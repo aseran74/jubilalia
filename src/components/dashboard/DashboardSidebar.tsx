@@ -1,273 +1,153 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { 
-  Search, 
-  Plus, 
-  Home, 
-  Building, 
-  ShoppingCart, 
-  Calendar, 
-  MessageSquare, 
-  MessageCircle,
-  Users, 
-  User,
-  ChevronRight,
-  Menu,
-  X
-} from 'lucide-react';
+  HomeIcon, 
+  UserIcon, 
+  CogIcon, 
+  LogOutIcon,
+  SearchIcon,
+  PlusIcon,
+  FileTextIcon,
+  CalendarIcon,
+  MapPinIcon,
+  BuildingIcon
+} from '@heroicons/react/24/outline';
 
-interface SidebarItem {
-  title: string;
-  icon: React.ReactNode;
-  href: string;
-  description: string;
-}
-
-interface SidebarSection {
-  title: string;
-  items: SidebarItem[];
-}
-
-interface DashboardSidebarProps {
-  isOpen: boolean;
-  onToggle: () => void;
-}
-
-const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isOpen, onToggle }) => {
+const DashboardSidebar: React.FC = () => {
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const sidebarSections: SidebarSection[] = [
-    {
-      title: "Habitaciones",
-      items: [
-        {
-          title: "Buscar habitaciones",
-          icon: <Search className="w-5 h-5" />,
-          href: "/dashboard/rooms/search",
-          description: "Encuentra habitaciones disponibles"
-        },
-        {
-          title: "Publicar habitación",
-          icon: <Plus className="w-5 h-5" />,
-          href: "/dashboard/rooms/publish",
-          description: "Alquila tu habitación"
-        }
-      ]
-    },
-    {
-      title: "Alquiler de Propiedades",
-      items: [
-        {
-          title: "Buscar alquiler",
-          icon: <Search className="w-5 h-5" />,
-          href: "/dashboard/properties/search",
-          description: "Encuentra propiedades para alquilar"
-        },
-        {
-          title: "Publicar alquiler",
-          icon: <Plus className="w-5 h-5" />,
-          href: "/dashboard/properties/publish",
-          description: "Alquila tu propiedad"
-        }
-      ]
-    },
-    {
-      title: "Compra de Propiedades",
-      items: [
-        {
-          title: "Buscar compra",
-          icon: <Search className="w-5 h-5" />,
-          href: "/dashboard/purchase/search",
-          description: "Encuentra propiedades para comprar"
-        },
-        {
-          title: "Publicar venta",
-          icon: <Plus className="w-5 h-5" />,
-          href: "/dashboard/purchase/publish",
-          description: "Vende tu propiedad"
-        }
-      ]
-    },
-    {
-      title: "Actividades",
-      items: [
-        {
-          title: "Buscar actividades",
-          icon: <Search className="w-5 h-5" />,
-          href: "/dashboard/activities/search",
-          description: "Encuentra actividades y eventos"
-        },
-        {
-          title: "Publicar actividad",
-          icon: <Plus className="w-5 h-5" />,
-          href: "/dashboard/activities/publish",
-          description: "Organiza una actividad"
-        }
-      ]
-    },
-    {
-      title: "Posts",
-      items: [
-        {
-          title: "Ver posts",
-          icon: <Search className="w-5 h-5" />,
-          href: "/dashboard/posts",
-          description: "Explora publicaciones"
-        },
-        {
-          title: "Crear post",
-          icon: <Plus className="w-5 h-5" />,
-          href: "/dashboard/posts/create",
-          description: "Comparte con la comunidad"
-        }
-      ]
-    },
-    {
-      title: "Red Social (Legacy)",
-      items: [
-        {
-          title: "Buscar posts",
-          icon: <Search className="w-5 h-5" />,
-          href: "/dashboard/social/search",
-          description: "Explora publicaciones"
-        },
-        {
-          title: "Publicar post",
-          icon: <Plus className="w-5 h-5" />,
-          href: "/dashboard/social/publish",
-          description: "Comparte con la comunidad"
-        }
-      ]
-    },
-    {
-      title: "Mensajes",
-      items: [
-        {
-          title: "Conversaciones",
-          icon: <MessageCircle className="w-5 h-5" />,
-          href: "/dashboard/messages",
-          description: "Gestiona tus mensajes"
-        }
-      ]
-    },
-    {
-      title: "Perfil y Gente",
-      items: [
-        {
-          title: "Buscar gente",
-          icon: <Users className="w-5 h-5" />,
-          href: "/dashboard/people/search",
-          description: "Conecta con otros usuarios"
-        },
-        {
-          title: "Completar perfil",
-          icon: <User className="w-5 h-5" />,
-          href: "/dashboard/profile/edit",
-          description: "Actualiza tu información"
-        }
-      ]
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
+  };
+
+  const navigation = [
+    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+    { name: 'Buscar propiedades', href: '/dashboard/properties', icon: SearchIcon },
+    { name: 'Crear propiedad', href: '/dashboard/properties/create', icon: PlusIcon },
+    { name: 'Buscar actividades', href: '/dashboard/activities', icon: CalendarIcon },
+    { name: 'Crear actividad', href: '/dashboard/activities/create', icon: PlusIcon },
+    { name: 'Posts', href: '/dashboard/posts', icon: FileTextIcon },
+    { name: 'Crear post', href: '/dashboard/posts/create', icon: PlusIcon },
+    { name: 'Perfil', href: '/dashboard/profile', icon: UserIcon },
+    { name: 'Configuración', href: '/dashboard/settings', icon: CogIcon },
   ];
 
   const isActive = (href: string) => {
+    if (href === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
     return location.pathname.startsWith(href);
   };
 
-  const handleItemClick = () => {
-    // En móvil/tablet, cerrar el sidebar al hacer clic en un elemento
-    if (window.innerWidth < 1024) {
-      onToggle();
-    }
-  };
-
   return (
-    <>
-      {/* Overlay para móvil/tablet */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={onToggle}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div className={`
-        fixed lg:static inset-y-0 left-0 z-50
-        transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        w-80 bg-white border-r border-gray-200 h-full overflow-y-auto
-        lg:block
-      `}>
-        <div className="p-4 lg:p-6">
-          {/* Header con botón de cerrar en móvil */}
-          <div className="flex items-center justify-between mb-6 lg:mb-8">
-            <div className="flex-1">
-              <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-1 lg:mb-2">Dashboard</h1>
-              <p className="text-sm lg:text-base text-gray-600">Gestiona tu experiencia en Jubilalia</p>
-            </div>
-            <button
-              onClick={onToggle}
-              className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+    <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+      isCollapsed ? 'w-16' : 'w-64'
+    }`}>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          {!isCollapsed && (
+            <h1 className="text-xl font-bold text-gray-900">Jubilalia</h1>
+          )}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 rounded-md hover:bg-gray-100"
+          >
+            <svg
+              className={`w-5 h-5 text-gray-600 transition-transform ${
+                isCollapsed ? 'rotate-180' : ''
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        </div>
 
-          {/* Secciones del sidebar */}
-          <div className="space-y-6 lg:space-y-8">
-            {sidebarSections.map((section, sectionIndex) => (
-              <div key={sectionIndex}>
-                <h3 className="text-xs lg:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 lg:mb-3">
-                  {section.title}
-                </h3>
-                <div className="space-y-1 lg:space-y-2">
-                  {section.items.map((item, itemIndex) => (
-                    <Link
-                      key={itemIndex}
-                      to={item.href}
-                      onClick={handleItemClick}
-                      className={`group flex items-center p-2 lg:p-3 rounded-lg transition-all duration-200 ${
-                        isActive(item.href)
-                          ? 'bg-blue-50 border-l-4 border-blue-500 text-blue-700'
-                          : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
-                      }`}
-                    >
-                      <div className={`mr-2 lg:mr-3 ${
-                        isActive(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
-                      }`}>
-                        {item.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">{item.title}</div>
-                        <div className={`text-xs truncate ${
-                          isActive(item.href) ? 'text-blue-600' : 'text-gray-500'
-                        }`}>
-                          {item.description}
-                        </div>
-                      </div>
-                      <ChevronRight className={`w-3 h-3 lg:w-4 lg:h-4 transition-transform duration-200 flex-shrink-0 ${
-                        isActive(item.href) ? 'text-blue-600 rotate-90' : 'text-gray-400 group-hover:text-gray-600'
-                      }`} />
-                    </Link>
-                  ))}
+        {/* User Info */}
+        {user && (
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.full_name || 'Usuario'}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <UserIcon className="w-6 h-6 text-white" />
+                )}
+              </div>
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {profile?.full_name || user.email || 'Usuario'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {user.email}
+                  </p>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer del sidebar */}
-          <div className="mt-8 lg:mt-12 pt-4 lg:pt-6 border-t border-gray-200">
-            <div className="text-center">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full mx-auto mb-2 lg:mb-3 flex items-center justify-center">
-                <Home className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-              </div>
-              <p className="text-xs lg:text-sm text-gray-600">Jubilalia</p>
-              <p className="text-xs text-gray-400">Tu plataforma de confianza</p>
+              )}
             </div>
           </div>
+        )}
+
+        {/* Navigation */}
+        <nav className="flex-1 px-2 py-4 space-y-1">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
+                  isActive(item.href)
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <Icon
+                  className={`mr-3 h-5 w-5 flex-shrink-0 ${
+                    isActive(item.href)
+                      ? 'text-blue-700'
+                      : 'text-gray-400 group-hover:text-gray-500'
+                  }`}
+                />
+                {!isCollapsed && <span>{item.name}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Sign Out Button */}
+        <div className="p-4 border-t border-gray-200">
+          <button
+            onClick={handleSignOut}
+            className="group flex items-center w-full px-2 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          >
+            <LogOutIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 flex-shrink-0" />
+            {!isCollapsed && <span>Cerrar sesión</span>}
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

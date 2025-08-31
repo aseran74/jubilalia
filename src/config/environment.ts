@@ -6,17 +6,9 @@ export const environment = {
   supabase: {
     url: import.meta.env.VITE_SUPABASE_URL || 'https://sdmkodriokrpsdegweat.supabase.co',
     anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkbWtvZHJpb2tycHNkZWd3ZWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMjkxOTcsImV4cCI6MjA3MTYwNTE5N30.s4i-P6koEZWq1-Vna-LRjKrNZll8tAGeeNaRCLoELrE',
-  },
-
-  // Firebase Configuration
-  firebase: {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyCNUrv77koEb8ncO3L8gTZhAUcQ7IHEg0s',
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'jubilalia-d60c8.firebaseapp.com',
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'jubilalia-d60c8',
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'jubilalia-d60c8.firebasestorage.app',
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '770858998366',
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:770858998366:web:cebe2e26b026a68d57b2cf',
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-E2XLN83Z1H',
+    // Google OAuth Configuration (configurado en Supabase Dashboard)
+    googleClientId: import.meta.env.VITE_SUPABASE_GOOGLE_CLIENT_ID || '',
+    googleClientSecret: import.meta.env.VITE_SUPABASE_GOOGLE_CLIENT_SECRET || '',
   },
 
   // App Configuration
@@ -45,14 +37,9 @@ export const environment = {
 VITE_SUPABASE_URL=https://sdmkodriokrpsdegweat.supabase.co
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
-# Firebase Configuration
-VITE_FIREBASE_API_KEY=AIzaSyCNUrv77koEb8ncO3L8gTZhAUcQ7IHEg0s
-VITE_FIREBASE_AUTH_DOMAIN=jubilalia-d60c8.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=jubilalia-d60c8
-VITE_FIREBASE_STORAGE_BUCKET=jubilalia-d60c8.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=770858998366
-VITE_FIREBASE_APP_ID=1:770858998366:web:cebe2e26b026a68d57b2cf
-VITE_FIREBASE_MEASUREMENT_ID=G-E2XLN83Z1H
+# Google OAuth (configurado en Supabase Dashboard)
+VITE_SUPABASE_GOOGLE_CLIENT_ID=your_google_client_id_here
+VITE_SUPABASE_GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 
 # App Configuration
 VITE_APP_NAME=Jubilalia

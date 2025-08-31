@@ -1,112 +1,242 @@
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from '../types/supabase'
-import { environment } from '../config/environment'
+import { createClient } from '@supabase/supabase-js';
+import { environment } from '../config/environment';
 
-export const supabase = createClient<Database>(
-  environment.supabase.url,
-  environment.supabase.anonKey
-)
+// Configuración de Supabase
+const supabaseUrl = environment.supabase.url;
+const supabaseAnonKey = environment.supabase.anonKey;
 
-// Función para sincronizar la sesión de Firebase con Supabase
-export const syncFirebaseSessionWithSupabase = async (firebaseUser: any) => {
-  if (!firebaseUser) {
-    console.log('❌ No hay usuario de Firebase para sincronizar')
-    return null
+// Crear cliente de Supabase
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
   }
+});
 
-  console.log('🔄 Verificando usuario en Supabase...', {
-    uid: firebaseUser.uid,
-    email: firebaseUser.email
-  })
+// Tipos para el perfil de usuario
+export interface UserProfile {
+  id: string;
+  firebase_uid?: string; // Mantenemos esto temporalmente para la migración
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  phone: string | null;
+  date_of_birth: string | null;
+  gender: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  postal_code: string | null;
+  country: string | null;
+  occupation: string | null;
+  interests: string[] | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
 
+// Función para obtener el perfil del usuario actual
+export const getUserProfile = async (userId?: string): Promise<UserProfile | null> => {
   try {
-    // Verificar si el usuario existe en la tabla profiles
-    const { data: profile, error: profileError } = await supabase
+    // Si no se proporciona userId, usar el usuario autenticado actual
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      userId = user.id;
+    }
+
+    const { data, error } = await supabase
       .from('profiles')
-      .select('id, firebase_uid, email')
-      .eq('firebase_uid', firebaseUser.uid)
-      .single()
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    if (profileError) {
-      console.log('⚠️ Usuario no encontrado en profiles:', profileError.message)
-      return null
+    if (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
     }
 
-    if (profile) {
-      console.log('✅ Usuario verificado en Supabase:', profile)
-      
-      // Para las consultas RLS, necesitamos establecer el contexto del usuario
-      // Vamos a usar una función personalizada que simule la autenticación
-      return { user: profile, session: null }
-    }
-
-    return null
+    return data;
   } catch (error) {
-    console.error('❌ Error inesperado verificando usuario en Supabase:', error)
-    return null
+    console.error('Error in getUserProfile:', error);
+    return null;
   }
-}
+};
 
-// Función para obtener el perfil del usuario por Firebase UID
-export const getUserProfile = async (firebaseUid: string) => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('firebase_uid', firebaseUid)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching user profile:', error)
-    return null
-  }
-  
-  return data
-}
+// Función para crear o actualizar un perfil de usuario
+export const upsertUserProfile = async (profile: Partial<UserProfile>): Promise<UserProfile | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .upsert(profile, { onConflict: 'id' })
+      .select()
+      .single();
 
-// Función para crear o actualizar el perfil del usuario
-export const upsertUserProfile = async (profile: Database['public']['Tables']['profiles']['Insert']) => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .upsert(profile, { onConflict: 'firebase_uid' })
-    .select()
-    .single()
-  
-  if (error) {
-    console.error('Error upserting user profile:', error)
-    return null
+    if (error) {
+      console.error('Error upserting user profile:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in upsertUserProfile:', error);
+    return null;
   }
-  
-  return data
-}
+};
+
+// Función para crear un perfil de usuario
+export const createUserProfile = async (profile: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>): Promise<UserProfile | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert(profile)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating user profile:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in createUserProfile:', error);
+    return null;
+  }
+};
+
+// Función para actualizar un perfil de usuario
+export const updateUserProfile = async (id: string, updates: Partial<UserProfile>): Promise<UserProfile | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating user profile:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in updateUserProfile:', error);
+    return null;
+  }
+};
 
 // Función para obtener la configuración del usuario
 export const getUserSettings = async (profileId: string) => {
-  const { data, error } = await supabase
-    .from('user_settings')
-    .select('*')
-    .eq('profile_id', profileId)
-    .single()
-  
-  if (error) {
-    console.error('Error fetching user settings:', error)
-    return null
+  try {
+    const { data, error } = await supabase
+      .from('user_settings')
+      .select('*')
+      .eq('profile_id', profileId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      console.error('Error fetching user settings:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in getUserSettings:', error);
+    return null;
   }
-  
-  return data
-}
+};
 
 // Función para crear o actualizar la configuración del usuario
-export const upsertUserSettings = async (settings: Database['public']['Tables']['user_settings']['Insert']) => {
-  const { data, error } = await supabase
-    .from('user_settings')
-    .upsert(settings, { onConflict: 'profile_id' })
-    .select()
-    .single()
-  
-  if (error) {
-    console.error('Error upserting user settings:', error)
-    return null
+export const upsertUserSettings = async (settings: any) => {
+  try {
+    const { data, error } = await supabase
+      .from('user_settings')
+      .upsert(settings, { onConflict: 'profile_id' })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error upserting user settings:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in upsertUserSettings:', error);
+    return null;
   }
-  
-  return data
-}
+};
+
+// Función para iniciar sesión con Google
+export const signInWithGoogle = async () => {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    });
+
+    if (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in signInWithGoogle:', error);
+    throw error;
+  }
+};
+
+// Función para cerrar sesión
+export const signOut = async () => {
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error in signOut:', error);
+    throw error;
+  }
+};
+
+// Función para obtener el usuario actual
+export const getCurrentUser = async () => {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+    return user;
+  } catch (error) {
+    console.error('Error in getCurrentUser:', error);
+    return null;
+  }
+};
+
+// Función para verificar si el usuario está autenticado
+export const isAuthenticated = async (): Promise<boolean> => {
+  try {
+    const user = await getCurrentUser();
+    return !!user;
+  } catch (error) {
+    console.error('Error checking authentication:', error);
+    return false;
+  }
+};
+
+// Función para manejar la sesión de autenticación
+export const onAuthStateChange = (callback: (user: any) => void) => {
+  return supabase.auth.onAuthStateChange((event, session) => {
+    callback(session?.user || null);
+  });
+};
+
+export default supabase;
