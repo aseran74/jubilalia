@@ -44,6 +44,9 @@ import UserProfile from './components/users/UserProfile';
 // Componentes de mensajería
 import ChatApp from './components/messaging/ChatApp';
 
+// Componentes de debug
+import ConnectionTest from './components/debug/ConnectionTest';
+
 // Componente principal del dashboard
 const DashboardLayout: React.FC = () => {
   const { user, loading, profile } = useAuth();
@@ -249,8 +252,9 @@ const App: React.FC = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/signin" element={<SignInForm />} />
           <Route path="/signup" element={<SignUpForm />} />
-          <Route path="/debug" element={<DebugAuth />} />
-          <Route path="/dashboard/*" element={<DashboardLayout />} />
+                           <Route path="/debug" element={<DebugAuth />} />
+                 <Route path="/test-connection" element={<ConnectionTest />} />
+                 <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
