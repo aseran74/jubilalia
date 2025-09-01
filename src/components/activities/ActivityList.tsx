@@ -41,6 +41,21 @@ const ActivityList: React.FC = () => {
       setLoading(true);
       console.log('🔄 Iniciando fetch de actividades...');
       
+      // Verificar conectividad primero
+      try {
+        const { testSupabaseConnection } = await import('../../lib/supabase');
+        const isConnected = await testSupabaseConnection();
+        
+        if (!isConnected) {
+          console.error('❌ No hay conectividad con Supabase');
+          setActivities([]);
+          setLoading(false);
+          return;
+        }
+      } catch (connectionError) {
+        console.error('❌ Error verificando conectividad:', connectionError);
+      }
+      
       // CONSULTA MUY SIMPLE PARA DEBUG
       console.log('🔍 Haciendo consulta básica...');
       const { data, error } = await supabase

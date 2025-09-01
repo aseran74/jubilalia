@@ -6,6 +6,11 @@ import { UserProfile } from '../types/supabase';
 const supabaseUrl = environment.supabase.url;
 const supabaseAnonKey = environment.supabase.anonKey;
 
+console.log('🔧 Configuración de Supabase:', {
+  url: supabaseUrl,
+  anonKey: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'No configurado'
+});
+
 // Crear cliente de Supabase
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -14,6 +19,19 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true
   }
 });
+
+// Función para probar la conectividad
+export const testSupabaseConnection = async () => {
+  try {
+    console.log('🔧 Probando conectividad con Supabase...');
+    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+    console.log('🔧 Resultado de prueba:', { data, error });
+    return !error;
+  } catch (error) {
+    console.error('❌ Error de conectividad con Supabase:', error);
+    return false;
+  }
+};
 
 // Función para obtener el perfil del usuario actual
 export const getUserProfile = async (userId?: string): Promise<UserProfile | null> => {

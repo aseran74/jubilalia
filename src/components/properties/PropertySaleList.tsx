@@ -265,10 +265,10 @@ const PropertySaleList: React.FC = () => {
             onChange={(e) => setSelectedCity(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
-            <option value="">Todas las ciudades</option>
-            {cities.map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
+                          <option key="all-cities" value="">Todas las ciudades</option>
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
           </select>
 
           {/* Filtro de tipo */}
@@ -277,10 +277,10 @@ const PropertySaleList: React.FC = () => {
             onChange={(e) => setSelectedType(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
-            <option value="">Todos los tipos</option>
-            {propertyTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
+                          <option key="all-types" value="">Todos los tipos</option>
+              {propertyTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
           </select>
 
           {/* Filtro de precio */}
@@ -310,11 +310,11 @@ const PropertySaleList: React.FC = () => {
             onChange={(e) => setBedroomsFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
-            <option value="">Cualquier habitación</option>
-            <option value="1">1+ habitación</option>
-            <option value="2">2+ habitaciones</option>
-            <option value="3">3+ habitaciones</option>
-            <option value="4">4+ habitaciones</option>
+                          <option key="any-bedrooms" value="">Cualquier habitación</option>
+              <option key="1-bedroom" value="1">1+ habitación</option>
+              <option key="2-bedrooms" value="2">2+ habitaciones</option>
+              <option key="3-bedrooms" value="3">3+ habitaciones</option>
+              <option key="4-bedrooms" value="4">4+ habitaciones</option>
           </select>
 
           <select
@@ -322,10 +322,10 @@ const PropertySaleList: React.FC = () => {
             onChange={(e) => setBathroomsFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
-            <option value="">Cualquier baño</option>
-            <option value="1">1+ baño</option>
-            <option value="2">2+ baños</option>
-            <option value="3">3+ baños</option>
+                          <option key="any-bathrooms" value="">Cualquier baño</option>
+              <option key="1-bathroom" value="1">1+ baño</option>
+              <option key="2-bathrooms" value="2">2+ baños</option>
+              <option key="3-bathrooms" value="3">3+ baños</option>
           </select>
 
           <select
@@ -333,10 +333,10 @@ const PropertySaleList: React.FC = () => {
             onChange={(e) => setConditionFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
-            <option value="">Cualquier estado</option>
-            {propertyConditions.map(condition => (
-              <option key={condition} value={condition}>{condition}</option>
-            ))}
+                          <option key="any-condition" value="">Cualquier estado</option>
+              {propertyConditions.map(condition => (
+                <option key={condition} value={condition}>{condition}</option>
+              ))}
           </select>
 
           {/* Filtro de año de construcción */}

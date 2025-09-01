@@ -142,6 +142,22 @@ const DashboardLayout: React.FC = () => {
 // Componente de depuración temporal
 const DebugAuth: React.FC = () => {
   const { user, loading, profile } = useAuth();
+  const [connectionStatus, setConnectionStatus] = useState<string>('Pendiente');
+  const [testingConnection, setTestingConnection] = useState(false);
+  
+  const testConnection = async () => {
+    setTestingConnection(true);
+    try {
+      const { testSupabaseConnection } = await import('./lib/supabase');
+      const isConnected = await testSupabaseConnection();
+      setConnectionStatus(isConnected ? '✅ Conectado' : '❌ Error de conexión');
+    } catch (error) {
+      setConnectionStatus('❌ Error de conexión');
+      console.error('Error testing connection:', error);
+    } finally {
+      setTestingConnection(false);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -153,6 +169,17 @@ const DebugAuth: React.FC = () => {
             <p><strong>Loading:</strong> {loading ? 'Sí' : 'No'}</p>
             <p><strong>Usuario:</strong> {user ? `Sí (${user.email})` : 'No'}</p>
             <p><strong>Perfil:</strong> {profile ? `Sí (${profile.full_name})` : 'No'}</p>
+            <p><strong>Conexión Supabase:</strong> {connectionStatus}</p>
+          </div>
+          
+          <div className="mt-4">
+            <button
+              onClick={testConnection}
+              disabled={testingConnection}
+              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
+            >
+              {testingConnection ? 'Probando...' : 'Probar Conexión Supabase'}
+            </button>
           </div>
           
           {user && (
