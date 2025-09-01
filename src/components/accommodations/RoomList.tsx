@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus } from 'lucide-react';
 import RoomCard from './RoomCard';
+import { supabase } from '../../lib/supabase';
 
 interface Room {
   id: string;
@@ -47,6 +48,122 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     petsAllowed: false,
     gender: 'any' as string
   });
+
+  // Función para cargar datos reales de Supabase
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Cargando habitaciones desde Supabase...');
+
+      // Obtener listings de habitaciones
+      const { data: listingsData, error: listingsError } = await supabase
+        .from('property_listings')
+        .select(`
+          id,
+          title,
+          description,
+          address,
+          city,
+          postal_code,
+          price,
+          created_at,
+          profile_id,
+          is_available
+        `)
+        .eq('listing_type', 'room_rental')
+        .eq('is_available', true);
+
+      if (listingsError) {
+        console.error('Error fetching listings:', listingsError);
+        return;
+      }
+
+      console.log('📊 Listings obtenidos:', listingsData);
+
+      // Obtener requisitos para cada listing
+      const roomsWithDetails = await Promise.all(
+        listingsData.map(async (listing) => {
+          const { data: requirementsData, error: requirementsError } = await supabase
+            .from('room_rental_requirements')
+            .select('*')
+            .eq('listing_id', listing.id)
+            .single();
+
+          if (requirementsError) {
+            console.error('Error fetching requirements for listing', listing.id, requirementsError);
+            return null;
+          }
+
+          // Obtener perfil del propietario
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('full_name, avatar_url')
+            .eq('id', listing.profile_id)
+            .single();
+
+          if (profileError) {
+            console.error('Error fetching profile for listing', listing.id, profileError);
+          }
+
+          // Obtener imágenes
+          const { data: imagesData, error: imagesError } = await supabase
+            .from('property_images')
+            .select('image_url')
+            .eq('listing_id', listing.id)
+            .order('image_order');
+
+          if (imagesError) {
+            console.error('Error fetching images for listing', listing.id, imagesError);
+          }
+
+          return {
+            id: listing.id,
+            title: listing.title,
+            description: listing.description,
+            address: listing.address,
+            city: listing.city,
+            price_per_month: listing.price,
+            room_area: requirementsData.room_area,
+            private_bathroom: requirementsData.private_bathroom,
+            has_balcony: requirementsData.has_balcony,
+            preferred_gender: requirementsData.preferred_gender,
+            preferred_age_min: requirementsData.preferred_age_min,
+            preferred_age_max: requirementsData.preferred_age_max,
+            smoking_allowed: requirementsData.smoking_allowed,
+            pets_allowed: requirementsData.pets_allowed,
+            pet_types: requirementsData.pet_types || [],
+            images: imagesData?.map(img => img.image_url) || [],
+            owner: {
+              full_name: profileData?.full_name || 'Propietario',
+              avatar_url: profileData?.avatar_url
+            },
+            created_at: listing.created_at,
+            rating: 4.5, // Mock rating por ahora
+            review_count: 0
+          };
+        })
+      );
+
+      const validRooms = roomsWithDetails.filter(room => room !== null);
+      console.log('🎉 Habitaciones procesadas:', validRooms);
+      setRooms(validRooms);
+
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Cargar datos cuando el componente se monte
+  useEffect(() => {
+    if (propRooms) {
+      setRooms(propRooms);
+      setLoading(false);
+    } else {
+      fetchRooms();
+    }
+  }, [propRooms]);
 
   // Mock data para demostración - en producción esto vendría de la API
   const mockRooms: Room[] = [

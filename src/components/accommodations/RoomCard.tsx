@@ -249,7 +249,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
         {/* Botones de acción */}
         <div className="flex gap-3">
           <Link
-            to={`/rooms/${room.id}`}
+            to={`/dashboard/rooms/${room.id}`}
             className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors text-center flex items-center justify-center"
           >
                             <EyeIcon className="w-4 h-4 mr-2" />
