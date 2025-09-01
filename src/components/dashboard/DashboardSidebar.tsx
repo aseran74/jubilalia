@@ -57,8 +57,8 @@ const DashboardSidebar: React.FC = () => {
       name: 'Habitaciones',
       icon: BuildingOfficeIcon,
       items: [
-        { name: 'Buscar habitaciones', href: '/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Publicar habitación', href: '/rooms/create', icon: PlusIcon },
+        { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Publicar habitación', href: '/dashboard/rooms/create', icon: PlusIcon },
       ]
     },
     {
@@ -183,8 +183,8 @@ const DashboardSidebar: React.FC = () => {
             {/* Debug Link */}
             <button
               onClick={() => {
-                console.log('Navegando a /rooms desde sidebar...');
-                navigate('/rooms');
+                console.log('Navegando a /dashboard/rooms desde sidebar...');
+                navigate('/dashboard/rooms');
               }}
               className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-purple-600 hover:bg-purple-50 hover:text-purple-700 transition-colors border border-purple-200"
             >
