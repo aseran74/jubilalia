@@ -50,6 +50,9 @@ import ChatApp from './components/messaging/ChatApp';
 // Componentes de debug
 import ConnectionTest from './components/debug/ConnectionTest';
 
+// Componentes de demo
+import CalendarDemo from './components/demo/CalendarDemo';
+
 // Componente principal del dashboard
 const DashboardLayout: React.FC = () => {
   const { user, loading, profile } = useAuth();
@@ -141,6 +144,9 @@ const DashboardLayout: React.FC = () => {
             {/* Perfil y Configuración */}
             <Route path="/profile" element={<ProfileForm />} />
             <Route path="/settings" element={<div className="p-6">Configuración</div>} />
+            
+            {/* Demo */}
+            <Route path="/calendar-demo" element={<CalendarDemo />} />
           </Routes>
         </main>
       </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { createPropertyListing } from '../../lib/properties';
 import type { CreatePropertyListingComplete, ListingType } from '../../types/properties';
+import TailAdminDatePicker from '../common/TailAdminDatePicker';
 import { 
   Building, 
   Users, 
@@ -35,8 +36,8 @@ const PropertyListingForm: React.FC = () => {
       bedrooms: undefined,
       bathrooms: undefined,
       total_area: undefined,
-      available_from: '',
-      available_until: ''
+      available_from: null as Date | null,
+      available_until: null as Date | null
     },
             roomRequirements: {
           bed_type: 'single',
@@ -123,6 +124,21 @@ const PropertyListingForm: React.FC = () => {
     }
   };
 
+  const handleDateChange = (field: 'available_from' | 'available_until', date: Date | null) => {
+    setFormData(prev => ({
+      ...prev,
+      listing: {
+        ...prev.listing,
+        [field]: date
+      }
+    }));
+    
+    // Limpiar error del campo
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
   const handleAmenityToggle = (amenity: string) => {
     setFormData(prev => ({
       ...prev,
@@ -182,8 +198,18 @@ const PropertyListingForm: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      // Convertir fechas a formato ISO antes de enviar
+      const formDataToSend = {
+        ...formData,
+        listing: {
+          ...formData.listing,
+          available_from: formData.listing.available_from ? formData.listing.available_from.toISOString().split('T')[0] : null,
+          available_until: formData.listing.available_until ? formData.listing.available_until.toISOString().split('T')[0] : null
+        }
+      };
+
       // Aquí se agregarían los requisitos específicos según el tipo
-      const result = await createPropertyListing(formData);
+      const result = await createPropertyListing(formDataToSend);
       
       if (result.success) {
         navigate('/dashboard/properties/sale');
@@ -453,26 +479,22 @@ const PropertyListingForm: React.FC = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Disponible desde
-            </label>
-            <input
-              type="date"
-              value={formData.listing.available_from}
-              onChange={(e) => handleInputChange('available_from', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            <TailAdminDatePicker
+              selected={formData.listing.available_from}
+              onChange={(date) => handleDateChange('available_from', date)}
+              label="Disponible desde"
+              placeholder="Seleccionar fecha de inicio"
+              minDate={new Date()}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Disponible hasta
-            </label>
-            <input
-              type="date"
-              value={formData.listing.available_until}
-              onChange={(e) => handleInputChange('available_until', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            <TailAdminDatePicker
+              selected={formData.listing.available_until}
+              onChange={(date) => handleDateChange('available_until', date)}
+              label="Disponible hasta"
+              placeholder="Seleccionar fecha de fin"
+              minDate={formData.listing.available_from || new Date()}
             />
           </div>
         </div>
