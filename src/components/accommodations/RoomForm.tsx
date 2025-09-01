@@ -372,16 +372,16 @@ const RoomForm: React.FC = () => {
                     <option value="sofá">Sofá cama</option>
                   </select>
                 </div>
-                <div>
-                  <CustomDatePicker
-                    selected={formData.available_from}
-                    onChange={handleDateChange}
-                    label="Disponible desde"
-                    placeholder="Seleccionar fecha de disponibilidad"
-                    required={true}
-                    minDate={new Date()}
-                  />
-                </div>
+                                 <div>
+                   <TailAdminDatePicker
+                     selected={formData.available_from}
+                     onChange={handleDateChange}
+                     label="Disponible desde"
+                     placeholder="Seleccionar fecha de disponibilidad"
+                     required={true}
+                     minDate={new Date()}
+                   />
+                 </div>
               </div>
 
               <div className="mt-6 space-y-4">
