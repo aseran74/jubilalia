@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import CustomDatePicker from '../common/DatePicker';
 import { 
   ArrowLeftIcon,
   MapPinIcon,
@@ -16,7 +17,7 @@ interface RoomFormData {
   city: string;
   postal_code: string;
   price: number;
-  available_from: string;
+  available_from: Date | null;
   room_area: number;
   private_bathroom: boolean;
   has_balcony: boolean;
@@ -44,7 +45,7 @@ const RoomForm: React.FC = () => {
     city: '',
     postal_code: '',
     price: 0,
-    available_from: '',
+    available_from: null,
     room_area: 0,
     private_bathroom: false,
     has_balcony: false,
@@ -75,6 +76,13 @@ const RoomForm: React.FC = () => {
     }));
   };
 
+  const handleDateChange = (date: Date | null) => {
+    setFormData(prev => ({
+      ...prev,
+      available_from: date
+    }));
+  };
+
   const handlePetTypeToggle = (petType: string) => {
     setFormData(prev => ({
       ...prev,
@@ -96,16 +104,16 @@ const RoomForm: React.FC = () => {
 
     try {
       // Crear el listing principal
-      const { data: listingData, error: listingError } = await supabase
-        .from('property_listings')
-        .insert({
-          title: formData.title,
-          description: formData.description,
-          address: formData.address,
-          city: formData.city,
-          postal_code: formData.postal_code,
-          price: formData.price,
-          available_from: formData.available_from,
+              const { data: listingData, error: listingError } = await supabase
+          .from('property_listings')
+          .insert({
+            title: formData.title,
+            description: formData.description,
+            address: formData.address,
+            city: formData.city,
+            postal_code: formData.postal_code,
+            price: formData.price,
+            available_from: formData.available_from ? formData.available_from.toISOString() : null,
           listing_type: 'room_rental',
           property_type: 'room',
           profile_id: profile.id,
@@ -365,16 +373,13 @@ const RoomForm: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Disponible desde *
-                  </label>
-                  <input
-                    type="date"
-                    name="available_from"
-                    value={formData.available_from}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  <CustomDatePicker
+                    selected={formData.available_from}
+                    onChange={handleDateChange}
+                    label="Disponible desde"
+                    placeholder="Seleccionar fecha de disponibilidad"
+                    required={true}
+                    minDate={new Date()}
                   />
                 </div>
               </div>

@@ -41,6 +41,9 @@ import ProfileForm from './components/profile/ProfileForm';
 import UserSearch from './components/users/UserSearch';
 import UserProfile from './components/users/UserProfile';
 
+// Componentes de grupos
+import Groups from './components/people/Groups';
+
 // Componentes de mensajería
 import ChatApp from './components/messaging/ChatApp';
 
@@ -128,6 +131,9 @@ const DashboardLayout: React.FC = () => {
             {/* Búsqueda de Usuarios */}
             <Route path="/users" element={<UserSearch />} />
             <Route path="/users/:id" element={<UserProfile />} />
+            
+            {/* Grupos */}
+            <Route path="/groups" element={<Groups />} />
             
             {/* Mensajería */}
             <Route path="/messages" element={<ChatApp />} />

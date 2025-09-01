@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import {
   HomeIcon,
   UserIcon,
+  UsersIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   MagnifyingGlassIcon,
@@ -98,6 +99,7 @@ const DashboardSidebar: React.FC = () => {
       icon: UserIcon,
       items: [
         { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
+        { name: 'Grupos', href: '/dashboard/groups', icon: UsersIcon },
       ]
     },
     {
