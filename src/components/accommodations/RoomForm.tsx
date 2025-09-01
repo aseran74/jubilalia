@@ -7,7 +7,9 @@ import {
   ArrowLeftIcon,
   MapPinIcon,
   BuildingOfficeIcon,
-  UserIcon
+  UserIcon,
+  PhotoIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface RoomFormData {
@@ -89,6 +91,56 @@ const RoomForm: React.FC = () => {
       pet_types: prev.pet_types.includes(petType)
         ? prev.pet_types.filter(type => type !== petType)
         : [...prev.pet_types, petType]
+    }));
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      setLoading(true);
+      const newImages: string[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // Subir imagen al bucket de post-images
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `room-images/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('post-images')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Obtener URL pública
+        const { data: { publicUrl } } = supabase.storage
+          .from('post-images')
+          .getPublicUrl(filePath);
+
+        newImages.push(publicUrl);
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...newImages]
+      }));
+
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      setError('Error al subir las imágenes. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
     }));
   };
 
@@ -524,6 +576,77 @@ const RoomForm: React.FC = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="Cualquier requisito adicional o información importante..."
               />
+            </div>
+
+            {/* Imágenes de la habitación */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <PhotoIcon className="w-5 h-5 mr-2" />
+                Imágenes de la Habitación
+              </h2>
+              <div className="space-y-4">
+                {/* Subida de imágenes */}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <PhotoIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-2">
+                    Agrega fotos de tu habitación para que los interesados puedan verla
+                  </p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Puedes subir múltiples imágenes. Formatos: JPG, PNG, GIF
+                  </p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="room-images-upload"
+                    disabled={loading}
+                  />
+                  <label
+                    htmlFor="room-images-upload"
+                    className={`inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 cursor-pointer transition-colors ${
+                      loading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Subiendo...
+                      </>
+                    ) : (
+                      'Seleccionar Imágenes'
+                    )}
+                  </label>
+                </div>
+
+                {/* Vista previa de imágenes */}
+                {formData.images.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">
+                      Imágenes subidas ({formData.images.length})
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {formData.images.map((imageUrl, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={imageUrl}
+                            alt={`Imagen ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                          >
+                            <XMarkIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Botones */}
