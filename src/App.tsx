@@ -43,6 +43,7 @@ import UserProfile from './components/users/UserProfile';
 
 // Componentes de grupos
 import Groups from './components/people/Groups';
+import GroupForm from './components/groups/GroupForm';
 
 // Componentes de mensajería
 import ChatApp from './components/messaging/ChatApp';
@@ -137,6 +138,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Grupos */}
             <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/create" element={<GroupForm />} />
             
             {/* Mensajería */}
             <Route path="/messages" element={<ChatApp />} />
