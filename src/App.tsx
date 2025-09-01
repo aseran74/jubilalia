@@ -46,8 +46,15 @@ import ChatApp from './components/messaging/ChatApp';
 
 // Componente principal del dashboard
 const DashboardLayout: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, profile } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Debug info
+  console.log('DashboardLayout - Estado de autenticación:', {
+    user: user ? { id: user.id, email: user.email } : null,
+    profile: profile ? { id: profile.id, full_name: profile.full_name } : null,
+    loading
+  });
 
   if (loading) {
     return (
@@ -61,6 +68,7 @@ const DashboardLayout: React.FC = () => {
   }
 
   if (!user) {
+    console.log('DashboardLayout - No hay usuario, redirigiendo a /signin');
     return <Navigate to="/signin" replace />;
   }
 
@@ -131,6 +139,60 @@ const DashboardLayout: React.FC = () => {
   );
 };
 
+// Componente de depuración temporal
+const DebugAuth: React.FC = () => {
+  const { user, loading, profile } = useAuth();
+  
+  return (
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold mb-4">Debug de Autenticación</h1>
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-4">Estado actual:</h2>
+          <div className="space-y-2">
+            <p><strong>Loading:</strong> {loading ? 'Sí' : 'No'}</p>
+            <p><strong>Usuario:</strong> {user ? `Sí (${user.email})` : 'No'}</p>
+            <p><strong>Perfil:</strong> {profile ? `Sí (${profile.full_name})` : 'No'}</p>
+          </div>
+          
+          {user && (
+            <div className="mt-4">
+              <h3 className="font-semibold mb-2">Información del usuario:</h3>
+              <pre className="bg-gray-100 p-2 rounded text-sm overflow-auto">
+                {JSON.stringify(user, null, 2)}
+              </pre>
+            </div>
+          )}
+          
+          {profile && (
+            <div className="mt-4">
+              <h3 className="font-semibold mb-2">Información del perfil:</h3>
+              <pre className="bg-gray-100 p-2 rounded text-sm overflow-auto">
+                {JSON.stringify(profile, null, 2)}
+              </pre>
+            </div>
+          )}
+          
+          <div className="mt-6 space-x-4">
+            <button
+              onClick={() => window.location.href = '/dashboard'}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Ir al Dashboard
+            </button>
+            <button
+              onClick={() => window.location.href = '/dashboard/rooms'}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              Ir a Habitaciones
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Componente principal de la aplicación
 const App: React.FC = () => {
   return (
@@ -140,6 +202,7 @@ const App: React.FC = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/signin" element={<SignInForm />} />
           <Route path="/signup" element={<SignUpForm />} />
+          <Route path="/debug" element={<DebugAuth />} />
           <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
