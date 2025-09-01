@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
 import { 
   HeartIcon,
   MapPinIcon,
@@ -65,12 +66,131 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
+  const [roomData, setRoomData] = useState<any>(null);
+  const [error, setError] = useState<string>('');
 
-  // Mock data para demostración - en producción esto vendría de la API
-  const mockRoom = room || {
+  // Función para cargar los datos de la habitación
+  const fetchRoomData = async () => {
+    if (!id) return;
+    
+    try {
+      setIsLoading(true);
+      setError('');
+      console.log('🔄 Cargando datos de habitación:', id);
+      
+      // Obtener el listing principal
+      const { data: listingData, error: listingError } = await supabase
+        .from('property_listings')
+        .select(`
+          id,
+          title,
+          description,
+          address,
+          city,
+          postal_code,
+          price,
+          available_from,
+          created_at,
+          profile_id,
+          listing_type,
+          is_available
+        `)
+        .eq('id', id)
+        .eq('listing_type', 'room_rental')
+        .single();
+
+      if (listingError) {
+        console.error('Error fetching listing:', listingError);
+        setError('No se pudo cargar la información de la habitación');
+        return;
+      }
+
+      console.log('📊 Datos del listing obtenidos:', listingData);
+
+      // Obtener los requisitos de la habitación
+      const { data: requirementsData, error: requirementsError } = await supabase
+        .from('room_rental_requirements')
+        .select('*')
+        .eq('listing_id', id)
+        .single();
+
+      if (requirementsError) {
+        console.error('Error fetching requirements:', requirementsError);
+        setError('No se pudo cargar los requisitos de la habitación');
+        return;
+      }
+
+      console.log('📋 Datos de requisitos obtenidos:', requirementsData);
+
+      // Obtener el perfil del propietario
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, email, phone')
+        .eq('id', listingData.profile_id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        setError('No se pudo cargar la información del propietario');
+        return;
+      }
+
+      console.log('👤 Datos del perfil obtenidos:', profileData);
+
+      // Obtener las imágenes
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('property_images')
+        .select('image_url')
+        .eq('listing_id', id);
+
+      if (imagesError) {
+        console.error('Error fetching images:', imagesError);
+      }
+
+      console.log('🖼️ Datos de imágenes obtenidos:', imagesData);
+
+      // Combinar todos los datos
+      const combinedData = {
+        ...listingData,
+        ...requirementsData,
+        owner: profileData,
+        images: imagesData?.map(img => img.image_url) || [],
+        price_per_month: listingData.price,
+        room_area: requirementsData.room_area,
+        private_bathroom: requirementsData.private_bathroom,
+        has_balcony: requirementsData.has_balcony,
+        preferred_gender: requirementsData.preferred_gender,
+        preferred_age_min: requirementsData.preferred_age_min,
+        preferred_age_max: requirementsData.preferred_age_max,
+        smoking_allowed: requirementsData.smoking_allowed,
+        pets_allowed: requirementsData.pets_allowed,
+        pet_types: requirementsData.pet_types || [],
+        other_requirements: requirementsData.other_requirements
+      };
+
+      console.log('🎉 Datos combinados:', combinedData);
+      setRoomData(combinedData);
+
+    } catch (error) {
+      console.error('Error fetching room data:', error);
+      setError('Error al cargar los datos de la habitación');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cargar datos cuando cambie el ID
+  useEffect(() => {
+    if (id) {
+      fetchRoomData();
+    }
+  }, [id]);
+
+  // Usar datos reales o mock como fallback
+  const currentRoom = roomData || room || {
     id: id || '1',
     title: 'Habitación luminosa en piso céntrico',
     description: 'Hermosa habitación en un piso completamente reformado, ubicado en el centro de la ciudad. La habitación cuenta con mucha luz natural, armario empotrado y escritorio. El piso tiene cocina equipada, salón amplio y está muy bien comunicado con transporte público.',
@@ -113,7 +233,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
     if (!onFavorite) return;
     setIsLoading(true);
     try {
-      await onFavorite(mockRoom.id);
+      await onFavorite(currentRoom.id);
     } finally {
       setIsLoading(false);
     }
@@ -170,12 +290,58 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
     // Mostrar notificación de éxito
   };
 
-  if (!mockRoom) {
+  // Mostrar estado de carga
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando habitación...</p>
+          <p className="text-gray-600">Cargando detalles de la habitación...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error si hay alguno
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Error al cargar</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/dashboard/rooms')}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Volver a Habitaciones
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentRoom) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Habitación no encontrada</h3>
+          <p className="text-gray-600 mb-4">La habitación que buscas no existe o ha sido eliminada.</p>
+          <button
+            onClick={() => navigate('/dashboard/rooms')}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Volver a Habitaciones
+          </button>
         </div>
       </div>
     );
@@ -203,31 +369,31 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
             {/* Galería de imágenes */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="relative h-96 bg-gray-200">
-                {mockRoom.images && mockRoom.images.length > 0 ? (
+                {currentRoom.images && currentRoom.images.length > 0 ? (
                   <>
                     <img
-                      src={mockRoom.images[currentImageIndex]}
-                      alt={mockRoom.title}
+                      src={currentRoom.images[currentImageIndex]}
+                      alt={currentRoom.title}
                       className="w-full h-full object-cover"
                     />
                     {/* Navegación de imágenes */}
-                    {mockRoom.images.length > 1 && (
+                    {currentRoom.images.length > 1 && (
                       <>
                         <button
-                          onClick={() => setCurrentImageIndex(prev => prev > 0 ? prev - 1 : mockRoom.images.length - 1)}
+                          onClick={() => setCurrentImageIndex(prev => prev > 0 ? prev - 1 : currentRoom.images.length - 1)}
                           className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
                         >
                           <ArrowLeftIcon className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => setCurrentImageIndex(prev => prev < mockRoom.images.length - 1 ? prev + 1 : 0)}
+                          onClick={() => setCurrentImageIndex(prev => prev < currentRoom.images.length - 1 ? prev + 1 : 0)}
                           className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
                         >
                           <ArrowLeftIcon className="w-5 h-5 rotate-180" />
                         </button>
                         {/* Indicadores */}
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                          {mockRoom.images.map((_, index) => (
+                          {currentRoom.images.map((_: string, index: number) => (
                             <button
                               key={index}
                               onClick={() => setCurrentImageIndex(index)}
@@ -255,15 +421,15 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{mockRoom.title}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentRoom.title}</h1>
                   <div className="flex items-center text-gray-600 mb-4">
                     <MapPinIcon className="w-5 h-5 mr-2" />
-                    <span className="text-lg">{mockRoom.address}, {mockRoom.city}</span>
+                    <span className="text-lg">{currentRoom.address}, {currentRoom.city}</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-4xl font-bold text-green-600 mb-1">
-                    {formatPrice(mockRoom.price_per_month)}
+                    {formatPrice(currentRoom.price_per_month)}
                   </div>
                   <div className="text-gray-500">por mes</div>
                 </div>
@@ -271,30 +437,30 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
 
               {/* Badges de características */}
               <div className="flex flex-wrap gap-3 mb-6">
-                <span className={`px-4 py-2 rounded-full text-sm font-medium ${getGenderColor(mockRoom.preferred_gender)}`}>
-                  {getGenderLabel(mockRoom.preferred_gender)}
+                <span className={`px-4 py-2 rounded-full text-sm font-medium ${getGenderColor(currentRoom.preferred_gender)}`}>
+                  {getGenderLabel(currentRoom.preferred_gender)}
                 </span>
                 <span className="px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                  {mockRoom.preferred_age_min}-{mockRoom.preferred_age_max} años
+                  {currentRoom.preferred_age_min}-{currentRoom.preferred_age_max} años
                 </span>
-                                 {mockRoom.private_bathroom && (
+                                 {currentRoom.private_bathroom && (
                    <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
                      <BuildingOfficeIcon className="w-4 h-4 inline mr-1" />
                      Baño propio
                    </span>
                  )}
-                {mockRoom.has_balcony && (
+                {currentRoom.has_balcony && (
                   <span className="px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                     🌅 Balcón
                   </span>
                 )}
-                                 {mockRoom.smoking_allowed && (
+                                 {currentRoom.smoking_allowed && (
                    <span className="px-4 py-2 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
                      <BuildingOfficeIcon className="w-4 h-4 inline mr-1" />
                      Fumadores
                    </span>
                  )}
-                                 {mockRoom.pets_allowed && (
+                                 {currentRoom.pets_allowed && (
                    <span className="px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
                      <BuildingOfficeIcon className="w-4 h-4 inline mr-1" />
                      Mascotas
@@ -305,7 +471,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
               {/* Descripción */}
               <div className="mb-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Descripción</h3>
-                <p className="text-gray-700 leading-relaxed">{mockRoom.description}</p>
+                <p className="text-gray-700 leading-relaxed">{currentRoom.description}</p>
               </div>
 
               {/* Características */}
@@ -315,13 +481,13 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                   <div className="space-y-2">
                                          <div className="flex items-center text-gray-700">
                        <BuildingOfficeIcon className="w-5 h-5 mr-3 text-green-600" />
-                       <span>{mockRoom.room_area} metros cuadrados</span>
+                       <span>{currentRoom.room_area} metros cuadrados</span>
                      </div>
                      <div className="flex items-center text-gray-700">
                        <BuildingOfficeIcon className="w-5 h-5 mr-3 text-blue-600" />
-                       <span>{mockRoom.private_bathroom ? 'Baño privado' : 'Baño compartido'}</span>
+                       <span>{currentRoom.private_bathroom ? 'Baño privado' : 'Baño compartido'}</span>
                      </div>
-                    {mockRoom.has_balcony && (
+                    {currentRoom.has_balcony && (
                       <div className="flex items-center text-gray-700">
                         <div className="w-5 h-5 mr-3">🌅</div>
                         <span>Balcón</span>
@@ -333,7 +499,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Amenities</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    {mockRoom.amenities?.map((amenity, index) => (
+                    {currentRoom.amenities?.map((amenity: string, index: number) => (
                       <div key={index} className="flex items-center text-gray-700">
                         <CheckCircleIcon className="w-4 h-4 mr-2 text-green-600" />
                         <span className="text-sm">{amenity}</span>
@@ -344,10 +510,10 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
               </div>
 
               {/* Otros requisitos */}
-              {mockRoom.other_requirements && (
+              {currentRoom.other_requirements && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Requisitos adicionales</h3>
-                  <p className="text-gray-700 leading-relaxed">{mockRoom.other_requirements}</p>
+                  <p className="text-gray-700 leading-relaxed">{currentRoom.other_requirements}</p>
                 </div>
               )}
 
@@ -356,29 +522,29 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Sobre el propietario</h3>
                 <div className="flex items-start space-x-4">
                   <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-                    {mockRoom.owner?.avatar_url ? (
+                    {currentRoom.owner?.avatar_url ? (
                       <img 
-                        src={mockRoom.owner.avatar_url} 
-                        alt={mockRoom.owner.full_name || 'Propietario'}
+                        src={currentRoom.owner.avatar_url} 
+                        alt={currentRoom.owner.full_name || 'Propietario'}
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white text-xl font-bold">
-                        {mockRoom.owner?.full_name?.charAt(0) || 'U'}
+                        {currentRoom.owner?.full_name?.charAt(0) || 'U'}
                       </div>
                     )}
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-1">{mockRoom.owner?.full_name || 'Propietario'}</h4>
-                    {mockRoom.owner?.bio && (
-                      <p className="text-gray-600 mb-2">{mockRoom.owner.bio}</p>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-1">{currentRoom.owner?.full_name || 'Propietario'}</h4>
+                    {currentRoom.owner?.bio && (
+                      <p className="text-gray-600 mb-2">{currentRoom.owner.bio}</p>
                     )}
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>Publicado {formatDate(mockRoom.created_at)}</span>
-                      {mockRoom.owner?.rating && (
+                      <span>Publicado {formatDate(currentRoom.created_at)}</span>
+                      {currentRoom.owner?.rating && (
                         <div className="flex items-center">
                           <StarIcon className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                          <span>{mockRoom.owner.rating} ({mockRoom.owner.review_count || 0} reseñas)</span>
+                          <span>{currentRoom.owner.rating} ({currentRoom.owner.review_count || 0} reseñas)</span>
                         </div>
                       )}
                     </div>
@@ -394,7 +560,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
             <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
               <div className="text-center mb-6">
                 <div className="text-3xl font-bold text-green-600 mb-1">
-                  {formatPrice(mockRoom.price_per_month)}
+                  {formatPrice(currentRoom.price_per_month)}
                 </div>
                 <div className="text-gray-500">por mes</div>
               </div>
@@ -432,16 +598,16 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                 <div className="text-sm text-gray-600 space-y-2">
                   <div className="flex items-center">
                     <ClockIcon className="w-4 h-4 mr-2" />
-                    <span>Disponible desde {formatDate(mockRoom.created_at)}</span>
+                    <span>Disponible desde {formatDate(currentRoom.created_at)}</span>
                   </div>
                   <div className="flex items-center">
 
                     <UserIcon className="w-4 h-4 mr-2" />
-                    <span>Preferencia: {getGenderLabel(mockRoom.preferred_gender)}</span>
+                    <span>Preferencia: {getGenderLabel(currentRoom.preferred_gender)}</span>
                   </div>
                   <div className="flex items-center">
                     <UserIcon2 className="w-4 h-4 mr-2" />
-                    <span>Edad: {mockRoom.preferred_age_min}-{mockRoom.preferred_age_max} años</span>
+                    <span>Edad: {currentRoom.preferred_age_min}-{currentRoom.preferred_age_max} años</span>
                   </div>
                 </div>
               </div>
@@ -451,16 +617,16 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Información de contacto</h3>
               <div className="space-y-3">
-                {mockRoom.owner?.phone && (
+                {currentRoom.owner?.phone && (
                   <div className="flex items-center text-gray-700">
                     <PhoneIcon className="w-4 h-4 mr-3 text-green-600" />
-                    <span className="text-sm">{mockRoom.owner.phone}</span>
+                    <span className="text-sm">{currentRoom.owner.phone}</span>
                   </div>
                 )}
-                {mockRoom.owner?.email && (
+                {currentRoom.owner?.email && (
                   <div className="flex items-center text-gray-700">
                     <EnvelopeIcon className="w-4 h-4 mr-3 text-blue-600" />
-                    <span className="text-sm">{mockRoom.owner.email}</span>
+                    <span className="text-sm">{currentRoom.owner.email}</span>
                   </div>
                 )}
               </div>
