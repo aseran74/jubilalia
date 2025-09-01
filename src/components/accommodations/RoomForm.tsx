@@ -106,20 +106,20 @@ const RoomForm: React.FC = () => {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         
-        // Subir imagen al bucket de post-images
+        // Subir imagen al bucket de room-images
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `room-images/${fileName}`;
+        const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('post-images')
+          .from('room-images')
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
         // Obtener URL pública
         const { data: { publicUrl } } = supabase.storage
-          .from('post-images')
+          .from('room-images')
           .getPublicUrl(filePath);
 
         newImages.push(publicUrl);

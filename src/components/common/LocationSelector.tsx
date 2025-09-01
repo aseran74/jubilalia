@@ -42,8 +42,21 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   // Cargar Google Places API
   useEffect(() => {
+    // Verificar si ya está cargado
+    if (window.google && window.google.maps && window.google.maps.places) {
+      initializeAutocomplete();
+      return;
+    }
+
+    // Verificar si la API key está disponible
+    const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+    if (!apiKey) {
+      console.error('Google Places API key no encontrada en VITE_GOOGLE_PLACES_API_KEY');
+      return;
+    }
+
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_PLACES_API_KEY}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => {
@@ -51,38 +64,63 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
         initializeAutocomplete();
       }
     };
+    script.onerror = () => {
+      console.error('Error al cargar Google Places API');
+    };
     document.head.appendChild(script);
 
     return () => {
-      document.head.removeChild(script);
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
   }, []);
 
   // Inicializar autocompletado
   const initializeAutocomplete = () => {
-    if (!inputRef.current || !window.google?.maps?.places) return;
+    if (!inputRef.current) {
+      console.error('LocationSelector: inputRef no está disponible');
+      return;
+    }
+    
+    if (!window.google?.maps?.places) {
+      console.error('LocationSelector: Google Maps Places API no está disponible');
+      return;
+    }
 
-    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['geocode'],
-      componentRestrictions: { country: 'es' }, // Restringir a España
-      fields: ['address_components', 'formatted_address', 'geometry']
-    });
+    try {
+      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ['geocode'],
+        componentRestrictions: { country: 'es' }, // Restringir a España
+        fields: ['address_components', 'formatted_address', 'geometry']
+      });
 
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (place.address_components) {
-        const location = parseAddressComponents(place.address_components);
-        if (place.geometry?.location) {
-          location.coordinates = {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng()
-          };
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace();
+        console.log('Place selected:', place);
+        
+        if (place.address_components) {
+          const location = parseAddressComponents(place.address_components);
+          console.log('Parsed location:', location);
+          
+          if (place.geometry?.location) {
+            location.coordinates = {
+              lat: place.geometry.location.lat(),
+              lng: place.geometry.location.lng()
+            };
+          }
+          onLocationSelect(location);
+          setInputValue(place.formatted_address || '');
+          setShowSuggestions(false);
+        } else {
+          console.warn('Place no tiene address_components');
         }
-        onLocationSelect(location);
-        setInputValue(place.formatted_address || '');
-        setShowSuggestions(false);
-      }
-    });
+      });
+      
+      console.log('LocationSelector: Autocomplete inicializado correctamente');
+    } catch (error) {
+      console.error('LocationSelector: Error al inicializar autocomplete:', error);
+    }
   };
 
   // Parsear componentes de dirección

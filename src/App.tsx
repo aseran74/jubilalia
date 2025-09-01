@@ -50,6 +50,7 @@ import ChatApp from './components/messaging/ChatApp';
 
 // Componentes de debug
 import ConnectionTest from './components/debug/ConnectionTest';
+import GooglePlacesTest from './components/debug/GooglePlacesTest';
 
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
@@ -268,6 +269,7 @@ const App: React.FC = () => {
           <Route path="/signup" element={<SignUpForm />} />
                            <Route path="/debug" element={<DebugAuth />} />
                  <Route path="/test-connection" element={<ConnectionTest />} />
+                 <Route path="/test-google-places" element={<GooglePlacesTest />} />
                  <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
