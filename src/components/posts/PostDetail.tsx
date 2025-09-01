@@ -12,11 +12,9 @@ import {
   Share2,
   Edit,
   Trash2,
-  MoreHorizontal,
   Send,
   Loader2,
-  Star,
-  Clock
+  Star
 } from 'lucide-react';
 
 interface PostCategory {
@@ -119,7 +117,7 @@ const PostDetail: React.FC = () => {
           .from('post_likes')
           .select('*')
           .eq('post_id', id)
-          .eq('profile_id', currentUser.uid)
+          .eq('profile_id', currentUser.id)
           .single();
 
         data.is_liked = !!likeData;
@@ -163,7 +161,7 @@ const PostDetail: React.FC = () => {
               .from('comment_likes')
               .select('*')
               .eq('comment_id', comment.id)
-              .eq('profile_id', currentUser.uid)
+              .eq('profile_id', currentUser.id)
               .single();
 
             isLiked = !!likeData;
@@ -187,7 +185,7 @@ const PostDetail: React.FC = () => {
     try {
       await supabase
         .from('posts')
-        .update({ view_count: post?.view_count + 1 })
+        .update({ view_count: (post?.view_count || 0) + 1 })
         .eq('id', id);
     } catch (error) {
       console.error('Error incrementing view count:', error);
@@ -207,7 +205,7 @@ const PostDetail: React.FC = () => {
           .from('post_likes')
           .delete()
           .eq('post_id', id)
-          .eq('profile_id', currentUser.uid);
+          .eq('profile_id', currentUser.id);
 
         setPost(prev => prev ? {
           ...prev,
@@ -220,7 +218,7 @@ const PostDetail: React.FC = () => {
           .from('post_likes')
           .insert({
             post_id: id,
-            profile_id: currentUser.uid
+            profile_id: currentUser.id
           });
 
         setPost(prev => prev ? {
@@ -246,7 +244,7 @@ const PostDetail: React.FC = () => {
       const { data: profile } = await supabase
         .from('profiles')
         .select('id')
-        .eq('firebase_uid', currentUser.uid)
+        .eq('id', currentUser.id)
         .single();
 
       if (!profile) {
@@ -309,14 +307,14 @@ const PostDetail: React.FC = () => {
           .from('comment_likes')
           .delete()
           .eq('comment_id', commentId)
-          .eq('profile_id', currentUser.uid);
+          .eq('profile_id', currentUser.id);
       } else {
         // Agregar like
         await supabase
           .from('comment_likes')
           .insert({
             comment_id: commentId,
-            profile_id: currentUser.uid
+            profile_id: currentUser.id
           });
       }
 
@@ -397,7 +395,7 @@ const PostDetail: React.FC = () => {
           Volver a Posts
         </button>
 
-        {currentUser && currentUser.uid === post.author.id && (
+        {currentUser && currentUser.id === post.author.id && (
           <div className="flex items-center space-x-2">
             <button
               onClick={() => navigate(`/dashboard/posts/${id}/edit`)}

@@ -1,29 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Heart, 
-  MapPin, 
-  Bed, 
-  Bath, 
-  Square, 
-  Star,
-  MessageCircle,
-  Calendar,
-  Users,
-  Wifi,
-  Car,
-  Dog,
-  Smoking,
-  ArrowLeft,
-  Phone,
-  Mail,
-  Share2,
-  Flag,
-  Clock,
-  User,
-  CheckCircle,
-  XCircle
-} from 'lucide-react';
+  HeartIcon,
+  MapPinIcon,
+  BuildingOfficeIcon,
+  StarIcon,
+  ChatBubbleLeftRightIcon,
+  CalendarIcon,
+  UserIcon,
+  WifiIcon,
+  BuildingOfficeIcon as CarIcon,
+  BuildingOfficeIcon as DogIcon,
+  BuildingOfficeIcon as SmokingIcon,
+  ArrowLeftIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  ShareIcon,
+  FlagIcon,
+  ClockIcon,
+  UserIcon as UserIcon2,
+  CheckCircleIcon
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth';
 
 interface RoomDetailProps {
@@ -199,7 +196,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
             onClick={() => navigate(-1)}
             className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
+                            <ArrowLeftIcon className="w-5 h-5 mr-2" />
             Volver
           </button>
         </div>
@@ -226,13 +223,13 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                           onClick={() => setCurrentImageIndex(prev => prev > 0 ? prev - 1 : mockRoom.images.length - 1)}
                           className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
                         >
-                          <ArrowLeft className="w-5 h-5" />
+                          <ArrowLeftIcon className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => setCurrentImageIndex(prev => prev < mockRoom.images.length - 1 ? prev + 1 : 0)}
                           className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
                         >
-                          <ArrowLeft className="w-5 h-5 rotate-180" />
+                          <ArrowLeftIcon className="w-5 h-5 rotate-180" />
                         </button>
                         {/* Indicadores */}
                         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -250,12 +247,12 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                     )}
                   </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                    <div className="text-center text-gray-400">
-                      <Bed className="w-16 h-16 mx-auto mb-4" />
-                      <p>Sin imágenes disponibles</p>
-                    </div>
-                  </div>
+                                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                     <div className="text-center text-gray-400">
+                       <BuildingOfficeIcon className="w-16 h-16 mx-auto mb-4" />
+                       <p>Sin imágenes disponibles</p>
+                     </div>
+                   </div>
                 )}
               </div>
             </div>
@@ -266,7 +263,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">{mockRoom.title}</h1>
                   <div className="flex items-center text-gray-600 mb-4">
-                    <MapPin className="w-5 h-5 mr-2" />
+                    <MapPinIcon className="w-5 h-5 mr-2" />
                     <span className="text-lg">{mockRoom.address}, {mockRoom.city}</span>
                   </div>
                 </div>
@@ -286,29 +283,29 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                 <span className="px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                   {mockRoom.preferred_age_min}-{mockRoom.preferred_age_max} años
                 </span>
-                {mockRoom.private_bathroom && (
-                  <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    <Bath className="w-4 h-4 inline mr-1" />
-                    Baño propio
-                  </span>
-                )}
+                                 {mockRoom.private_bathroom && (
+                   <span className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                     <BuildingOfficeIcon className="w-4 h-4 inline mr-1" />
+                     Baño propio
+                   </span>
+                 )}
                 {mockRoom.has_balcony && (
                   <span className="px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                     🌅 Balcón
                   </span>
                 )}
-                {mockRoom.smoking_allowed && (
-                  <span className="px-4 py-2 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
-                    <Smoking className="w-4 h-4 inline mr-1" />
-                    Fumadores
-                  </span>
-                )}
-                {mockRoom.pets_allowed && (
-                  <span className="px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                    <Dog className="w-4 h-4 inline mr-1" />
-                    Mascotas
-                  </span>
-                )}
+                                 {mockRoom.smoking_allowed && (
+                   <span className="px-4 py-2 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                     <BuildingOfficeIcon className="w-4 h-4 inline mr-1" />
+                     Fumadores
+                   </span>
+                 )}
+                                 {mockRoom.pets_allowed && (
+                   <span className="px-4 py-2 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                     <BuildingOfficeIcon className="w-4 h-4 inline mr-1" />
+                     Mascotas
+                   </span>
+                 )}
               </div>
 
               {/* Descripción */}
@@ -322,14 +319,14 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Características</h3>
                   <div className="space-y-2">
-                    <div className="flex items-center text-gray-700">
-                      <Square className="w-5 h-5 mr-3 text-green-600" />
-                      <span>{mockRoom.room_area} metros cuadrados</span>
-                    </div>
-                    <div className="flex items-center text-gray-700">
-                      <Bath className="w-5 h-5 mr-3 text-blue-600" />
-                      <span>{mockRoom.private_bathroom ? 'Baño privado' : 'Baño compartido'}</span>
-                    </div>
+                                         <div className="flex items-center text-gray-700">
+                       <BuildingOfficeIcon className="w-5 h-5 mr-3 text-green-600" />
+                       <span>{mockRoom.room_area} metros cuadrados</span>
+                     </div>
+                     <div className="flex items-center text-gray-700">
+                       <BuildingOfficeIcon className="w-5 h-5 mr-3 text-blue-600" />
+                       <span>{mockRoom.private_bathroom ? 'Baño privado' : 'Baño compartido'}</span>
+                     </div>
                     {mockRoom.has_balcony && (
                       <div className="flex items-center text-gray-700">
                         <div className="w-5 h-5 mr-3">🌅</div>
@@ -344,7 +341,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                   <div className="grid grid-cols-2 gap-2">
                     {mockRoom.amenities?.map((amenity, index) => (
                       <div key={index} className="flex items-center text-gray-700">
-                        <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                        <CheckCircleIcon className="w-4 h-4 mr-2 text-green-600" />
                         <span className="text-sm">{amenity}</span>
                       </div>
                     ))}
@@ -386,7 +383,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                       <span>Publicado {formatDate(mockRoom.created_at)}</span>
                       {mockRoom.owner?.rating && (
                         <div className="flex items-center">
-                          <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
+                          <StarIcon className="w-4 h-4 text-yellow-400 fill-current mr-1" />
                           <span>{mockRoom.owner.rating} ({mockRoom.owner.review_count || 0} reseñas)</span>
                         </div>
                       )}
@@ -413,7 +410,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                   onClick={handleContact}
                   className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center"
                 >
-                  <MessageCircle className="w-4 h-4 mr-2" />
+                  <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2" />
                   Contactar
                 </button>
                 
@@ -426,12 +423,12 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
+                  <HeartIcon className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
                   {isFavorite ? 'En favoritos' : 'Añadir a favoritos'}
                 </button>
 
                 <button className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center">
-                  <Share2 className="w-4 h-4 mr-2" />
+                  <ShareIcon className="w-4 h-4 mr-2" />
                   Compartir
                 </button>
               </div>
@@ -440,15 +437,16 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
               <div className="border-t border-gray-200 pt-4">
                 <div className="text-sm text-gray-600 space-y-2">
                   <div className="flex items-center">
-                    <Clock className="w-4 h-4 mr-2" />
+                    <ClockIcon className="w-4 h-4 mr-2" />
                     <span>Disponible desde {formatDate(mockRoom.created_at)}</span>
                   </div>
                   <div className="flex items-center">
-                    <Users className="w-4 h-4 mr-2" />
+
+                    <UserIcon className="w-4 h-4 mr-2" />
                     <span>Preferencia: {getGenderLabel(mockRoom.preferred_gender)}</span>
                   </div>
                   <div className="flex items-center">
-                    <User className="w-4 h-4 mr-2" />
+                    <UserIcon2 className="w-4 h-4 mr-2" />
                     <span>Edad: {mockRoom.preferred_age_min}-{mockRoom.preferred_age_max} años</span>
                   </div>
                 </div>
@@ -461,13 +459,13 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
               <div className="space-y-3">
                 {mockRoom.owner?.phone && (
                   <div className="flex items-center text-gray-700">
-                    <Phone className="w-4 h-4 mr-3 text-green-600" />
+                    <PhoneIcon className="w-4 h-4 mr-3 text-green-600" />
                     <span className="text-sm">{mockRoom.owner.phone}</span>
                   </div>
                 )}
                 {mockRoom.owner?.email && (
                   <div className="flex items-center text-gray-700">
-                    <Mail className="w-4 h-4 mr-3 text-blue-600" />
+                    <EnvelopeIcon className="w-4 h-4 mr-3 text-blue-600" />
                     <span className="text-sm">{mockRoom.owner.email}</span>
                   </div>
                 )}

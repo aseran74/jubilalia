@@ -3,33 +3,27 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { 
-  MapPin, 
-  Users, 
   Calendar, 
   Clock, 
-  Euro, 
-  Tag, 
+  MapPin, 
   Heart, 
-  Share2, 
-  MessageCircle, 
-  Phone, 
-  Mail, 
-  Globe, 
   Star,
-  ArrowLeft,
   Activity,
   User,
+  Share2,
   AlertCircle,
-  CheckCircle,
-  XCircle,
+  ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  Plus,
-  Minus,
+  Camera,
   Edit,
   Trash2,
-  Camera,
-  Navigation
+  Navigation,
+  CheckCircle,
+  Phone,
+  Mail,
+  Globe,
+  XCircle
 } from 'lucide-react';
 
 interface ActivityDetail {
@@ -86,7 +80,7 @@ const ActivityDetail: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [contactMessage, setContactMessage] = useState('');
-  const [sendingMessage, setSendingMessage] = useState(false);
+
   const [joiningActivity, setJoiningActivity] = useState(false);
   const [leavingActivity, setLeavingActivity] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);

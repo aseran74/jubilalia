@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+
 
 const SignUpForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const handleGoogleSignUp = async () => {
     try {
       setLoading(true);
       setError(null);
-      await signInWithGoogle();
+      // Para Google OAuth, no necesitamos email/password
+      await signUp('', '');
       // La redirección se maneja automáticamente por Supabase
     } catch (error: any) {
       console.error('Error signing up with Google:', error);

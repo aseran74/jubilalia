@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, MapPin, Calendar, Users, Activity, TrendingUp, Star } from 'lucide-react';
+
+import { Plus, Calendar, Users, Activity, Star } from 'lucide-react';
 import ActivityList from './ActivityList';
 import ActivityForm from './ActivityForm';
 
 const ActivityDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const navigate = useNavigate();
+
 
   const handleCreateActivity = () => {
     setShowCreateForm(true);
@@ -19,12 +19,7 @@ const ActivityDashboard: React.FC = () => {
     setActiveTab('list');
   };
 
-  const handleActivityCreated = (activityId: string) => {
-    setShowCreateForm(false);
-    setActiveTab('list');
-    // Opcional: navegar a los detalles de la actividad creada
-    // navigate(`/dashboard/activities/${activityId}`);
-  };
+
 
   return (
     <div className="space-y-6">
@@ -140,7 +135,7 @@ const ActivityDashboard: React.FC = () => {
                 </button>
                 <h2 className="text-xl font-semibold text-gray-900">Crear Nueva Actividad</h2>
               </div>
-              <ActivityForm onSuccess={handleActivityCreated} />
+              <ActivityForm />
             </div>
           )}
         </div>

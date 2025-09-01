@@ -28,7 +28,7 @@ const DashboardLayout: React.FC = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <DashboardSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
+      <DashboardSidebar />
       
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">

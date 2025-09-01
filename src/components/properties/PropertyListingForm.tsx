@@ -9,11 +9,9 @@ import {
   Home, 
   Umbrella, 
   Upload, 
-  MapPin, 
-  Euro,
-  Calendar,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Euro
 } from 'lucide-react';
 
 const PropertyListingForm: React.FC = () => {

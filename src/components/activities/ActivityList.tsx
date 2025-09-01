@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Search, MapPin, Users, Calendar, Clock, Heart, Eye, Activity, Plus } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus } from 'lucide-react';
 
 interface Activity {
   id: string;

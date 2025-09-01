@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Filter, 
-  MapPin, 
-  Euro, 
-  Home, 
+import {
+  MapPin,
   Bed,
-  X,
+  Bath,
+  Square,
+  Users,
+  Calendar,
+  Euro,
+  Home,
+  Car,
+  Wifi,
+  Dog,
+  Building,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import type { Accommodation } from '../../types/accommodations';
+import { getAccommodations } from '../../lib/accommodations';
 import AccommodationCard from './AccommodationCard';
-import { getAccommodations, searchAccommodations } from '../../lib/accommodations';
-import type { Accommodation, AccommodationFilters } from '../../types/accommodations';
 
 interface AccommodationListProps {
   onAccommodationSelect?: (accommodation: Accommodation) => void;
@@ -31,7 +36,7 @@ const AccommodationList: React.FC<AccommodationListProps> = ({
   const [error, setError] = useState<string | null>(null);
   
   // Estado de filtros
-  const [filters, setFilters] = useState<AccommodationFilters>({});
+  const [filters, setFilters] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
   
@@ -42,23 +47,22 @@ const AccommodationList: React.FC<AccommodationListProps> = ({
 
   // Cargar alojamientos
   useEffect(() => {
-    loadAccommodations();
-  }, []);
-
-  const loadAccommodations = async () => {
-    try {
+    const fetchAccommodations = async () => {
       setLoading(true);
-      const data = await getAccommodations();
-      setAccommodations(data);
-      setFilteredAccommodations(data);
-      setTotalPages(Math.ceil(data.length / itemsPerPage));
-    } catch (err) {
-      setError('Error al cargar los alojamientos');
-      console.error('Error loading accommodations:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const data = await getAccommodations();
+        setAccommodations(data as unknown as Accommodation[]);
+        setFilteredAccommodations(data as unknown as Accommodation[]);
+      } catch (error) {
+        console.error('Error fetching accommodations:', error);
+        setError('Error al cargar las acomodaciones');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccommodations();
+  }, []);
 
   // Aplicar filtros
   const applyFilters = () => {
@@ -162,12 +166,27 @@ const AccommodationList: React.FC<AccommodationListProps> = ({
     return (
       <div className="text-center py-20">
         <div className="text-red-500 mb-4">
-          <X className="w-16 h-16 mx-auto" />
+          <Home className="w-16 h-16 mx-auto" />
         </div>
         <h3 className="text-xl font-semibold text-gray-800 mb-2">Error al cargar</h3>
         <p className="text-gray-600 mb-4">{error}</p>
         <button
-          onClick={loadAccommodations}
+          onClick={() => {
+            const fetchAccommodations = async () => {
+              setLoading(true);
+              try {
+                const data = await getAccommodations();
+                setAccommodations(data as unknown as Accommodation[]);
+                setFilteredAccommodations(data as unknown as Accommodation[]);
+              } catch (error) {
+                console.error('Error fetching accommodations:', error);
+                setError('Error al cargar las acomodaciones');
+              } finally {
+                setLoading(false);
+              }
+            };
+            fetchAccommodations();
+          }}
           className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors"
         >
           Intentar de nuevo
@@ -186,7 +205,7 @@ const AccommodationList: React.FC<AccommodationListProps> = ({
           {/* Búsqueda */}
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Buscar alojamientos por título, descripción o ciudad..."
@@ -203,7 +222,7 @@ const AccommodationList: React.FC<AccommodationListProps> = ({
               onClick={() => setShowFiltersPanel(!showFiltersPanel)}
               className="flex items-center space-x-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              <Filter className="w-5 h-5" />
+              <Home className="w-5 h-5" />
               <span>Filtros</span>
             </button>
             

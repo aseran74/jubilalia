@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  Heart, 
-  MapPin, 
-  Bed, 
-  Bath, 
-  Square, 
+import {
+  MapPin,
+  Bed,
+  Bath,
+  Square,
+  Users,
+  Heart,
   Star,
-  MessageCircle,
   Calendar,
-  Users
+  Euro,
+  Home,
+  Car,
+  Wifi,
+  Dog,
+  Building
 } from 'lucide-react';
 import type { Accommodation } from '../../types/accommodations';
 
@@ -125,8 +130,8 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
             onClick={handleFavorite}
             disabled={isLoading}
             className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
-              isFavorite 
-                ? 'bg-red-500 text-white shadow-lg' 
+              isFavorite
+                ? 'bg-red-500 text-white shadow-lg'
                 : 'bg-white/90 text-gray-600 hover:bg-white hover:shadow-md'
             }`}
           >

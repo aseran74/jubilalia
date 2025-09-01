@@ -6,7 +6,6 @@ import {
   Building, 
   MessageCircle, 
   Calendar, 
-  Search, 
   Star,
   CheckCircle
 } from 'lucide-react';

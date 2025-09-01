@@ -4,9 +4,6 @@ import {
   Calendar, 
   Clock, 
   MapPin, 
-  Users, 
-  Euro, 
-  Tag, 
   Heart, 
   Eye,
   Star,
@@ -53,7 +50,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(activity.is_favorite || false);
-  const [imageError, setImageError] = useState(false);
+
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -103,18 +100,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     }
   };
 
-  const getDifficultyColor = (level: string) => {
-    switch (level.toLowerCase()) {
-      case 'principiante':
-        return 'bg-green-100 text-green-800';
-      case 'intermedio':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'avanzado':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-blue-100 text-blue-800';
-    }
-  };
+
 
   const getActivityTypeColor = (type: string) => {
     const colors = {
@@ -158,8 +144,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
     return colors[type.toLowerCase() as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
-  const participationPercentage = (current_participants / max_participants) * 100;
-  const isFull = current_participants >= max_participants;
+  const participationPercentage = (activity.current_participants / activity.max_participants) * 100;
+  const isFull = activity.current_participants >= activity.max_participants;
   const isAlmostFull = participationPercentage >= 80;
 
   return (
@@ -174,7 +160,6 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
             src={activity.images[0]}
             alt={activity.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={() => setImageError(true)}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-100 to-green-100 flex items-center justify-center">

@@ -11,6 +11,17 @@ export const environment = {
     googleClientSecret: import.meta.env.VITE_SUPABASE_GOOGLE_CLIENT_SECRET || '',
   },
 
+  // Google Places API Configuration
+  googlePlaces: {
+    apiKey: import.meta.env.VITE_GOOGLE_PLACES_API_KEY || '',
+    libraries: ['places', 'geometry'],
+    defaultLocation: {
+      lat: 40.4168, // Madrid, España
+      lng: -3.7038
+    },
+    searchRadius: 50000, // 50km por defecto
+  },
+
   // App Configuration
   app: {
     name: import.meta.env.VITE_APP_NAME || 'Jubilalia',
@@ -28,6 +39,7 @@ export const environment = {
   features: {
     analytics: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
     debugMode: import.meta.env.VITE_ENABLE_DEBUG_MODE === 'true',
+    locationSharing: import.meta.env.VITE_ENABLE_LOCATION_SHARING === 'true',
   },
 };
 
@@ -41,6 +53,9 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 VITE_SUPABASE_GOOGLE_CLIENT_ID=your_google_client_id_here
 VITE_SUPABASE_GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 
+# Google Places API
+VITE_GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
+
 # App Configuration
 VITE_APP_NAME=Jubilalia
 VITE_APP_VERSION=1.0.0
@@ -53,4 +68,5 @@ VITE_API_TIMEOUT=30000
 # Feature Flags
 VITE_ENABLE_ANALYTICS=true
 VITE_ENABLE_DEBUG_MODE=true
+VITE_ENABLE_LOCATION_SHARING=true
 */

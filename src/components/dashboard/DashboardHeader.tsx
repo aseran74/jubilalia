@@ -1,9 +1,8 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { Bell, Settings, LogOut, User, Menu, Home, MessageCircle, RefreshCw } from 'lucide-react';
+import { Bell, Settings, LogOut, User, Menu, Home, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUnreadMessages } from '../../hooks/useUnreadMessages';
-import { useSupabaseSync } from '../../hooks/useSupabaseSync';
 
 interface DashboardHeaderProps {
   onToggleSidebar: () => void;
@@ -12,7 +11,6 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSidebar }) => {
   const { user, profile, logout } = useAuth();
   const { unreadCount } = useUnreadMessages();
-  const { forceSync, syncing, lastSync } = useSupabaseSync();
 
   const handleLogout = async () => {
     try {
@@ -61,30 +59,17 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSidebar }) =>
             <Home className="w-4 h-4 lg:w-5 lg:h-5" />
           </Link>
 
-          {/* Botón de sincronización con Supabase */}
-          <button
-            onClick={forceSync}
-            disabled={syncing}
-            className={`p-2 rounded-lg transition-colors ${
-              syncing
-                ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-                : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
-            }`}
-            title={`Sincronizar con Supabase${lastSync ? ` (Última: ${lastSync.toLocaleTimeString()})` : ''}`}
-          >
-            <RefreshCw className={`w-4 h-4 lg:w-5 lg:h-5 ${syncing ? 'animate-spin' : ''}`} />
-          </button>
+
 
           {/* Botón de debug del perfil */}
           <button
             onClick={() => {
               console.log('🔍 DEBUG - Estado del perfil:');
               console.log('👤 Profile:', profile);
-              console.log('🔥 Firebase User:', user);
+              console.log('👤 Supabase User:', user);
               console.log('📧 Email:', user?.email);
               console.log('🆔 Profile ID:', profile?.id);
-              console.log('🆔 Firebase UID:', profile?.firebase_uid);
-              alert(`Debug del perfil:\nID: ${profile?.id}\nEmail: ${profile?.email}\nFirebase UID: ${profile?.firebase_uid}`);
+              alert(`Debug del perfil:\nID: ${profile?.id}\nEmail: ${profile?.email}`);
             }}
             className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
             title="Debug del perfil"

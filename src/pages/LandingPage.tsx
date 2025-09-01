@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
-  Search, 
-  Users, 
-  Building, 
-  MessageCircle, 
-  Calendar, 
-  ChevronDown,
-  Menu,
-  X,
-  ArrowRight,
-  Heart,
-  Shield,
-  Star,
-  Phone,
-  Mail,
-  MapPin,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin
-} from 'lucide-react';
+  MagnifyingGlassIcon as Search, 
+  UserGroupIcon as Users, 
+  BuildingOfficeIcon as Building, 
+  ChatBubbleLeftRightIcon as MessageCircle, 
+  CalendarIcon as Calendar, 
+  ChevronDownIcon as ChevronDown,
+  Bars3Icon as Menu,
+  XMarkIcon as X,
+  ArrowRightIcon as ArrowRight,
+  HeartIcon as Heart,
+  ShieldCheckIcon as Shield,
+  StarIcon as Star,
+  PhoneIcon as Phone,
+  EnvelopeIcon as Mail,
+  MapPinIcon as MapPin,
+  BuildingOfficeIcon as Facebook,
+  BuildingOfficeIcon as Twitter,
+  BuildingOfficeIcon as Instagram,
+  BuildingOfficeIcon as Linkedin
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
 import StatsSection from '../components/landing/StatsSection';

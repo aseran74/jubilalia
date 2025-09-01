@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { 
-  Save, 
   Eye, 
   X, 
   Tag, 
-  Calendar,
-  User,
   AlertCircle,
   CheckCircle,
   Loader2,

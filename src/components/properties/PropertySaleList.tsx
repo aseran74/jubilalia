@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Search, Filter, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Home, Building, Calendar, Car } from 'lucide-react';
+import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car } from 'lucide-react';
 
 interface PropertySale {
   id: string;

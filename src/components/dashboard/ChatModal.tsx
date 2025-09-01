@@ -52,7 +52,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
       const { data: profile } = await supabase
         .from('profiles')
         .select('id')
-        .eq('firebase_uid', user.uid)
+        .eq('id', user.id)
         .single();
 
       if (!profile) return;
@@ -85,7 +85,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
         message_text: msg.message_text,
         created_at: msg.created_at,
         is_read: msg.is_read,
-        sender_name: msg.profiles?.full_name || 'Usuario'
+        sender_name: msg.profiles?.[0]?.full_name || 'Usuario'
       })) || [];
 
       setMessages(transformedMessages);
@@ -121,7 +121,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
       const { data: profile } = await supabase
         .from('profiles')
         .select('id')
-        .eq('firebase_uid', user.uid)
+        .eq('id', user.id)
         .single();
 
       if (!profile) return;

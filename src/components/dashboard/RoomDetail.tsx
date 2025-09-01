@@ -11,21 +11,12 @@ import {
   Square, 
   Star,
   MessageCircle,
-  Calendar,
-  Users,
-  Wifi,
-  Car,
-  Dog,
   Phone,
   Mail,
-  Share2,
-  Flag,
-  Clock,
-  User,
   CheckCircle,
-  XCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Dog
 } from 'lucide-react';
 
 interface RoomDetail {

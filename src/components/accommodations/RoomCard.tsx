@@ -1,20 +1,11 @@
 import React, { useState } from 'react';
 import { 
-  Heart, 
-  MapPin, 
-  Bed, 
-  Bath, 
-  Square, 
-  Star,
-  MessageCircle,
-  Calendar,
-  Users,
-  Wifi,
-  Car,
-  Dog,
-  Smoking,
-  Eye
-} from 'lucide-react';
+  HeartIcon,
+  MapPinIcon,
+  EyeIcon,
+  BuildingOfficeIcon,
+  ChatBubbleLeftRightIcon
+} from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 
 interface RoomCardProps {
@@ -127,12 +118,12 @@ const RoomCard: React.FC<RoomCardProps> = ({
             )}
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-            <div className="text-center text-gray-400">
-              <Bed className="w-12 h-12 mx-auto mb-2" />
-              <p className="text-sm">Sin imagen</p>
-            </div>
-          </div>
+                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+             <div className="text-center text-gray-400">
+               <BuildingOfficeIcon className="w-12 h-12 mx-auto mb-2" />
+               <p className="text-sm">Sin imagen</p>
+             </div>
+           </div>
         )}
 
         {/* Botón de favorito */}
@@ -146,7 +137,7 @@ const RoomCard: React.FC<RoomCardProps> = ({
                 : 'bg-white/90 text-gray-600 hover:bg-white hover:shadow-lg'
             }`}
           >
-            <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+                            <HeartIcon className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
           </button>
         )}
 
@@ -183,20 +174,20 @@ const RoomCard: React.FC<RoomCardProps> = ({
 
         {/* Ubicación */}
         <div className="flex items-center text-gray-500 mb-4">
-          <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                          <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0" />
           <span className="text-sm truncate">{room.address}, {room.city}</span>
         </div>
 
         {/* Características principales */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <Square className="w-4 h-4 mr-2" />
-            <span>{room.room_area} m²</span>
-          </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <Bath className="w-4 h-4 mr-2" />
-            <span>{room.private_bathroom ? 'Baño propio' : 'Baño compartido'}</span>
-          </div>
+                 <div className="grid grid-cols-2 gap-3 mb-4">
+           <div className="flex items-center text-sm text-gray-600">
+             <BuildingOfficeIcon className="w-4 h-4 mr-2" />
+             <span>{room.room_area} m²</span>
+           </div>
+           <div className="flex items-center text-sm text-gray-600">
+             <BuildingOfficeIcon className="w-4 h-4 mr-2" />
+             <span>{room.private_bathroom ? 'Baño propio' : 'Baño compartido'}</span>
+           </div>
           {room.has_balcony && (
             <div className="flex items-center text-sm text-gray-600">
               <div className="w-4 h-4 mr-2">🌅</div>
@@ -205,21 +196,21 @@ const RoomCard: React.FC<RoomCardProps> = ({
           )}
         </div>
 
-        {/* Preferencias */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {room.smoking_allowed && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-              <Smoking className="w-3 h-3 mr-1" />
-              Fumadores
-            </span>
-          )}
-          {room.pets_allowed && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              <Dog className="w-3 h-3 mr-1" />
-              Mascotas
-            </span>
-          )}
-        </div>
+                 {/* Preferencias */}
+         <div className="flex flex-wrap gap-2 mb-4">
+           {room.smoking_allowed && (
+             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+               <BuildingOfficeIcon className="w-3 h-3 mr-1" />
+               Fumadores
+             </span>
+           )}
+           {room.pets_allowed && (
+             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+               <BuildingOfficeIcon className="w-3 h-3 mr-1" />
+               Mascotas
+             </span>
+           )}
+         </div>
 
         {/* Información del propietario */}
         <div className="flex items-center justify-between mb-4">
@@ -243,16 +234,16 @@ const RoomCard: React.FC<RoomCardProps> = ({
             </div>
           </div>
 
-          {/* Rating si existe */}
-          {room.rating && (
-            <div className="flex items-center">
-              <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-              <span className="text-sm font-medium text-gray-900">{room.rating}</span>
-              {room.review_count && (
-                <span className="text-xs text-gray-500 ml-1">({room.review_count})</span>
-              )}
-            </div>
-          )}
+                     {/* Rating si existe */}
+           {room.rating && (
+             <div className="flex items-center">
+               <BuildingOfficeIcon className="w-4 h-4 text-yellow-400 fill-current mr-1" />
+               <span className="text-sm font-medium text-gray-900">{room.rating}</span>
+               {room.review_count && (
+                 <span className="text-xs text-gray-500 ml-1">({room.review_count})</span>
+               )}
+             </div>
+           )}
         </div>
 
         {/* Botones de acción */}
@@ -261,12 +252,12 @@ const RoomCard: React.FC<RoomCardProps> = ({
             to={`/rooms/${room.id}`}
             className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors text-center flex items-center justify-center"
           >
-            <Eye className="w-4 h-4 mr-2" />
+                            <EyeIcon className="w-4 h-4 mr-2" />
             Ver Detalles
           </Link>
-          <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-            <MessageCircle className="w-4 h-4" />
-          </button>
+                     <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+             <ChatBubbleLeftRightIcon className="w-4 h-4" />
+           </button>
         </div>
       </div>
     </div>

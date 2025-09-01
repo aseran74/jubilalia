@@ -1,5 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, MapPin, Euro, Users, Bed, Bath } from 'lucide-react';
+import {
+  MapPin,
+  Bed,
+  Bath,
+  Square,
+  Users,
+  Calendar,
+  Euro,
+  Home,
+  Car,
+  Wifi,
+  Dog,
+  Building,
+  Search,
+  Filter,
+  Plus,
+  Star,
+  Heart,
+  Eye,
+  Share2,
+  Flag,
+  Clock,
+  User,
+  XCircle
+} from 'lucide-react';
 import RoomCard from './RoomCard';
 
 interface Room {

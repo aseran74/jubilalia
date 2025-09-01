@@ -3,18 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { 
-  Home, 
-  Users, 
-  Square, 
-  Bath, 
-  Bed, 
-  MapPin, 
-  Euro,
-  Calendar,
   AlertCircle,
   CheckCircle,
-  Upload,
-  X
+  X,
+  Home
 } from 'lucide-react';
 import ImageUpload from '../dashboard/ImageUpload';
 import { SUPABASE_BUCKETS } from '../../config/supabase';
@@ -37,7 +29,7 @@ interface PropertyRentalFormData {
 }
 
 const PropertyRentalForm: React.FC = () => {
-  const { profile, ensureProfile } = useAuth();
+  const { ensureProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string>('');

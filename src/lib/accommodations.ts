@@ -1,12 +1,28 @@
 import { supabase } from './supabase';
 import type { 
-  Accommodation, 
   AccommodationRequest, 
   AccommodationReview, 
   AccommodationFavorite,
-  AccommodationFilters,
   AccommodationSearchParams
 } from '../types/accommodations';
+
+export interface Accommodation {
+  id: string;
+  title: string;
+  description?: string;
+  property_type: string;
+  price_per_month: number;
+  total_rooms: number;
+  available_rooms: number;
+  city: string;
+  address: string;
+  postal_code: string;
+  amenities: string[];
+  images: string[];
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
 // =====================================================
 // FUNCIONES PARA ALOJAMIENTOS
@@ -14,18 +30,22 @@ import type {
 
 // Obtener todos los alojamientos activos
 export const getAccommodations = async (): Promise<Accommodation[]> => {
-  const { data, error } = await supabase
-    .from('accommodations')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('accommodations')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  if (error) {
+    if (error) {
+      console.error('Error fetching accommodations:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
     console.error('Error fetching accommodations:', error);
     return [];
   }
-
-  return data || [];
 };
 
 // Obtener alojamiento por ID

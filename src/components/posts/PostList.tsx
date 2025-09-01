@@ -6,14 +6,11 @@ import {
   Filter, 
   Calendar, 
   User, 
-  Tag, 
   Eye, 
   MessageCircle, 
   Heart, 
   Plus,
-  Clock,
   Star,
-  MoreHorizontal,
   Loader2
 } from 'lucide-react';
 
@@ -145,7 +142,7 @@ const PostList: React.FC = () => {
               .from('post_likes')
               .select('*')
               .eq('post_id', post.id)
-              .eq('profile_id', user.uid)
+              .eq('profile_id', user.id)
               .single();
 
             isLiked = !!likeData;
@@ -181,14 +178,14 @@ const PostList: React.FC = () => {
           .from('post_likes')
           .delete()
           .eq('post_id', postId)
-          .eq('profile_id', user.uid);
+          .eq('profile_id', user.id);
       } else {
         // Agregar like
         await supabase
           .from('post_likes')
           .insert({
             post_id: postId,
-            profile_id: user.uid
+            profile_id: user.id
           });
       }
 

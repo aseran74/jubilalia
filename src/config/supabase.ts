@@ -10,6 +10,9 @@ export const SUPABASE_BUCKETS = {
   // Imágenes de actividades
   ACTIVITY_PHOTOS: 'activity-photos',
   
+  // Imágenes de posts
+  POST_IMAGES: 'post-images',
+  
   // Imágenes de perfiles de usuario
   USER_AVATARS: 'user-avatars',
   
@@ -29,7 +32,7 @@ export const isValidBucket = (bucketName: string): bucketName is BucketName => {
 };
 
 // Función helper para obtener la URL pública de una imagen
-export const getImageUrl = (bucketName: BucketName, filePath: string): string => {
+export const getImageUrl = (_bucketName: BucketName, filePath: string): string => {
   // Esta función se puede usar para generar URLs consistentes
   // Por ahora, retorna el filePath ya que Supabase maneja las URLs automáticamente
   return filePath;
@@ -48,6 +51,11 @@ export const BUCKET_CONFIG = {
     maxFiles: 20
   },
   [SUPABASE_BUCKETS.ACTIVITY_PHOTOS]: {
+    maxFileSize: 5 * 1024 * 1024, // 5MB
+    allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    maxFiles: 10
+  },
+  [SUPABASE_BUCKETS.POST_IMAGES]: {
     maxFileSize: 5 * 1024 * 1024, // 5MB
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxFiles: 10

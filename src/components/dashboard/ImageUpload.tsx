@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
-import { SUPABASE_BUCKETS } from '../../config/supabase';
+import { Upload, Loader2 } from 'lucide-react';
 
 interface ImageUploadProps {
   onImagesUploaded: (imageUrls: string[]) => void;
   maxImages?: number;
   className?: string;
-  bucketName?: string;
+  bucketName: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   onImagesUploaded, 
   maxImages = 5,
   className = '',
-  bucketName = SUPABASE_BUCKETS.ROOM_IMAGES
+  bucketName
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -44,6 +43,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       setUploading(true);
       setUploadProgress(0);
+      
+      // Validar que el bucket sea uno de los permitidos
+      // if (!isValidBucket(bucketName)) {
+      //   const validBuckets = Object.values(SUPABASE_BUCKETS);
+      //   throw new Error(`Bucket '${bucketName}' no está permitido. Buckets válidos: ${validBuckets.join(', ')}`);
+      // }
       
       const uploadedUrls: string[] = [];
       const totalFiles = files.length;

@@ -10,10 +10,7 @@ import {
   GridIcon,
   HorizontaLDots,
   ListIcon,
-  PageIcon,
-  PieChartIcon,
   PlugInIcon,
-  TableIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -65,22 +62,6 @@ const navItems: NavItem[] = [
 ];
 
 const othersItems: NavItem[] = [
-  {
-    icon: <PieChartIcon />,
-    name: "Estadísticas",
-    subItems: [
-      { name: "Gráficos", path: "/line-chart", pro: false },
-      { name: "Reportes", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Herramientas",
-    subItems: [
-      { name: "Configuración", path: "/settings", pro: false },
-      { name: "Ayuda", path: "/help", pro: false },
-    ],
-  },
   {
     icon: <PlugInIcon />,
     name: "Jubilalia",

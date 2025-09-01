@@ -94,12 +94,7 @@ const PostForm: React.FC = () => {
     }));
   };
 
-  const handleImageUpload = (imageUrl: string) => {
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, imageUrl]
-    }));
-  };
+
 
   const removeImage = (index: number) => {
     setFormData(prev => ({
@@ -121,6 +116,12 @@ const PostForm: React.FC = () => {
       return;
     }
 
+    // Verificar que el usuario tenga un perfil
+    if (!profile) {
+      setError('Error: No se pudo obtener tu perfil. Por favor, recarga la página e inténtalo de nuevo.');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -129,10 +130,10 @@ const PostForm: React.FC = () => {
         title: formData.title.trim(),
         content: formData.content.trim(),
         category_id: formData.category_id,
-        author_id: user.id,
+        profile_id: profile.id,
         images: formData.images,
         tags: formData.tags,
-        status: 'published'
+        is_published: true
       };
 
       let result;
@@ -290,7 +291,14 @@ const PostForm: React.FC = () => {
                 Imágenes
               </label>
               <ImageUpload
-                onImageUpload={handleImageUpload}
+                onImagesUploaded={(imageUrls) => {
+                  // Agregar todas las imágenes subidas
+                  setFormData(prev => ({
+                    ...prev,
+                    images: [...prev.images, ...imageUrls]
+                  }));
+                }}
+                maxImages={10}
                 bucketName={SUPABASE_BUCKETS.POST_IMAGES}
                 className="mb-4"
               />

@@ -3,24 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Users, 
-  Euro,
-  Tag,
-  AlertCircle,
-  CheckCircle,
-  Upload,
-  X,
   Activity,
-  Phone,
-  Mail,
-  Globe,
-  Star,
   Plus,
-  Trash2,
-  Image as ImageIcon
+  X,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import ImageUpload from '../dashboard/ImageUpload';
 import { SUPABASE_BUCKETS } from '../../config/supabase';
@@ -49,7 +36,7 @@ interface ActivityFormData {
 }
 
 const ActivityForm: React.FC = () => {
-  const { profile, ensureProfile } = useAuth();
+  const { ensureProfile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string>('');

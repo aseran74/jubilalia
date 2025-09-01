@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { MessageCircle, User, Clock, MapPin, Bed } from 'lucide-react';
+import { MessageCircle, Clock, MapPin, Bed } from 'lucide-react';
 import ChatModal from './ChatModal';
 
 interface Conversation {
@@ -50,7 +50,7 @@ const ConversationsList: React.FC = () => {
       const { data: profile } = await supabase
         .from('profiles')
         .select('id')
-        .eq('firebase_uid', user.uid)
+        .eq('id', user.id)
         .single();
 
       if (!profile) return;
@@ -121,7 +121,7 @@ const ConversationsList: React.FC = () => {
         }) || []
       );
 
-      setConversations(conversationsWithDetails);
+      setConversations(conversationsWithDetails as unknown as Conversation[]);
     } catch (error) {
       console.error('Error:', error);
     } finally {
