@@ -186,7 +186,7 @@ const PropertyListingForm: React.FC = () => {
       const result = await createPropertyListing(formData);
       
       if (result.success) {
-        navigate('/properties');
+        navigate('/dashboard/properties/sale');
       } else {
         setErrors({ general: 'Error al crear el listado' });
       }

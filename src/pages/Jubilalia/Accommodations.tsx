@@ -1,31 +1,71 @@
-import React, { useState } from 'react';
-import { 
-  Home, 
-  Search, 
-  Filter, 
-  MapPin, 
-  Heart,
-  Plus,
-  Building,
+import React, { useState, useEffect } from 'react';
+import {
+  MapPin,
   Users,
-  Calendar,
-  Star,
-  X
+  Home,
+  Building,
+  Plus,
+  Star
 } from 'lucide-react';
 import AccommodationList from '../../components/accommodations/AccommodationList';
+import { getAccommodations } from '../../lib/accommodations';
 import type { Accommodation } from '../../types/accommodations';
 
-const JubilaliaAccommodations: React.FC = () => {
-  const [selectedAccommodation, setSelectedAccommodation] = useState<Accommodation | null>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+const Accommodations: React.FC = () => {
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAccommodationSelect = (accommodation: Accommodation) => {
-    setSelectedAccommodation(accommodation);
+  useEffect(() => {
+    const fetchAccommodations = async () => {
+      try {
+        setLoading(true);
+        const data = await getAccommodations();
+        setAccommodations(data as unknown as Accommodation[]);
+      } catch (err) {
+        setError('Failed to fetch accommodations');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAccommodations();
+    const interval = setInterval(fetchAccommodations, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAccommodationSelect = () => {
+    // Handle accommodation selection
   };
 
   const handleCreateNew = () => {
-    setShowCreateForm(true);
+    // Handle create new accommodation
   };
+
+  if (loading && accommodations.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-orange-50 flex items-center justify-center">
+        <p className="text-2xl text-gray-600">Cargando alojamientos...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-orange-50 flex items-center justify-center">
+        <p className="text-2xl text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (accommodations.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-orange-50 flex items-center justify-center">
+        <p className="text-2xl text-gray-600">No hay alojamientos disponibles.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-orange-50">
@@ -144,104 +184,18 @@ const JubilaliaAccommodations: React.FC = () => {
             </div>
           </div>
 
-          {/* Lista de alojamientos */}
-          <AccommodationList 
-            onAccommodationSelect={handleAccommodationSelect}
-            showFilters={true}
-          />
+                      {/* Lista de alojamientos */}
+            <AccommodationList 
+              onAccommodationSelect={handleAccommodationSelect}
+              showFilters={true}
+            />
         </div>
       </section>
 
       {/* Modal de detalles del alojamiento */}
-      {selectedAccommodation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {selectedAccommodation.title}
-                </h2>
-                <button
-                  onClick={() => setSelectedAccommodation(null)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              
-              {/* Contenido del modal */}
-              <div className="space-y-6">
-                {/* Imágenes */}
-                {selectedAccommodation.images && selectedAccommodation.images.length > 0 && (
-                  <div className="grid grid-cols-2 gap-4">
-                    {selectedAccommodation.images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`${selectedAccommodation.title} - Imagen ${index + 1}`}
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
-                    ))}
-                  </div>
-                )}
-                
-                {/* Información detallada */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Detalles</h3>
-                    <div className="space-y-2 text-gray-600">
-                      <p><strong>Ubicación:</strong> {selectedAccommodation.city}</p>
-                      <p><strong>Dirección:</strong> {selectedAccommodation.address}</p>
-                      <p><strong>Precio:</strong> {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(selectedAccommodation.price_per_month)}/mes</p>
-                      <p><strong>Habitaciones:</strong> {selectedAccommodation.available_rooms} de {selectedAccommodation.total_rooms} disponibles</p>
-                      <p><strong>Baños:</strong> {selectedAccommodation.total_bathrooms}</p>
-                      {selectedAccommodation.square_meters && (
-                        <p><strong>Superficie:</strong> {selectedAccommodation.square_meters}m²</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Comodidades</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedAccommodation.amenities.map((amenity, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full"
-                        >
-                          {amenity}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Descripción */}
-                {selectedAccommodation.description && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Descripción</h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {selectedAccommodation.description}
-                    </p>
-                  </div>
-                )}
-                
-                {/* Botones de acción */}
-                <div className="flex space-x-4 pt-6 border-t border-gray-200">
-                  <button className="flex-1 bg-green-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-600 transition-colors">
-                    Solicitar Información
-                  </button>
-                  <button className="px-6 py-3 border-2 border-green-500 text-green-600 rounded-lg font-semibold hover:bg-green-500 hover:text-white transition-colors">
-                    <Heart className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* This section was removed as per the new_code, as selectedAccommodation state was removed */}
     </div>
   );
 };
 
-export default JubilaliaAccommodations;
+export default Accommodations;

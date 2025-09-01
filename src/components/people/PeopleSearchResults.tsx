@@ -5,6 +5,7 @@ interface PeopleSearchResultsProps {
   results: LocationSearchResult[];
   loading: boolean;
   onPersonClick: (person: LocationSearchResult) => void;
+  onPersonSelect: (person: LocationSearchResult) => void;
 }
 
 const PeopleSearchResults: React.FC<PeopleSearchResultsProps> = ({

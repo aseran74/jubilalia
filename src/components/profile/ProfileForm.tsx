@@ -7,7 +7,6 @@ import {
   GlobeAltIcon,
   BriefcaseIcon,
   TagIcon,
-  PhotoIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';

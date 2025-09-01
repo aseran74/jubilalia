@@ -1,20 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Users, 
-  Building, 
-  MessageCircle, 
-  Calendar, 
+import {
   Home,
-  Search,
+  Calendar,
+  Users,
   Heart,
-  MapPin,
-  Star,
+  MessageCircle,
+  Bell,
   Plus,
-  ArrowRight,
-  User,
-  Settings,
-  Bell
+  ArrowRight
 } from 'lucide-react';
 import PageMeta from "../../components/common/PageMeta";
 
@@ -44,7 +38,7 @@ export default function JubilaliaDashboardHome() {
           {[
             { id: 'overview', label: 'Vista General', icon: Home },
             { id: 'roommates', label: 'Compartir Habitación', icon: Users },
-            { id: 'accommodations', label: 'Alojamientos', icon: Building },
+            { id: 'accommodations', label: 'Alojamientos', icon: Home },
             { id: 'social', label: 'Red Social', icon: MessageCircle },
             { id: 'activities', label: 'Actividades', icon: Calendar }
           ].map((tab) => (
@@ -83,7 +77,7 @@ export default function JubilaliaDashboardHome() {
             <div className="col-span-12 lg:col-span-3">
               <div className="bg-white rounded-xl shadow-md p-6 text-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Building className="w-6 h-6 text-blue-600" />
+                  <Home className="w-6 h-6 text-blue-600" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">25+</h3>
                 <p className="text-gray-600">Alojamientos</p>
@@ -119,7 +113,7 @@ export default function JubilaliaDashboardHome() {
                     to="/roommates"
                     className="group p-6 bg-gradient-to-br from-green-500 to-blue-500 text-white rounded-xl text-center hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                   >
-                    <Search className="w-8 h-8 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                    <Home className="w-8 h-8 mx-auto mb-3 group-hover:scale-110 transition-transform" />
                     <h4 className="font-semibold text-lg">Buscar Compañeros</h4>
                     <p className="text-sm opacity-90 mt-2">Encuentra personas compatibles</p>
                   </Link>
@@ -128,7 +122,7 @@ export default function JubilaliaDashboardHome() {
                     to="/accommodations"
                     className="group p-6 bg-gradient-to-br from-blue-500 to-purple-500 text-white rounded-xl text-center hover:from-blue-600 hover:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                   >
-                    <Building className="w-8 h-8 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                    <Home className="w-8 h-8 mx-auto mb-3 group-hover:scale-110 transition-transform" />
                     <h4 className="font-semibold text-lg">Ver Alojamientos</h4>
                     <p className="text-sm opacity-90 mt-2">Descubre viviendas perfectas</p>
                   </Link>
@@ -172,7 +166,7 @@ export default function JubilaliaDashboardHome() {
                   
                   <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Building className="w-5 h-5 text-blue-600" />
+                      <Home className="w-5 h-5 text-blue-600" />
                     </div>
                     <div className="flex-1">
                       <p className="text-gray-800 font-medium">Nuevo alojamiento en Barcelona</p>
@@ -234,7 +228,7 @@ export default function JubilaliaDashboardHome() {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <div className="text-center p-6 bg-green-50 rounded-xl">
-                <Search className="w-12 h-12 text-green-600 mx-auto mb-3" />
+                <Home className="w-12 h-12 text-green-600 mx-auto mb-3" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Buscar Compañeros</h3>
                 <p className="text-gray-600">Filtra por edad, gustos, horarios y más</p>
               </div>
@@ -268,7 +262,7 @@ export default function JubilaliaDashboardHome() {
         {activeTab === 'accommodations' && (
           <div className="bg-white rounded-xl shadow-md p-8">
             <div className="text-center mb-8">
-              <Building className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+              <Home className="w-16 h-16 text-blue-500 mx-auto mb-4" />
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Alojamientos</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Descubre alojamientos perfectos para compartir con otros jubilados. 
@@ -278,13 +272,13 @@ export default function JubilaliaDashboardHome() {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               <div className="text-center p-6 bg-blue-50 rounded-xl">
-                <MapPin className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+                <Home className="w-12 h-12 text-blue-600 mx-auto mb-3" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Ubicaciones Premium</h3>
                 <p className="text-gray-600">Zonas bien comunicadas y seguras</p>
               </div>
               
               <div className="text-center p-6 bg-green-50 rounded-xl">
-                <Star className="w-12 h-12 text-green-600 mx-auto mb-3" />
+                <Heart className="w-12 h-12 text-green-600 mx-auto mb-3" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">Alojamientos Verificados</h3>
                 <p className="text-gray-600">Propiedades inspeccionadas y seguras</p>
               </div>

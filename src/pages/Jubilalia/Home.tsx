@@ -1,14 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Home, 
-  Users, 
-  Building, 
-  MessageCircle, 
-  Calendar, 
+import {
+  Users,
   Heart,
-  ArrowRight,
-  Star
+  MessageCircle,
+  Building,
+  Star,
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ProfileCard from '../../components/landing/ProfileCard';

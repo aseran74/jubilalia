@@ -1,13 +1,12 @@
 import React from 'react';
 import { 
-  Users, 
-  Search, 
-  MessageCircle, 
   Heart, 
-  MapPin, 
-  Calendar,
+  Users, 
+  MessageCircle, 
+  Search,
   Filter,
-  Star
+  Star,
+  MapPin
 } from 'lucide-react';
 
 const JubilaliaRoommates: React.FC = () => {

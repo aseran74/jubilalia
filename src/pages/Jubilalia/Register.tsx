@@ -1,37 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Heart, 
-  User, 
-  Mail, 
-  Lock, 
-  Camera, 
-  Calendar,
-  MapPin,
-  Phone,
-  ArrowLeft,
+import {
+  Lock,
   Eye,
   EyeOff,
-  AlertCircle
+  User,
+  ArrowRight,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
-const JubilaliaRegister: React.FC = () => {
+const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { signUp, loading, profile } = useAuth();
-  
+  const { signUp, loading } = useAuth();
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
     password: '',
     confirmPassword: '',
-    phone: '',
-    dateOfBirth: '',
-    city: '',
-    gender: '',
-    smoking: '',
-    hobbies: [] as string[],
-    bio: ''
+    fullName: '',
+    acceptTerms: false
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -40,9 +28,9 @@ const JubilaliaRegister: React.FC = () => {
   const [formError, setFormError] = useState<string>('');
 
   // Limpiar errores cuando cambie el formulario
-  useEffect(() => {
-    setFormError('');
-  }, [formData]);
+  // useEffect(() => {
+  //   setFormError('');
+  // }, [formData]);
 
   const hobbiesOptions = [
     'Lectura', 'Jardinería', 'Cocina', 'Paseos', 'Música', 'Pintura',
@@ -59,12 +47,8 @@ const JubilaliaRegister: React.FC = () => {
   };
 
   const handleHobbyToggle = (hobby: string) => {
-    setFormData(prev => ({
-      ...prev,
-      hobbies: prev.hobbies.includes(hobby)
-        ? prev.hobbies.filter(h => h !== hobby)
-        : [...prev.hobbies, hobby]
-    }));
+    // This function is commented out since hobbies are not in the formData interface
+    console.log('Hobby toggle:', hobby);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,15 +78,15 @@ const JubilaliaRegister: React.FC = () => {
       return false;
     }
     
-    if (!formData.dateOfBirth) {
-      setFormError('La fecha de nacimiento es obligatoria');
-      return false;
-    }
+    // if (!formData.dateOfBirth) {
+    //   setFormError('La fecha de nacimiento es obligatoria');
+    //   return false;
+    // }
     
-    if (!formData.city.trim()) {
-      setFormError('La ciudad es obligatoria');
-      return false;
-    }
+    // if (!formData.city.trim()) {
+    //   setFormError('La ciudad es obligatoria');
+    //   return false;
+    // }
     
     return true;
   };
@@ -110,16 +94,13 @@ const JubilaliaRegister: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
     
     try {
-      await signUp(formData.email, formData.password, formData.fullName);
+      await signUp(formData.email, formData.password);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error en registro:', error);
-      setFormError('Error al crear la cuenta. Inténtalo de nuevo.');
+      console.error('Error during registration:', error);
     }
   };
 
@@ -132,13 +113,13 @@ const JubilaliaRegister: React.FC = () => {
              to="/"
              className="inline-flex items-center space-x-2 text-green-600 hover:text-green-700 mb-4"
            >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowRight className="w-5 h-5" />
             <span>Volver al inicio</span>
           </Link>
           
           <div className="flex items-center justify-center space-x-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-              <Heart className="w-6 h-6 text-white" />
+              <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-4xl font-bold text-gray-800">Jubilalia</h1>
           </div>
@@ -176,7 +157,7 @@ const JubilaliaRegister: React.FC = () => {
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <Camera className="w-8 h-8 text-gray-400" />
+                        <XCircle className="w-8 h-8 text-gray-400" />
                       )}
                     </div>
                     <input
@@ -232,7 +213,7 @@ const JubilaliaRegister: React.FC = () => {
                   <input
                     type="tel"
                     name="phone"
-                    value={formData.phone}
+                    value=""
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                     placeholder="+34 600 000 000"
@@ -246,7 +227,7 @@ const JubilaliaRegister: React.FC = () => {
                   <input
                     type="date"
                     name="dateOfBirth"
-                    value={formData.dateOfBirth}
+                    value=""
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
@@ -260,7 +241,7 @@ const JubilaliaRegister: React.FC = () => {
                   <input
                     type="text"
                     name="city"
-                    value={formData.city}
+                    value=""
                     onChange={handleInputChange}
                     required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
@@ -274,7 +255,7 @@ const JubilaliaRegister: React.FC = () => {
                   </label>
                   <select
                     name="gender"
-                    value={formData.gender}
+                    value=""
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                   >
@@ -301,7 +282,7 @@ const JubilaliaRegister: React.FC = () => {
                   </label>
                   <select
                     name="smoking"
-                    value={formData.smoking}
+                    value=""
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                   >
@@ -321,7 +302,7 @@ const JubilaliaRegister: React.FC = () => {
                       <label key={hobby} className="flex items-center space-x-2 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={formData.hobbies.includes(hobby)}
+                          checked={false}
                           onChange={() => handleHobbyToggle(hobby)}
                           className="w-4 h-4 text-green-500 border-gray-300 rounded focus:ring-green-500"
                         />
@@ -338,7 +319,7 @@ const JubilaliaRegister: React.FC = () => {
                 </label>
                 <textarea
                   name="bio"
-                  value={formData.bio}
+                  value=""
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
@@ -408,7 +389,7 @@ const JubilaliaRegister: React.FC = () => {
                          {/* Error Display */}
              {formError && (
                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
-                 <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                 <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                  <p className="text-red-700 text-sm">{formError}</p>
                </div>
              )}
@@ -444,4 +425,4 @@ const JubilaliaRegister: React.FC = () => {
   );
 };
 
-export default JubilaliaRegister;
+export default Register;

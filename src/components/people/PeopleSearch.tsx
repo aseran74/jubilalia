@@ -106,6 +106,11 @@ const PeopleSearch: React.FC = () => {
     console.log('Persona seleccionada:', person);
   };
 
+  const handlePersonClick = (person: LocationSearchResult) => {
+    // Aquí puedes navegar al perfil de la persona o abrir un modal
+    console.log('Persona clicada:', person);
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       <div className="text-center">
@@ -189,6 +194,8 @@ const PeopleSearch: React.FC = () => {
           {viewMode === 'list' ? (
             <PeopleSearchResults
               results={filteredResults}
+              loading={loading}
+              onPersonClick={handlePersonClick}
               onPersonSelect={handlePersonSelect}
             />
           ) : (

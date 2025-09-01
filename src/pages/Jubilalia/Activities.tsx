@@ -4,13 +4,12 @@ import {
   Plus, 
   Users, 
   MapPin, 
-  Clock, 
+  Clock,
   Heart,
   Bell,
   Search,
   Filter,
-  Star,
-  ArrowRight
+  Star
 } from 'lucide-react';
 
 const JubilaliaActivities: React.FC = () => {

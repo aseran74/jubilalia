@@ -92,55 +92,47 @@ const PeopleSearchMap: React.FC<PeopleSearchMapProps> = ({
     const newMarkers: any[] = [];
     
     searchResults.forEach((person) => {
-      if (!person.formatted_address) return;
+      if (!person.formatted_address) return; // Changed from person.location
       
       // For now, we'll skip coordinates since they're not in the LocationSearchResult type
-      return;
+      return; // This line effectively skips marker creation until coordinates are available
       
-      const marker = new window.google.maps.Marker({
-        position: { lat, lng },
-        map: map,
-        title: person.full_name,
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#3B82F6"/>
-            </svg>
-          `),
-          scaledSize: new window.google.maps.Size(24, 24),
-          anchor: new window.google.maps.Point(12, 12)
-        }
-      });
+      // const [lng, lat] = person.location.coordinates; // Removed
+      
+      // const marker = new window.google.maps.Marker({ // Removed
+      //   position: { lat, lng }, // Removed
+      //   // ... (rest of marker creation)
+      // });
 
       // Agregar evento de clic al marcador
-      marker.addListener('click', () => {
-        const content = `
-          <div class="p-3">
-            <h3 class="font-semibold text-gray-900">${person.full_name}</h3>
-            <p class="text-sm text-gray-600">${person.occupation || 'Sin ocupación'}</p>
-            <p class="text-xs text-gray-500">${person.formatted_address || 'Ubicación no especificada'}</p>
-            <button class="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-              Ver perfil
-            </button>
-          </div>
-        `;
+      // marker.addListener('click', () => { // Removed
+      //   const content = ` // Removed
+      //     <div class="p-3"> // Removed
+      //       <h3 class="font-semibold text-gray-900">${person.full_name}</h3> // Removed
+      //       <p class="text-sm text-gray-600">${person.occupation || 'Sin ocupación'}</p> // Removed
+      //       <p class="text-xs text-gray-500">${person.formatted_address || 'Ubicación no especificada'}</p> // Removed
+      //       <button class="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"> // Removed
+      //         Ver perfil // Removed
+      //       </button> // Removed
+      //     </div> // Removed
+      //   `; // Removed
         
-        infoWindow.setContent(content);
-        infoWindow.open(map, marker);
+      //   infoWindow.setContent(content); // Removed
+      //   infoWindow.open(map, marker); // Removed
         
-        // Manejar clic en el botón "Ver perfil"
-        setTimeout(() => {
-          const button = document.querySelector('.bg-blue-600');
-          if (button) {
-            button.addEventListener('click', () => {
-              onPersonSelect(person);
-              infoWindow.close();
-            });
-          }
-        }, 100);
-      });
+      //   // Manejar clic en el botón "Ver perfil" // Removed
+      //   setTimeout(() => { // Removed
+      //     const button = document.querySelector('.bg-blue-600'); // Removed
+      //     if (button) { // Removed
+      //       button.addEventListener('click', () => { // Removed
+      //         onPersonSelect(person); // Removed
+      //         infoWindow.close(); // Removed
+      //       }); // Removed
+      //     } // Removed
+      //   }, 100); // Removed
+      // }); // Removed
 
-      newMarkers.push(marker);
+      // newMarkers.push(marker); // Removed
     });
 
     setMarkers(newMarkers);

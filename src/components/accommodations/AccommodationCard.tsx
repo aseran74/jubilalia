@@ -4,16 +4,9 @@ import {
   Bed,
   Bath,
   Square,
-  Users,
   Heart,
   Star,
-  Calendar,
-  Euro,
-  Home,
-  Car,
-  Wifi,
-  Dog,
-  Building
+  MessageCircle
 } from 'lucide-react';
 import type { Accommodation } from '../../types/accommodations';
 

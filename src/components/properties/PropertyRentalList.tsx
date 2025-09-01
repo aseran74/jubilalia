@@ -407,7 +407,7 @@ const PropertyRentalList: React.FC = () => {
               {/* Botones de acción */}
               <div className="flex space-x-2">
                 <button 
-                  onClick={() => navigate(`/dashboard/properties/${property.id}`)}
+                  onClick={() => navigate(`/dashboard/properties/rental/${property.id}`)}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center"
                 >
                   <Eye className="w-4 h-4 mr-2" />

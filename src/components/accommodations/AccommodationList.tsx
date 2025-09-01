@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  MapPin,
-  Bed,
-  Bath,
-  Square,
-  Users,
-  Calendar,
-  Euro,
   Home,
-  Car,
-  Wifi,
-  Dog,
-  Building,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -22,28 +11,33 @@ import AccommodationCard from './AccommodationCard';
 interface AccommodationListProps {
   onAccommodationSelect?: (accommodation: Accommodation) => void;
   showFilters?: boolean;
-  maxItems?: number;
+}
+
+interface AccommodationFilters {
+  city?: string;
+  min_price?: number;
+  max_price?: number;
+  property_type?: string[];
+  min_rooms?: number;
+  max_rooms?: number;
 }
 
 const AccommodationList: React.FC<AccommodationListProps> = ({
   onAccommodationSelect,
-  showFilters = true,
-  maxItems
+  showFilters = true
 }) => {
   const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
   const [filteredAccommodations, setFilteredAccommodations] = useState<Accommodation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
+  const [totalPages, setTotalPages] = useState(0);
   
   // Estado de filtros
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<AccommodationFilters>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
-  
-  // Estado de paginación
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage] = useState(6);
 
   // Cargar alojamientos
   useEffect(() => {

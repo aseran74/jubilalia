@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   HeartIcon,
@@ -6,17 +6,11 @@ import {
   BuildingOfficeIcon,
   StarIcon,
   ChatBubbleLeftRightIcon,
-  CalendarIcon,
   UserIcon,
-  WifiIcon,
-  BuildingOfficeIcon as CarIcon,
-  BuildingOfficeIcon as DogIcon,
-  BuildingOfficeIcon as SmokingIcon,
   ArrowLeftIcon,
   PhoneIcon,
   EnvelopeIcon,
   ShareIcon,
-  FlagIcon,
   ClockIcon,
   UserIcon as UserIcon2,
   CheckCircleIcon

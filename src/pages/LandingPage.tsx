@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
-  MagnifyingGlassIcon as Search, 
   UserGroupIcon as Users, 
   BuildingOfficeIcon as Building, 
   ChatBubbleLeftRightIcon as MessageCircle, 
@@ -10,9 +9,6 @@ import {
   Bars3Icon as Menu,
   XMarkIcon as X,
   ArrowRightIcon as ArrowRight,
-  HeartIcon as Heart,
-  ShieldCheckIcon as Shield,
-  StarIcon as Star,
   PhoneIcon as Phone,
   EnvelopeIcon as Mail,
   MapPinIcon as MapPin,
@@ -29,7 +25,7 @@ import FeaturesSection from '../components/landing/FeaturesSection';
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
+  // const [activeSection, setActiveSection] = useState('home');
   const { user } = useAuth();
   const navigate = useNavigate();
 

@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Heart, 
-  Users, 
-  Building, 
-  MessageCircle, 
-  Calendar, 
+import {
   Home,
-  Search,
+  Calendar,
+  Users,
+  Heart,
+  MessageCircle,
   Bell,
-  Settings,
-  LogOut,
+  Search,
+  Building,
   User,
-  MapPin,
-  Star
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 

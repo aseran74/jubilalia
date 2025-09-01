@@ -106,7 +106,7 @@ const PropertyDetail: React.FC = () => {
             {error || 'Propiedad no encontrada'}
           </div>
           <button
-            onClick={() => navigate('/dashboard/properties')}
+            onClick={() => navigate('/dashboard/properties/sale')}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Volver a Propiedades
@@ -140,7 +140,7 @@ const PropertyDetail: React.FC = () => {
         {/* Back Button */}
         <div className="mb-6">
           <button
-            onClick={() => navigate('/dashboard/properties')}
+            onClick={() => navigate('/dashboard/properties/sale')}
             className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeftIcon className="w-5 h-5 mr-2" />

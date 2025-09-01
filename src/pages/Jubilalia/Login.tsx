@@ -7,8 +7,7 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
-  ArrowRight,
-  AlertCircle
+  ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 

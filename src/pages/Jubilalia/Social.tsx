@@ -4,7 +4,6 @@ import {
   Users, 
   Heart, 
   Plus, 
-  Search, 
   Bell,
   Image,
   Send,

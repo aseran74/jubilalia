@@ -223,7 +223,7 @@ const PropertyRentalForm: React.FC = () => {
       setSuccessMessage('¡Propiedad publicada exitosamente! Redirigiendo...');
       
       setTimeout(() => {
-        navigate('/dashboard/properties/search');
+        navigate('/dashboard/properties/rental');
       }, 2000);
 
     } catch (error) {

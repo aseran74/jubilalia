@@ -55,24 +55,23 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       if (place.geometry && place.geometry.location) {
         const location: GooglePlacesLocation = {
           place_id: place.place_id || '',
-          description: place.formatted_address || '',
-          structured_formatting: {
-            main_text: place.name || '',
-            secondary_text: place.formatted_address || ''
-          },
+          formatted_address: place.formatted_address || '',
           geometry: {
             location: {
               lat: place.geometry.location.lat(),
               lng: place.geometry.location.lng()
             }
-          }
+          },
+          address_components: place.address_components || [],
+          name: place.name,
+          types: place.types
         };
         onLocationSelect(location);
       }
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = () => {
     // Handle input changes if needed
   };
 
