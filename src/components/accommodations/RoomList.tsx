@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Search,
-  Filter
-} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Plus } from 'lucide-react';
 import RoomCard from './RoomCard';
 
 interface Room {
@@ -227,6 +225,8 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     );
   }
 
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -238,6 +238,15 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Descubre habitaciones perfectas para compartir vivienda y crear nuevas amistades
           </p>
+          <div className="mt-6">
+            <button
+              onClick={() => navigate('/rooms/create')}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Publicar Habitación
+            </button>
+          </div>
         </div>
 
         {/* Filtros y búsqueda */}
@@ -288,7 +297,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
 
             {/* Botón de filtros avanzados */}
             <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-              <Filter className="w-5 h-5 mr-2" />
+              <Search className="w-5 h-5 mr-2" />
               Filtros
             </button>
           </div>

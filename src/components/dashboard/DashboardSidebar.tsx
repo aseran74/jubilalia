@@ -49,8 +49,8 @@ const DashboardSidebar: React.FC = () => {
       name: 'Habitaciones',
       icon: BuildingOfficeIcon,
       items: [
-        { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Publicar habitación', href: '/dashboard/rooms/publish', icon: PlusIcon },
+        { name: 'Buscar habitaciones', href: '/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Publicar habitación', href: '/rooms/create', icon: PlusIcon },
       ]
     },
     {

@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Search, 
-  Plus, 
   Home, 
   Building, 
   Calendar, 
@@ -14,34 +13,26 @@ import {
 const DashboardHome: React.FC = () => {
   const quickActions = [
     {
-      title: "Publicar Habitación",
-      description: "Alquila tu habitación disponible",
-      icon: <Plus className="w-6 h-6 sm:w-8 sm:h-8" />,
-      href: "/dashboard/rooms/publish",
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50"
-    },
-    {
       title: "Buscar Habitaciones",
       description: "Encuentra tu próxima habitación",
       icon: <Search className="w-6 h-6 sm:w-8 sm:h-8" />,
-      href: "/dashboard/rooms/search",
+      href: "/rooms",
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50"
     },
     {
-      title: "Publicar Propiedad",
-      description: "Alquila o vende tu propiedad",
+      title: "Buscar Propiedades",
+      description: "Encuentra propiedades en alquiler",
       icon: <Building className="w-6 h-6 sm:w-8 sm:h-8" />,
-      href: "/dashboard/rental/publish",
+      href: "/properties/rental",
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50"
     },
     {
-      title: "Organizar Actividad",
-      description: "Crea eventos para la comunidad",
+      title: "Buscar Actividades",
+      description: "Encuentra actividades en tu zona",
       icon: <Calendar className="w-6 h-6 sm:w-8 sm:h-8" />,
-      href: "/dashboard/activities/publish",
+      href: "/activities",
       color: "from-orange-500 to-orange-600",
       bgColor: "bg-orange-50"
     }
@@ -136,21 +127,14 @@ const DashboardHome: React.FC = () => {
           </h3>
           <div className="space-y-2 sm:space-y-3">
             <Link
-              to="/dashboard/rooms/search"
+              to="/rooms"
               className="flex items-center p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Search className="w-4 h-4 mr-2 sm:mr-3 text-gray-400" />
               <span className="text-sm sm:text-base text-gray-700">Buscar habitaciones</span>
             </Link>
             <Link
-              to="/dashboard/rooms/publish"
-              className="flex items-center p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-2 sm:mr-3 text-gray-400" />
-              <span className="text-sm sm:text-base text-gray-700">Publicar habitación</span>
-            </Link>
-            <Link
-              to="/dashboard/rental/search"
+              to="/properties/rental"
               className="flex items-center p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Building className="w-4 h-4 mr-2 sm:mr-3 text-gray-400" />
@@ -167,21 +151,14 @@ const DashboardHome: React.FC = () => {
           </h3>
           <div className="space-y-2 sm:space-y-3">
             <Link
-              to="/dashboard/activities/search"
+              to="/activities"
               className="flex items-center p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Search className="w-4 h-4 mr-2 sm:mr-3 text-gray-400" />
               <span className="text-sm sm:text-base text-gray-700">Buscar actividades</span>
             </Link>
             <Link
-              to="/dashboard/activities/publish"
-              className="flex items-center p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Plus className="w-4 h-4 mr-2 sm:mr-3 text-gray-400" />
-              <span className="text-sm sm:text-base text-gray-700">Organizar actividad</span>
-            </Link>
-            <Link
-              to="/dashboard/social/search"
+              to="/posts"
               className="flex items-center p-2 sm:p-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <MessageSquare className="w-4 h-4 mr-2 sm:mr-3 text-gray-400" />
