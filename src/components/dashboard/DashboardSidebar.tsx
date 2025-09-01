@@ -35,6 +35,14 @@ const DashboardSidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<string[]>(['habitaciones', 'alquiler', 'venta', 'actividades', 'posts', 'usuarios', 'mensajeria']);
 
+  // Debug logs
+  console.log('DashboardSidebar - Estado:', {
+    user: user ? { id: user.id, email: user.email } : null,
+    profile: profile ? { id: profile.id, full_name: profile.full_name } : null,
+    location: location.pathname,
+    openGroups
+  });
+
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -171,6 +179,20 @@ const DashboardSidebar: React.FC = () => {
               </svg>
               {!isCollapsed && 'Ir a Jubilalia'}
             </Link>
+
+            {/* Debug Link */}
+            <button
+              onClick={() => {
+                console.log('Navegando a /rooms desde sidebar...');
+                navigate('/rooms');
+              }}
+              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-purple-600 hover:bg-purple-50 hover:text-purple-700 transition-colors border border-purple-200"
+            >
+              <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {!isCollapsed && 'Test Habitaciones'}
+            </button>
 
             {/* Divider */}
             <div className="border-t border-gray-200 my-4"></div>
