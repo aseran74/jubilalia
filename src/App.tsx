@@ -141,9 +141,10 @@ const DashboardLayout: React.FC = () => {
 
 // Componente de depuración temporal
 const DebugAuth: React.FC = () => {
-  const { user, loading, profile } = useAuth();
+  const { user, loading, profile, refreshProfile } = useAuth();
   const [connectionStatus, setConnectionStatus] = useState<string>('Pendiente');
   const [testingConnection, setTestingConnection] = useState(false);
+  const [creatingProfile, setCreatingProfile] = useState(false);
   
   const testConnection = async () => {
     setTestingConnection(true);
@@ -172,7 +173,7 @@ const DebugAuth: React.FC = () => {
             <p><strong>Conexión Supabase:</strong> {connectionStatus}</p>
           </div>
           
-          <div className="mt-4">
+          <div className="mt-4 space-x-4">
             <button
               onClick={testConnection}
               disabled={testingConnection}
@@ -180,6 +181,25 @@ const DebugAuth: React.FC = () => {
             >
               {testingConnection ? 'Probando...' : 'Probar Conexión Supabase'}
             </button>
+            
+            {user && !profile && (
+              <button
+                onClick={async () => {
+                  setCreatingProfile(true);
+                  try {
+                    await refreshProfile();
+                  } catch (error) {
+                    console.error('Error creating profile:', error);
+                  } finally {
+                    setCreatingProfile(false);
+                  }
+                }}
+                disabled={creatingProfile}
+                className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 disabled:opacity-50"
+              >
+                {creatingProfile ? 'Creando...' : 'Crear Perfil'}
+              </button>
+            )}
           </div>
           
           {user && (

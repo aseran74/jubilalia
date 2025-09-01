@@ -34,6 +34,7 @@ interface RoomListProps {
 }
 
 const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -224,8 +225,6 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
       </div>
     );
   }
-
-  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
