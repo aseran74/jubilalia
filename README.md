@@ -217,6 +217,8 @@ dashboard/
 La aplicación incluye varias herramientas de diagnóstico:
 
 - **`/auth-diagnostic`** - Diagnóstico de autenticación
+- **`/database-diagnostic`** - Diagnóstico de base de datos
+- **`/vercel-auth-fix`** - Solucionador de problemas de autenticación en Vercel
 - **`/test-connection`** - Test de conexión con Supabase
 - **`/test-google-places`** - Test de Google Places API
 - **`/test-database`** - Test de base de datos
