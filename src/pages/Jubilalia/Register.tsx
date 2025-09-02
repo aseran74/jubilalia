@@ -10,6 +10,7 @@ import {
   XCircle
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../lib/supabase';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +20,12 @@ const Register: React.FC = () => {
     password: '',
     confirmPassword: '',
     fullName: '',
+    dateOfBirth: '',
+    city: '',
+    phone: '',
+    gender: '',
+    smoking: '',
+    bio: '',
     acceptTerms: false
   });
 
@@ -97,10 +104,60 @@ const Register: React.FC = () => {
     if (!validateForm()) return;
     
     try {
-      await signUp(formData.email, formData.password);
-      navigate('/dashboard');
-    } catch (error) {
+      setLoading(true);
+      setFormError('');
+      
+      // Registrar usuario con Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            phone: formData.phone,
+            date_of_birth: formData.dateOfBirth || null,
+            city: formData.city || null,
+            gender: formData.gender || null,
+            bio: formData.bio || null
+          }
+        }
+      });
+
+      if (error) {
+        setFormError(error.message);
+        return;
+      }
+
+      if (data.user) {
+        // Crear perfil en la tabla profiles
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            auth_user_id: data.user.id,
+            email: formData.email,
+            full_name: formData.fullName,
+            phone: formData.phone || null,
+            date_of_birth: formData.dateOfBirth || null,
+            city: formData.city || null,
+            gender: formData.gender || null,
+            bio: formData.bio || null,
+            interests: []
+          });
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          setFormError('Error al crear el perfil. Inténtalo de nuevo.');
+          return;
+        }
+
+        // Si todo va bien, redirigir
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
       console.error('Error during registration:', error);
+      setFormError(error.message || 'Error al registrarse. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -213,7 +270,7 @@ const Register: React.FC = () => {
                   <input
                     type="tel"
                     name="phone"
-                    value=""
+                    value={formData.phone}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                     placeholder="+34 600 000 000"
@@ -222,28 +279,26 @@ const Register: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fecha de nacimiento *
+                    Fecha de nacimiento
                   </label>
                   <input
                     type="date"
                     name="dateOfBirth"
-                    value=""
+                    value={formData.dateOfBirth}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ciudad *
+                    Ciudad
                   </label>
                   <input
                     type="text"
                     name="city"
-                    value=""
+                    value={formData.city}
                     onChange={handleInputChange}
-                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                     placeholder="Madrid, Barcelona..."
                   />
@@ -255,7 +310,7 @@ const Register: React.FC = () => {
                   </label>
                   <select
                     name="gender"
-                    value=""
+                    value={formData.gender}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                   >
@@ -282,7 +337,7 @@ const Register: React.FC = () => {
                   </label>
                   <select
                     name="smoking"
-                    value=""
+                    value={formData.smoking}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
                   >
@@ -319,7 +374,7 @@ const Register: React.FC = () => {
                 </label>
                 <textarea
                   name="bio"
-                  value=""
+                  value={formData.bio}
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
