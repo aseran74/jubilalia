@@ -1,3 +1,15 @@
+<img width="1292" height="913" alt="image" src="https://github.com/user-attachments/assets/3e31b161-aee2-4ed9-a606-f9e5c9cd226f" />
+<img width="1613" height="924" alt="image" src="https://github.com/user-attachments/assets/65993589-d617-4d82-9654-06f5689268aa" />
+<img width="2225" height="896" alt="image" src="https://github.com/user-attachments/assets/a7f58aad-99e4-4bee-a023-ce4252b5b0e2" />
+
+
+
+<img width="1292" height="913" alt="image" src="https://github.com/user-attachments/assets/cd72c2f3-3aa5-4699-9071-56cc68e49cb1" />
+
+
+
+
+
 # Jubilalia - Plataforma de Alojamiento y Comunidad
 
 Jubilalia es una plataforma integral de alojamiento y comunidad desarrollada con **React, TypeScript y Tailwind CSS**, basada en el template TailAdmin. La aplicación proporciona una solución completa para la gestión de alojamientos, habitaciones, propiedades y comunidades.
