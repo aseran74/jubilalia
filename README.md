@@ -1,192 +1,136 @@
-# TailAdmin React - Free React Tailwind Admin Dashboard Template
+# Jubilalia - Plataforma de Alojamiento y Comunidad
 
-TailAdmin is a free and open-source admin dashboard template built on **React and Tailwind CSS**, providing developers
-with everything they need to create a comprehensive, data-driven back-end,
-dashboard, or admin panel solution for upcoming web projects.
+Jubilalia es una plataforma integral de alojamiento y comunidad desarrollada con **React, TypeScript y Tailwind CSS**, basada en el template TailAdmin. La aplicación proporciona una solución completa para la gestión de alojamientos, habitaciones, propiedades y comunidades.
 
-With TailAdmin, you get access to all the necessary dashboard UI components, elements, and pages required to build a
-feature-rich and complete dashboard or admin panel. Whether you're building dashboard or admin panel for a complex web
-application or a simple website, TailAdmin is the perfect solution to help you get up and running quickly.
+## 🏠 Características Principales
 
-![TailAdmin React.js Dashboard Preview](./banner.png)
+### Alojamiento y Propiedades
+- **Habitaciones**: Búsqueda y publicación de habitaciones en alquiler
+- **Propiedades en Venta**: Listado y gestión de propiedades para venta
+- **Propiedades en Alquiler**: Sistema completo de alquiler de viviendas
+- **Integración con Google Places**: Búsqueda de ubicaciones con autocompletado
 
-## Overview
+### Comunidad y Social
+- **Grupos**: Creación y gestión de grupos temáticos
+- **Posts y Comentarios**: Sistema de publicaciones dentro de grupos
+- **Mensajería**: Chat integrado entre usuarios
+- **Búsqueda de Personas**: Encuentra personas por ubicación y preferencias
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and
-control panels. It's built on:
+### Tecnologías Utilizadas
+- **Frontend**: React 19, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **APIs**: Google Places API, Google Maps
+- **Autenticación**: Supabase Auth con OAuth (Google, Facebook)
 
-- React 19
-- TypeScript
-- Tailwind CSS
+## 🚀 Instalación
 
-### Quick Links
+### Prerrequisitos
+- Node.js 18.x o superior (recomendado 20.x)
+- Cuenta de Supabase
+- API Key de Google Places
 
-- [✨ Visit Website](https://tailadmin.com)
-- [📄 Documentation](https://tailadmin.com/docs)
-- [⬇️ Download](https://tailadmin.com/download)
-- [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1214477970819985778)
-- [⚡ Get PRO Version](https://tailadmin.com/pricing)
+### Configuración
 
-### Demos
+1. **Clonar el repositorio**:
+   ```bash
+   git clone https://github.com/aseran74/jubilalia.git
+   cd jubilalia/dashboard
+   ```
 
-- [Free Version](https://free-react-demo.tailadmin.com/)
-- [Pro Version](https://react-demo.tailadmin.com)
-
-### Other Versions
-
-- [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-
-## Installation
-
-### Prerequisites
-
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
-
-- Node.js 18.x or later (recommended to use Node.js 20.x or later)
-
-### Cloning the Repository
-
-Clone the repository using the following command:
-
-```bash
-git clone https://github.com/TailAdmin/free-react-tailwind-admin-dashboard.git
-```
-
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
-
-1. Install dependencies:
-
+2. **Instalar dependencias**:
    ```bash
    npm install
-   # or
-   yarn install
    ```
 
-   > Use the `--legacy-peer-deps` flag, if you face issues while installing.
+3. **Configurar variables de entorno**:
+   Crear archivo `.env` en la carpeta `dashboard`:
+   ```env
+   VITE_SUPABASE_URL=tu_url_de_supabase
+   VITE_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
+   VITE_GOOGLE_PLACES_API_KEY=tu_api_key_de_google_places
+   ```
 
-2. Start the development server:
+4. **Iniciar servidor de desarrollo**:
    ```bash
    npm run dev
-   # or
-   yarn dev
    ```
 
-## Components
+## 📁 Estructura del Proyecto
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using React.js and Tailwind CSS. The
-template includes:
+```
+dashboard/
+├── src/
+│   ├── components/          # Componentes reutilizables
+│   │   ├── accommodations/  # Componentes de habitaciones
+│   │   ├── groups/         # Componentes de grupos
+│   │   ├── messaging/      # Componentes de mensajería
+│   │   ├── properties/     # Componentes de propiedades
+│   │   └── people/         # Componentes de búsqueda de personas
+│   ├── pages/              # Páginas principales
+│   ├── hooks/              # Custom hooks
+│   ├── lib/                # Configuración de Supabase
+│   └── types/              # Definiciones de TypeScript
+├── migrations/             # Migraciones de base de datos
+└── public/                 # Archivos estáticos
+```
 
-- Sophisticated and accessible sidebar
-- Data visualization components
-- Prebuilt profile management and 404 page
-- Tables and Charts(Line and Bar)
-- Authentication forms and input elements
-- Alerts, Dropdowns, Modals, Buttons and more
-- Can't forget Dark Mode 🕶️
+## 🗄️ Base de Datos
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+La aplicación utiliza Supabase con las siguientes tablas principales:
+- `profiles` - Perfiles de usuario
+- `rooms` - Habitaciones en alquiler
+- `property_listings` - Propiedades en venta/alquiler
+- `groups` - Grupos de la comunidad
+- `group_posts` - Posts dentro de grupos
+- `conversations` - Conversaciones de mensajería
 
-## Feature Comparison
+## 🔧 Scripts Disponibles
 
-### Free Version
+- `npm run dev` - Servidor de desarrollo
+- `npm run build` - Build de producción
+- `npm run preview` - Preview del build
 
-- 1 Unique Dashboard
-- 30+ dashboard components
-- 50+ UI elements
-- Basic Figma design files
-- Community support
+## 📱 Funcionalidades
 
-### Pro Version
+### Para Usuarios
+- Registro e inicio de sesión
+- Creación y edición de perfil
+- Búsqueda de alojamientos
+- Publicación de habitaciones/propiedades
+- Participación en grupos
+- Sistema de mensajería
 
-- 5 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, Stocks (more coming soon)
-- 400+ dashboard components and UI elements
-- Complete Figma design file
-- Email support
+### Para Administradores
+- Panel de administración completo
+- Gestión de usuarios y contenido
+- Estadísticas y reportes
+- Configuración del sistema
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+## 🚀 Despliegue
 
-## Changelog
+La aplicación está preparada para despliegue en Vercel:
 
-### Version 2.0.2 - [March 25, 2025]
+1. Conectar repositorio a Vercel
+2. Configurar variables de entorno
+3. Desplegar automáticamente desde la rama `main`
 
-- Upgraded to React 19
-- Included overrides for packages to prevent peer dependency errors.
-- Migrated from react-flatpickr to flatpickr package for React 19 support
+## 📄 Licencia
 
-### Version 2.0.1 - [February 27, 2025]
+Este proyecto está basado en TailAdmin React (MIT License) y está disponible bajo la misma licencia.
 
-#### Update Overview
+## 🤝 Contribuciones
 
-- Upgraded to Tailwind CSS v4 for better performance and efficiency.
-- Updated class usage to match the latest syntax and features.
-- Replaced deprecated class and optimized styles.
+Las contribuciones son bienvenidas. Por favor:
+1. Fork el proyecto
+2. Crea una rama para tu feature
+3. Commit tus cambios
+4. Push a la rama
+5. Abre un Pull Request
 
-#### Next Steps
+## 📞 Soporte
 
-- Run npm install or yarn install to update dependencies.
-- Check for any style changes or compatibility issues.
-- Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-- This update keeps the project up to date with the latest Tailwind improvements. 🚀
+Para soporte técnico o preguntas sobre el proyecto, por favor abre un issue en GitHub.
 
-### Version 2.0.0 - [February 2025]
+---
 
-A major update with comprehensive redesign and modern React patterns implementation.
-
-#### Major Improvements
-
-- Complete UI redesign with modern React patterns
-- New features: collapsible sidebar, chat, and calendar
-- Improved performance and accessibility
-- Updated data visualization using ApexCharts
-
-#### Key Features
-
-- Redesigned dashboards (Ecommerce, Analytics, Marketing, CRM)
-- Enhanced navigation with React Router integration
-- Advanced tables with sorting and filtering
-- Calendar with drag-and-drop support
-- New UI components and improved existing ones
-
-#### Breaking Changes
-
-- Updated sidebar component API
-- Migrated charts to ApexCharts
-- Revised authentication system
-
-[Read more](https://tailadmin.com/docs/update-logs/react) on this release.
-
-### Version 1.3.7 - [June 20, 2024]
-
-#### Enhancements
-
-1. Remove Repetition of DefaultLayout in every Pages
-2. Add ClickOutside Component for reduce repeated functionality in Header Message, Notification and User Dropdowns.
-
-### Version 1.3.6 - [Jan 31, 2024]
-
-#### Enhancements
-
-1. Integrate flatpickr in [Date Picker/Form Elements]
-2. Change color after select an option [Select Element/Form Elements].
-3. Make it functional [Multiselect Dropdown/Form Elements].
-4. Make best value editable [Pricing Table One/Pricing Table].
-5. Rearrange Folder structure.
-
-### Version 1.2.0 - [Apr 28, 2023]
-
-- Add Typescript in TailAdmin React.
-
-### Version 1.0.0 - Initial Release - [Mar 13, 2023]
-
-- Initial release of TailAdmin React.
-
-## License
-
-TailAdmin React.js Free Version is released under the MIT License.
-
-## Support
-
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing
-and maintaining this template.
+**Jubilalia** - Conectando personas, creando comunidades 🏠✨
