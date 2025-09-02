@@ -9,6 +9,7 @@ import LandingPage from './pages/LandingPage';
 import SignUpForm from './components/auth/SignUpForm';
 import JubilaliaLogin from './pages/Jubilalia/Login';
 import Register from './pages/Jubilalia/Register';
+import AuthCallback from './pages/AuthCallback';
 
 // Componentes del dashboard
 import DashboardSidebar from './components/dashboard/DashboardSidebar';
@@ -272,6 +273,7 @@ const App: React.FC = () => {
           <Route path="/signup" element={<SignUpForm />} />
           <Route path="/login" element={<JubilaliaLogin />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/debug" element={<DebugAuth />} />
           <Route path="/test-connection" element={<ConnectionTest />} />
           <Route path="/test-google-places" element={<GooglePlacesTest />} />
