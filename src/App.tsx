@@ -6,7 +6,6 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import LandingPage from './pages/LandingPage';
 
 // Componentes de autenticación
-import SignInForm from './components/auth/SignInForm';
 import SignUpForm from './components/auth/SignUpForm';
 import JubilaliaLogin from './pages/Jubilalia/Login';
 import Register from './pages/Jubilalia/Register';
@@ -83,8 +82,8 @@ const DashboardLayout: React.FC = () => {
   }
 
   if (!user) {
-    console.log('DashboardLayout - No hay usuario, redirigiendo a /signin');
-    return <Navigate to="/signin" replace />;
+    console.log('DashboardLayout - No hay usuario, redirigiendo a /login');
+    return <Navigate to="/login" replace />;
   }
 
   return (
@@ -269,7 +268,7 @@ const App: React.FC = () => {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/signin" element={<SignInForm />} />
+          <Route path="/signin" element={<JubilaliaLogin />} />
           <Route path="/signup" element={<SignUpForm />} />
           <Route path="/login" element={<JubilaliaLogin />} />
           <Route path="/register" element={<Register />} />

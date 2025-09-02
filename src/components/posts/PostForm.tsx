@@ -180,7 +180,7 @@ const PostForm: React.FC = () => {
             Debes iniciar sesión para crear o editar posts
           </p>
           <button
-            onClick={() => navigate('/signin')}
+            onClick={() => navigate('/login')}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
           >
             Iniciar sesión

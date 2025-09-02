@@ -21,7 +21,7 @@ import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
 import StatsSection from '../components/landing/StatsSection';
 import FeaturesSection from '../components/landing/FeaturesSection';
-import FeaturedContent from '../components/landing/FeaturedContent';
+
 
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -597,8 +597,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Contenido Destacado */}
-      <FeaturedContent />
+
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">

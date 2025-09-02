@@ -41,7 +41,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-2">
       {/* Imagen */}
       <div className="relative h-48 bg-gray-200">
         {room.images && room.images.length > 0 ? (
@@ -55,9 +55,9 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
             <HomeIcon className="w-12 h-12 text-gray-400" />
           </div>
         )}
-        <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-          Habitación
-        </div>
+                 <div className="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+           Habitación
+         </div>
       </div>
 
       {/* Contenido */}
@@ -97,12 +97,12 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
           <span className="text-xs text-gray-500">
             Publicado {formatDate(room.created_at)}
           </span>
-          <Link
-            to={`/dashboard/rooms/${room.id}`}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-          >
-            Ver detalles
-          </Link>
+                     <Link
+             to={`/dashboard/rooms/${room.id}`}
+             className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg"
+           >
+             Ver detalles
+           </Link>
         </div>
       </div>
     </div>

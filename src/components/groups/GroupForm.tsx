@@ -158,7 +158,7 @@ const GroupForm: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-2">Acceso restringido</h3>
           <p className="text-gray-600 mb-4">Debes iniciar sesión para crear un grupo</p>
           <button
-            onClick={() => navigate('/signin')}
+            onClick={() => navigate('/login')}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
             Iniciar Sesión

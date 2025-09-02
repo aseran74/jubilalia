@@ -13,7 +13,7 @@ interface ActivityCardProps {
     id: string;
     title: string;
     description: string;
-    category: string;
+    category?: string;
     location: string;
     city: string;
     date: string;
@@ -46,6 +46,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
   };
 
   const getCategoryColor = (category: string) => {
+    if (!category) return 'bg-gray-500';
+    
     const colors: { [key: string]: string } = {
       'deportes': 'bg-green-500',
       'cultura': 'bg-purple-500',
@@ -62,7 +64,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-2">
       {/* Imagen */}
       <div className="relative h-48 bg-gray-200">
         {activity.images && activity.images.length > 0 ? (
@@ -76,15 +78,17 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
             <CalendarIcon className="w-16 h-16 text-green-400" />
           </div>
         )}
-        <div className={`absolute top-3 right-3 ${getCategoryColor(activity.category)} text-white px-2 py-1 rounded-full text-xs font-medium capitalize`}>
-          {activity.category}
-        </div>
-        {activity.is_featured && (
-          <div className="absolute top-3 left-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
-            <StarIcon className="w-3 h-3 mr-1" />
-            Destacada
-          </div>
-        )}
+                          {activity.category && (
+           <div className={`absolute top-3 right-3 ${getCategoryColor(activity.category)} text-white px-3 py-1 rounded-full text-xs font-semibold capitalize shadow-lg`}>
+             {activity.category}
+           </div>
+         )}
+         {activity.is_featured && (
+           <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center shadow-lg">
+             <StarIcon className="w-3 h-3 mr-1" />
+             Destacada
+           </div>
+         )}
       </div>
 
       {/* Contenido */}
@@ -144,12 +148,12 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
           <span className="text-xs text-gray-500">
             Publicado {formatDate(activity.created_at)}
           </span>
-          <Link
-            to={`/dashboard/activities/${activity.id}`}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-          >
-            Ver actividad
-          </Link>
+                     <Link
+             to={`/dashboard/activities/${activity.id}`}
+             className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-md hover:shadow-lg"
+           >
+             Ver actividad
+           </Link>
         </div>
       </div>
     </div>

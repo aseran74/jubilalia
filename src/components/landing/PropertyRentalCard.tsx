@@ -44,7 +44,7 @@ const PropertyRentalCard: React.FC<PropertyRentalCardProps> = ({ property }) => 
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-2">
       {/* Imagen */}
       <div className="relative h-48 bg-gray-200">
         {property.images && property.images.length > 0 ? (
@@ -58,15 +58,15 @@ const PropertyRentalCard: React.FC<PropertyRentalCardProps> = ({ property }) => 
             <HomeIcon className="w-12 h-12 text-gray-400" />
           </div>
         )}
-        <div className="absolute top-3 right-3 bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-          Alquiler
-        </div>
-        {property.is_featured && (
-          <div className="absolute top-3 left-3 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
-            <StarIcon className="w-3 h-3 mr-1" />
-            Destacada
-          </div>
-        )}
+                 <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+           Alquiler
+         </div>
+         {property.is_featured && (
+           <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center shadow-lg">
+             <StarIcon className="w-3 h-3 mr-1" />
+             Destacada
+           </div>
+         )}
       </div>
 
       {/* Contenido */}
@@ -112,12 +112,12 @@ const PropertyRentalCard: React.FC<PropertyRentalCardProps> = ({ property }) => 
           <span className="text-xs text-gray-500">
             Publicado {formatDate(property.created_at)}
           </span>
-          <Link
-            to={`/dashboard/properties/rental/${property.id}`}
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
-          >
-            Ver detalles
-          </Link>
+                     <Link
+             to={`/dashboard/properties/rental/${property.id}`}
+             className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-md hover:shadow-lg"
+           >
+             Ver detalles
+           </Link>
         </div>
       </div>
     </div>

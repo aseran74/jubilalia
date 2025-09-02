@@ -10,8 +10,7 @@ import {
   HomeIcon, 
   BuildingOfficeIcon, 
   UserGroupIcon, 
-  CalendarIcon,
-  ArrowRightIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 
 const FeaturedContent: React.FC = () => {
@@ -30,47 +29,47 @@ const FeaturedContent: React.FC = () => {
     try {
       setLoading(true);
 
-      // Fetch featured rooms (limit 3)
-      const { data: roomsData } = await supabase
-        .from('rooms')
-        .select('*')
-        .eq('is_available', true)
-        .order('created_at', { ascending: false })
-        .limit(3);
+             // Fetch featured rooms (limit 1)
+       const { data: roomsData } = await supabase
+         .from('rooms')
+         .select('*')
+         .eq('is_available', true)
+         .order('created_at', { ascending: false })
+         .limit(1);
 
-      // Fetch featured sale properties (limit 3)
-      const { data: saleData } = await supabase
-        .from('property_listings')
-        .select('*')
-        .eq('listing_type', 'property_purchase')
-        .eq('is_available', true)
-        .order('created_at', { ascending: false })
-        .limit(3);
+       // Fetch featured sale properties (limit 1)
+       const { data: saleData } = await supabase
+         .from('property_listings')
+         .select('*')
+         .eq('listing_type', 'property_purchase')
+         .eq('is_available', true)
+         .order('created_at', { ascending: false })
+         .limit(1);
 
-      // Fetch featured rental properties (limit 3)
-      const { data: rentalData } = await supabase
-        .from('property_listings')
-        .select('*')
-        .eq('listing_type', 'property_rental')
-        .eq('is_available', true)
-        .order('created_at', { ascending: false })
-        .limit(3);
+       // Fetch featured rental properties (limit 1)
+       const { data: rentalData } = await supabase
+         .from('property_listings')
+         .select('*')
+         .eq('listing_type', 'property_rental')
+         .eq('is_available', true)
+         .order('created_at', { ascending: false })
+         .limit(1);
 
-      // Fetch featured groups (limit 3)
-      const { data: groupsData } = await supabase
-        .from('groups')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(3);
+       // Fetch featured groups (limit 1)
+       const { data: groupsData } = await supabase
+         .from('groups')
+         .select('*')
+         .eq('is_public', true)
+         .order('created_at', { ascending: false })
+         .limit(1);
 
-      // Fetch featured activities (limit 3)
-      const { data: activitiesData } = await supabase
-        .from('activities')
-        .select('*')
-        .gte('date', new Date().toISOString().split('T')[0])
-        .order('created_at', { ascending: false })
-        .limit(3);
+       // Fetch featured activities (limit 1)
+       const { data: activitiesData } = await supabase
+         .from('activities')
+         .select('*')
+         .gte('date', new Date().toISOString().split('T')[0])
+         .order('created_at', { ascending: false })
+         .limit(1);
 
       setRooms(roomsData || []);
       setSaleProperties(saleData || []);
@@ -99,158 +98,167 @@ const FeaturedContent: React.FC = () => {
   }
 
   return (
-    <div className="py-16 bg-gray-50">
+    <div className="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Habitaciones Destacadas */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center">
-              <HomeIcon className="w-8 h-8 text-green-600 mr-3" />
-              <h2 className="text-3xl font-bold text-gray-900">Habitaciones Destacadas</h2>
+        {/* Título principal */}
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-bold text-gray-900 mb-6">
+            Contenido Destacado
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Descubre las mejores opciones en habitaciones, propiedades, grupos y actividades
+          </p>
+        </div>
+
+        {/* Grid de 5 cards centradas con mejor espaciado */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 max-w-7xl mx-auto">
+          
+          {/* Habitación */}
+          {rooms.length > 0 ? (
+            <div className="flex justify-center">
+              <RoomCard room={rooms[0]} />
             </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 text-center w-full max-w-sm border border-gray-100">
+                <div className="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                  <HomeIcon className="w-10 h-10 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Habitaciones</h3>
+                <p className="text-gray-500 text-sm mb-4">No hay habitaciones disponibles</p>
+                <div className="bg-green-50 rounded-lg p-3">
+                  <span className="text-green-700 text-sm font-medium">Próximamente</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Propiedad en Venta */}
+          {saleProperties.length > 0 ? (
+            <div className="flex justify-center">
+              <PropertySaleCard property={saleProperties[0]} />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 text-center w-full max-w-sm border border-gray-100">
+                <div className="bg-blue-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                  <BuildingOfficeIcon className="w-10 h-10 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Propiedades en Venta</h3>
+                <p className="text-gray-500 text-sm mb-4">No hay propiedades disponibles</p>
+                <div className="bg-blue-50 rounded-lg p-3">
+                  <span className="text-blue-700 text-sm font-medium">Próximamente</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Propiedad en Alquiler */}
+          {rentalProperties.length > 0 ? (
+            <div className="flex justify-center">
+              <PropertyRentalCard property={rentalProperties[0]} />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 text-center w-full max-w-sm border border-gray-100">
+                <div className="bg-purple-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                  <BuildingOfficeIcon className="w-10 h-10 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Propiedades en Alquiler</h3>
+                <p className="text-gray-500 text-sm mb-4">No hay propiedades disponibles</p>
+                <div className="bg-purple-50 rounded-lg p-3">
+                  <span className="text-purple-700 text-sm font-medium">Próximamente</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Grupo */}
+          {groups.length > 0 ? (
+            <div className="flex justify-center">
+              <GroupCard group={groups[0]} />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 text-center w-full max-w-sm border border-gray-100">
+                <div className="bg-indigo-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                  <UserGroupIcon className="w-10 h-10 text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Grupos</h3>
+                <p className="text-gray-500 text-sm mb-4">No hay grupos disponibles</p>
+                <div className="bg-indigo-50 rounded-lg p-3">
+                  <span className="text-indigo-700 text-sm font-medium">Próximamente</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Actividad */}
+          {activities.length > 0 ? (
+            <div className="flex justify-center">
+              <ActivityCard activity={activities[0]} />
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 p-8 text-center w-full max-w-sm border border-gray-100">
+                <div className="bg-emerald-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                  <CalendarIcon className="w-10 h-10 text-emerald-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Actividades</h3>
+                <p className="text-gray-500 text-sm mb-4">No hay actividades disponibles</p>
+                <div className="bg-emerald-50 rounded-lg p-3">
+                  <span className="text-emerald-700 text-sm font-medium">Próximamente</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+
+        {/* Enlaces para ver más */}
+        <div className="text-center mt-16">
+          <h3 className="text-2xl font-bold text-gray-900 mb-8">
+            Explora todas nuestras categorías
+          </h3>
+          <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
             <Link
               to="/dashboard/rooms"
-              className="flex items-center text-green-600 hover:text-green-700 font-medium"
+              className="group flex items-center bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Ver todas
-              <ArrowRightIcon className="w-4 h-4 ml-1" />
+              <HomeIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+              Ver todas las habitaciones
             </Link>
-          </div>
-          
-          {rooms.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rooms.map((room) => (
-                <RoomCard key={room.id} room={room} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <HomeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No hay habitaciones disponibles en este momento</p>
-            </div>
-          )}
-        </section>
-
-        {/* Propiedades en Venta */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center">
-              <BuildingOfficeIcon className="w-8 h-8 text-blue-600 mr-3" />
-              <h2 className="text-3xl font-bold text-gray-900">Propiedades en Venta</h2>
-            </div>
             <Link
               to="/dashboard/properties/sale"
-              className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="group flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Ver todas
-              <ArrowRightIcon className="w-4 h-4 ml-1" />
+              <BuildingOfficeIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+              Ver propiedades en venta
             </Link>
-          </div>
-          
-          {saleProperties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {saleProperties.map((property) => (
-                <PropertySaleCard key={property.id} property={property} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <BuildingOfficeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No hay propiedades en venta disponibles en este momento</p>
-            </div>
-          )}
-        </section>
-
-        {/* Propiedades en Alquiler */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center">
-              <BuildingOfficeIcon className="w-8 h-8 text-purple-600 mr-3" />
-              <h2 className="text-3xl font-bold text-gray-900">Propiedades en Alquiler</h2>
-            </div>
             <Link
               to="/dashboard/properties/rental"
-              className="flex items-center text-purple-600 hover:text-purple-700 font-medium"
+              className="group flex items-center bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Ver todas
-              <ArrowRightIcon className="w-4 h-4 ml-1" />
+              <BuildingOfficeIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+              Ver propiedades en alquiler
             </Link>
-          </div>
-          
-          {rentalProperties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rentalProperties.map((property) => (
-                <PropertyRentalCard key={property.id} property={property} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <BuildingOfficeIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No hay propiedades en alquiler disponibles en este momento</p>
-            </div>
-          )}
-        </section>
-
-        {/* Grupos Destacados */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center">
-              <UserGroupIcon className="w-8 h-8 text-blue-600 mr-3" />
-              <h2 className="text-3xl font-bold text-gray-900">Grupos Destacados</h2>
-            </div>
             <Link
               to="/dashboard/groups"
-              className="flex items-center text-blue-600 hover:text-blue-700 font-medium"
+              className="group flex items-center bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Ver todos
-              <ArrowRightIcon className="w-4 h-4 ml-1" />
+              <UserGroupIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+              Ver todos los grupos
             </Link>
-          </div>
-          
-          {groups.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {groups.map((group) => (
-                <GroupCard key={group.id} group={group} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No hay grupos disponibles en este momento</p>
-            </div>
-          )}
-        </section>
-
-        {/* Actividades Destacadas */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center">
-              <CalendarIcon className="w-8 h-8 text-green-600 mr-3" />
-              <h2 className="text-3xl font-bold text-gray-900">Actividades Destacadas</h2>
-            </div>
             <Link
               to="/dashboard/activities"
-              className="flex items-center text-green-600 hover:text-green-700 font-medium"
+              className="group flex items-center bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Ver todas
-              <ArrowRightIcon className="w-4 h-4 ml-1" />
+              <CalendarIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+              Ver todas las actividades
             </Link>
           </div>
-          
-          {activities.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activities.map((activity) => (
-                <ActivityCard key={activity.id} activity={activity} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <CalendarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No hay actividades disponibles en este momento</p>
-            </div>
-          )}
-        </section>
+        </div>
 
       </div>
     </div>
