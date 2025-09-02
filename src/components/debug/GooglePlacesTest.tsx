@@ -59,7 +59,7 @@ const GooglePlacesTest: React.FC = () => {
         service.getPlacePredictions({
           input: 'Madrid',
           types: ['geocode']
-        }, (predictions, status) => {
+        }, (predictions: any, status: any) => {
           if (status === window.google.maps.places.PlacesServiceStatus.OK) {
             addTestResult(`✅ Test de búsqueda exitoso: ${predictions?.length || 0} resultados`);
           } else {
@@ -231,7 +231,7 @@ const GooglePlacesTest: React.FC = () => {
                 </h2>
                 <div className="text-sm text-red-700 space-y-2">
                   <p><strong>API Key no encontrada:</strong> Verifica VITE_GOOGLE_PLACES_API_KEY en .env</p>
-                  <p><strong>Places API no habilitada:</strong> Ve a Google Cloud Console > APIs & Services > Library</p>
+                                      <p><strong>Places API no habilitada:</strong> Ve a Google Cloud Console → APIs & Services → Library</p>
                   <p><strong>Restricciones de dominio:</strong> Verifica que localhost esté permitido</p>
                   <p><strong>Cuota excedida:</strong> Verifica el uso de la API en Google Cloud Console</p>
                 </div>

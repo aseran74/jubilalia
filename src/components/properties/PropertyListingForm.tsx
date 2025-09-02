@@ -36,8 +36,8 @@ const PropertyListingForm: React.FC = () => {
       bedrooms: undefined,
       bathrooms: undefined,
       total_area: undefined,
-      available_from: null as Date | null,
-      available_until: null as Date | null
+      available_from: undefined,
+      available_until: undefined
     },
             roomRequirements: {
           bed_type: 'single',
@@ -203,8 +203,8 @@ const PropertyListingForm: React.FC = () => {
         ...formData,
         listing: {
           ...formData.listing,
-          available_from: formData.listing.available_from ? formData.listing.available_from.toISOString().split('T')[0] : null,
-          available_until: formData.listing.available_until ? formData.listing.available_until.toISOString().split('T')[0] : null
+          available_from: formData.listing.available_from,
+          available_until: formData.listing.available_until
         }
       };
 
@@ -480,7 +480,7 @@ const PropertyListingForm: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <TailAdminDatePicker
-              selected={formData.listing.available_from}
+              selected={formData.listing.available_from ? new Date(formData.listing.available_from) : null}
               onChange={(date) => handleDateChange('available_from', date)}
               label="Disponible desde"
               placeholder="Seleccionar fecha de inicio"
@@ -490,11 +490,11 @@ const PropertyListingForm: React.FC = () => {
 
           <div>
             <TailAdminDatePicker
-              selected={formData.listing.available_until}
+              selected={formData.listing.available_until ? new Date(formData.listing.available_until) : null}
               onChange={(date) => handleDateChange('available_until', date)}
               label="Disponible hasta"
               placeholder="Seleccionar fecha de fin"
-              minDate={formData.listing.available_from || new Date()}
+              minDate={formData.listing.available_from ? new Date(formData.listing.available_from) : new Date()}
             />
           </div>
         </div>

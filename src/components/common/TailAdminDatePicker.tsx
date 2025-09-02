@@ -27,7 +27,7 @@ const TailAdminDatePicker: React.FC<TailAdminDatePickerProps> = ({
   error
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(selected || new Date());
+
   const [currentYear, setCurrentYear] = useState(selected?.getFullYear() || new Date().getFullYear());
   const [currentMonthIndex, setCurrentMonthIndex] = useState(selected?.getMonth() || new Date().getMonth());
   const pickerRef = useRef<HTMLDivElement>(null);

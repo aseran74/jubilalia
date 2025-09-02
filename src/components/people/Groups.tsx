@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import GroupPosts from '../groups/GroupPosts';
 import { 
   PlusIcon,
   UsersIcon,
-  ChatBubbleLeftRightIcon,
-  HeartIcon,
-  EyeIcon,
-  CalendarIcon,
-  MapPinIcon
+
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 
 interface Group {
@@ -26,89 +24,63 @@ interface Group {
   role?: string;
 }
 
-interface GroupPost {
-  id: string;
-  group_id: string;
-  author_id: string;
-  title: string;
-  content: string;
-  image_urls: string[];
-  likes_count: number;
-  comments_count: number;
-  is_pinned: boolean;
-  created_at: string;
-  author?: {
-    full_name: string;
-    avatar_url: string;
-  };
-  is_liked?: boolean;
-}
-
 const Groups: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [posts, setPosts] = useState<GroupPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateGroup, setShowCreateGroup] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useState(false);
-  const [newPost, setNewPost] = useState({ title: '', content: '', image_urls: [] as string[] });
+  const [showGroupPosts, setShowGroupPosts] = useState(false);
 
   // Cargar grupos
   const fetchGroups = async () => {
     try {
       setLoading(true);
       
-      // Obtener grupos públicos y grupos de los que es miembro
-      const { data: groupsData, error } = await supabase
+      // Obtener grupos públicos
+      const { data: publicGroups, error: publicError } = await supabase
+        .from('groups')
+        .select('*')
+        .eq('is_public', true);
+
+      if (publicError) throw publicError;
+
+      // Obtener grupos de los que es miembro
+      const { data: memberGroups, error: memberError } = await supabase
         .from('groups')
         .select(`
           *,
           group_members!inner(profile_id, role)
         `)
-        .or('is_public.eq.true,group_members.profile_id.eq.' + (profile?.id || ''))
+        .eq('group_members.profile_id', profile?.id || '');
 
-      if (error) throw error;
+      if (memberError) throw memberError;
+
+      // Combinar los grupos y eliminar duplicados
+      const allGroups = [...(publicGroups || [])];
+      (memberGroups || []).forEach(group => {
+        if (!allGroups.find(g => g.id === group.id)) {
+          allGroups.push(group);
+        }
+      });
+
+      const groupsData = allGroups;
 
       // Procesar los datos para marcar si el usuario es miembro
-      const processedGroups = groupsData.map(group => ({
-        ...group,
-        is_member: group.group_members?.some((member: any) => member.profile_id === profile?.id),
-        role: group.group_members?.find((member: any) => member.profile_id === profile?.id)?.role
-      }));
+      const processedGroups = groupsData.map(group => {
+        const memberData = memberGroups.find(mg => mg.id === group.id);
+        return {
+          ...group,
+          is_member: memberData ? true : false,
+          role: memberData?.group_members?.[0]?.role || null
+        };
+      });
 
       setGroups(processedGroups);
     } catch (error) {
       console.error('Error fetching groups:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Cargar posts de un grupo
-  const fetchGroupPosts = async (groupId: string) => {
-    try {
-      const { data: postsData, error } = await supabase
-        .from('group_posts')
-        .select(`
-          *,
-          profiles!author_id(full_name, avatar_url)
-        `)
-        .eq('group_id', groupId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      // Procesar posts para incluir información del autor
-      const processedPosts = postsData.map(post => ({
-        ...post,
-        author: post.profiles
-      }));
-
-      setPosts(processedPosts);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
     }
   };
 
@@ -130,13 +102,25 @@ const Groups: React.FC = () => {
       // Actualizar el contador de miembros
       await supabase
         .from('groups')
-        .update({ current_members: groups.find(g => g.id === groupId)?.current_members + 1 })
+        .update({ current_members: (groups.find(g => g.id === groupId)?.current_members || 0) + 1 })
         .eq('id', groupId);
 
       fetchGroups();
     } catch (error) {
       console.error('Error joining group:', error);
     }
+  };
+
+  // Ver posts de un grupo
+  const viewGroupPosts = (group: Group) => {
+    setSelectedGroup(group);
+    setShowGroupPosts(true);
+  };
+
+  // Volver a la lista de grupos
+  const backToGroups = () => {
+    setShowGroupPosts(false);
+    setSelectedGroup(null);
   };
 
   // Abandonar un grupo
@@ -155,67 +139,15 @@ const Groups: React.FC = () => {
       // Actualizar el contador de miembros
       await supabase
         .from('groups')
-        .update({ current_members: groups.find(g => g.id === groupId)?.current_members - 1 })
+        .update({ current_members: (groups.find(g => g.id === groupId)?.current_members || 0) - 1 })
         .eq('id', groupId);
 
       fetchGroups();
       if (selectedGroup?.id === groupId) {
         setSelectedGroup(null);
-        setPosts([]);
       }
     } catch (error) {
       console.error('Error leaving group:', error);
-    }
-  };
-
-  // Crear un post
-  const createPost = async () => {
-    if (!selectedGroup || !profile) return;
-
-    try {
-      const { error } = await supabase
-        .from('group_posts')
-        .insert({
-          group_id: selectedGroup.id,
-          author_id: profile.id,
-          title: newPost.title,
-          content: newPost.content,
-          image_urls: newPost.image_urls
-        });
-
-      if (error) throw error;
-
-      setNewPost({ title: '', content: '', image_urls: [] });
-      setShowCreatePost(false);
-      fetchGroupPosts(selectedGroup.id);
-    } catch (error) {
-      console.error('Error creating post:', error);
-    }
-  };
-
-  // Dar like a un post
-  const likePost = async (postId: string) => {
-    if (!profile) return;
-
-    try {
-      const { error } = await supabase
-        .from('group_post_likes')
-        .insert({
-          post_id: postId,
-          profile_id: profile.id
-        });
-
-      if (error) throw error;
-
-      // Actualizar contador de likes
-      await supabase
-        .from('group_posts')
-        .update({ likes_count: posts.find(p => p.id === postId)?.likes_count + 1 })
-        .eq('id', postId);
-
-      fetchGroupPosts(selectedGroup!.id);
-    } catch (error) {
-      console.error('Error liking post:', error);
     }
   };
 
@@ -223,18 +155,65 @@ const Groups: React.FC = () => {
     fetchGroups();
   }, [profile]);
 
-  useEffect(() => {
-    if (selectedGroup) {
-      fetchGroupPosts(selectedGroup.id);
-    }
-  }, [selectedGroup]);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando grupos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si estamos viendo posts de un grupo
+  if (showGroupPosts && selectedGroup) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          {/* Header con botón de volver */}
+          <div className="flex items-center mb-6">
+            <button
+              onClick={backToGroups}
+              className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
+            >
+              <ArrowLeftIcon className="w-5 h-5 mr-2" />
+              Volver a Grupos
+            </button>
+          </div>
+
+          {/* Información del grupo */}
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="flex items-center space-x-4">
+              {selectedGroup.image_url ? (
+                <img
+                  src={selectedGroup.image_url}
+                  alt={selectedGroup.name}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
+                  <UsersIcon className="w-8 h-8 text-green-600" />
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{selectedGroup.name}</h1>
+                <p className="text-gray-600">{selectedGroup.description}</p>
+                <div className="flex items-center space-x-4 mt-2">
+                  <span className="text-sm text-gray-500">
+                    <UsersIcon className="w-4 h-4 inline mr-1" />
+                    {selectedGroup.current_members || 0} miembros
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {selectedGroup.is_public ? 'Público' : 'Privado'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Posts del grupo */}
+          <GroupPosts groupId={selectedGroup.id} />
         </div>
       </div>
     );
@@ -262,28 +241,30 @@ const Groups: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {groups.map((group) => (
             <div key={group.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="relative h-48 bg-gray-200">
-                {group.image_url && (
-                  <img
-                    src={group.image_url}
-                    alt={group.name}
-                    className="w-full h-full object-cover"
-                  />
-                )}
-                <div className="absolute top-3 right-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    group.is_public ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {group.is_public ? 'Público' : 'Privado'}
-                  </span>
-                </div>
-              </div>
-              
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{group.name}</h3>
-                <p className="text-gray-600 mb-4 line-clamp-2">{group.description}</p>
-                
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3 mb-4">
+                  {group.image_url ? (
+                    <img
+                      src={group.image_url}
+                      alt={group.name}
+                      className="w-12 h-12 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <UsersIcon className="w-6 h-6 text-green-600" />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{group.name}</h3>
+                    <p className="text-sm text-gray-500">
+                      {group.is_public ? 'Público' : 'Privado'}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{group.description}</p>
+
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                   <div className="flex items-center text-sm text-gray-500">
                     <UsersIcon className="w-4 h-4 mr-1" />
                     {group.current_members}/{group.max_members} miembros
@@ -297,10 +278,10 @@ const Groups: React.FC = () => {
                   {group.is_member ? (
                     <>
                       <button
-                        onClick={() => setSelectedGroup(group)}
+                        onClick={() => viewGroupPosts(group)}
                         className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-center"
                       >
-                        Ver Grupo
+                        Ver Posts
                       </button>
                       <button
                         onClick={() => leaveGroup(group.id)}
@@ -323,156 +304,17 @@ const Groups: React.FC = () => {
           ))}
         </div>
 
-        {/* Vista de grupo seleccionado */}
-        {selectedGroup && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">{selectedGroup.name}</h2>
-                <p className="text-gray-600 mt-2">{selectedGroup.description}</p>
-              </div>
-              <button
-                onClick={() => setSelectedGroup(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Botón para crear post */}
-            <div className="mb-6">
-              <button
-                onClick={() => setShowCreatePost(true)}
-                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center"
-              >
-                <PlusIcon className="w-5 h-5 mr-2" />
-                Crear Post
-              </button>
-            </div>
-
-            {/* Posts del grupo */}
-            <div className="space-y-6">
-              {posts.map((post) => (
-                <div key={post.id} className="border border-gray-200 rounded-lg p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full overflow-hidden mr-3">
-                        {post.author?.avatar_url ? (
-                          <img
-                            src={post.author.avatar_url}
-                            alt={post.author.full_name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
-                            {post.author?.full_name?.charAt(0) || 'U'}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{post.author?.full_name}</p>
-                        <p className="text-sm text-gray-500">
-                          {new Date(post.created_at).toLocaleDateString('es-ES')}
-                        </p>
-                      </div>
-                    </div>
-                    {post.is_pinned && (
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">
-                        Fijado
-                      </span>
-                    )}
-                  </div>
-
-                  {post.title && (
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h3>
-                  )}
-                  
-                  <p className="text-gray-700 mb-4">{post.content}</p>
-
-                  {post.image_urls && post.image_urls.length > 0 && (
-                    <div className="mb-4">
-                      <img
-                        src={post.image_urls[0]}
-                        alt="Post image"
-                        className="w-full h-64 object-cover rounded-lg"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={() => likePost(post.id)}
-                        className={`flex items-center space-x-1 ${
-                          post.is_liked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
-                        }`}
-                      >
-                        <HeartIcon className="w-5 h-5" />
-                        <span>{post.likes_count}</span>
-                      </button>
-                      <div className="flex items-center space-x-1 text-gray-500">
-                        <ChatBubbleLeftRightIcon className="w-5 h-5" />
-                        <span>{post.comments_count}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Modal para crear post */}
-        {showCreatePost && selectedGroup && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Crear Post en {selectedGroup.name}</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Título (opcional)
-                  </label>
-                  <input
-                    type="text"
-                    value={newPost.title}
-                    onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Título del post..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Contenido *
-                  </label>
-                  <textarea
-                    value={newPost.content}
-                    onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Escribe tu post..."
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-4 mt-6">
-                <button
-                  onClick={() => setShowCreatePost(false)}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={createPost}
-                  disabled={!newPost.content.trim()}
-                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Publicar
-                </button>
-              </div>
-            </div>
+        {groups.length === 0 && (
+          <div className="text-center py-12">
+            <UsersIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No hay grupos disponibles</h3>
+            <p className="text-gray-500 mb-6">Sé el primero en crear un grupo y conectar con otros usuarios.</p>
+            <button
+              onClick={() => navigate('/dashboard/groups/create')}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Crear Primer Grupo
+            </button>
           </div>
         )}
       </div>

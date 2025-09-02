@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -14,7 +14,9 @@ import {
   BuildingOfficeIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -34,7 +36,24 @@ const DashboardSidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<string[]>(['habitaciones', 'alquiler', 'venta', 'actividades', 'posts', 'usuarios', 'mensajeria']);
+
+  // Detectar si es móvil
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setIsMobileOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Debug logs
   console.log('DashboardSidebar - Estado:', {
@@ -137,36 +156,70 @@ const DashboardSidebar: React.FC = () => {
   };
 
   return (
-    <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${
-      isCollapsed ? 'w-16' : 'w-64'
-    }`}>
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          {!isCollapsed && (
-            <h1 className="text-xl font-bold text-gray-900">Jubilalia</h1>
+    <>
+      {/* Mobile Menu Button */}
+      {isMobile && (
+        <button
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
+          className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200 md:hidden"
+        >
+          {isMobileOpen ? (
+            <XMarkIcon className="w-6 h-6 text-gray-600" />
+          ) : (
+            <Bars3Icon className="w-6 h-6 text-gray-600" />
           )}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-md hover:bg-gray-100"
-          >
-            <svg
-              className={`w-5 h-5 text-gray-600 transition-transform ${
-                isCollapsed ? 'rotate-180' : ''
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-        </div>
+        </button>
+      )}
+
+      {/* Mobile Overlay */}
+      {isMobile && isMobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        bg-white border-r border-gray-200 transition-all duration-300
+        ${isMobile 
+          ? `fixed top-0 left-0 h-full z-50 transform ${
+              isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+            } w-80`
+          : `relative ${
+              isCollapsed ? 'w-16' : 'w-64'
+            }`
+        }
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            {(!isCollapsed || isMobile) && (
+              <h1 className="text-xl font-bold text-gray-900">Jubilalia</h1>
+            )}
+            {!isMobile && (
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="p-2 rounded-md hover:bg-gray-100"
+              >
+                <svg
+                  className={`w-5 h-5 text-gray-600 transition-transform ${
+                    isCollapsed ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
@@ -174,27 +227,16 @@ const DashboardSidebar: React.FC = () => {
             {/* Landing Page Link */}
             <Link
               to="/"
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200"
+              onClick={() => isMobile && setIsMobileOpen(false)}
+              className="flex items-center px-3 py-3 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200"
             >
               <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              {!isCollapsed && 'Ir a Jubilalia'}
+              {(!isCollapsed || isMobile) && 'Ir a Jubilalia'}
             </Link>
 
-            {/* Debug Link */}
-            <button
-              onClick={() => {
-                console.log('Navegando a /dashboard/rooms desde sidebar...');
-                navigate('/dashboard/rooms');
-              }}
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-purple-600 hover:bg-purple-50 hover:text-purple-700 transition-colors border border-purple-200"
-            >
-              <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {!isCollapsed && 'Test Habitaciones'}
-            </button>
+
 
             {/* Divider */}
             <div className="border-t border-gray-200 my-4"></div>
@@ -204,14 +246,15 @@ const DashboardSidebar: React.FC = () => {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                onClick={() => isMobile && setIsMobileOpen(false)}
+                className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                   isActive(item.href)
                     ? 'bg-green-100 text-green-700'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >
                 <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                {!isCollapsed && item.name}
+                {(!isCollapsed || isMobile) && item.name}
               </Link>
             ))}
 
@@ -219,11 +262,11 @@ const DashboardSidebar: React.FC = () => {
             <div className="border-t border-gray-200 my-4"></div>
 
             {/* Grouped Navigation */}
-            {!isCollapsed && navigationGroups.map((group) => (
+            {(!isCollapsed || isMobile) && navigationGroups.map((group) => (
               <div key={group.name} className="space-y-1">
                 <button
                   onClick={() => toggleGroup(group.name)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isGroupActive(group)
                       ? 'bg-green-50 text-green-700'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -246,7 +289,8 @@ const DashboardSidebar: React.FC = () => {
                       <Link
                         key={item.href}
                         to={item.href}
-                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        onClick={() => isMobile && setIsMobileOpen(false)}
+                        className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                           isActive(item.href)
                             ? 'bg-green-100 text-green-700'
                             : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
@@ -262,12 +306,12 @@ const DashboardSidebar: React.FC = () => {
             ))}
 
             {/* Collapsed view for groups */}
-            {isCollapsed && (
+            {isCollapsed && !isMobile && (
               <>
                 {/* Landing Page Link (Collapsed) */}
                 <Link
                   to="/"
-                  className="w-full flex items-center justify-center p-3 rounded-md text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200"
+                  className="w-full flex items-center justify-center p-3 rounded-lg text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200"
                   title="Ir a Jubilalia"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,10 +324,10 @@ const DashboardSidebar: React.FC = () => {
               </>
             )}
             
-            {isCollapsed && navigationGroups.map((group) => (
+            {isCollapsed && !isMobile && navigationGroups.map((group) => (
               <div key={group.name} className="relative group">
                 <button
-                  className="w-full flex items-center justify-center p-3 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="w-full flex items-center justify-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                   title={group.name}
                 >
                   <group.icon className="w-5 h-5" />
@@ -300,9 +344,9 @@ const DashboardSidebar: React.FC = () => {
 
         {/* User Section */}
         <div className="border-t border-gray-200 p-4">
-          {!isCollapsed ? (
+          {(!isCollapsed || isMobile) ? (
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </span>
@@ -318,7 +362,7 @@ const DashboardSidebar: React.FC = () => {
             </div>
           ) : (
             <div className="flex justify-center">
-              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </span>
@@ -328,16 +372,17 @@ const DashboardSidebar: React.FC = () => {
           
           <button
             onClick={handleSignOut}
-            className={`mt-3 w-full flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
-              isCollapsed ? 'justify-center' : ''
+            className={`mt-3 w-full flex items-center px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
+              (isCollapsed && !isMobile) ? 'justify-center' : ''
             }`}
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3 flex-shrink-0" />
-            {!isCollapsed && 'Cerrar sesión'}
+            {(!isCollapsed || isMobile) && 'Cerrar sesión'}
           </button>
         </div>
       </div>
     </div>
+    </>
   );
 };
 

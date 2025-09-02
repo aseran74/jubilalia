@@ -24,7 +24,7 @@ interface RoomFormData {
   room_area: number;
   private_bathroom: boolean;
   has_balcony: boolean;
-  preferred_gender: 'any' | 'male' | 'female';
+  preferred_gender: 'no_preference' | 'male' | 'female';
   preferred_age_min: number;
   preferred_age_max: number;
   smoking_allowed: boolean;
@@ -52,13 +52,13 @@ const RoomForm: React.FC = () => {
     room_area: 0,
     private_bathroom: false,
     has_balcony: false,
-    preferred_gender: 'any',
+    preferred_gender: 'no_preference',
     preferred_age_min: 55,
     preferred_age_max: 75,
     smoking_allowed: false,
     pets_allowed: false,
     pet_types: [],
-    bed_type: 'individual',
+    bed_type: 'single',
     other_requirements: '',
     images: []
   });
@@ -206,7 +206,7 @@ const RoomForm: React.FC = () => {
           preferred_age_max: formData.preferred_age_max,
           smoking_allowed: formData.smoking_allowed,
           pets_allowed: formData.pets_allowed,
-          pet_types: formData.pet_types,
+          pet_types: formData.pet_types.length > 0 ? formData.pet_types : [],
           other_requirements: formData.other_requirements
         });
 
@@ -447,8 +447,10 @@ const RoomForm: React.FC = () => {
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
-                    <option value="individual">Individual</option>
-                    <option value="doble">Doble</option>
+                    <option value="single">Individual</option>
+                    <option value="double">Doble</option>
+                    <option value="queen">Queen</option>
+                    <option value="king">King</option>
                     <option value="litera">Litera</option>
                     <option value="sofá">Sofá cama</option>
                   </select>
@@ -508,7 +510,7 @@ const RoomForm: React.FC = () => {
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
-                    <option value="any">Cualquier género</option>
+                    <option value="no_preference">Sin preferencia</option>
                     <option value="male">Solo hombres</option>
                     <option value="female">Solo mujeres</option>
                   </select>

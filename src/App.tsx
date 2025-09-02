@@ -8,6 +8,8 @@ import LandingPage from './pages/LandingPage';
 // Componentes de autenticación
 import SignInForm from './components/auth/SignInForm';
 import SignUpForm from './components/auth/SignUpForm';
+import JubilaliaLogin from './pages/Jubilalia/Login';
+import Register from './pages/Jubilalia/Register';
 
 // Componentes del dashboard
 import DashboardSidebar from './components/dashboard/DashboardSidebar';
@@ -51,6 +53,8 @@ import ChatApp from './components/messaging/ChatApp';
 // Componentes de debug
 import ConnectionTest from './components/debug/ConnectionTest';
 import GooglePlacesTest from './components/debug/GooglePlacesTest';
+import DatabaseTest from './components/debug/DatabaseTest';
+import RoomFormTest from './components/debug/RoomFormTest';
 
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
@@ -267,10 +271,14 @@ const App: React.FC = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/signin" element={<SignInForm />} />
           <Route path="/signup" element={<SignUpForm />} />
-                           <Route path="/debug" element={<DebugAuth />} />
-                 <Route path="/test-connection" element={<ConnectionTest />} />
-                 <Route path="/test-google-places" element={<GooglePlacesTest />} />
-                 <Route path="/dashboard/*" element={<DashboardLayout />} />
+          <Route path="/login" element={<JubilaliaLogin />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/debug" element={<DebugAuth />} />
+          <Route path="/test-connection" element={<ConnectionTest />} />
+          <Route path="/test-google-places" element={<GooglePlacesTest />} />
+          <Route path="/test-database" element={<DatabaseTest />} />
+          <Route path="/test-room-form" element={<RoomFormTest />} />
+          <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

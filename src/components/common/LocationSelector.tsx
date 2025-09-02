@@ -104,7 +104,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           console.log('Parsed location:', location);
           
           if (place.geometry?.location) {
-            location.coordinates = {
+            (location as any).coordinates = {
               lat: place.geometry.location.lat(),
               lng: place.geometry.location.lng()
             };
@@ -124,7 +124,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   };
 
   // Parsear componentes de dirección
-  const parseAddressComponents = (components: google.maps.GeocoderAddressComponent[]) => {
+  const parseAddressComponents = (components: any[]) => {
     const location = {
       address: '',
       city: '',
@@ -174,7 +174,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
         componentRestrictions: { country: 'es' }
       };
 
-      service.getPlacePredictions(request, (predictions, status) => {
+      service.getPlacePredictions(request, (predictions: any, status: any) => {
         if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
           setSuggestions(predictions);
           setShowSuggestions(true);
@@ -213,11 +213,11 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       fields: ['address_components', 'formatted_address', 'geometry']
     };
 
-    service.getDetails(request, (place, status) => {
+    service.getDetails(request, (place: any, status: any) => {
       if (status === window.google.maps.places.PlacesServiceStatus.OK && place?.address_components) {
         const location = parseAddressComponents(place.address_components);
         if (place.geometry?.location) {
-          location.coordinates = {
+          (location as any).coordinates = {
             lat: place.geometry.location.lat(),
             lng: place.geometry.location.lng()
           };

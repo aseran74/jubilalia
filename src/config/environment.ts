@@ -4,8 +4,8 @@
 export const environment = {
   // Supabase Configuration
   supabase: {
-    url: import.meta.env.VITE_SUPABASE_URL || 'https://sdmkodriokrpsdegweat.supabase.co',
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkbWtvZHJpb2tycHNkZWd3ZWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwMjkxOTcsImV4cCI6MjA3MTYwNTE5N30.s4i-P6koEZWq1-Vna-LRjKrNZll8tAGeeNaRCLoELrE',
+    url: import.meta.env.VITE_SUPABASE_URL || '',
+    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
     // Google OAuth Configuration (configurado en Supabase Dashboard)
     googleClientId: import.meta.env.VITE_SUPABASE_GOOGLE_CLIENT_ID || '',
     googleClientSecret: import.meta.env.VITE_SUPABASE_GOOGLE_CLIENT_SECRET || '',

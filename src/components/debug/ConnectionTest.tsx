@@ -1,103 +1,109 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import React, { useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 const ConnectionTest: React.FC = () => {
-  const [connectionStatus, setConnectionStatus] = useState<string>('Probando...');
-  const [testResults, setTestResults] = useState<any>(null);
-  const [error, setError] = useState<string>('');
+  const [testResult, setTestResult] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const testConnection = async () => {
+    setIsLoading(true);
+    setTestResult('Probando conexión...');
+
     try {
-      setConnectionStatus('Probando conexión...');
-      setError('');
-      setTestResults(null);
+      // Obtener variables de entorno
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-      // Test 1: Verificar configuración
-      console.log('🔧 Configuración actual:', {
-        url: supabase.supabaseUrl,
-        anonKey: supabase.supabaseKey ? `${supabase.supabaseKey.substring(0, 20)}...` : 'No configurado'
-      });
+      console.log('Supabase URL:', supabaseUrl);
+      console.log('Supabase Key length:', supabaseKey?.length);
 
-      // Test 2: Consulta simple
+      if (!supabaseUrl || !supabaseKey) {
+        setTestResult('❌ Variables de entorno no configuradas');
+        setIsLoading(false);
+        return;
+      }
+
+      // Crear cliente Supabase
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Probar conexión simple
       const { data, error } = await supabase
         .from('profiles')
         .select('count')
         .limit(1);
 
       if (error) {
-        throw error;
+        setTestResult(`❌ Error de conexión: ${error.message}`);
+        console.error('Supabase error:', error);
+      } else {
+        setTestResult(`✅ Conexión exitosa: ${JSON.stringify(data)}`);
+        console.log('Supabase success:', data);
       }
-
-      setTestResults({
-        success: true,
-        data,
-        timestamp: new Date().toISOString()
-      });
-      setConnectionStatus('✅ Conexión exitosa');
-
-    } catch (err: any) {
-      console.error('❌ Error de conexión:', err);
-      setError(err.message || 'Error desconocido');
-      setConnectionStatus('❌ Error de conexión');
+    } catch (error) {
+      setTestResult(`❌ Error de red: ${error}`);
+      console.error('Network error:', error);
     }
+
+    setIsLoading(false);
   };
 
-  useEffect(() => {
-    testConnection();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Prueba de Conexión Supabase</h1>
-        
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">Estado de la conexión</h2>
-          <div className="space-y-4">
-            <div className="flex items-center">
-              <span className="font-medium">Estado:</span>
-              <span className={`ml-2 px-3 py-1 rounded-full text-sm ${
-                connectionStatus.includes('✅') 
-                  ? 'bg-green-100 text-green-800' 
-                  : connectionStatus.includes('❌') 
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-yellow-100 text-yellow-800'
-              }`}>
-                {connectionStatus}
-              </span>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            🔧 Prueba de Conexión Supabase
+          </h1>
+
+          <div className="space-y-6">
+            {/* Variables de entorno */}
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h2 className="text-lg font-semibold text-blue-900 mb-2">
+                Variables de Entorno
+              </h2>
+              <div className="space-y-2 text-sm text-blue-700">
+                <p><strong>VITE_SUPABASE_URL:</strong> {import.meta.env.VITE_SUPABASE_URL || 'No configurada'}</p>
+                <p><strong>VITE_SUPABASE_ANON_KEY:</strong> {import.meta.env.VITE_SUPABASE_ANON_KEY ? `Configurada (${import.meta.env.VITE_SUPABASE_ANON_KEY.length} caracteres)` : 'No configurada'}</p>
+              </div>
             </div>
 
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded p-4">
-                <h3 className="font-medium text-red-800 mb-2">Error:</h3>
-                <p className="text-red-700">{error}</p>
+            {/* Botón de prueba */}
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <h2 className="text-lg font-semibold text-green-900 mb-2">
+                Prueba de Conexión
+              </h2>
+              <button
+                onClick={testConnection}
+                disabled={isLoading}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              >
+                {isLoading ? 'Probando...' : 'Probar Conexión'}
+              </button>
+            </div>
+
+            {/* Resultado */}
+            {testResult && (
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                  Resultado
+                </h2>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {testResult}
+                </div>
               </div>
             )}
 
-            {testResults && (
-              <div className="bg-green-50 border border-green-200 rounded p-4">
-                <h3 className="font-medium text-green-800 mb-2">Resultado exitoso:</h3>
-                <pre className="text-sm text-green-700 bg-green-100 p-2 rounded">
-                  {JSON.stringify(testResults, null, 2)}
-                </pre>
+            {/* Información adicional */}
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <h2 className="text-lg font-semibold text-yellow-900 mb-2">
+                Información de Configuración
+              </h2>
+              <div className="text-sm text-yellow-700 space-y-2">
+                <p><strong>URL:</strong> https://sdmkodriokrpsdegweat.supabase.co</p>
+                <p><strong>Clave esperada:</strong> Debería tener ~150+ caracteres</p>
+                <p><strong>Clave actual:</strong> {import.meta.env.VITE_SUPABASE_ANON_KEY?.length || 0} caracteres</p>
               </div>
-            )}
-          </div>
-
-          <button
-            onClick={testConnection}
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-          >
-            Probar de nuevo
-          </button>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Información de configuración</h2>
-          <div className="space-y-2 text-sm">
-            <p><strong>URL:</strong> {supabase.supabaseUrl}</p>
-            <p><strong>Clave anónima:</strong> {supabase.supabaseKey ? `${supabase.supabaseKey.substring(0, 20)}...` : 'No configurada'}</p>
-            <p><strong>Timestamp:</strong> {new Date().toLocaleString()}</p>
+            </div>
           </div>
         </div>
       </div>
