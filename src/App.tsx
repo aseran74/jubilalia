@@ -55,6 +55,7 @@ import ConnectionTest from './components/debug/ConnectionTest';
 import GooglePlacesTest from './components/debug/GooglePlacesTest';
 import DatabaseTest from './components/debug/DatabaseTest';
 import RoomFormTest from './components/debug/RoomFormTest';
+import AuthDiagnostic from './components/debug/AuthDiagnostic';
 
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
@@ -279,6 +280,7 @@ const App: React.FC = () => {
           <Route path="/test-google-places" element={<GooglePlacesTest />} />
           <Route path="/test-database" element={<DatabaseTest />} />
           <Route path="/test-room-form" element={<RoomFormTest />} />
+          <Route path="/auth-diagnostic" element={<AuthDiagnostic />} />
           <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
