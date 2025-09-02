@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import ImageUpload from '../dashboard/ImageUpload';
 import { SUPABASE_BUCKETS } from '../../config/supabase';
+import TailAdminDatePicker from '../common/TailAdminDatePicker';
 
 interface PropertyRentalFormData {
   title: string;
@@ -19,13 +20,15 @@ interface PropertyRentalFormData {
   city: string;
   country: string;
   price: string;
-  available_from: string;
+  available_from: Date | null;
+  available_until: Date | null;
   bedrooms: string;
   bathrooms: string;
   total_area: string;
   max_occupants: string;
   amenities: string[];
   images: string[];
+  is_featured: boolean;
 }
 
 const PropertyRentalForm: React.FC = () => {
@@ -43,13 +46,15 @@ const PropertyRentalForm: React.FC = () => {
     city: '',
     country: 'España',
     price: '',
-    available_from: '',
+    available_from: null,
+    available_until: null,
     bedrooms: '',
     bathrooms: '',
     total_area: '',
     max_occupants: '',
     amenities: [],
-    images: []
+    images: [],
+    is_featured: false
   });
 
   const availableAmenities = [
@@ -164,7 +169,9 @@ const PropertyRentalForm: React.FC = () => {
           address: formData.address,
           city: formData.city,
           country: formData.country,
-          available_from: formData.available_from,
+          available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : null,
+          available_until: formData.available_until ? formData.available_until.toISOString().split('T')[0] : null,
+          is_featured: formData.is_featured,
           is_available: true,
           bedrooms: parseInt(formData.bedrooms),
           bathrooms: parseInt(formData.bathrooms),
@@ -456,17 +463,43 @@ const PropertyRentalForm: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Disponible desde
-                  </label>
-                  <input
-                    type="date"
-                    name="available_from"
-                    value={formData.available_from}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  <TailAdminDatePicker
+                    selected={formData.available_from}
+                    onChange={(date) => setFormData(prev => ({ ...prev, available_from: date }))}
+                    label="Disponible desde"
+                    placeholder="Seleccionar fecha de inicio"
+                    minDate={new Date()}
+                    error={errors.available_from}
                   />
-                  {errors.available_from && <p className="text-red-500 text-sm mt-1">{errors.available_from}</p>}
+                </div>
+
+                <div>
+                  <TailAdminDatePicker
+                    selected={formData.available_until}
+                    onChange={(date) => setFormData(prev => ({ ...prev, available_until: date }))}
+                    label="Disponible hasta"
+                    placeholder="Seleccionar fecha de fin"
+                    minDate={formData.available_from || new Date()}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Propiedad destacada
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="is_featured"
+                      name="is_featured"
+                      checked={formData.is_featured}
+                      onChange={(e) => setFormData(prev => ({ ...prev, is_featured: e.target.checked }))}
+                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                    />
+                    <label htmlFor="is_featured" className="text-sm text-gray-700">
+                      Marcar como propiedad destacada (aparecerá en la página principal)
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>

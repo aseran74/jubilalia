@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import ImageUpload from '../dashboard/ImageUpload';
 import { SUPABASE_BUCKETS } from '../../config/supabase';
+import TailAdminDatePicker from '../common/TailAdminDatePicker';
 
 interface PropertySaleFormData {
   title: string;
@@ -28,6 +29,8 @@ interface PropertySaleFormData {
   parking_spaces: string;
   amenities: string[];
   images: string[];
+  is_featured: boolean;
+  available_from: Date | null;
 }
 
 const PropertySaleForm: React.FC = () => {
@@ -53,7 +56,9 @@ const PropertySaleForm: React.FC = () => {
     property_condition: '',
     parking_spaces: '',
     amenities: [],
-    images: []
+    images: [],
+    is_featured: false,
+    available_from: null
   });
 
   const availableAmenities = [
@@ -188,7 +193,8 @@ const PropertySaleForm: React.FC = () => {
           address: formData.address,
           city: formData.city,
           country: formData.country,
-          available_from: new Date().toISOString().split('T')[0], // Disponible inmediatamente
+          available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          is_featured: formData.is_featured,
           is_available: true,
           property_type: formData.property_type,
           bedrooms: parseInt(formData.bedrooms),
@@ -520,6 +526,44 @@ const PropertySaleForm: React.FC = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="1"
                   />
+                </div>
+              </div>
+            </div>
+
+            {/* Fechas y Destacada */}
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-6">
+                4.5. Fechas y Promoción
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <TailAdminDatePicker
+                    selected={formData.available_from}
+                    onChange={(date) => setFormData(prev => ({ ...prev, available_from: date }))}
+                    label="Disponible desde"
+                    placeholder="Seleccionar fecha de disponibilidad"
+                    minDate={new Date()}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Propiedad destacada
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="is_featured"
+                      name="is_featured"
+                      checked={formData.is_featured}
+                      onChange={(e) => setFormData(prev => ({ ...prev, is_featured: e.target.checked }))}
+                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                    />
+                    <label htmlFor="is_featured" className="text-sm text-gray-700">
+                      Marcar como propiedad destacada (aparecerá en la página principal)
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
