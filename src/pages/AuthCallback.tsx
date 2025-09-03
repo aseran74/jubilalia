@@ -32,11 +32,57 @@ const AuthCallback: React.FC = () => {
         if (hash && hash.includes('access_token')) {
           setStatus('Procesando tokens de Google OAuth...');
           console.log('✅ Detectados tokens de Google OAuth en el hash');
+          
+          // Extraer los parámetros del hash
+          const hashParams = new URLSearchParams(hash.substring(1));
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+          const expiresAt = hashParams.get('expires_at');
+          
+          console.log('✅ Tokens extraídos:', {
+            accessToken: accessToken ? 'Presente' : 'Faltante',
+            refreshToken: refreshToken ? 'Presente' : 'Faltante',
+            expiresAt: expiresAt
+          });
+          
+          setStatus('Estableciendo sesión con tokens de Google...');
+          
+          // Establecer la sesión manualmente con los tokens
+          const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken || '',
+            refresh_token: refreshToken || ''
+          });
+          
+          if (sessionError) {
+            console.error('Error estableciendo sesión:', sessionError);
+            setError(`Error estableciendo sesión: ${sessionError.message}`);
+            setStatus('Error en la sesión');
+            setTimeout(() => navigate('/login'), 3000);
+            return;
+          }
+          
+          if (sessionData.session) {
+            console.log('✅ Sesión establecida correctamente:', sessionData.session.user.email);
+            setStatus('¡Autenticación exitosa! Redirigiendo...');
+            
+            // Limpiar el hash de la URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            setTimeout(() => {
+              navigate('/dashboard');
+            }, 1000);
+            return;
+          } else {
+            setError('No se pudo establecer la sesión con los tokens');
+            setStatus('Error: No hay sesión activa');
+            setTimeout(() => navigate('/login'), 3000);
+            return;
+          }
         }
 
         setStatus('Obteniendo sesión...');
         
-        // Obtener la sesión actual
+        // Obtener la sesión actual (para otros tipos de autenticación)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
