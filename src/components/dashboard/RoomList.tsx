@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import AdminButtons from '../common/AdminButtons';
 import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle } from 'lucide-react';
 
 interface Room {
@@ -41,6 +43,7 @@ const RoomList: React.FC = () => {
   const [smokingFilter, setSmokingFilter] = useState<boolean | null>(null);
 
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     fetchRooms();
@@ -182,6 +185,32 @@ const RoomList: React.FC = () => {
       console.error('Error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteRoom = async (roomId: string) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta habitación?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('room_rental_listings')
+        .delete()
+        .eq('id', roomId);
+
+      if (error) {
+        console.error('Error deleting room:', error);
+        alert('Error al eliminar la habitación');
+        return;
+      }
+
+      alert('Habitación eliminada correctamente');
+      // Actualizar la lista de habitaciones
+      setRooms(rooms.filter(room => room.id !== roomId));
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      alert('Error al eliminar la habitación');
     }
   };
 
@@ -474,6 +503,17 @@ const RoomList: React.FC = () => {
                   <MessageCircle className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Botones de administrador */}
+              {isAdmin && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <AdminButtons 
+                    itemId={room.id}
+                    itemType="room"
+                    onDelete={handleDeleteRoom}
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}

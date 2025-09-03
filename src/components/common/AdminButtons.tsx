@@ -36,6 +36,9 @@ const AdminButtons: React.FC<AdminButtonsProps> = ({
       case 'activity':
         navigate(`/dashboard/activities/${itemId}/edit`);
         break;
+      case 'room':
+        navigate(`/dashboard/rooms/${itemId}/edit`);
+        break;
       default:
         console.warn('Tipo de elemento no reconocido:', itemType);
     }

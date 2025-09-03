@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import AdminButtons from '../common/AdminButtons';
 import ChatModal from './ChatModal';
 import { 
   ArrowLeft, 
@@ -59,6 +61,7 @@ interface RoomDetail {
 const RoomDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { profile, isAdmin } = useAuth();
   const [room, setRoom] = useState<RoomDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -228,6 +231,31 @@ const RoomDetail: React.FC = () => {
       setCurrentImageIndex((prev) => 
         prev === 0 ? room.images.length - 1 : prev - 1
       );
+    }
+  };
+
+  const handleDeleteRoom = async (roomId: string) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta habitación?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('room_rental_listings')
+        .delete()
+        .eq('id', roomId);
+
+      if (error) {
+        console.error('Error deleting room:', error);
+        alert('Error al eliminar la habitación');
+        return;
+      }
+
+      alert('Habitación eliminada correctamente');
+      navigate('/dashboard/rooms');
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      alert('Error al eliminar la habitación');
     }
   };
 
@@ -507,6 +535,17 @@ const RoomDetail: React.FC = () => {
                   {isFavorite ? 'En favoritos' : 'Agregar a favoritos'}
                 </button>
               </div>
+
+              {/* Botones de administrador */}
+              {isAdmin && (
+                <div className="border-t border-gray-200 pt-4">
+                  <AdminButtons 
+                    itemId={room.id}
+                    itemType="room"
+                    onDelete={handleDeleteRoom}
+                  />
+                </div>
+              )}
 
               {/* Información adicional */}
               <div className="border-t border-gray-200 pt-4 space-y-3">

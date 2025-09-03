@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import TailAdminDatePicker from '../common/TailAdminDatePicker';
@@ -37,10 +37,13 @@ interface RoomFormData {
 
 const RoomForm: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const { user, profile } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(!!id);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const isEditing = !!id;
   const [formData, setFormData] = useState<RoomFormData>({
     title: '',
     description: '',
@@ -94,6 +97,75 @@ const RoomForm: React.FC = () => {
         : [...prev.pet_types, petType]
     }));
   };
+
+  // Cargar datos de la habitación si se está editando
+  useEffect(() => {
+    if (isEditing && id) {
+      const fetchRoom = async () => {
+        try {
+          setLoadingData(true);
+          
+          // Obtener datos de la habitación
+          const { data: roomData, error: roomError } = await supabase
+            .from('room_rental_listings')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+          if (roomError) throw roomError;
+
+          // Obtener requisitos de la habitación
+          const { data: requirementsData, error: requirementsError } = await supabase
+            .from('room_rental_requirements')
+            .select('*')
+            .eq('listing_id', id)
+            .single();
+
+          if (requirementsError) throw requirementsError;
+
+          // Obtener imágenes
+          const { data: imagesData, error: imagesError } = await supabase
+            .from('room_rental_images')
+            .select('image_url')
+            .eq('listing_id', id)
+            .order('image_order');
+
+          if (imagesError) throw imagesError;
+
+          // Actualizar el formulario con los datos obtenidos
+          setFormData({
+            title: roomData.title || '',
+            description: roomData.description || '',
+            address: roomData.address || '',
+            city: roomData.city || '',
+            postal_code: roomData.postal_code || '',
+            price: roomData.price || 0,
+            available_from: roomData.available_from ? new Date(roomData.available_from) : null,
+            room_area: requirementsData.room_area || 0,
+            private_bathroom: requirementsData.private_bathroom || false,
+            has_balcony: requirementsData.has_balcony || false,
+            preferred_gender: requirementsData.preferred_gender || 'no_preference',
+            preferred_age_min: requirementsData.preferred_age_min || 18,
+            preferred_age_max: requirementsData.preferred_age_max || 99,
+            smoking_allowed: requirementsData.smoking_allowed || false,
+            pets_allowed: requirementsData.pets_allowed || false,
+            pet_types: requirementsData.pet_types || [],
+            bed_type: requirementsData.bed_type || '',
+            other_requirements: requirementsData.other_requirements || '',
+            images: imagesData?.map(img => img.image_url) || []
+          });
+
+        } catch (error) {
+          console.error('Error loading room data:', error);
+          setError('Error al cargar los datos de la habitación');
+        } finally {
+          setLoadingData(false);
+        }
+      };
+
+      fetchRoom();
+    }
+  }, [id, isEditing]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -171,8 +243,50 @@ const RoomForm: React.FC = () => {
     setError('');
 
     try {
-      // Crear el listing principal
-              const { data: listingData, error: listingError } = await supabase
+      if (isEditing && id) {
+        // Actualizar la habitación existente
+        const { error: updateError } = await supabase
+          .from('property_listings')
+          .update({
+            title: formData.title,
+            description: formData.description,
+            address: formData.address,
+            city: formData.city,
+            postal_code: formData.postal_code,
+            price: formData.price,
+            available_from: formData.available_from ? formData.available_from.toISOString() : null,
+          })
+          .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        // Actualizar los requisitos
+        const { error: requirementsUpdateError } = await supabase
+          .from('room_rental_requirements')
+          .update({
+            bed_type: formData.bed_type,
+            room_area: formData.room_area,
+            private_bathroom: formData.private_bathroom,
+            has_balcony: formData.has_balcony,
+            preferred_gender: formData.preferred_gender,
+            preferred_age_min: formData.preferred_age_min,
+            preferred_age_max: formData.preferred_age_max,
+            smoking_allowed: formData.smoking_allowed,
+            pets_allowed: formData.pets_allowed,
+            pet_types: formData.pet_types.length > 0 ? formData.pet_types : [],
+            other_requirements: formData.other_requirements
+          })
+          .eq('listing_id', id);
+
+        if (requirementsUpdateError) throw requirementsUpdateError;
+
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard/rooms');
+        }, 2000);
+      } else {
+        // Crear nueva habitación
+        const { data: listingData, error: listingError } = await supabase
           .from('property_listings')
           .insert({
             title: formData.title,
@@ -182,15 +296,15 @@ const RoomForm: React.FC = () => {
             postal_code: formData.postal_code,
             price: formData.price,
             available_from: formData.available_from ? formData.available_from.toISOString() : null,
-          listing_type: 'room_rental',
-          property_type: 'room',
-          profile_id: profile.id,
-          is_available: true
-        })
-        .select()
-        .single();
+            listing_type: 'room_rental',
+            property_type: 'room',
+            profile_id: profile.id,
+            is_available: true
+          })
+          .select()
+          .single();
 
-      if (listingError) throw listingError;
+        if (listingError) throw listingError;
 
       // Crear los requisitos de la habitación
       const { error: requirementsError } = await supabase
@@ -227,14 +341,14 @@ const RoomForm: React.FC = () => {
         await Promise.all(imagePromises);
       }
 
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/rooms');
-      }, 2000);
-
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard/rooms');
+        }, 2000);
+      }
     } catch (error) {
-      console.error('Error creating room:', error);
-      setError('Error al crear la habitación. Inténtalo de nuevo.');
+      console.error('Error creating/updating room:', error);
+      setError(isEditing ? 'Error al actualizar la habitación. Inténtalo de nuevo.' : 'Error al crear la habitación. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -279,12 +393,21 @@ const RoomForm: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Publicar Habitación
+              {isEditing ? 'Editar Habitación' : 'Publicar Habitación'}
             </h1>
             <p className="text-gray-600">
-              Completa el formulario para publicar tu habitación disponible
+              {isEditing 
+                ? 'Modifica la información de tu habitación' 
+                : 'Completa el formulario para publicar tu habitación disponible'
+              }
             </p>
           </div>
+
+          {loadingData && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-800">Cargando datos de la habitación...</p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -294,7 +417,9 @@ const RoomForm: React.FC = () => {
 
           {success && (
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-800">¡Habitación publicada exitosamente! Redirigiendo...</p>
+              <p className="text-green-800">
+                {isEditing ? '¡Habitación actualizada exitosamente!' : '¡Habitación publicada exitosamente!'} Redirigiendo...
+              </p>
             </div>
           )}
 
@@ -700,7 +825,7 @@ const RoomForm: React.FC = () => {
                     Publicando...
                   </>
                 ) : (
-                  'Publicar Habitación'
+                  isEditing ? 'Actualizar Habitación' : 'Publicar Habitación'
                 )}
               </button>
             </div>
