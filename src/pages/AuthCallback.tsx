@@ -13,7 +13,7 @@ const AuthCallback: React.FC = () => {
       try {
         setStatus('Verificando parámetros de URL...');
         
-        // Verificar si hay parámetros de error en la URL
+        // Verificar si hay parámetros de error en la URL (query params)
         const errorParam = searchParams.get('error');
         const errorDescription = searchParams.get('error_description');
         
@@ -23,6 +23,15 @@ const AuthCallback: React.FC = () => {
           setStatus('Error en la autenticación');
           setTimeout(() => navigate('/login'), 3000);
           return;
+        }
+
+        // Verificar si hay datos en el hash (Google OAuth)
+        const hash = window.location.hash;
+        console.log('🔍 Hash de la URL:', hash);
+        
+        if (hash && hash.includes('access_token')) {
+          setStatus('Procesando tokens de Google OAuth...');
+          console.log('✅ Detectados tokens de Google OAuth en el hash');
         }
 
         setStatus('Obteniendo sesión...');
@@ -79,7 +88,8 @@ const AuthCallback: React.FC = () => {
             <p className="text-gray-600">{status}</p>
             <div className="mt-4 text-xs text-gray-400">
               <p>URL actual: {window.location.href}</p>
-              <p>Parámetros: {searchParams.toString()}</p>
+              <p>Query params: {searchParams.toString()}</p>
+              <p>Hash: {window.location.hash.substring(0, 100)}...</p>
             </div>
           </div>
         )}
