@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
+import AdminButtons from '../common/AdminButtons';
 import { 
   Calendar, 
   Clock, 
@@ -71,7 +72,7 @@ interface ActivityDetail {
 const ActivityDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
   
   const [activity, setActivity] = useState<ActivityDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -105,20 +106,25 @@ const ActivityDetail: React.FC = () => {
       // Obtener la actividad principal
       const { data: activityData, error: activityError } = await supabase
         .from('activities')
-        .select(`
-          *,
-          owner:profiles!activities_profile_id_fkey(
-            id,
-            full_name,
-            avatar_url,
-            bio
-          )
-        `)
+        .select('*')
         .eq('id', id)
-        .eq('is_active', true)
         .single();
 
       if (activityError) throw activityError;
+
+      // Obtener información del propietario
+      let ownerData = null;
+      if (activityData.profile_id) {
+        const { data: owner, error: ownerError } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url, bio')
+          .eq('id', activityData.profile_id)
+          .single();
+        
+        if (!ownerError) {
+          ownerData = owner;
+        }
+      }
 
       // Obtener las imágenes
       const { data: imagesData, error: imagesError } = await supabase
@@ -179,7 +185,7 @@ const ActivityDetail: React.FC = () => {
       const activityDetail: ActivityDetail = {
         ...activityData,
         images: imagesData?.map(img => img.image_url) || [],
-        owner: activityData.owner,
+        owner: ownerData,
         is_favorite: isFavorite,
         user_participation: userParticipation,
         rating,
@@ -230,6 +236,31 @@ const ActivityDetail: React.FC = () => {
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+    }
+  };
+
+  const handleDeleteActivity = async (activityId: string) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta actividad?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('activities')
+        .delete()
+        .eq('id', activityId);
+
+      if (error) {
+        console.error('Error deleting activity:', error);
+        alert('Error al eliminar la actividad');
+        return;
+      }
+
+      alert('Actividad eliminada correctamente');
+      navigate('/dashboard/activities');
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+      alert('Error al eliminar la actividad');
     }
   };
 
@@ -453,7 +484,7 @@ const ActivityDetail: React.FC = () => {
   const participationPercentage = (activity.current_participants / activity.max_participants) * 100;
   const isFull = activity.current_participants >= activity.max_participants;
   const isAlmostFull = participationPercentage >= 80;
-  const isOwner = profile?.id === activity.owner.id;
+  const isOwner = profile?.id === activity.owner?.id;
   const isParticipating = !!activity.user_participation;
   const canJoin = !isFull && !isParticipating && !isOwner;
 
@@ -575,12 +606,31 @@ const ActivityDetail: React.FC = () => {
 
                 {isOwner && (
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors">
+                    <button 
+                      onClick={() => navigate(`/dashboard/activities/${activity.id}/edit`)}
+                      className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                      title="Editar actividad"
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
+                    <button 
+                      onClick={() => handleDeleteActivity(activity.id)}
+                      className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                      title="Eliminar actividad"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
+                  </div>
+                )}
+
+                {/* Botones de administrador */}
+                {isAdmin && !isOwner && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <AdminButtons 
+                      itemId={activity.id}
+                      itemType="activity"
+                      onDelete={handleDeleteActivity}
+                    />
                   </div>
                 )}
               </div>
