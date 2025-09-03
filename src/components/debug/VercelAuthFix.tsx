@@ -45,7 +45,7 @@ const VercelAuthFix: React.FC = () => {
         if (currentUser) {
           setStatus('Probando acceso a datos...');
           
-          const { data: rooms, error: roomsError } = await supabase
+          const { error: roomsError } = await supabase
             .from('rooms')
             .select('*')
             .limit(1);
