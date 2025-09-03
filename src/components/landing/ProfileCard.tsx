@@ -24,13 +24,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
-    console.log('🔄 ProfileCard: useEffect ejecutándose, user:', user ? user.uid : 'null');
+    console.log('🔄 ProfileCard: useEffect ejecutándose, user:', user ? user.id : 'null');
     
     const fetchUserProfile = async () => {
       if (user) {
-        console.log('🔍 ProfileCard: Buscando perfil para usuario:', user.uid);
+        console.log('🔍 ProfileCard: Buscando perfil para usuario:', user.id);
         try {
-          const profile = await getUserProfile(user.uid);
+          const profile = await getUserProfile(user.id);
           console.log('✅ ProfileCard: Perfil encontrado:', profile);
           setUserProfile(profile);
         } catch (error) {
@@ -52,13 +52,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
       console.log('🚪 ProfileCard: Iniciando logout...');
       await logout();
       setIsDropdownOpen(false);
+      // La redirección se maneja en el hook useAuth
     } catch (error) {
       console.error('❌ ProfileCard: Error en logout:', error);
     }
   };
 
   // Log del estado actual
-  console.log('🔄 ProfileCard renderizando - user:', user ? user.uid : 'null', 'loading:', loading, 'userProfile:', userProfile);
+  console.log('🔄 ProfileCard renderizando - user:', user ? user.id : 'null', 'loading:', loading, 'userProfile:', userProfile);
 
   if (loading) {
     return (

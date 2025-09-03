@@ -43,7 +43,12 @@ const RoomList: React.FC = () => {
   const [smokingFilter, setSmokingFilter] = useState<boolean | null>(null);
 
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, profile } = useAuth();
+
+  // Debug: verificar si isAdmin se está obteniendo correctamente
+  console.log('🔍 RoomList - isAdmin:', isAdmin, 'type:', typeof isAdmin);
+  console.log('🔍 RoomList - profile:', profile);
+  console.log('🔍 RoomList - profile.is_admin:', profile?.is_admin);
 
   useEffect(() => {
     fetchRooms();
@@ -504,16 +509,27 @@ const RoomList: React.FC = () => {
                 </button>
               </div>
 
-              {/* Botones de administrador */}
-              {isAdmin && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <AdminButtons 
-                    itemId={room.id}
-                    itemType="room"
-                    onDelete={handleDeleteRoom}
-                  />
+              {/* Botones de administrador - DEBUG */}
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="text-xs text-gray-500 mb-2">
+                  DEBUG: isAdmin = {String(isAdmin)} (tipo: {typeof isAdmin})
                 </div>
-              )}
+                {isAdmin === true && (
+                  <div>
+                    <div className="text-xs text-green-600 mb-2">✅ Usuario es administrador</div>
+                    <AdminButtons 
+                      itemId={room.id}
+                      itemType="room"
+                      onDelete={handleDeleteRoom}
+                    />
+                  </div>
+                )}
+                {isAdmin !== true && (
+                  <div className="text-xs text-red-600">
+                    ❌ Usuario NO es administrador (valor: {String(isAdmin)})
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}

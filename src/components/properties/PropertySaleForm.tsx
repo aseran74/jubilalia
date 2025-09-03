@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { 
@@ -36,9 +36,85 @@ interface PropertySaleFormData {
 const PropertySaleForm: React.FC = () => {
   const { ensureProfile } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(!!id);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const isEditing = !!id;
+
+  // Cargar datos de la propiedad si se está editando
+  useEffect(() => {
+    if (isEditing && id) {
+      const fetchProperty = async () => {
+        try {
+          setLoadingData(true);
+          console.log('🔍 PropertySaleForm - Cargando datos para propiedad ID:', id);
+          
+          // Obtener datos de la propiedad
+          const { data: propertyData, error: propertyError } = await supabase
+            .from('property_listings')
+            .select('*')
+            .eq('id', id)
+            .eq('listing_type', 'property_purchase')
+            .single();
+
+          console.log('🔍 PropertySaleForm - Datos de propiedad:', propertyData, 'Error:', propertyError);
+          if (propertyError) throw propertyError;
+
+          // Obtener requisitos de la propiedad
+          const { data: requirementsData, error: requirementsError } = await supabase
+            .from('property_purchase_requirements')
+            .select('*')
+            .eq('listing_id', id)
+            .single();
+
+          console.log('🔍 PropertySaleForm - Datos de requisitos:', requirementsData, 'Error:', requirementsError);
+          if (requirementsError) throw requirementsError;
+
+          // Obtener imágenes
+          const { data: imagesData, error: imagesError } = await supabase
+            .from('property_images')
+            .select('image_url')
+            .eq('listing_id', id)
+            .order('created_at');
+
+          console.log('🔍 PropertySaleForm - Datos de imágenes:', imagesData, 'Error:', imagesError);
+          if (imagesError) throw imagesError;
+
+          // Actualizar el formulario con los datos obtenidos
+          setFormData({
+            title: propertyData.title || '',
+            description: propertyData.description || '',
+            property_type: requirementsData.property_type || '',
+            address: propertyData.address || '',
+            city: propertyData.city || '',
+            country: propertyData.country || 'España',
+            price: propertyData.price?.toString() || '',
+            bedrooms: requirementsData.bedrooms?.toString() || '',
+            bathrooms: requirementsData.bathrooms?.toString() || '',
+            total_area: requirementsData.total_area?.toString() || '',
+            land_area: requirementsData.land_area?.toString() || '',
+            construction_year: requirementsData.construction_year?.toString() || '',
+            property_condition: requirementsData.property_condition || '',
+            parking_spaces: requirementsData.parking_spaces?.toString() || '',
+            amenities: requirementsData.amenities || [],
+            images: imagesData?.map(img => img.image_url) || [],
+            is_featured: propertyData.is_featured || false,
+            available_from: propertyData.available_from ? new Date(propertyData.available_from) : null
+          });
+
+        } catch (error) {
+          console.error('Error loading property data:', error);
+          setErrors({ general: 'Error al cargar los datos de la propiedad' });
+        } finally {
+          setLoadingData(false);
+        }
+      };
+
+      fetchProperty();
+    }
+  }, [id, isEditing]);
 
   const [formData, setFormData] = useState<PropertySaleFormData>({
     title: '',
@@ -181,55 +257,110 @@ const PropertySaleForm: React.FC = () => {
 
       console.log('✅ Usando perfil:', currentProfile);
 
-      // 1. Crear el listado principal
-      const { data: listing, error: listingError } = await supabase
-        .from('property_listings')
-        .insert({
-          profile_id: currentProfile.id,
-          listing_type: 'property_purchase',
-          title: formData.title,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          address: formData.address,
-          city: formData.city,
-          country: formData.country,
-          available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-          is_featured: formData.is_featured,
-          is_available: true,
-          property_type: formData.property_type,
-          bedrooms: parseInt(formData.bedrooms),
-          bathrooms: parseInt(formData.bathrooms),
-          total_area: parseFloat(formData.total_area),
-          land_area: formData.land_area ? parseFloat(formData.land_area) : null,
-          construction_year: parseInt(formData.construction_year),
-          property_condition: formData.property_condition,
-          parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0
-        })
-        .select()
-        .single();
+      let listingId: string;
 
-      if (listingError) throw listingError;
+      if (isEditing && id) {
+        // Actualizar propiedad existente
+        const { error: listingError } = await supabase
+          .from('property_listings')
+          .update({
+            title: formData.title,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            address: formData.address,
+            city: formData.city,
+            country: formData.country,
+            available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            is_featured: formData.is_featured,
+            property_type: formData.property_type,
+            bedrooms: parseInt(formData.bedrooms),
+            bathrooms: parseInt(formData.bathrooms),
+            total_area: parseFloat(formData.total_area),
+            land_area: formData.land_area ? parseFloat(formData.land_area) : null,
+            construction_year: parseInt(formData.construction_year),
+            property_condition: formData.property_condition,
+            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0
+          })
+          .eq('id', id);
 
-      const listingId = listing.id;
+        if (listingError) throw listingError;
+        listingId = id;
+      } else {
+        // Crear nueva propiedad
+        const { data: listing, error: listingError } = await supabase
+          .from('property_listings')
+          .insert({
+            profile_id: currentProfile.id,
+            listing_type: 'property_purchase',
+            title: formData.title,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            address: formData.address,
+            city: formData.city,
+            country: formData.country,
+            available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            is_featured: formData.is_featured,
+            is_available: true,
+            property_type: formData.property_type,
+            bedrooms: parseInt(formData.bedrooms),
+            bathrooms: parseInt(formData.bathrooms),
+            total_area: parseFloat(formData.total_area),
+            land_area: formData.land_area ? parseFloat(formData.land_area) : null,
+            construction_year: parseInt(formData.construction_year),
+            property_condition: formData.property_condition,
+            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0
+          })
+          .select()
+          .single();
 
-      // 2. Crear los requisitos específicos para compra de propiedades (solo información adicional)
-      const { error: requirementsError } = await supabase
-        .from('property_purchase_requirements')
-        .insert({
-          listing_id: listingId,
-          bedrooms: parseInt(formData.bedrooms),
-          bathrooms: parseInt(formData.bathrooms),
-          total_area: parseFloat(formData.total_area),
-          land_area: formData.land_area ? parseFloat(formData.land_area) : null,
-          construction_year: parseInt(formData.construction_year),
-          property_condition: formData.property_condition,
-          parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
-          property_type: formData.property_type
-        });
+        if (listingError) throw listingError;
+        listingId = listing.id;
+      }
 
-      if (requirementsError) throw requirementsError;
+      // 2. Actualizar o crear los requisitos específicos para compra de propiedades
+      if (isEditing) {
+        const { error: requirementsError } = await supabase
+          .from('property_purchase_requirements')
+          .update({
+            bedrooms: parseInt(formData.bedrooms),
+            bathrooms: parseInt(formData.bathrooms),
+            total_area: parseFloat(formData.total_area),
+            land_area: formData.land_area ? parseFloat(formData.land_area) : null,
+            construction_year: parseInt(formData.construction_year),
+            property_condition: formData.property_condition,
+            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
+            property_type: formData.property_type
+          })
+          .eq('listing_id', listingId);
 
-      // 3. Crear las amenidades
+        if (requirementsError) throw requirementsError;
+      } else {
+        const { error: requirementsError } = await supabase
+          .from('property_purchase_requirements')
+          .insert({
+            listing_id: listingId,
+            bedrooms: parseInt(formData.bedrooms),
+            bathrooms: parseInt(formData.bathrooms),
+            total_area: parseFloat(formData.total_area),
+            land_area: formData.land_area ? parseFloat(formData.land_area) : null,
+            construction_year: parseInt(formData.construction_year),
+            property_condition: formData.property_condition,
+            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
+            property_type: formData.property_type
+          });
+
+        if (requirementsError) throw requirementsError;
+      }
+
+      // 3. Manejar amenidades
+      if (isEditing) {
+        // Eliminar amenidades existentes y crear nuevas
+        await supabase
+          .from('property_amenities')
+          .delete()
+          .eq('listing_id', listingId);
+      }
+
       if (formData.amenities.length > 0) {
         const amenitiesData = formData.amenities.map(amenityName => ({
           listing_id: listingId,
@@ -245,7 +376,15 @@ const PropertySaleForm: React.FC = () => {
         if (amenitiesError) throw amenitiesError;
       }
 
-      // 4. Crear las imágenes
+      // 4. Manejar imágenes
+      if (isEditing) {
+        // Eliminar imágenes existentes y crear nuevas
+        await supabase
+          .from('property_images')
+          .delete()
+          .eq('listing_id', listingId);
+      }
+
       if (formData.images.length > 0) {
         const imagesData = formData.images.map((imageUrl, index) => ({
           listing_id: listingId,
@@ -261,10 +400,10 @@ const PropertySaleForm: React.FC = () => {
         if (imagesError) throw imagesError;
       }
 
-      setSuccessMessage('¡Propiedad publicada exitosamente! Redirigiendo...');
+      setSuccessMessage(isEditing ? '¡Propiedad actualizada exitosamente! Redirigiendo...' : '¡Propiedad publicada exitosamente! Redirigiendo...');
       
       setTimeout(() => {
-        navigate('/dashboard/purchase/search');
+        navigate('/dashboard/properties/sale');
       }, 2000);
 
     } catch (error) {
@@ -281,12 +420,18 @@ const PropertySaleForm: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Publicar Propiedad en Venta
+              {isEditing ? 'Editar Propiedad en Venta' : 'Publicar Propiedad en Venta'}
             </h1>
             <p className="text-gray-600">
-              Completa los datos de tu propiedad para encontrar compradores
+              {isEditing ? 'Modifica los datos de tu propiedad' : 'Completa los datos de tu propiedad para encontrar compradores'}
             </p>
           </div>
+
+          {loadingData && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-800">Cargando datos de la propiedad...</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Información básica */}
@@ -693,7 +838,7 @@ const PropertySaleForm: React.FC = () => {
                 ) : (
                   <>
                     <Building className="w-5 h-5" />
-                    Publicar Propiedad en Venta
+                    {isEditing ? 'Editar Propiedad en Venta' : 'Publicar Propiedad en Venta'}
                   </>
                 )}
               </button>

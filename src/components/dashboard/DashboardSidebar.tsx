@@ -16,7 +16,8 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -32,7 +33,7 @@ interface NavigationGroup {
 }
 
 const DashboardSidebar: React.FC = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -129,6 +130,16 @@ const DashboardSidebar: React.FC = () => {
       ]
     }
   ];
+
+  // Sección de administración (solo para administradores)
+  const adminGroup: NavigationGroup = {
+    name: 'Administración',
+    icon: ShieldCheckIcon,
+    items: [
+      { name: 'Gestionar Habitaciones', href: '/dashboard/admin/rooms', icon: BuildingOfficeIcon },
+      { name: 'Gestionar Propiedades', href: '/dashboard/admin/properties', icon: BuildingOfficeIcon },
+    ]
+  };
 
   const standaloneItems: NavigationItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -305,6 +316,55 @@ const DashboardSidebar: React.FC = () => {
               </div>
             ))}
 
+            {/* Admin Section (only for admins) */}
+            {isAdmin && (!isCollapsed || isMobile) && (
+              <>
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-4"></div>
+                
+                <div className="space-y-1">
+                  <button
+                    onClick={() => toggleGroup(adminGroup.name)}
+                    className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      isGroupActive(adminGroup)
+                        ? 'bg-red-50 text-red-700'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <adminGroup.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                      {adminGroup.name}
+                    </div>
+                    {openGroups.includes(adminGroup.name) ? (
+                      <ChevronDownIcon className="w-4 h-4" />
+                    ) : (
+                      <ChevronRightIcon className="w-4 h-4" />
+                    )}
+                  </button>
+                  
+                  {openGroups.includes(adminGroup.name) && (
+                    <div className="ml-6 space-y-1">
+                      {adminGroup.items.map((item) => (
+                        <Link
+                          key={item.href}
+                          to={item.href}
+                          onClick={() => isMobile && setIsMobileOpen(false)}
+                          className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                            isActive(item.href)
+                              ? 'bg-red-100 text-red-700'
+                              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4 mr-3 flex-shrink-0" />
+                          {item.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
             {/* Collapsed view for groups */}
             {isCollapsed && !isMobile && (
               <>
@@ -339,6 +399,23 @@ const DashboardSidebar: React.FC = () => {
                 </div>
               </div>
             ))}
+
+            {/* Admin Section (Collapsed view) */}
+            {isAdmin && isCollapsed && !isMobile && (
+              <div className="relative group">
+                <button
+                  className="w-full flex items-center justify-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  title={adminGroup.name}
+                >
+                  <adminGroup.icon className="w-5 h-5" />
+                </button>
+                
+                {/* Tooltip for collapsed admin group */}
+                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  {adminGroup.name}
+                </div>
+              </div>
+            )}
           </div>
         </nav>
 

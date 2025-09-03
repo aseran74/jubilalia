@@ -39,22 +39,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Calcular si el usuario es administrador
   const isAdmin = profile?.is_admin === true;
 
-  const refreshProfile = async () => {
-    if (!user) {
+  const refreshProfile = async (userToRefresh = user) => {
+    if (!userToRefresh) {
       console.log('refreshProfile - No hay usuario, saliendo...');
       return;
     }
 
+    // Evitar múltiples llamadas simultáneas
+    if (loading) {
+      console.log('refreshProfile - Ya hay una consulta en progreso, saliendo...');
+      return;
+    }
+
     try {
-      console.log('refreshProfile - Usuario:', user.id);
+      console.log('refreshProfile - Usuario:', userToRefresh.id);
+      console.log('refreshProfile - Iniciando consulta a la base de datos...');
       
-      // Buscar perfil por auth_user_id
-      const { data: profileData, error } = await supabase
+      // Buscar perfil por auth_user_id con timeout
+      const queryPromise = supabase
         .from('profiles')
         .select('*')
-        .eq('auth_user_id', user.id)
+        .eq('auth_user_id', userToRefresh.id)
         .single();
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout: La consulta tardó demasiado')), 5000)
+      );
+      
+      const { data: profileData, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
+      console.log('refreshProfile - Consulta completada');
       console.log('refreshProfile - Perfil encontrado:', profileData, 'Error:', error);
 
       if (profileData && !error) {
@@ -63,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         console.log('refreshProfile - Creando nuevo perfil...');
         // Si no existe el perfil, crearlo automáticamente
-        const newProfile = createLocalProfile(user);
+        const newProfile = createLocalProfile(userToRefresh);
         console.log('refreshProfile - Nuevo perfil a crear:', newProfile);
         
         const { data: createdProfile, error: createError } = await supabase
@@ -81,6 +95,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           console.error('refreshProfile - Error al crear perfil:', createError);
         }
       }
+      console.log('refreshProfile - Función completada exitosamente');
     } catch (error) {
       console.error('Error refreshing profile:', error);
     }
@@ -136,11 +151,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
+      console.log('🚪 Iniciando logout...');
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
+      console.log('✅ Logout exitoso');
+      // Redirigir a la página principal
+      window.location.href = '/';
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('❌ Error signing out:', error);
     }
   };
 
@@ -202,7 +221,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         console.log('getInitialSession - Usuario encontrado, llamando a refreshProfile...');
-        await refreshProfile();
+        await refreshProfile(session.user);
       }
       setLoading(false);
     };
@@ -216,7 +235,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           console.log('onAuthStateChange - Usuario encontrado, llamando a refreshProfile...');
-          await refreshProfile();
+          await refreshProfile(session.user);
         } else {
           setProfile(null);
         }
@@ -229,11 +248,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Efecto adicional para refrescar el perfil cuando cambie el usuario
   useEffect(() => {
-    if (user && !profile) {
+    if (user && !profile && !loading) {
       console.log('useEffect [user] - Usuario cambiado, refrescando perfil...');
-      refreshProfile();
+      refreshProfile(user);
     }
-  }, [user, profile]);
+  }, [user, profile, loading]); // Agregado loading para evitar llamadas simultáneas
 
   const value = {
     user,

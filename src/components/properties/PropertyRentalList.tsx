@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import AdminButtons from '../common/AdminButtons';
 import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Home } from 'lucide-react';
 
 interface PropertyRental {
@@ -36,10 +38,58 @@ const PropertyRentalList: React.FC = () => {
   const [bathroomsFilter, setBathroomsFilter] = useState('');
 
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     fetchProperties();
   }, []);
+
+  const handleDeleteProperty = async (propertyId: string) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta propiedad?')) {
+      return;
+    }
+
+    try {
+      // Eliminar imágenes primero
+      const { error: imagesError } = await supabase
+        .from('property_images')
+        .delete()
+        .eq('listing_id', propertyId);
+
+      if (imagesError) {
+        console.error('Error deleting images:', imagesError);
+      }
+
+      // Eliminar requisitos
+      const { error: requirementsError } = await supabase
+        .from('property_rental_requirements')
+        .delete()
+        .eq('listing_id', propertyId);
+
+      if (requirementsError) {
+        console.error('Error deleting requirements:', requirementsError);
+      }
+
+      // Eliminar la propiedad
+      const { error: propertyError } = await supabase
+        .from('property_listings')
+        .delete()
+        .eq('id', propertyId);
+
+      if (propertyError) {
+        console.error('Error deleting property:', propertyError);
+        alert('Error al eliminar la propiedad');
+        return;
+      }
+
+      // Actualizar la lista
+      setProperties(prev => prev.filter(property => property.id !== propertyId));
+      alert('Propiedad eliminada exitosamente');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar la propiedad');
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -417,6 +467,18 @@ const PropertyRentalList: React.FC = () => {
                   <MessageCircle className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Botones de administrador */}
+              {isAdmin && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <AdminButtons
+                    itemId={property.id}
+                    itemType="property_rental"
+                    onDelete={handleDeleteProperty}
+                    className="justify-center"
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}

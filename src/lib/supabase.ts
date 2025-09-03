@@ -8,7 +8,9 @@ const supabaseAnonKey = environment.supabase.anonKey;
 
 console.log('🔧 Configuración de Supabase:', {
   url: supabaseUrl,
-  anonKey: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'No configurado'
+  anonKey: supabaseAnonKey ? `${supabaseAnonKey.substring(0, 20)}...` : 'No configurado',
+  hasUrl: !!supabaseUrl,
+  hasAnonKey: !!supabaseAnonKey
 });
 
 // Crear cliente de Supabase

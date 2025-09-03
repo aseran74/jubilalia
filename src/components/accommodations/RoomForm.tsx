@@ -104,14 +104,17 @@ const RoomForm: React.FC = () => {
       const fetchRoom = async () => {
         try {
           setLoadingData(true);
+          console.log('🔍 RoomForm - Cargando datos para habitación ID:', id);
           
           // Obtener datos de la habitación
           const { data: roomData, error: roomError } = await supabase
-            .from('room_rental_listings')
+            .from('property_listings')
             .select('*')
             .eq('id', id)
+            .eq('listing_type', 'room_rental')
             .single();
 
+          console.log('🔍 RoomForm - Datos de habitación:', roomData, 'Error:', roomError);
           if (roomError) throw roomError;
 
           // Obtener requisitos de la habitación
@@ -121,15 +124,17 @@ const RoomForm: React.FC = () => {
             .eq('listing_id', id)
             .single();
 
+          console.log('🔍 RoomForm - Datos de requisitos:', requirementsData, 'Error:', requirementsError);
           if (requirementsError) throw requirementsError;
 
           // Obtener imágenes
           const { data: imagesData, error: imagesError } = await supabase
-            .from('room_rental_images')
+            .from('property_images')
             .select('image_url')
             .eq('listing_id', id)
-            .order('image_order');
+            .order('created_at');
 
+          console.log('🔍 RoomForm - Datos de imágenes:', imagesData, 'Error:', imagesError);
           if (imagesError) throw imagesError;
 
           // Actualizar el formulario con los datos obtenidos
