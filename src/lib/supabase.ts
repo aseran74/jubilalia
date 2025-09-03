@@ -16,9 +16,12 @@ console.log('🔧 Configuración de Supabase:', {
 // Crear cliente de Supabase
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: true,
+    // IMPORTANTE: Configurar correctamente para Vercel
+    detectSessionInUrl: true,
     persistSession: true,
-    detectSessionInUrl: true
+    autoRefreshToken: true,
+    // Configurar el flujo de autenticación
+    flowType: 'pkce'
   }
 });
 
@@ -146,7 +149,11 @@ export const signInWithGoogle = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        }
       }
     });
     if (error) {
