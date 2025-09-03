@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import AdminButtons from '../common/AdminButtons';
 import { 
   Search, 
   Filter, 
@@ -57,6 +59,7 @@ const PostList: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     fetchCategories();
@@ -202,6 +205,32 @@ const PostList: React.FC = () => {
 
     } catch (error) {
       console.error('Error toggling like:', error);
+    }
+  };
+
+  const handleDeletePost = async (postId: string) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este post?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId);
+
+      if (error) {
+        console.error('Error deleting post:', error);
+        alert('Error al eliminar el post');
+        return;
+      }
+
+      // Actualizar la lista de posts
+      setPosts(posts.filter(post => post.id !== postId));
+      alert('Post eliminado correctamente');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Error al eliminar el post');
     }
   };
 
@@ -501,6 +530,17 @@ const PostList: React.FC = () => {
                   <Heart className={`w-4 h-4 ${post.is_liked ? 'fill-current' : ''}`} />
                 </button>
               </div>
+
+              {/* Botones de administrador */}
+              {isAdmin && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <AdminButtons 
+                    itemId={post.id}
+                    itemType="post"
+                    onDelete={handleDeletePost}
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}

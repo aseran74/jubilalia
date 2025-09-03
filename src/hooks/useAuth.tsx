@@ -6,6 +6,7 @@ interface AuthContextType {
   user: any;
   profile: UserProfile | null;
   loading: boolean;
+  isAdmin: boolean; // Nueva propiedad para verificar si es administrador
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -34,6 +35,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Calcular si el usuario es administrador
+  const isAdmin = profile?.is_admin === true;
 
   const refreshProfile = async () => {
     if (!user) {
@@ -235,6 +239,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     profile,
     loading,
+    isAdmin,
     signOut,
     refreshProfile,
     signInWithGoogle,

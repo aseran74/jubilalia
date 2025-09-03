@@ -1026,6 +1026,7 @@ export interface UserProfile {
   country: string | null;
   occupation: string | null;
   interests: string[] | null;
+  is_admin: boolean; // Campo para identificar administradores
   created_at: string | null;
   updated_at: string | null;
   

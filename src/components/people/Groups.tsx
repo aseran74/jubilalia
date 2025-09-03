@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import GroupPosts from '../groups/GroupPosts';
+import AdminButtons from '../common/AdminButtons';
 import { 
   PlusIcon,
   UsersIcon,
@@ -26,7 +27,7 @@ interface Group {
 
 const Groups: React.FC = () => {
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
@@ -148,6 +149,33 @@ const Groups: React.FC = () => {
       }
     } catch (error) {
       console.error('Error leaving group:', error);
+    }
+  };
+
+  // Eliminar un grupo (solo administradores)
+  const handleDeleteGroup = async (groupId: string) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este grupo?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('groups')
+        .delete()
+        .eq('id', groupId);
+
+      if (error) {
+        console.error('Error deleting group:', error);
+        alert('Error al eliminar el grupo');
+        return;
+      }
+
+      // Actualizar la lista de grupos
+      setGroups(groups.filter(group => group.id !== groupId));
+      alert('Grupo eliminado correctamente');
+    } catch (error) {
+      console.error('Error deleting group:', error);
+      alert('Error al eliminar el grupo');
     }
   };
 
@@ -299,6 +327,17 @@ const Groups: React.FC = () => {
                     </button>
                   )}
                 </div>
+
+                {/* Botones de administrador */}
+                {isAdmin && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <AdminButtons 
+                      itemId={group.id}
+                      itemType="group"
+                      onDelete={handleDeleteGroup}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ))}
