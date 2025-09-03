@@ -61,7 +61,11 @@ interface RoomDetail {
 const RoomDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { profile, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
+  
+  // Debug: verificar si isAdmin se está obteniendo correctamente
+  console.log('🔍 RoomDetail - isAdmin:', isAdmin, 'type:', typeof isAdmin);
+  
   const [room, setRoom] = useState<RoomDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -536,16 +540,27 @@ const RoomDetail: React.FC = () => {
                 </button>
               </div>
 
-              {/* Botones de administrador */}
-              {isAdmin && (
-                <div className="border-t border-gray-200 pt-4">
-                  <AdminButtons 
-                    itemId={room.id}
-                    itemType="room"
-                    onDelete={handleDeleteRoom}
-                  />
+              {/* Botones de administrador - DEBUG */}
+              <div className="border-t border-gray-200 pt-4">
+                <div className="text-xs text-gray-500 mb-2">
+                  DEBUG: isAdmin = {String(isAdmin)} (tipo: {typeof isAdmin})
                 </div>
-              )}
+                {isAdmin === true && (
+                  <div>
+                    <div className="text-xs text-green-600 mb-2">✅ Usuario es administrador</div>
+                    <AdminButtons 
+                      itemId={room.id}
+                      itemType="room"
+                      onDelete={handleDeleteRoom}
+                    />
+                  </div>
+                )}
+                {isAdmin !== true && (
+                  <div className="text-xs text-red-600">
+                    ❌ Usuario NO es administrador (valor: {String(isAdmin)})
+                  </div>
+                )}
+              </div>
 
               {/* Información adicional */}
               <div className="border-t border-gray-200 pt-4 space-y-3">

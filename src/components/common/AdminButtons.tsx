@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface AdminButtonsProps {
   itemId: string;
-  itemType: 'post' | 'group' | 'profile' | 'property' | 'activity';
+  itemType: 'post' | 'group' | 'profile' | 'property' | 'activity' | 'room';
   onDelete?: (id: string) => void;
   className?: string;
 }
@@ -28,10 +28,11 @@ const AdminButtons: React.FC<AdminButtonsProps> = ({
       case 'profile':
         navigate(`/dashboard/profiles/${itemId}/edit`);
         break;
-      case 'property':
-        // Para propiedades, necesitamos determinar si es venta o alquiler
-        // Por ahora, usaremos una ruta genérica que se puede ajustar
+      case 'property_sale':
         navigate(`/dashboard/properties/sale/${itemId}/edit`);
+        break;
+      case 'property_rental':
+        navigate(`/dashboard/properties/rental/${itemId}/edit`);
         break;
       case 'activity':
         navigate(`/dashboard/activities/${itemId}/edit`);
