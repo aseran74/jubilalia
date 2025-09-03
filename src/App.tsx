@@ -301,6 +301,7 @@ const App: React.FC = () => {
           <Route path="/database-diagnostic" element={<DatabaseDiagnostic />} />
           <Route path="/vercel-auth-fix" element={<VercelAuthFix />} />
           <Route path="/google-auth-diagnostic" element={<GoogleAuthDiagnostic />} />
+          <Route path="/auth-debug" element={<GoogleAuthDiagnostic />} />
           <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
