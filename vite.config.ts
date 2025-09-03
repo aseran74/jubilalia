@@ -15,4 +15,18 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['lucide-react', '@heroicons/react'],
+          charts: ['apexcharts', 'react-apexcharts'],
+          supabase: ['@supabase/supabase-js']
+        }
+      }
+    }
+  }
 });
