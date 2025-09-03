@@ -87,6 +87,36 @@ const GoogleAuthDiagnostic: React.FC = () => {
     }
   };
 
+  const clearSessionData = async () => {
+    try {
+      console.log('🧹 Limpiando datos de sesión...');
+      
+      // Cerrar sesión en Supabase
+      await supabase.auth.signOut();
+      
+      // Limpiar localStorage
+      localStorage.clear();
+      
+      // Limpiar sessionStorage
+      sessionStorage.clear();
+      
+      // Limpiar cookies del dominio
+      document.cookie.split(";").forEach((c) => {
+        const eqPos = c.indexOf("=");
+        const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=." + window.location.hostname;
+      });
+      
+      alert('✅ Datos de sesión limpiados. Recarga la página para continuar.');
+      window.location.reload();
+    } catch (error: any) {
+      console.error('❌ Error limpiando sesión:', error);
+      alert(`Error: ${error.message}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 bg-white rounded-lg shadow">
@@ -176,15 +206,26 @@ const GoogleAuthDiagnostic: React.FC = () => {
         </div>
       </div>
 
-      {/* Botón de prueba */}
+      {/* Botones de prueba */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-3">🧪 Prueba de Autenticación</h3>
-        <button
-          onClick={testGoogleAuth}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Probar Autenticación con Google
-        </button>
+        <h3 className="text-lg font-semibold mb-3">🧪 Pruebas y Soluciones</h3>
+        <div className="space-x-4">
+          <button
+            onClick={testGoogleAuth}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Probar Autenticación con Google
+          </button>
+          <button
+            onClick={clearSessionData}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            🧹 Limpiar Datos de Sesión
+          </button>
+        </div>
+        <div className="mt-2 text-sm text-gray-600">
+          <strong>Nota:</strong> Si funciona en modo incógnito pero no en sesión normal, usa el botón "Limpiar Datos de Sesión"
+        </div>
       </div>
 
       {/* Instrucciones */}
