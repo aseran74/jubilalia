@@ -1,4 +1,13 @@
 {
+  "name": "jubilalia",
+  "version": "1.0.0",
+  "description": "Jubilalia - Plataforma para jubilados",
+  "scripts": {
+    "build": "cd dashboard && npm run build",
+    "dev": "cd dashboard && npm run dev",
+    "install": "cd dashboard && npm install",
+    "preview": "cd dashboard && npm run preview"
+  },
   "dependencies": {
     "lucide-react": "^0.542.0"
   }
