@@ -168,38 +168,38 @@ const GroupForm: React.FC = () => {
         const { data: groupData, error: groupError } = await supabase
           .from('groups')
           .insert({
-          name: formData.name.trim(),
-          description: formData.description.trim(),
-          image_url: formData.image_url || null,
-          is_public: formData.is_public,
-          max_members: formData.max_members,
-          created_by: profile.id,
-          current_members: 1
-        })
-        .select()
-        .single();
+            name: formData.name.trim(),
+            description: formData.description.trim(),
+            image_url: formData.image_url || null,
+            is_public: formData.is_public,
+            max_members: formData.max_members,
+            created_by: profile.id,
+            current_members: 1
+          })
+          .select()
+          .single();
 
-      if (groupError) throw groupError;
+        if (groupError) throw groupError;
 
-      // Agregar al creador como miembro del grupo
-      const { error: memberError } = await supabase
-        .from('group_members')
-        .insert({
-          group_id: groupData.id,
-          profile_id: profile.id,
-          role: 'admin'
-        });
+        // Agregar al creador como miembro del grupo
+        const { error: memberError } = await supabase
+          .from('group_members')
+          .insert({
+            group_id: groupData.id,
+            profile_id: profile.id,
+            role: 'admin'
+          });
 
-      if (memberError) throw memberError;
+        if (memberError) throw memberError;
 
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard/groups');
-      }, 2000);
-
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard/groups');
+        }, 2000);
+      }
     } catch (error) {
-      console.error('Error creating group:', error);
-      setError('Error al crear el grupo. Inténtalo de nuevo.');
+      console.error('Error creating/updating group:', error);
+      setError(isEditing ? 'Error al actualizar el grupo. Inténtalo de nuevo.' : 'Error al crear el grupo. Inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
