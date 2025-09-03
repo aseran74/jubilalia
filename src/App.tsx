@@ -27,6 +27,10 @@ import RoomList from './components/accommodations/RoomList';
 import RoomDetail from './components/accommodations/RoomDetail';
 import RoomForm from './components/accommodations/RoomForm';
 
+// Componentes de administración
+import AdminRoomManagement from './components/admin/AdminRoomManagement';
+import AdminPropertyManagement from './components/admin/AdminPropertyManagement';
+
 // Componentes de actividades
 import ActivityForm from './components/activities/ActivityForm';
 import ActivityList from './components/activities/ActivityList';
@@ -58,6 +62,7 @@ import RoomFormTest from './components/debug/RoomFormTest';
 import AuthDiagnostic from './components/debug/AuthDiagnostic';
 import DatabaseDiagnostic from './components/debug/DatabaseDiagnostic';
 import VercelAuthFix from './components/debug/VercelAuthFix';
+import GoogleAuthDiagnostic from './components/debug/GoogleAuthDiagnostic';
 
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
@@ -155,6 +160,10 @@ const DashboardLayout: React.FC = () => {
             
             {/* Mensajería */}
             <Route path="/messages" element={<ChatApp />} />
+            
+            {/* Administración */}
+            <Route path="/admin/rooms" element={<AdminRoomManagement />} />
+            <Route path="/admin/properties" element={<AdminPropertyManagement />} />
             
             {/* Perfil y Configuración */}
             <Route path="/profile" element={<ProfileForm />} />
@@ -288,9 +297,10 @@ const App: React.FC = () => {
           <Route path="/test-google-places" element={<GooglePlacesTest />} />
           <Route path="/test-database" element={<DatabaseTest />} />
           <Route path="/test-room-form" element={<RoomFormTest />} />
-          <Route path="/auth-diagnostic" element={<AuthDiagnostic />} />
-        <Route path="/database-diagnostic" element={<DatabaseDiagnostic />} />
-        <Route path="/vercel-auth-fix" element={<VercelAuthFix />} />
+                    <Route path="/auth-diagnostic" element={<AuthDiagnostic />} />
+          <Route path="/database-diagnostic" element={<DatabaseDiagnostic />} />
+          <Route path="/vercel-auth-fix" element={<VercelAuthFix />} />
+          <Route path="/google-auth-diagnostic" element={<GoogleAuthDiagnostic />} />
           <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
