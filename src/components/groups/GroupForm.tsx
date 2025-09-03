@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -22,8 +22,10 @@ interface GroupFormData {
 
 const GroupForm: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const { user, profile } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(!!id);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState<GroupFormData>({
@@ -33,6 +35,40 @@ const GroupForm: React.FC = () => {
     is_public: true,
     max_members: 50
   });
+
+  const isEditing = !!id;
+
+  // Cargar datos del grupo si se está editando
+  useEffect(() => {
+    if (isEditing && id) {
+      const fetchGroup = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('groups')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+          if (error) throw error;
+
+          setFormData({
+            name: data.name || '',
+            description: data.description || '',
+            image_url: data.image_url || '',
+            is_public: data.is_public ?? true,
+            max_members: data.max_members || 50
+          });
+        } catch (error) {
+          console.error('Error loading group:', error);
+          setError('Error al cargar el grupo');
+        } finally {
+          setLoadingData(false);
+        }
+      };
+
+      fetchGroup();
+    }
+  }, [id, isEditing]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -107,10 +143,31 @@ const GroupForm: React.FC = () => {
     setError('');
 
     try {
-      // Crear el grupo
-      const { data: groupData, error: groupError } = await supabase
-        .from('groups')
-        .insert({
+      if (isEditing && id) {
+        // Actualizar el grupo existente
+        const { error: updateError } = await supabase
+          .from('groups')
+          .update({
+            name: formData.name,
+            description: formData.description,
+            image_url: formData.image_url,
+            is_public: formData.is_public,
+            max_members: formData.max_members,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard/groups');
+        }, 2000);
+      } else {
+        // Crear el grupo
+        const { data: groupData, error: groupError } = await supabase
+          .from('groups')
+          .insert({
           name: formData.name.trim(),
           description: formData.description.trim(),
           image_url: formData.image_url || null,
@@ -190,12 +247,21 @@ const GroupForm: React.FC = () => {
               <UserGroupIcon className="w-10 h-10 text-green-600" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Crear Nuevo Grupo
+              {isEditing ? 'Editar Grupo' : 'Crear Nuevo Grupo'}
             </h1>
             <p className="text-gray-600">
-              Crea un grupo para conectar con personas que compartan tus intereses
+              {isEditing 
+                ? 'Modifica la información del grupo' 
+                : 'Crea un grupo para conectar con personas que compartan tus intereses'
+              }
             </p>
           </div>
+
+          {loadingData && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-blue-800">Cargando datos del grupo...</p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -205,7 +271,9 @@ const GroupForm: React.FC = () => {
 
           {success && (
             <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-800">¡Grupo creado exitosamente! Redirigiendo...</p>
+              <p className="text-green-800">
+                {isEditing ? '¡Grupo actualizado exitosamente!' : '¡Grupo creado exitosamente!'} Redirigiendo...
+              </p>
             </div>
           )}
 

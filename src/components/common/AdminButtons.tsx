@@ -20,19 +20,21 @@ const AdminButtons: React.FC<AdminButtonsProps> = ({
     // Navegar al formulario de edición según el tipo
     switch (itemType) {
       case 'post':
-        navigate(`/dashboard/posts/edit/${itemId}`);
+        navigate(`/dashboard/posts/${itemId}/edit`);
         break;
       case 'group':
-        navigate(`/dashboard/groups/edit/${itemId}`);
+        navigate(`/dashboard/groups/${itemId}/edit`);
         break;
       case 'profile':
-        navigate(`/dashboard/profiles/edit/${itemId}`);
+        navigate(`/dashboard/profiles/${itemId}/edit`);
         break;
       case 'property':
-        navigate(`/dashboard/properties/edit/${itemId}`);
+        // Para propiedades, necesitamos determinar si es venta o alquiler
+        // Por ahora, usaremos una ruta genérica que se puede ajustar
+        navigate(`/dashboard/properties/sale/${itemId}/edit`);
         break;
       case 'activity':
-        navigate(`/dashboard/activities/edit/${itemId}`);
+        navigate(`/dashboard/activities/${itemId}/edit`);
         break;
       default:
         console.warn('Tipo de elemento no reconocido:', itemType);

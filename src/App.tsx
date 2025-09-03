@@ -118,21 +118,25 @@ const DashboardLayout: React.FC = () => {
             <Route path="/properties/sale" element={<PropertySaleList />} />
             <Route path="/properties/sale/create" element={<PropertySaleForm />} />
             <Route path="/properties/sale/:id" element={<PropertyDetail />} />
+            <Route path="/properties/sale/:id/edit" element={<PropertySaleForm />} />
             
             {/* Propiedades - Alquiler */}
             <Route path="/properties/rental" element={<PropertyRentalList />} />
             <Route path="/properties/rental/create" element={<PropertyRentalForm />} />
             <Route path="/properties/rental/:id" element={<PropertyDetail />} />
+            <Route path="/properties/rental/:id/edit" element={<PropertyRentalForm />} />
             
             {/* Alquiler de Habitaciones */}
             <Route path="/rooms" element={<RoomList />} />
             <Route path="/rooms/create" element={<RoomForm />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />
+            <Route path="/rooms/:id/edit" element={<RoomForm />} />
             
             {/* Actividades */}
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/activities/create" element={<ActivityForm />} />
             <Route path="/activities/:id" element={<ActivityDetail />} />
+            <Route path="/activities/:id/edit" element={<ActivityForm />} />
             
             {/* Posts */}
             <Route path="/posts" element={<PostList />} />
@@ -147,12 +151,14 @@ const DashboardLayout: React.FC = () => {
             {/* Grupos */}
             <Route path="/groups" element={<Groups />} />
             <Route path="/groups/create" element={<GroupForm />} />
+            <Route path="/groups/:id/edit" element={<GroupForm />} />
             
             {/* Mensajería */}
             <Route path="/messages" element={<ChatApp />} />
             
             {/* Perfil y Configuración */}
             <Route path="/profile" element={<ProfileForm />} />
+            <Route path="/profiles/:id/edit" element={<ProfileForm />} />
             <Route path="/settings" element={<div className="p-6">Configuración</div>} />
             
             {/* Demo */}
