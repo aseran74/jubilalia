@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface AdminButtonsProps {
   itemId: string;
-  itemType: 'post' | 'group' | 'profile' | 'property' | 'activity' | 'room';
+  itemType: 'post' | 'group' | 'profile' | 'property' | 'property_sale' | 'property_rental' | 'activity' | 'room';
   onDelete?: (id: string) => void;
   className?: string;
 }
