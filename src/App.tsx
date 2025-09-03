@@ -63,6 +63,7 @@ import AuthDiagnostic from './components/debug/AuthDiagnostic';
 import DatabaseDiagnostic from './components/debug/DatabaseDiagnostic';
 import VercelAuthFix from './components/debug/VercelAuthFix';
 import GoogleAuthDiagnostic from './components/debug/GoogleAuthDiagnostic';
+import RedirectFix from './components/debug/RedirectFix';
 
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
@@ -302,6 +303,7 @@ const App: React.FC = () => {
           <Route path="/vercel-auth-fix" element={<VercelAuthFix />} />
           <Route path="/google-auth-diagnostic" element={<GoogleAuthDiagnostic />} />
           <Route path="/auth-debug" element={<GoogleAuthDiagnostic />} />
+          <Route path="/redirect-fix" element={<RedirectFix />} />
           <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
