@@ -17,7 +17,8 @@ import {
   ChevronRightIcon,
   Bars3Icon,
   XMarkIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  MapIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -79,7 +80,9 @@ const DashboardSidebar: React.FC = () => {
       icon: BuildingOfficeIcon,
       items: [
         { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MagnifyingGlassIcon },
         { name: 'Publicar habitación', href: '/dashboard/rooms/create', icon: PlusIcon },
+        { name: '🔧 Debug Maps', href: '/map-debug', icon: Cog6ToothIcon },
       ]
     },
     {
@@ -87,6 +90,7 @@ const DashboardSidebar: React.FC = () => {
       icon: BuildingOfficeIcon,
       items: [
         { name: 'Buscar alquiler', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
+        { name: 'Ver en mapa', href: '/dashboard/properties/rental/map', icon: MapIcon },
         { name: 'Publicar alquiler', href: '/dashboard/properties/rental/create', icon: PlusIcon },
       ]
     },
@@ -95,6 +99,7 @@ const DashboardSidebar: React.FC = () => {
       icon: BuildingOfficeIcon,
       items: [
         { name: 'Buscar venta', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
+        { name: 'Ver en mapa', href: '/dashboard/properties/sale/map', icon: MapIcon },
         { name: 'Publicar venta', href: '/dashboard/properties/sale/create', icon: PlusIcon },
       ]
     },

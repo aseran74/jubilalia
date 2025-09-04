@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
-import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car } from 'lucide-react';
+import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car, Plus } from 'lucide-react';
 
 interface PropertySale {
   id: string;
@@ -283,6 +283,34 @@ const PropertySaleList: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Propiedades en Venta</h1>
+            <p className="text-gray-600 mt-1">
+              {filteredProperties.length} propiedades encontradas
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/properties/sale/map')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <MapPin className="w-4 h-4" />
+              Ver en Mapa
+            </button>
+            <button
+              onClick={() => navigate('/properties/sale/create')}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Publicar Propiedad
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Filtros y búsqueda */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex justify-between items-center mb-4">

@@ -421,17 +421,15 @@ const RoomDetail: React.FC = () => {
               </div>
 
               {/* Mapa de ubicación */}
-              {room.latitude && room.longitude && (
-                <div className="mb-6">
-                  <RoomDetailMap
-                    latitude={room.latitude}
-                    longitude={room.longitude}
-                    title={room.title}
-                    location={`${room.address}, ${room.city}`}
-                    className="w-full h-80"
-                  />
-                </div>
-              )}
+              <div className="mb-6">
+                <RoomDetailMap
+                  latitude={room.latitude || 40.4168}
+                  longitude={room.longitude || -3.7038}
+                  title={room.title}
+                  location={`${room.address}, ${room.city}`}
+                  className="w-full h-80"
+                />
+              </div>
 
               {/* Características y amenidades */}
               <div className="grid md:grid-cols-2 gap-6 mb-6">

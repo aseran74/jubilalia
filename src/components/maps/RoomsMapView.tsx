@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPinIcon, HomeIcon, UsersIcon, CurrencyEuroIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
+import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 
 interface Room {
   id: string;
@@ -30,29 +31,26 @@ const RoomsMapView: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
+  
+  const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
   useEffect(() => {
     fetchRooms();
   }, []);
 
   useEffect(() => {
-    if (rooms.length > 0 && mapRef.current && !map) {
+    if (rooms.length > 0 && mapRef.current && !map && mapsLoaded) {
       initializeMap();
     }
-  }, [rooms, map]);
+  }, [rooms, map, mapsLoaded]);
 
   const fetchRooms = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('rooms')
-        .select(`
-          *,
-          user_profile:profiles!rooms_user_id_fkey(
-            full_name,
-            avatar_url
-          )
-        `)
+        .from('property_listings')
+        .select('*')
+        .eq('listing_type', 'room_rental')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -60,11 +58,34 @@ const RoomsMapView: React.FC = () => {
         return;
       }
 
-      setRooms(data || []);
+      // Agregar coordenadas por defecto para habitaciones sin coordenadas
+      const roomsWithCoords = (data || []).map((room, index) => {
+        if (!room.latitude || !room.longitude) {
+          // Usar coordenadas por defecto basadas en la ciudad o Madrid
+          const defaultCoords = {
+            'madrid': { lat: 40.4168, lng: -3.7038 },
+            'barcelona': { lat: 41.3851, lng: 2.1734 },
+            'valencia': { lat: 39.4699, lng: -0.3763 },
+            'sevilla': { lat: 37.3891, lng: -5.9845 },
+            'cerro muriano': { lat: 37.9838, lng: -4.7669 }
+          };
+          
+          const city = room.city?.toLowerCase() || 'madrid';
+          const coords = defaultCoords[city] || defaultCoords['madrid'];
+          
+          return {
+            ...room,
+            latitude: coords.lat + (Math.random() - 0.5) * 0.01, // Pequeña variación
+            longitude: coords.lng + (Math.random() - 0.5) * 0.01
+          };
+        }
+        return room;
+      });
+
+      setRooms(roomsWithCoords);
       
-      // Si hay habitaciones con coordenadas, centrar el mapa en la primera
-      const roomsWithCoords = data?.filter(room => room.latitude && room.longitude);
-      if (roomsWithCoords && roomsWithCoords.length > 0) {
+      // Centrar el mapa en la primera habitación
+      if (roomsWithCoords.length > 0) {
         setMapCenter({
           lat: roomsWithCoords[0].latitude,
           lng: roomsWithCoords[0].longitude
@@ -152,12 +173,17 @@ const RoomsMapView: React.FC = () => {
     });
   };
 
-  if (loading) {
+  if (loading || mapsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando mapa de habitaciones...</p>
+          <p className="text-gray-600">
+            {loading ? 'Cargando habitaciones...' : 'Cargando Google Maps...'}
+          </p>
+          {mapsError && (
+            <p className="text-red-600 text-sm mt-2">Error: {mapsError}</p>
+          )}
         </div>
       </div>
     );

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPinIcon } from '@heroicons/react/24/outline';
+import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 
 interface RoomDetailMapProps {
   latitude: number;
@@ -19,12 +20,14 @@ const RoomDetailMap: React.FC<RoomDetailMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+  
+  const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
   useEffect(() => {
-    if (mapRef.current && latitude && longitude && !map) {
+    if (mapRef.current && latitude && longitude && !map && mapsLoaded) {
       initializeMap();
     }
-  }, [latitude, longitude, map]);
+  }, [latitude, longitude, map, mapsLoaded]);
 
   const initializeMap = () => {
     if (!window.google || !mapRef.current) return;
@@ -138,6 +141,11 @@ const RoomDetailMap: React.FC<RoomDetailMapProps> = ({
       <div className="text-sm text-gray-600">
         <p><strong>Dirección:</strong> {location}</p>
         <p><strong>Coordenadas:</strong> {latitude.toFixed(6)}, {longitude.toFixed(6)}</p>
+        {(latitude === 40.4168 && longitude === -3.7038) && (
+          <p className="text-amber-600 text-xs mt-1">
+            ⚠️ Ubicación aproximada (coordenadas no disponibles)
+          </p>
+        )}
       </div>
     </div>
   );

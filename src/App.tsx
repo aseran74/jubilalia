@@ -64,9 +64,13 @@ import DatabaseDiagnostic from './components/debug/DatabaseDiagnostic';
 import VercelAuthFix from './components/debug/VercelAuthFix';
 import GoogleAuthDiagnostic from './components/debug/GoogleAuthDiagnostic';
 import RedirectFix from './components/debug/RedirectFix';
+import GoogleMapsDiagnostic from './components/debug/GoogleMapsDiagnostic';
+import MapDebug from './components/debug/MapDebug';
 
 // Componentes de mapas
 import RoomsMapView from './components/maps/RoomsMapView';
+import PropertiesSaleMapView from './components/maps/PropertiesSaleMapView';
+import PropertiesRentalMapView from './components/maps/PropertiesRentalMapView';
 
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
@@ -125,12 +129,14 @@ const DashboardLayout: React.FC = () => {
             
             {/* Propiedades - Venta */}
             <Route path="/properties/sale" element={<PropertySaleList />} />
+            <Route path="/properties/sale/map" element={<PropertiesSaleMapView />} />
             <Route path="/properties/sale/create" element={<PropertySaleForm />} />
             <Route path="/properties/sale/:id" element={<PropertyDetail />} />
             <Route path="/properties/sale/:id/edit" element={<PropertySaleForm />} />
             
             {/* Propiedades - Alquiler */}
             <Route path="/properties/rental" element={<PropertyRentalList />} />
+            <Route path="/properties/rental/map" element={<PropertiesRentalMapView />} />
             <Route path="/properties/rental/create" element={<PropertyRentalForm />} />
             <Route path="/properties/rental/:id" element={<PropertyDetail />} />
             <Route path="/properties/rental/:id/edit" element={<PropertyRentalForm />} />
@@ -308,6 +314,8 @@ const App: React.FC = () => {
           <Route path="/google-auth-diagnostic" element={<GoogleAuthDiagnostic />} />
           <Route path="/auth-debug" element={<GoogleAuthDiagnostic />} />
           <Route path="/redirect-fix" element={<RedirectFix />} />
+          <Route path="/google-maps-diagnostic" element={<GoogleMapsDiagnostic />} />
+          <Route path="/map-debug" element={<MapDebug />} />
           <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
