@@ -8,7 +8,8 @@ import {
   Calendar, 
   Settings,
   LogOut,
-  ChevronDown
+  ChevronDown,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserProfile } from '../../lib/supabase';
@@ -158,6 +159,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
             >
               <Users className="w-4 h-4" />
               <span>Compartir Habitación</span>
+            </Link>
+            
+            <Link
+              to="/rooms/map"
+              onClick={() => setIsDropdownOpen(false)}
+              className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Mapa de Habitaciones</span>
             </Link>
             
             <Link

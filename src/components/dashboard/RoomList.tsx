@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
-import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle } from 'lucide-react';
+import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Map } from 'lucide-react';
 
 interface Room {
   id: string;
@@ -304,6 +304,34 @@ const RoomList: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header principal */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Habitaciones Disponibles</h1>
+            <p className="text-gray-600 mt-1">Encuentra tu habitación ideal</p>
+          </div>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => navigate('/rooms/map')}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <Map className="w-4 h-4" />
+              Ver en Mapa
+            </button>
+            {isAdmin && (
+              <button
+                onClick={() => navigate('/rooms/create')}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              >
+                <Bed className="w-4 h-4" />
+                Crear Habitación
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Filtros y búsqueda */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex justify-between items-center mb-4">

@@ -65,6 +65,9 @@ import VercelAuthFix from './components/debug/VercelAuthFix';
 import GoogleAuthDiagnostic from './components/debug/GoogleAuthDiagnostic';
 import RedirectFix from './components/debug/RedirectFix';
 
+// Componentes de mapas
+import RoomsMapView from './components/maps/RoomsMapView';
+
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
 
@@ -134,6 +137,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Alquiler de Habitaciones */}
             <Route path="/rooms" element={<RoomList />} />
+            <Route path="/rooms/map" element={<RoomsMapView />} />
             <Route path="/rooms/create" element={<RoomForm />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />
             <Route path="/rooms/:id/edit" element={<RoomForm />} />

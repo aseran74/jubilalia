@@ -140,12 +140,6 @@ const LandingPage: React.FC = () => {
                   >
                     Registrarse
                   </Link>
-                  <Link
-                    to="/auth-debug"
-                    className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600 transition-colors"
-                  >
-                    🔧 Debug Auth
-                  </Link>
                 </>
               )}
             </div>

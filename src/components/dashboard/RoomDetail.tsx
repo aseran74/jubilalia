@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
 import ChatModal from './ChatModal';
+import RoomDetailMap from '../maps/RoomDetailMap';
 import { 
   ArrowLeft, 
   Heart, 
@@ -418,6 +419,19 @@ const RoomDetail: React.FC = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Descripción</h3>
                 <p className="text-gray-700 leading-relaxed">{room.description}</p>
               </div>
+
+              {/* Mapa de ubicación */}
+              {room.latitude && room.longitude && (
+                <div className="mb-6">
+                  <RoomDetailMap
+                    latitude={room.latitude}
+                    longitude={room.longitude}
+                    title={room.title}
+                    location={`${room.address}, ${room.city}`}
+                    className="w-full h-80"
+                  />
+                </div>
+              )}
 
               {/* Características y amenidades */}
               <div className="grid md:grid-cols-2 gap-6 mb-6">
