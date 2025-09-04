@@ -7,7 +7,14 @@ import '../../types/google-maps';
 declare global {
   namespace google.maps {
     interface Map {}
-    interface Marker {}
+    interface Marker {
+      setMap(map: Map | null): void;
+      getPosition(): LatLng | null;
+    }
+    interface LatLng {
+      lat(): number;
+      lng(): number;
+    }
   }
 }
 
