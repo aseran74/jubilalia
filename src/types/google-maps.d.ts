@@ -28,6 +28,14 @@ declare namespace google.maps {
     center?: LatLng | LatLngLiteral;
     zoom?: number;
     styles?: MapTypeStyle[];
+    mapTypeId?: MapTypeId;
+  }
+
+  enum MapTypeId {
+    ROADMAP = 'roadmap',
+    SATELLITE = 'satellite',
+    HYBRID = 'hybrid',
+    TERRAIN = 'terrain'
   }
 
   interface LatLngLiteral {

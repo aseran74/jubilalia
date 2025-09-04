@@ -29,6 +29,8 @@ interface RoomDetail {
   address: string;
   city: string;
   postal_code?: string;
+  latitude?: number;
+  longitude?: number;
   price: number;
   available_from: string;
   room_requirements: {

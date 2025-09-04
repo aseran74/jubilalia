@@ -146,19 +146,19 @@ const RoomList: React.FC = () => {
       }
 
       // Crear un mapa de requisitos por listing_id
-      const requirementsMap = new Map<string, any>();
+      const requirementsMap = new Map();
       requirementsData?.forEach(req => {
         requirementsMap.set(req.listing_id, req);
       });
 
       // Crear un mapa de perfiles por id
-      const profilesMap = new Map<string, any>();
+      const profilesMap = new Map();
       profilesData?.forEach(profile => {
         profilesMap.set(profile.id, profile);
       });
 
       // Crear un mapa de imágenes por listing_id
-      const imagesMap = new Map<string, any[]>();
+      const imagesMap = new Map();
       imagesData?.forEach(img => {
         if (!imagesMap.has(img.listing_id)) {
           imagesMap.set(img.listing_id, []);
