@@ -397,7 +397,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
               <input
                 type="number"
                 placeholder="Min/€"
-                value={priceRange[0]}
+                value={priceRange[0] || ''}
                 onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
                 className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
@@ -405,7 +405,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
               <input
                 type="number"
                 placeholder="Max/€"
-                value={priceRange[1]}
+                value={priceRange[1] || ''}
                 onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 1000])}
                 className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
