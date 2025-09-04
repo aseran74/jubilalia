@@ -21,7 +21,7 @@ const RoomDetailMap: React.FC<RoomDetailMapProps> = ({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   
-  const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
+  const { isLoaded: mapsLoaded } = useGoogleMaps();
 
   useEffect(() => {
     if (mapRef.current && latitude && longitude && !map && mapsLoaded) {

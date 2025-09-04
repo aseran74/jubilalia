@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPinIcon, HomeIcon, UsersIcon, CurrencyEuroIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, HomeIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 
@@ -30,7 +30,6 @@ const RoomsMapView: React.FC = () => {
   const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -59,10 +58,10 @@ const RoomsMapView: React.FC = () => {
       }
 
       // Agregar coordenadas por defecto para habitaciones sin coordenadas
-      const roomsWithCoords = (data || []).map((room, index) => {
+      const roomsWithCoords = (data || []).map((room) => {
         if (!room.latitude || !room.longitude) {
           // Usar coordenadas por defecto basadas en la ciudad o Madrid
-          const defaultCoords = {
+          const defaultCoords: { [key: string]: { lat: number; lng: number } } = {
             'madrid': { lat: 40.4168, lng: -3.7038 },
             'barcelona': { lat: 41.3851, lng: 2.1734 },
             'valencia': { lat: 39.4699, lng: -0.3763 },
@@ -158,7 +157,7 @@ const RoomsMapView: React.FC = () => {
       }
     });
 
-    setMarkers(newMarkers);
+    // Los marcadores se manejan automáticamente por Google Maps
   };
 
   const getAvailableSpots = (room: Room) => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPinIcon, HomeIcon, CurrencyEuroIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 import NumberStepper from '../common/NumberStepper';
@@ -223,13 +223,6 @@ const PropertiesRentalMapView: React.FC = () => {
     return `${price.toLocaleString()} ${currency}/mes`;
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   const formatAvailability = (from: string | null, until: string | null) => {
     if (!from) return 'Disponible';
