@@ -246,10 +246,10 @@ const PropertiesRentalMapView: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex h-[calc(100vh-80px)]">
           {/* Mapa */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm border h-96">
+          <div className="flex-1 mr-6">
+            <div className="bg-white rounded-lg shadow-sm border h-full">
               <div ref={mapRef} className="w-full h-full rounded-lg" />
             </div>
           </div>
