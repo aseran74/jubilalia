@@ -40,9 +40,17 @@ const CompactNumberStepper: React.FC<CompactNumberStepperProps> = ({
           <MinusIcon className="w-3 h-3 text-gray-600" />
         </button>
         
-        <span className="text-sm font-medium text-gray-900 min-w-[20px] text-center">
-          {value}
-        </span>
+        <div className="relative">
+          <input
+            type="number"
+            value={value}
+            onChange={(e) => onChange(Number(e.target.value) || 0)}
+            placeholder={label === "Habitaciones" ? "Habit/€" : "Baños/€"}
+            min={min}
+            max={max}
+            className="w-16 px-2 py-1 text-sm text-center border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-transparent"
+          />
+        </div>
         
         <button
           onClick={handleIncrease}
