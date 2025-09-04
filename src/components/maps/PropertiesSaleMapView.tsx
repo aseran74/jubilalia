@@ -7,6 +7,14 @@ import NumberStepper from '../common/NumberStepper';
 import AmenitiesFilter from '../common/AmenitiesFilter';
 import '../../types/google-maps';
 
+// Declarar tipos de Google Maps localmente
+declare global {
+  namespace google.maps {
+    interface Map {}
+    interface Marker {}
+  }
+}
+
 interface Property {
   id: string;
   title: string;

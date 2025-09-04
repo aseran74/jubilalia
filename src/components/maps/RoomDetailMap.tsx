@@ -3,6 +3,14 @@ import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 import '../../types/google-maps';
 
+// Declarar tipos de Google Maps localmente
+declare global {
+  namespace google.maps {
+    interface Map {}
+    interface Marker {}
+  }
+}
+
 interface RoomDetailMapProps {
   latitude: number;
   longitude: number;
@@ -73,7 +81,6 @@ const RoomDetailMap: React.FC<RoomDetailMapProps> = ({
       }
     });
 
-    setMarker(roomMarker);
 
     // Crear ventana de información
     const infoWindow = new window.google.maps.InfoWindow({

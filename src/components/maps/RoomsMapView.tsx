@@ -5,6 +5,14 @@ import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 import '../../types/google-maps';
 
+// Declarar tipos de Google Maps localmente
+declare global {
+  namespace google.maps {
+    interface Map {}
+    interface Marker {}
+  }
+}
+
 interface Room {
   id: string;
   title: string;
