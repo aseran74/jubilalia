@@ -349,24 +349,31 @@ const PropertyRentalList: React.FC = () => {
           
           {/* Fila 2: Precio, Habitaciones, Baños y Más Filtros */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="flex space-x-2">
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  placeholder="Min €/mes"
-                  value={priceRange.min}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  placeholder="Max €/mes"
-                  value={priceRange.max}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
+            <div className="flex flex-col">
+              <label className="text-xs font-medium text-gray-700 mb-1">Precio</label>
+              <div className="flex space-x-2">
+                <div className="relative flex-1">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                    Min/€
+                  </div>
+                  <input
+                    type="number"
+                    value={priceRange.min}
+                    onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
+                    className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+                <div className="relative flex-1">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                    Max/€
+                  </div>
+                  <input
+                    type="number"
+                    value={priceRange.max}
+                    onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
+                    className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
               </div>
             </div>
             
