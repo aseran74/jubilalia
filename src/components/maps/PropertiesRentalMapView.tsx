@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { MapPinIcon, HomeIcon, CurrencyEuroIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
+import NumberStepper from '../common/NumberStepper';
+import AmenitiesFilter from '../common/AmenitiesFilter';
 
 interface Property {
   id: string;
@@ -40,6 +42,9 @@ const PropertiesRentalMapView: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
+  const [bedrooms, setBedrooms] = useState(0);
+  const [bathrooms, setBathrooms] = useState(0);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -58,11 +63,18 @@ const PropertiesRentalMapView: React.FC = () => {
       
       const matchesPrice = !property.price || (property.price >= priceRange.min && property.price <= priceRange.max);
       
-      return matchesSearch && matchesCity && matchesPrice;
+      const matchesBedrooms = bedrooms === 0 || (property.bedrooms && property.bedrooms >= bedrooms);
+      
+      const matchesBathrooms = bathrooms === 0 || (property.bathrooms && property.bathrooms >= bathrooms);
+      
+      // TODO: Implementar filtro de amenidades cuando tengamos los datos en la base
+      const matchesAmenities = selectedAmenities.length === 0; // Por ahora siempre true
+      
+      return matchesSearch && matchesCity && matchesPrice && matchesBedrooms && matchesBathrooms && matchesAmenities;
     });
     
     setFilteredProperties(filtered);
-  }, [properties, searchTerm, selectedCity, priceRange]);
+  }, [properties, searchTerm, selectedCity, priceRange, bedrooms, bathrooms, selectedAmenities]);
 
   useEffect(() => {
     if (filteredProperties.length > 0 && mapRef.current && !map && mapsLoaded) {
@@ -269,42 +281,67 @@ const PropertiesRentalMapView: React.FC = () => {
           </div>
           
           {/* Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar propiedades..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+          <div className="space-y-4">
+            {/* Fila 1: Búsqueda y Ciudad */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Buscar propiedades..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              >
+                <option value="">Todas las ciudades</option>
+                {[...new Set(properties.map(p => p.city))].map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
             </div>
             
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todas las ciudades</option>
-              {[...new Set(properties.map(p => p.city))].map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-            
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                placeholder="Precio min"
-                value={priceRange.min}
-                onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            {/* Fila 2: Precio, Habitaciones y Baños */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  placeholder="Precio min"
+                  value={priceRange.min}
+                  onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <input
+                  type="number"
+                  placeholder="Precio max"
+                  value={priceRange.max}
+                  onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <NumberStepper
+                label="Habitaciones"
+                value={bedrooms}
+                onChange={setBedrooms}
+                max={5}
               />
-              <input
-                type="number"
-                placeholder="Precio max"
-                value={priceRange.max}
-                onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              
+              <NumberStepper
+                label="Baños"
+                value={bathrooms}
+                onChange={setBathrooms}
+                max={4}
+              />
+              
+              <AmenitiesFilter
+                selectedAmenities={selectedAmenities}
+                onAmenitiesChange={setSelectedAmenities}
               />
             </div>
           </div>

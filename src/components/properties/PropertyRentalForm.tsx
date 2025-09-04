@@ -157,7 +157,8 @@ const PropertyRentalForm: React.FC = () => {
     'Duplex',
     'Villa',
     'Chalet',
-    'Finca'
+    'Finca',
+    'Comunidad'
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

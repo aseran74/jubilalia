@@ -172,6 +172,7 @@ const PropertySaleForm: React.FC = () => {
     'Villa',
     'Chalet',
     'Finca',
+    'Comunidad',
     'Local comercial',
     'Oficina',
     'Nave industrial'
