@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { MapPinIcon, HomeIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
+import '../../types/google-maps';
 
 interface Room {
   id: string;

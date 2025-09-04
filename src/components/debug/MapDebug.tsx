@@ -65,7 +65,7 @@ const MapDebug: React.FC = () => {
       });
 
       // Agregar marcador de prueba
-      const marker = new window.google.maps.Marker({
+      new window.google.maps.Marker({
         position: { lat: 40.4168, lng: -3.7038 },
         map: map,
         title: 'Madrid - Prueba'

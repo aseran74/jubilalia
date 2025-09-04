@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
+import '../../types/google-maps';
 
 interface RoomDetailMapProps {
   latitude: number;
@@ -19,7 +20,6 @@ const RoomDetailMap: React.FC<RoomDetailMapProps> = ({
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
   
   const { isLoaded: mapsLoaded } = useGoogleMaps();
 

@@ -74,7 +74,7 @@ const GoogleMapsDiagnostic: React.FC = () => {
       testDiv.style.height = '100px';
       document.body.appendChild(testDiv);
 
-      const testMap = new window.google.maps.Map(testDiv, {
+      new window.google.maps.Map(testDiv, {
         center: { lat: 40.4168, lng: -3.7038 },
         zoom: 10
       });
