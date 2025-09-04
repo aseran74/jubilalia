@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPinIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, HomeIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
-import NumberStepper from '../common/NumberStepper';
+import CompactNumberStepper from '../common/CompactNumberStepper';
 import AmenitiesFilter from '../common/AmenitiesFilter';
+import Modal from '../common/Modal';
 
 // Declarar tipos de Google Maps localmente
 declare global {
@@ -60,6 +61,7 @@ const PropertiesRentalMapView: React.FC = () => {
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -314,8 +316,8 @@ const PropertiesRentalMapView: React.FC = () => {
               </select>
             </div>
             
-            {/* Fila 2: Precio, Habitaciones y Baños */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Fila 2: Precio, Habitaciones, Baños y Más Filtros */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="flex space-x-2">
                 <input
                   type="number"
@@ -333,24 +335,32 @@ const PropertiesRentalMapView: React.FC = () => {
                 />
               </div>
               
-              <NumberStepper
+              <CompactNumberStepper
                 label="Habitaciones"
                 value={bedrooms}
                 onChange={setBedrooms}
                 max={5}
               />
               
-              <NumberStepper
+              <CompactNumberStepper
                 label="Baños"
                 value={bathrooms}
                 onChange={setBathrooms}
                 max={4}
               />
               
-              <AmenitiesFilter
-                selectedAmenities={selectedAmenities}
-                onAmenitiesChange={setSelectedAmenities}
-              />
+              <button
+                onClick={() => setIsFiltersModalOpen(true)}
+                className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <FunnelIcon className="w-4 h-4 mr-2" />
+                <span className="text-sm">Más filtros</span>
+                {selectedAmenities.length > 0 && (
+                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    {selectedAmenities.length}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -430,6 +440,44 @@ const PropertiesRentalMapView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de Filtros */}
+      <Modal
+        isOpen={isFiltersModalOpen}
+        onClose={() => setIsFiltersModalOpen(false)}
+        title="Filtros Avanzados"
+        size="lg"
+      >
+        <div className="space-y-6">
+          <div>
+            <h4 className="text-sm font-medium text-gray-900 mb-3">Amenidades</h4>
+            <AmenitiesFilter
+              selectedAmenities={selectedAmenities}
+              onAmenitiesChange={setSelectedAmenities}
+            />
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <button
+              onClick={() => {
+                setSelectedAmenities([]);
+                setBedrooms(0);
+                setBathrooms(0);
+                setPriceRange({ min: 0, max: 5000 });
+              }}
+              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Limpiar filtros
+            </button>
+            <button
+              onClick={() => setIsFiltersModalOpen(false)}
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Aplicar filtros
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Script para manejar clics en info windows */}
       <script

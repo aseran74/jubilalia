@@ -81,6 +81,7 @@ const DashboardSidebar: React.FC = () => {
       items: [
         { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MagnifyingGlassIcon },
+
         
         { name: 'Publicar habitación', href: '/dashboard/rooms/create', icon: PlusIcon },
         { name: '🔧 Debug Maps', href: '/map-debug', icon: Cog6ToothIcon },
