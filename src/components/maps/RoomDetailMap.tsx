@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
-import '../../types/google-maps';
 
 // Declarar tipos de Google Maps localmente
 declare global {

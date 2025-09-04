@@ -5,7 +5,6 @@ import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 import NumberStepper from '../common/NumberStepper';
 import AmenitiesFilter from '../common/AmenitiesFilter';
-import '../../types/google-maps';
 
 // Declarar tipos de Google Maps localmente
 declare global {
