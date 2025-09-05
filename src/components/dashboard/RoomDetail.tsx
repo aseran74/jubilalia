@@ -17,11 +17,9 @@ import {
   Phone,
   Mail,
   CheckCircle,
-  ChevronLeft,
   ChevronRight,
   Dog,
   Share2,
-  Copy,
   Check
 } from 'lucide-react';
 
@@ -74,7 +72,6 @@ const RoomDetail: React.FC = () => {
   
   const [room, setRoom] = useState<RoomDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -249,13 +246,6 @@ const RoomDetail: React.FC = () => {
     return colors[gender] || 'bg-gray-100 text-gray-800';
   };
 
-  const nextImage = () => {
-    if (room && room.images.length > 1) {
-      setCurrentImageIndex((prev) => 
-        prev === room.images.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -286,13 +276,6 @@ const RoomDetail: React.FC = () => {
     }
   };
 
-  const prevImage = () => {
-    if (room && room.images.length > 1) {
-      setCurrentImageIndex((prev) => 
-        prev === 0 ? room.images.length - 1 : prev - 1
-      );
-    }
-  };
 
   const handleDeleteRoom = async (roomId: string) => {
     if (!window.confirm('¿Estás seguro de que quieres eliminar esta habitación?')) {
@@ -379,7 +362,7 @@ const RoomDetail: React.FC = () => {
                     />
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
-                        onClick={() => setCurrentImageIndex(0)}
+                        onClick={() => window.open(room.images[0], '_blank')}
                         className="bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
                       >
                         Ver más grande
@@ -397,7 +380,7 @@ const RoomDetail: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
-                          onClick={() => setCurrentImageIndex(1)}
+                          onClick={() => window.open(room.images[1], '_blank')}
                           className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
                         >
                           Ver más
@@ -416,7 +399,7 @@ const RoomDetail: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
-                          onClick={() => setCurrentImageIndex(2)}
+                          onClick={() => window.open(room.images[2], '_blank')}
                           className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
                         >
                           Ver más
@@ -435,7 +418,7 @@ const RoomDetail: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
-                          onClick={() => setCurrentImageIndex(3)}
+                          onClick={() => window.open(room.images[3], '_blank')}
                           className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
                         >
                           Ver más
@@ -454,7 +437,7 @@ const RoomDetail: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
-                          onClick={() => setCurrentImageIndex(4)}
+                          onClick={() => window.open(room.images[4], '_blank')}
                           className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
                         >
                           Ver más
