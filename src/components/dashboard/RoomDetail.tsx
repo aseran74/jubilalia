@@ -85,9 +85,22 @@ const RoomDetail: React.FC = () => {
     }
   }, [id]);
 
+  // Debug: detectar cambios en el estado del room
+  useEffect(() => {
+    if (room) {
+      console.log('🔄 Room state actualizado:', room);
+      console.log('🖼️ Imágenes en el estado:', room.images);
+      console.log('🖼️ Número de imágenes:', room.images?.length || 0);
+    }
+  }, [room]);
+
   const fetchRoomDetails = async (roomId: string) => {
     try {
       setLoading(true);
+      console.log('🔄 Iniciando carga de datos para habitación:', roomId);
+      
+      // Limpiar el estado anterior para evitar datos obsoletos
+      setRoom(null);
       
       // Obtener la información básica de la habitación
       const { data: roomData, error: roomError } = await supabase
@@ -144,6 +157,9 @@ const RoomDetail: React.FC = () => {
         .eq('listing_id', roomId)
         .order('image_order', { ascending: true });
 
+      console.log('🖼️ Imágenes obtenidas:', imagesData);
+      console.log('🖼️ Error de imágenes:', imagesError);
+
       if (imagesError) {
         console.error('Error fetching images:', imagesError);
         return;
@@ -177,6 +193,10 @@ const RoomDetail: React.FC = () => {
         amenities: amenitiesData?.map(amenity => amenity.amenity_name) || [],
         created_at: roomData.created_at
       };
+
+      console.log('🏠 Room detail construido:', roomDetail);
+      console.log('🖼️ Número de imágenes:', roomDetail.images.length);
+      console.log('🖼️ URLs de imágenes:', roomDetail.images);
 
       setRoom(roomDetail);
     } catch (error) {
@@ -671,6 +691,14 @@ const RoomDetail: React.FC = () => {
                       Compartir
                     </>
                   )}
+                </button>
+                
+                <button
+                  onClick={() => id && fetchRoomDetails(id)}
+                  className="w-full border border-blue-300 text-blue-700 py-3 px-4 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center justify-center"
+                >
+                  <ChevronRight className="w-4 h-4 mr-2" />
+                  Recargar datos
                 </button>
               </div>
 
