@@ -39,7 +39,7 @@ const PropertySaleList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -249,7 +249,8 @@ const PropertySaleList: React.FC = () => {
     
     const matchesCity = !selectedCity || property.city === selectedCity;
     const matchesType = !selectedType || property.purchase_requirements.property_type === selectedType;
-    const matchesPrice = property.price >= priceRange.min && property.price <= priceRange.max;
+    const matchesPrice = (priceRange.min === 0 || property.price >= priceRange.min) && 
+                        (priceRange.max === 0 || property.price <= priceRange.max);
     const matchesBedrooms = !bedroomsFilter || property.purchase_requirements.bedrooms >= parseInt(bedroomsFilter);
     const matchesBathrooms = !bathroomsFilter || property.purchase_requirements.bathrooms >= parseFloat(bathroomsFilter);
     const matchesCondition = !conditionFilter || property.purchase_requirements.property_condition === conditionFilter;
@@ -527,17 +528,6 @@ const PropertySaleList: React.FC = () => {
                 </button>
               </div>
 
-              {/* Botones de administrador */}
-              {isAdmin && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <AdminButtons
-                    itemId={property.id}
-                    itemType="property_sale"
-                    onDelete={handleDeleteProperty}
-                    className="justify-center"
-                  />
-                </div>
-              )}
             </div>
           </div>
         ))}

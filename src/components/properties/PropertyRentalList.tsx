@@ -36,7 +36,7 @@ const PropertyRentalList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedType, setSelectedType] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -244,7 +244,8 @@ const PropertyRentalList: React.FC = () => {
     
     const matchesCity = !selectedCity || property.city === selectedCity;
     const matchesType = !selectedType || property.rental_requirements.property_type === selectedType;
-    const matchesPrice = property.price >= priceRange.min && property.price <= priceRange.max;
+    const matchesPrice = (priceRange.min === 0 || property.price >= priceRange.min) && 
+                        (priceRange.max === 0 || property.price <= priceRange.max);
     const matchesBedrooms = !bedroomsFilter || property.rental_requirements.bedrooms >= parseInt(bedroomsFilter);
     const matchesBathrooms = !bathroomsFilter || property.rental_requirements.bathrooms >= parseFloat(bathroomsFilter);
 
@@ -494,17 +495,6 @@ const PropertyRentalList: React.FC = () => {
                 </button>
               </div>
 
-              {/* Botones de administrador */}
-              {isAdmin && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <AdminButtons
-                    itemId={property.id}
-                    itemType="property_rental"
-                    onDelete={handleDeleteProperty}
-                    className="justify-center"
-                  />
-                </div>
-              )}
             </div>
           </div>
         ))}

@@ -40,7 +40,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
   const [filters, setFilters] = useState({
     privateBathroom: false,
     hasBalcony: false,
@@ -319,7 +319,8 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     
     const matchesCity = !selectedCity || room.city === selectedCity;
     
-    const matchesPrice = room.price_per_month >= priceRange[0] && room.price_per_month <= priceRange[1];
+    const matchesPrice = (priceRange[0] === 0 || room.price_per_month >= priceRange[0]) && 
+                        (priceRange[1] === 0 || room.price_per_month <= priceRange[1]);
     
     const matchesFilters = (!filters.privateBathroom || room.private_bathroom) &&
                           (!filters.hasBalcony || room.has_balcony) &&

@@ -19,7 +19,10 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
-  Dog
+  Dog,
+  Share2,
+  Copy,
+  Check
 } from 'lucide-react';
 
 interface RoomDetail {
@@ -74,6 +77,7 @@ const RoomDetail: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -233,6 +237,35 @@ const RoomDetail: React.FC = () => {
     }
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: room?.title || 'Habitación en Jubilalia',
+          text: room?.description || 'Mira esta habitación disponible',
+          url: url,
+        });
+      } catch (err) {
+        console.log('Error al compartir:', err);
+        copyToClipboard(url);
+      }
+    } else {
+      copyToClipboard(url);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Error al copiar:', err);
+    }
+  };
+
   const prevImage = () => {
     if (room && room.images.length > 1) {
       setCurrentImageIndex((prev) => 
@@ -313,57 +346,127 @@ const RoomDetail: React.FC = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contenido principal */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Galería de imágenes */}
+            {/* Galería de imágenes mejorada */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="relative h-96 bg-gray-200">
-                {room.images && room.images.length > 0 ? (
-                  <>
+              {room.images && room.images.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 p-2">
+                  {/* Imagen principal - ocupa 2 columnas */}
+                  <div className="col-span-2 relative h-80 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
                     <img
-                      src={room.images[currentImageIndex]}
+                      src={room.images[0]}
                       alt={room.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     />
-                    
-                    {/* Navegación de imágenes */}
-                    {room.images.length > 1 && (
-                      <>
-                        <button
-                          onClick={prevImage}
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={nextImage}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-lg transition-all"
-                        >
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-                        
-                        {/* Indicadores de imagen */}
-                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                          {room.images.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setCurrentImageIndex(index)}
-                              className={`w-3 h-3 rounded-full transition-all ${
-                                index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                    <div className="text-center text-gray-400">
-                      <Bed className="w-16 h-16 mx-auto mb-4" />
-                      <p>Sin imágenes disponibles</p>
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        onClick={() => setCurrentImageIndex(0)}
+                        className="bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
+                      >
+                        Ver más grande
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
+                  
+                  {/* Segunda imagen - ocupa 1 columna */}
+                  {room.images.length > 1 && (
+                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={room.images[1]}
+                        alt={room.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => setCurrentImageIndex(1)}
+                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Ver más
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Tercera imagen - ocupa 1 columna */}
+                  {room.images.length > 2 && (
+                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={room.images[2]}
+                        alt={room.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => setCurrentImageIndex(2)}
+                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Ver más
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Cuarta imagen - ocupa 1 columna */}
+                  {room.images.length > 3 && (
+                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={room.images[3]}
+                        alt={room.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => setCurrentImageIndex(3)}
+                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Ver más
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Quinta imagen - ocupa 1 columna */}
+                  {room.images.length > 4 && (
+                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={room.images[4]}
+                        alt={room.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => setCurrentImageIndex(4)}
+                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Ver más
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Indicador de más imágenes */}
+                  {room.images.length > 5 && (
+                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={room.images[5]}
+                        alt={room.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span className="text-white text-lg font-semibold">
+                          +{room.images.length - 5} más
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-96 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div className="text-center text-gray-500">
+                    <Bed className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium">Sin imágenes disponibles</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Información de la habitación */}
@@ -551,6 +654,23 @@ const RoomDetail: React.FC = () => {
                 >
                   <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
                   {isFavorite ? 'En favoritos' : 'Agregar a favoritos'}
+                </button>
+                
+                <button
+                  onClick={handleShare}
+                  className="w-full border border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 mr-2 text-green-600" />
+                      ¡Copiado!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Compartir
+                    </>
+                  )}
                 </button>
               </div>
 

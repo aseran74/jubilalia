@@ -37,7 +37,7 @@ const RoomList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 2000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [genderFilter, setGenderFilter] = useState('');
   const [petsFilter, setPetsFilter] = useState<boolean | null>(null);
   const [smokingFilter, setSmokingFilter] = useState<boolean | null>(null);
@@ -226,7 +226,8 @@ const RoomList: React.FC = () => {
     
     const matchesCity = !selectedCity || room.city === selectedCity;
     
-    const matchesPrice = room.price >= priceRange.min && room.price <= priceRange.max;
+    const matchesPrice = (priceRange.min === 0 || room.price >= priceRange.min) && 
+                        (priceRange.max === 0 || room.price <= priceRange.max);
     
     const matchesGender = !genderFilter || room.room_requirements.preferred_gender === genderFilter || room.room_requirements.preferred_gender === 'any';
     

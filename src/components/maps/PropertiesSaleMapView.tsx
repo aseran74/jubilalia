@@ -55,7 +55,7 @@ const PropertiesSaleMapView: React.FC = () => {
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -76,7 +76,9 @@ const PropertiesSaleMapView: React.FC = () => {
       
       const matchesCity = !selectedCity || property.city === selectedCity;
       
-      const matchesPrice = !property.price || (property.price >= priceRange.min && property.price <= priceRange.max);
+      const matchesPrice = !property.price || 
+                          ((priceRange.min === 0 || property.price >= priceRange.min) && 
+                           (priceRange.max === 0 || property.price <= priceRange.max));
       
       const matchesBedrooms = bedrooms === 0 || (property.bedrooms && property.bedrooms >= bedrooms);
       

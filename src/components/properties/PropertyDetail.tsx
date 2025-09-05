@@ -317,23 +317,6 @@ const PropertyDetail: React.FC = () => {
               </div>
             )}
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Acciones Rápidas
-              </h3>
-              <div className="space-y-3">
-                <Link
-                  to={`/dashboard/properties/${property.id}/edit`}
-                  className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                >
-                  Editar Propiedad
-                </Link>
-                <button className="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-                  Eliminar Propiedad
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       </div>
