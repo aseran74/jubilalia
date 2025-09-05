@@ -194,17 +194,12 @@ const PropertySaleList: React.FC = () => {
                          property.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCity = !selectedCity || property.city === selectedCity;
-    const matchesType = !selectedType || property.purchase_requirements.property_type === selectedType;
     const matchesPrice = (priceRange.min === 0 || property.price >= priceRange.min) && 
                         (priceRange.max === 0 || property.price <= priceRange.max);
-    const matchesBedrooms = !bedroomsFilter || property.purchase_requirements.bedrooms >= parseInt(bedroomsFilter);
-    const matchesBathrooms = !bathroomsFilter || property.purchase_requirements.bathrooms >= parseFloat(bathroomsFilter);
-    const matchesCondition = !conditionFilter || property.purchase_requirements.property_condition === conditionFilter;
-    const matchesYear = property.purchase_requirements.construction_year >= yearRange.min && 
-                       property.purchase_requirements.construction_year <= yearRange.max;
+    const matchesBedrooms = bedrooms === 0 || property.purchase_requirements.bedrooms >= bedrooms;
+    const matchesBathrooms = bathrooms === 0 || property.purchase_requirements.bathrooms >= bathrooms;
 
-    return matchesSearch && matchesCity && matchesType && matchesPrice && 
-           matchesBedrooms && matchesBathrooms && matchesCondition && matchesYear;
+    return matchesSearch && matchesCity && matchesPrice && matchesBedrooms && matchesBathrooms;
   });
 
   const cities = [...new Set(properties.map(property => property.city))];

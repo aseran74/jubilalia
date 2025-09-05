@@ -191,13 +191,12 @@ const PropertyRentalList: React.FC = () => {
                          property.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCity = !selectedCity || property.city === selectedCity;
-    const matchesType = !selectedType || property.rental_requirements.property_type === selectedType;
     const matchesPrice = (priceRange.min === 0 || property.price >= priceRange.min) && 
                         (priceRange.max === 0 || property.price <= priceRange.max);
-    const matchesBedrooms = !bedroomsFilter || property.rental_requirements.bedrooms >= parseInt(bedroomsFilter);
-    const matchesBathrooms = !bathroomsFilter || property.rental_requirements.bathrooms >= parseFloat(bathroomsFilter);
+    const matchesBedrooms = bedrooms === 0 || property.rental_requirements.bedrooms >= bedrooms;
+    const matchesBathrooms = bathrooms === 0 || property.rental_requirements.bathrooms >= bathrooms;
 
-    return matchesSearch && matchesCity && matchesType && matchesPrice && matchesBedrooms && matchesBathrooms;
+    return matchesSearch && matchesCity && matchesPrice && matchesBedrooms && matchesBathrooms;
   });
 
   const cities = [...new Set(properties.map(property => property.city))];
