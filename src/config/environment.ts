@@ -4,7 +4,7 @@
 export const environment = {
   // Supabase Configuration
   supabase: {
-    url: import.meta.env.VITE_SUPABASE_URL || '',
+    url: import.meta.env.VITE_SUPABASE_URL || 'https://sdmkodriokrpsdegweat.supabase.co',
     anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
     // Google OAuth Configuration (configurado en Supabase Dashboard)
     googleClientId: import.meta.env.VITE_SUPABASE_GOOGLE_CLIENT_ID || '',
