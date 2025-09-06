@@ -285,6 +285,32 @@ const RoomForm: React.FC = () => {
 
         if (requirementsUpdateError) throw requirementsUpdateError;
 
+        // Actualizar imágenes si las hay
+        if (formData.images.length > 0) {
+          // Primero eliminar las imágenes existentes
+          const { error: deleteImagesError } = await supabase
+            .from('property_images')
+            .delete()
+            .eq('listing_id', id);
+
+          if (deleteImagesError) {
+            console.error('Error deleting existing images:', deleteImagesError);
+          }
+
+          // Luego insertar las nuevas imágenes con order_index
+          const imagesData = formData.images.map((imageUrl, index) => ({
+            listing_id: id,
+            image_url: imageUrl,
+            order_index: index
+          }));
+
+          const { error: imageError } = await supabase
+            .from('property_images')
+            .insert(imagesData);
+
+          if (imageError) throw imageError;
+        }
+
         setSuccess(true);
         setTimeout(() => {
           navigate('/dashboard/rooms');
@@ -333,17 +359,17 @@ const RoomForm: React.FC = () => {
 
       // Subir imágenes si las hay
       if (formData.images.length > 0) {
-        const imagePromises = formData.images.map(imageUrl => 
-          supabase
-            .from('property_images')
-            .insert({
-              listing_id: listingData.id,
-              image_url: imageUrl,
-              is_primary: false
-            })
-        );
+        const imagesData = formData.images.map((imageUrl, index) => ({
+          listing_id: listingData.id,
+          image_url: imageUrl,
+          order_index: index
+        }));
 
-        await Promise.all(imagePromises);
+        const { error: imageError } = await supabase
+          .from('property_images')
+          .insert(imagesData);
+
+        if (imageError) throw imageError;
       }
 
         setSuccess(true);

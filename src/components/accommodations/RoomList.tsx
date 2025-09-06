@@ -110,7 +110,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             .from('property_images')
             .select('image_url')
             .eq('listing_id', listing.id)
-            .order('image_order');
+            .order('order_index', { ascending: true });
 
           if (imagesError) {
             console.error('Error fetching images for listing', listing.id, imagesError);
@@ -165,148 +165,6 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     }
   }, [propRooms]);
 
-  // Mock data para demostración - en producción esto vendría de la API
-  const mockRooms: Room[] = [
-    {
-      id: '1',
-      title: 'Habitación luminosa en piso céntrico',
-      description: 'Hermosa habitación en un piso completamente reformado, ubicado en el centro de Madrid. La habitación cuenta con mucha luz natural, armario empotrado y escritorio.',
-      address: 'Calle Gran Vía 123',
-      city: 'Madrid',
-      price_per_month: 450,
-      room_area: 18,
-      private_bathroom: true,
-      has_balcony: true,
-      preferred_gender: 'any',
-      preferred_age_min: 55,
-      preferred_age_max: 75,
-      smoking_allowed: false,
-      pets_allowed: true,
-      pet_types: ['perros pequeños', 'gatos'],
-      images: [
-        'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop',
-        'https://images.unsplash.com/photo-1560448075-bb485b067938?w=800&h=600&fit=crop'
-      ],
-      owner: {
-        full_name: 'María García',
-        avatar_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
-      },
-      created_at: '2024-01-15T10:00:00Z',
-      rating: 4.9,
-      review_count: 8
-    },
-    {
-      id: '2',
-      title: 'Habitación tranquila con jardín',
-      description: 'Habitación espaciosa en casa unifamiliar con jardín privado. Ideal para personas que buscan tranquilidad y contacto con la naturaleza.',
-      address: 'Calle de la Paz 45',
-      city: 'Barcelona',
-      price_per_month: 380,
-      room_area: 20,
-      private_bathroom: true,
-      has_balcony: false,
-      preferred_gender: 'any',
-      preferred_age_min: 60,
-      preferred_age_max: 80,
-      smoking_allowed: false,
-      pets_allowed: false,
-      images: [
-        'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=800&h=600&fit=crop'
-      ],
-      owner: {
-        full_name: 'Juan López'
-      },
-      created_at: '2024-01-20T10:00:00Z',
-      rating: 4.7,
-      review_count: 5
-    },
-    {
-      id: '3',
-      title: 'Habitación moderna en residencia',
-      description: 'Habitación completamente equipada en residencia de lujo con servicios incluidos. Incluye limpieza semanal y acceso a gimnasio.',
-      address: 'Avenida del Puerto 67',
-      city: 'Valencia',
-      price_per_month: 520,
-      room_area: 16,
-      private_bathroom: true,
-      has_balcony: false,
-      preferred_gender: 'any',
-      preferred_age_min: 55,
-      preferred_age_max: 70,
-      smoking_allowed: false,
-      pets_allowed: false,
-      images: [
-        'https://images.unsplash.com/photo-1560448075-8b5b0b0b0b0b?w=800&h=600&fit=crop'
-      ],
-      owner: {
-        full_name: 'Ana Martínez'
-      },
-      created_at: '2024-01-25T10:00:00Z',
-      rating: 4.8,
-      review_count: 12
-    },
-    {
-      id: '4',
-      title: 'Habitación con balcón y vistas',
-      description: 'Habitación con balcón privado y vistas espectaculares a la ciudad. Ubicada en un piso alto con mucha luz natural.',
-      address: 'Calle Sierpes 89',
-      city: 'Sevilla',
-      price_per_month: 420,
-      room_area: 19,
-      private_bathroom: false,
-      has_balcony: true,
-      preferred_gender: 'female',
-      preferred_age_min: 58,
-      preferred_age_max: 78,
-      smoking_allowed: false,
-      pets_allowed: true,
-      pet_types: ['gatos'],
-      images: [
-        'https://images.unsplash.com/photo-1560448204-8b5b0b0b0b0b?w=800&h=600&fit=crop'
-      ],
-      owner: {
-        full_name: 'Carlos Rodríguez'
-      },
-      created_at: '2024-01-30T10:00:00Z',
-      rating: 4.6,
-      review_count: 6
-    },
-    {
-      id: '5',
-      title: 'Habitación en chalet con montaña',
-      description: 'Habitación en chalet independiente con vistas a la montaña. Perfecta para amantes de la naturaleza y el senderismo.',
-      address: 'Camino de la Sierra 12',
-      city: 'Málaga',
-      price_per_month: 350,
-      room_area: 22,
-      private_bathroom: true,
-      has_balcony: false,
-      preferred_gender: 'any',
-      preferred_age_min: 55,
-      preferred_age_max: 85,
-      smoking_allowed: true,
-      pets_allowed: true,
-      pet_types: ['perros', 'gatos'],
-      images: [
-        'https://images.unsplash.com/photo-1560448075-9b5b0b0b0b0b?w=800&h=600&fit=crop'
-      ],
-      owner: {
-        full_name: 'Lucía González'
-      },
-      created_at: '2024-02-01T10:00:00Z',
-      rating: 4.5,
-      review_count: 4
-    }
-  ];
-
-  useEffect(() => {
-    // Simular carga de datos
-    setTimeout(() => {
-      setRooms(propRooms || mockRooms);
-      setLoading(false);
-    }, 1000);
-  }, [propRooms]);
-
   const handleFavorite = async (roomId: string) => {
     // Aquí iría la lógica para marcar como favorito
     console.log('Habitación marcada como favorita:', roomId);
@@ -331,11 +189,27 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     return matchesSearch && matchesCity && matchesPrice && matchesFilters;
   });
 
-  const cities = Array.from(new Set(rooms.map(room => room.city)));
+  const cities = [...new Set(rooms.map(room => room.city))];
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando habitaciones...</p>
@@ -345,33 +219,33 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Encuentra tu Habitación Ideal
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Descubre habitaciones perfectas para compartir vivienda y crear nuevas amistades
-          </p>
-          <div className="mt-6">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Habitaciones Disponibles</h1>
+              <p className="text-gray-600 mt-2">Encuentra tu hogar ideal para la jubilación</p>
+            </div>
             <button
-              onClick={() => navigate('/rooms/create')}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center mx-auto"
+              onClick={() => navigate('/dashboard/rooms/create')}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
             >
-              <Plus className="w-5 h-5 mr-2" />
+              <Plus className="w-5 h-5" />
               Publicar Habitación
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Filtros y búsqueda */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filtros */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Búsqueda */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Buscar habitaciones..."
@@ -385,7 +259,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             <select
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="">Todas las ciudades</option>
               {cities.map(city => (
@@ -420,51 +294,47 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
           </div>
 
           {/* Filtros adicionales */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <label className="flex items-center space-x-2">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
+            <label className="flex items-center">
               <input
                 type="checkbox"
                 checked={filters.privateBathroom}
-                onChange={(e) => setFilters({...filters, privateBathroom: e.target.checked})}
-                className="rounded text-green-600 focus:ring-green-500"
+                onChange={(e) => setFilters(prev => ({ ...prev, privateBathroom: e.target.checked }))}
+                className="mr-2"
               />
-              <span className="text-sm text-gray-700">Baño propio</span>
+              Baño privado
             </label>
-            
-            <label className="flex items-center space-x-2">
+            <label className="flex items-center">
               <input
                 type="checkbox"
                 checked={filters.hasBalcony}
-                onChange={(e) => setFilters({...filters, hasBalcony: e.target.checked})}
-                className="rounded text-green-600 focus:ring-green-500"
+                onChange={(e) => setFilters(prev => ({ ...prev, hasBalcony: e.target.checked }))}
+                className="mr-2"
               />
-              <span className="text-sm text-gray-700">Balcón</span>
+              Balcón
             </label>
-            
-            <label className="flex items-center space-x-2">
+            <label className="flex items-center">
               <input
                 type="checkbox"
                 checked={filters.smokingAllowed}
-                onChange={(e) => setFilters({...filters, smokingAllowed: e.target.checked})}
-                className="rounded text-green-600 focus:ring-green-500"
+                onChange={(e) => setFilters(prev => ({ ...prev, smokingAllowed: e.target.checked }))}
+                className="mr-2"
               />
-              <span className="text-sm text-gray-700">Fumadores</span>
+              Fumar permitido
             </label>
-            
-            <label className="flex items-center space-x-2">
+            <label className="flex items-center">
               <input
                 type="checkbox"
                 checked={filters.petsAllowed}
-                onChange={(e) => setFilters({...filters, petsAllowed: e.target.checked})}
-                className="rounded text-green-600 focus:ring-green-500"
+                onChange={(e) => setFilters(prev => ({ ...prev, petsAllowed: e.target.checked }))}
+                className="mr-2"
               />
-              <span className="text-sm text-gray-700">Mascotas</span>
+              Mascotas permitidas
             </label>
-            
             <select
               value={filters.gender}
-              onChange={(e) => setFilters({...filters, gender: e.target.value})}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+              onChange={(e) => setFilters(prev => ({ ...prev, gender: e.target.value }))}
+              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="any">Cualquier género</option>
               <option value="male">Solo hombres</option>
@@ -474,85 +344,33 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
         </div>
 
         {/* Resultados */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <p className="text-gray-600">
-              {filteredRooms.length} habitación{filteredRooms.length !== 1 ? 'es' : ''} encontrada{filteredRooms.length !== 1 ? 's' : ''}
-            </p>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">Ordenar por:</span>
-              <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm">
-                <option value="relevance">Relevancia</option>
-                <option value="price-asc">Precio: menor a mayor</option>
-                <option value="price-desc">Precio: mayor a menor</option>
-                <option value="date">Más recientes</option>
-                <option value="rating">Mejor valoradas</option>
-              </select>
-            </div>
-          </div>
+        <div className="mb-4">
+          <p className="text-gray-600">
+            Mostrando {filteredRooms.length} de {rooms.length} habitaciones
+          </p>
         </div>
 
-        {/* Grid de habitaciones */}
-        {filteredRooms.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRooms.map((room) => (
-              <RoomCard
-                key={room.id}
-                room={room}
-                onFavorite={handleFavorite}
-                isFavorite={false}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-12 h-12 text-gray-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No se encontraron habitaciones
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Intenta ajustar los filtros o la búsqueda para encontrar más opciones
-            </p>
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCity('');
-                setPriceRange([0, 1000]);
-                setFilters({
-                  privateBathroom: false,
-                  hasBalcony: false,
-                  smokingAllowed: false,
-                  petsAllowed: false,
-                  gender: 'any'
-                });
-              }}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Limpiar filtros
-            </button>
-          </div>
-        )}
+        {/* Lista de habitaciones */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredRooms.map((room) => (
+            <RoomCard
+              key={room.id}
+              room={room}
+              onFavorite={handleFavorite}
+            />
+          ))}
+        </div>
 
-        {/* Paginación */}
-        {filteredRooms.length > 0 && (
-          <div className="flex justify-center mt-12">
-            <nav className="flex items-center space-x-2">
-              <button className="px-3 py-2 border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors">
-                Anterior
-              </button>
-              <button className="px-3 py-2 bg-green-600 text-white rounded-lg">1</button>
-              <button className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                2
-              </button>
-              <button className="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                3
-              </button>
-              <button className="px-3 py-2 border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors">
-                Siguiente
-              </button>
-            </nav>
+        {filteredRooms.length === 0 && !loading && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron habitaciones</h3>
+            <p className="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
           </div>
         )}
       </div>

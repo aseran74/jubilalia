@@ -152,7 +152,7 @@ const RoomDetail: React.FC = () => {
         .from('property_images')
         .select('image_url')
         .eq('listing_id', roomId)
-        .order('image_order', { ascending: true });
+        .order('order_index', { ascending: true });
 
       console.log('🖼️ Imágenes obtenidas:', imagesData);
       console.log('🖼️ Error de imágenes:', imagesError);
