@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import GroupPosts from '../groups/GroupPosts';
+import GroupMembers from '../groups/GroupMembers';
 import AdminButtons from '../common/AdminButtons';
 import { 
   PlusIcon,
   UsersIcon,
-
+  UserGroupIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 
@@ -32,6 +33,7 @@ const Groups: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
   const [showGroupPosts, setShowGroupPosts] = useState(false);
+  const [showGroupMembers, setShowGroupMembers] = useState(false);
 
   // Cargar grupos
   const fetchGroups = async () => {
@@ -118,9 +120,21 @@ const Groups: React.FC = () => {
     setShowGroupPosts(true);
   };
 
+  // Ver miembros del grupo
+  const viewGroupMembers = (group: Group) => {
+    setSelectedGroup(group);
+    setShowGroupMembers(true);
+  };
+
   // Volver a la lista de grupos
   const backToGroups = () => {
     setShowGroupPosts(false);
+    setSelectedGroup(null);
+  };
+
+  // Cerrar vista de miembros
+  const closeGroupMembers = () => {
+    setShowGroupMembers(false);
     setSelectedGroup(null);
   };
 
@@ -312,6 +326,13 @@ const Groups: React.FC = () => {
                         Ver Posts
                       </button>
                       <button
+                        onClick={() => viewGroupMembers(group)}
+                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center flex items-center justify-center space-x-1"
+                      >
+                        <UserGroupIcon className="h-4 w-4" />
+                        <span>Miembros</span>
+                      </button>
+                      <button
                         onClick={() => leaveGroup(group.id)}
                         className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                       >
@@ -319,12 +340,21 @@ const Groups: React.FC = () => {
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => joinGroup(group.id)}
-                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Unirse
-                    </button>
+                    <>
+                      <button
+                        onClick={() => joinGroup(group.id)}
+                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Unirse
+                      </button>
+                      <button
+                        onClick={() => viewGroupMembers(group)}
+                        className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-1"
+                        title="Ver miembros"
+                      >
+                        <UserGroupIcon className="h-4 w-4" />
+                      </button>
+                    </>
                   )}
                 </div>
 
@@ -357,6 +387,17 @@ const Groups: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Vista de miembros del grupo */}
+      {showGroupMembers && selectedGroup && (
+        <GroupMembers
+          groupId={selectedGroup.id}
+          groupName={selectedGroup.name}
+          isOpen={showGroupMembers}
+          onClose={closeGroupMembers}
+          currentUserId={profile?.id}
+        />
+      )}
     </div>
   );
 };
