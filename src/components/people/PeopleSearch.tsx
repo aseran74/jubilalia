@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import LocationSelector from './LocationSelector';
 import PeopleSearchFilters from './PeopleSearchFilters';
@@ -7,6 +8,7 @@ import PeopleSearchMap from './PeopleSearchMap';
 import type { LocationSearchResult, SearchFilters } from '../../types/supabase';
 
 const PeopleSearch: React.FC = () => {
+  const location = useLocation();
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<LocationSearchResult[]>([]);
@@ -20,6 +22,15 @@ const PeopleSearch: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+
+  // Detectar si estamos en la ruta del mapa
+  useEffect(() => {
+    if (location.pathname === '/dashboard/users/map') {
+      setViewMode('map');
+    } else {
+      setViewMode('list');
+    }
+  }, [location.pathname]);
 
   // Buscar personas por ubicación
   const searchPeople = async () => {

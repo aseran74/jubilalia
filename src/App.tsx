@@ -35,6 +35,7 @@ import AdminPropertyManagement from './components/admin/AdminPropertyManagement'
 import ActivityForm from './components/activities/ActivityForm';
 import ActivityList from './components/activities/ActivityList';
 import ActivityDetail from './components/activities/ActivityDetail';
+import ActivityMap from './components/activities/ActivityMap';
 
 // Componentes de posts
 import PostForm from './components/posts/PostForm';
@@ -46,6 +47,7 @@ import PostEdit from './components/posts/PostEdit';
 import ProfileForm from './components/profile/ProfileForm';
 import UserSearch from './components/users/UserSearch';
 import UserProfile from './components/users/UserProfile';
+import PeopleSearch from './components/people/PeopleSearch';
 
 // Componentes de grupos
 import Groups from './components/people/Groups';
@@ -150,6 +152,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Actividades */}
             <Route path="/activities" element={<ActivityList />} />
+            <Route path="/activities/map" element={<ActivityList />} />
             <Route path="/activities/create" element={<ActivityForm />} />
             <Route path="/activities/:id" element={<ActivityDetail />} />
             <Route path="/activities/:id/edit" element={<ActivityForm />} />
@@ -161,7 +164,8 @@ const DashboardLayout: React.FC = () => {
             <Route path="/posts/:id/edit" element={<PostEdit />} />
             
             {/* Búsqueda de Usuarios */}
-            <Route path="/users" element={<UserSearch />} />
+            <Route path="/users" element={<PeopleSearch />} />
+            <Route path="/users/map" element={<PeopleSearch />} />
             <Route path="/users/:id" element={<UserProfile />} />
             
             {/* Grupos */}

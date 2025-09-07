@@ -108,6 +108,7 @@ const DashboardSidebar: React.FC = () => {
       icon: CalendarIcon,
       items: [
         { name: 'Buscar actividades', href: '/dashboard/activities', icon: MagnifyingGlassIcon },
+        { name: 'Ver en mapa', href: '/dashboard/activities/map', icon: MapIcon },
         { name: 'Crear actividad', href: '/dashboard/activities/create', icon: PlusIcon },
       ]
     },
@@ -124,6 +125,7 @@ const DashboardSidebar: React.FC = () => {
       icon: UserIcon,
       items: [
         { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
+        { name: 'Ver en mapa', href: '/dashboard/users/map', icon: MapIcon },
         { name: 'Grupos', href: '/dashboard/groups', icon: UsersIcon },
       ]
     },

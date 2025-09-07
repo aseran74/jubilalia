@@ -85,6 +85,9 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
   useEffect(() => {
     if (!map || !infoWindow) return;
 
+    console.log('🗺️ ActivityMap: Actualizando marcadores para', activities.length, 'actividades');
+    console.log('🗺️ Actividades:', activities);
+
     // Limpiar marcadores existentes
     markers.forEach(marker => marker.setMap(null));
 
@@ -114,9 +117,11 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
         }
       }
       
+      console.log(`📍 Creando marcador para "${activity.title}" en ${activity.city} (${lat}, ${lng})`);
+      
       const marker = new window.google.maps.Marker({
         position: { lat, lng },
-        map: newMap,
+        map: map,
         title: activity.title,
         icon: {
           url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
@@ -178,6 +183,7 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
     });
 
     setMarkers(newMarkers);
+    console.log(`✅ ActivityMap: Se crearon ${newMarkers.length} marcadores`);
 
     // Ajustar vista del mapa si hay marcadores
     if (newMarkers.length > 0) {
