@@ -33,24 +33,8 @@ export const useNearbyPlaces = (
 
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
-  console.log('🔍 useNearbyPlaces hook:', { 
-    latitude, 
-    longitude, 
-    mapsLoaded, 
-    mapsLoading, 
-    mapsError 
-  });
-
   useEffect(() => {
-    console.log('🔍 useNearbyPlaces useEffect ejecutándose:', { 
-      latitude, 
-      longitude, 
-      mapsLoaded, 
-      mapsLoading 
-    });
-    
     if (!latitude || !longitude || !mapsLoaded || mapsLoading) {
-      console.log('🔍 useNearbyPlaces: Condiciones no cumplidas, saliendo');
       return;
     }
 

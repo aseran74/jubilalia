@@ -14,16 +14,12 @@ const NearbyPlaces: React.FC<NearbyPlacesProps> = ({
   radius = 1000,
   className = ''
 }) => {
-  console.log('🔍 NearbyPlaces component renderizando:', { latitude, longitude, radius });
-  
   const { places, loading, error } = useNearbyPlaces(
     latitude,
     longitude,
     radius,
     ['supermarket', 'hospital', 'transit_station', 'school', 'pharmacy', 'bank']
   );
-
-  console.log('🔍 NearbyPlaces state:', { places: places.length, loading, error });
 
   if (loading) {
     return (
