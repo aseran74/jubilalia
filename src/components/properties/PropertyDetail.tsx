@@ -15,6 +15,7 @@ import {
 import { CheckCircle } from 'lucide-react';
 import RoomDetailMap from '../maps/RoomDetailMap';
 import ImageGallery from '../ImageGallery';
+import NearbyPlaces from '../common/NearbyPlaces';
 
 interface Property {
   id: string;
@@ -314,49 +315,12 @@ const PropertyDetail: React.FC = () => {
             </div>
 
             {/* Actividades Cercanas */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Actividades Cercanas
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-semibold">🏪</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">Supermercado</h3>
-                    <p className="text-sm text-gray-600">Carrefour - 0.5 km</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-green-600 font-semibold">🏥</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">Centro de Salud</h3>
-                    <p className="text-sm text-gray-600">Centro de Salud Norte - 0.8 km</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                    <span className="text-yellow-600 font-semibold">🚌</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">Transporte Público</h3>
-                    <p className="text-sm text-gray-600">Parada de autobús - 0.2 km</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 font-semibold">🎓</span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">Educación</h3>
-                    <p className="text-sm text-gray-600">Colegio Público - 1.2 km</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <NearbyPlaces
+              latitude={property.latitude || 40.4168}
+              longitude={property.longitude || -3.7038}
+              radius={1000}
+              className="mb-6"
+            />
           </div>
 
           {/* Sidebar */}

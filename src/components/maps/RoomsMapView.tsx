@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MapPinIcon, HomeIcon, UsersIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
@@ -32,6 +32,7 @@ interface Room {
   images?: string[];
   created_at: string;
   user_id: string;
+  primary_image_url?: string;
   user_profile?: {
     full_name: string;
     avatar_url?: string;
@@ -39,6 +40,7 @@ interface Room {
 }
 
 const RoomsMapView: React.FC = () => {
+  const navigate = useNavigate();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -63,7 +65,13 @@ const RoomsMapView: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('property_listings')
-        .select('*')
+        .select(`
+          *,
+          property_images(
+            image_url,
+            is_primary
+          )
+        `)
         .eq('listing_type', 'room_rental')
         .order('created_at', { ascending: false });
 
@@ -72,8 +80,19 @@ const RoomsMapView: React.FC = () => {
         return;
       }
 
-      // Agregar coordenadas por defecto para habitaciones sin coordenadas
+      // Agregar coordenadas por defecto para habitaciones sin coordenadas y extraer imagen principal
       const roomsWithCoords = (data || []).map((room) => {
+        // Extraer la imagen principal
+        const primaryImage = room.property_images?.find((img: any) => img.is_primary) || room.property_images?.[0];
+        const primaryImageUrl = primaryImage?.image_url;
+        
+        console.log(`🏠 Habitación: ${room.title}`, {
+          hasImages: !!room.property_images,
+          imagesCount: room.property_images?.length || 0,
+          primaryImageUrl: primaryImageUrl,
+          allImages: room.property_images
+        });
+        
         if (!room.latitude || !room.longitude) {
           // Usar coordenadas por defecto basadas en la ciudad o Madrid
           const defaultCoords: { [key: string]: { lat: number; lng: number } } = {
@@ -90,10 +109,14 @@ const RoomsMapView: React.FC = () => {
           return {
             ...room,
             latitude: coords.lat + (Math.random() - 0.5) * 0.01, // Pequeña variación
-            longitude: coords.lng + (Math.random() - 0.5) * 0.01
+            longitude: coords.lng + (Math.random() - 0.5) * 0.01,
+            primary_image_url: primaryImageUrl
           };
         }
-        return room;
+        return {
+          ...room,
+          primary_image_url: primaryImageUrl
+        };
       });
 
       setRooms(roomsWithCoords);
@@ -150,15 +173,28 @@ const RoomsMapView: React.FC = () => {
           }
         });
 
+        console.log(`📸 Creando InfoWindow para: ${room.title}`, {
+          hasImage: !!room.primary_image_url,
+          imageUrl: room.primary_image_url
+        });
+
         const infoWindow = new window.google.maps.InfoWindow({
           content: `
-            <div class="p-2 max-w-xs">
-              <h3 class="font-semibold text-gray-800 mb-1">${room.title}</h3>
+            <div class="p-3 max-w-xs">
+              ${room.primary_image_url ? `
+                <div class="mb-3">
+                  <img src="${room.primary_image_url}" alt="${room.title}" class="w-full h-32 object-cover rounded-lg" onerror="console.log('Error cargando imagen:', this.src)">
+                </div>
+              ` : '<div class="mb-3 h-32 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-sm">Sin imagen</div>'}
+              <h3 class="font-semibold text-lg mb-2">${room.title}</h3>
               <p class="text-sm text-gray-600 mb-2">${room.description.substring(0, 100)}...</p>
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between mb-2">
                 <span class="text-green-600 font-bold">€${room.price}/mes</span>
                 <span class="text-sm text-gray-500">${room.current_occupants}/${room.max_occupants}</span>
               </div>
+              <button id="details-btn-${room.id}" class="w-full px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">
+                Ver detalles
+              </button>
             </div>
           `
         });
@@ -166,6 +202,19 @@ const RoomsMapView: React.FC = () => {
         marker.addListener('click', () => {
           setSelectedRoom(room);
           infoWindow.open(mapInstance, marker);
+          
+          // Agregar event listener para el botón de detalles después de que se abra el InfoWindow
+          setTimeout(() => {
+            const detailsButton = document.getElementById(`details-btn-${room.id}`);
+            if (detailsButton) {
+              detailsButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔗 Navegando a detalles de habitación:', room.title);
+                navigate(`/dashboard/rooms/${room.id}`);
+              });
+            }
+          }, 100);
         });
 
         newMarkers.push(marker);
@@ -220,7 +269,7 @@ const RoomsMapView: React.FC = () => {
                 {rooms.length} habitaciones encontradas
               </div>
               <Link
-                to="/rooms"
+                to="/dashboard/rooms"
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
                 Vista Lista
@@ -299,7 +348,7 @@ const RoomsMapView: React.FC = () => {
                 
                 <div className="mt-3 flex space-x-2">
                   <Link
-                    to={`/rooms/${room.id}`}
+                    to={`/dashboard/rooms/${room.id}`}
                     className="flex-1 bg-green-600 text-white text-center py-2 px-3 rounded-lg text-sm hover:bg-green-700 transition-colors"
                   >
                     Ver Detalles

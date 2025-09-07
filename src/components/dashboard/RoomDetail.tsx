@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
 import ChatModal from './ChatModal';
 import RoomDetailMap from '../maps/RoomDetailMap';
+import NearbyPlaces from '../common/NearbyPlaces';
 import { 
   ArrowLeft, 
   Heart, 
@@ -330,6 +331,10 @@ const RoomDetail: React.FC = () => {
     );
   }
 
+
+  console.log('🔍 RoomDetail renderizando, room:', room);
+  console.log('🔍 Room coordinates:', { lat: room?.latitude, lng: room?.longitude });
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header con botón de volver */}
@@ -530,6 +535,24 @@ const RoomDetail: React.FC = () => {
                   title={room.title}
                   location={`${room.address}, ${room.city}`}
                   className="w-full h-80"
+                />
+              </div>
+
+              {/* Actividades Cercanas */}
+              {console.log('🎯 Renderizando NearbyPlaces en RoomDetail:', {
+                latitude: room.latitude || 40.4168,
+                longitude: room.longitude || -3.7038,
+                roomId: room.id
+              })}
+              <div style={{border: '3px solid red', padding: '20px', margin: '20px 0'}}>
+                <h2>DEBUG: Sección de Actividades Cercanas</h2>
+                <p>Lat: {room.latitude || 40.4168}</p>
+                <p>Lng: {room.longitude || -3.7038}</p>
+                <NearbyPlaces
+                  latitude={room.latitude || 40.4168}
+                  longitude={room.longitude || -3.7038}
+                  radius={1000}
+                  className="mb-6"
                 />
               </div>
 

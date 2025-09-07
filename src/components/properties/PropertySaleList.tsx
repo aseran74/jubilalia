@@ -241,14 +241,14 @@ const PropertySaleList: React.FC = () => {
           </div>
           <div className="flex gap-3">
             <button
-              onClick={() => navigate('/properties/sale/map')}
+              onClick={() => navigate('/dashboard/properties/sale/map')}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
               <MapPin className="w-4 h-4" />
               Ver en Mapa
             </button>
             <button
-              onClick={() => navigate('/properties/sale/create')}
+              onClick={() => navigate('/dashboard/properties/sale/create')}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />

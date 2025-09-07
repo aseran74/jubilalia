@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MapPinIcon, HomeIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
@@ -42,9 +42,11 @@ interface Property {
   available_from: string | null;
   available_until: string | null;
   created_at: string;
+  primary_image_url?: string;
 }
 
 const PropertiesRentalMapView: React.FC = () => {
+  const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +108,13 @@ const PropertiesRentalMapView: React.FC = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from('property_listings')
-        .select('*')
+        .select(`
+          *,
+          property_images(
+            image_url,
+            is_primary
+          )
+        `)
         .eq('listing_type', 'property_rental')
         .order('created_at', { ascending: false });
 
@@ -115,18 +123,33 @@ const PropertiesRentalMapView: React.FC = () => {
         return;
       }
 
-      // Asignar coordenadas por defecto si no existen
+      // Asignar coordenadas por defecto si no existen y extraer imagen principal
       const propertiesWithCoords = data?.map(property => {
+        // Extraer la imagen principal
+        const primaryImage = property.property_images?.find((img: any) => img.is_primary) || property.property_images?.[0];
+        const primaryImageUrl = primaryImage?.image_url;
+        
+        console.log(`🏠 Propiedad: ${property.title}`, {
+          hasImages: !!property.property_images,
+          imagesCount: property.property_images?.length || 0,
+          primaryImageUrl: primaryImageUrl,
+          allImages: property.property_images
+        });
+        
         if (!property.latitude || !property.longitude) {
           // Coordenadas por defecto basadas en la ciudad
           const defaultCoords = getDefaultCoordinates(property.city);
           return {
             ...property,
             latitude: defaultCoords.lat,
-            longitude: defaultCoords.lng
+            longitude: defaultCoords.lng,
+            primary_image_url: primaryImageUrl
           };
         }
-        return property;
+        return {
+          ...property,
+          primary_image_url: primaryImageUrl
+        };
       }) || [];
 
       setProperties(propertiesWithCoords);
@@ -201,17 +224,27 @@ const PropertiesRentalMapView: React.FC = () => {
           }
         });
 
+        console.log(`📸 Creando InfoWindow para: ${property.title}`, {
+          hasImage: !!property.primary_image_url,
+          imageUrl: property.primary_image_url
+        });
+
         const infoWindow = new window.google.maps.InfoWindow({
           content: `
             <div class="p-3 max-w-xs">
+              ${property.primary_image_url ? `
+                <div class="mb-3">
+                  <img src="${property.primary_image_url}" alt="${property.title}" class="w-full h-32 object-cover rounded-lg" onerror="console.log('Error cargando imagen:', this.src)">
+                </div>
+              ` : '<div class="mb-3 h-32 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-sm">Sin imagen</div>'}
               <h3 class="font-semibold text-lg mb-2">${property.title}</h3>
               <p class="text-gray-600 text-sm mb-2">${property.address}, ${property.city}</p>
               <div class="flex items-center gap-4 text-sm">
                 ${property.price ? `<span class="text-blue-600 font-semibold">${property.price.toLocaleString()} €/mes</span>` : ''}
-                ${property.bedrooms ? `<span class="flex items-center gap-1"><HomeIcon class="w-4 h-4"/> ${property.bedrooms}</span>` : ''}
+                ${property.bedrooms ? `<span class="flex items-center gap-1">🏠 ${property.bedrooms}</span>` : ''}
                 ${property.bathrooms ? `<span class="flex items-center gap-1">🚿 ${property.bathrooms}</span>` : ''}
               </div>
-              <button onclick="window.selectProperty('${property.id}')" class="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+              <button id="details-btn-${property.id}" class="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
                 Ver detalles
               </button>
             </div>
@@ -221,6 +254,19 @@ const PropertiesRentalMapView: React.FC = () => {
         marker.addListener('click', () => {
           infoWindow.open(mapInstance, marker);
           setSelectedProperty(property);
+          
+          // Agregar event listener para el botón de detalles después de que se abra el InfoWindow
+          setTimeout(() => {
+            const detailsButton = document.getElementById(`details-btn-${property.id}`);
+            if (detailsButton) {
+              detailsButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔗 Navegando a detalles de propiedad:', property.title);
+                navigate(`/dashboard/properties/rental/${property.id}`);
+              });
+            }
+          }, 100);
         });
 
         newMarkers.push(marker);
@@ -284,7 +330,7 @@ const PropertiesRentalMapView: React.FC = () => {
                 {filteredProperties.length} de {properties.length} propiedades
               </div>
               <Link
-                to="/properties/rental"
+                to="/dashboard/properties/rental"
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Vista Lista
@@ -435,6 +481,16 @@ const PropertiesRentalMapView: React.FC = () => {
                     <div className="text-xs text-gray-500 mt-2">
                       {formatAvailability(property.available_from, property.available_until)}
                     </div>
+                    
+                    <div className="mt-3">
+                      <Link
+                        to={`/dashboard/properties/rental/${property.id}`}
+                        className="inline-block px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Ver detalles
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -481,20 +537,6 @@ const PropertiesRentalMapView: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Script para manejar clics en info windows */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.selectProperty = function(propertyId) {
-              const property = ${JSON.stringify(properties)}.find(p => p.id === propertyId);
-              if (property) {
-                // Aquí podrías abrir un modal o navegar a la página de detalles
-                console.log('Selected property:', property);
-              }
-            };
-          `
-        }}
-      />
     </div>
   );
 };

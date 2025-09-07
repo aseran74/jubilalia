@@ -53,6 +53,7 @@ const PeopleSearch: React.FC = () => {
       }
 
       console.log('✅ Usuarios iniciales cargados:', data);
+      console.log('🔍 Datos de perfiles con avatares:', data?.map(p => ({ name: p.full_name, avatar: p.avatar_url })));
       
         // Convertir a formato LocationSearchResult
         const formattedResults = data?.map(profile => {
@@ -132,6 +133,7 @@ const PeopleSearch: React.FC = () => {
         }
 
         console.log('✅ Resultados de consulta directa:', data);
+        console.log('🔍 Datos de búsqueda con avatares:', data?.map(p => ({ name: p.full_name, avatar: p.avatar_url })));
         
         // Convertir a formato LocationSearchResult
         const formattedResults = data?.map(profile => {
@@ -225,11 +227,13 @@ const PeopleSearch: React.FC = () => {
 
   const handlePersonSelect = (person: LocationSearchResult) => {
     // Navegar al perfil de la persona
+    console.log('🔗 PeopleSearch: Navegando a perfil de:', person.full_name, 'ID:', person.id);
     navigate(`/dashboard/users/${person.id}`);
   };
 
   const handlePersonClick = (person: LocationSearchResult) => {
     // Navegar al perfil de la persona
+    console.log('🔗 PeopleSearch: Navegando a perfil de:', person.full_name, 'ID:', person.id);
     navigate(`/dashboard/users/${person.id}`);
   };
 
