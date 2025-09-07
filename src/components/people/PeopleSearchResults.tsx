@@ -55,15 +55,15 @@ const PeopleSearchResults: React.FC<PeopleSearchResultsProps> = ({
         </p>
       </div>
 
-      <div className="divide-y divide-gray-200">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {results.map((person) => (
           <div
             key={person.id}
             onClick={() => onPersonClick(person)}
-            className="p-6 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md cursor-pointer transition-all duration-150"
           >
-            <div className="flex items-start space-x-4">
-              {/* Avatar */}
+            {/* Header con avatar y nombre */}
+            <div className="flex items-center space-x-3 mb-3">
               <div className="flex-shrink-0">
                 {person.avatar_url ? (
                   <img
@@ -79,77 +79,61 @@ const PeopleSearchResults: React.FC<PeopleSearchResultsProps> = ({
                   </div>
                 )}
               </div>
-
-              {/* Información de la persona */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 hover:text-blue-600">
-                      {person.full_name || 'Usuario sin nombre'}
-                    </h4>
-                    {person.occupation && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {person.occupation}
-                      </p>
-                    )}
-                  </div>
-                  
-                  {/* Distancia */}
-                  <div className="text-right">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {person.distance_km < 1 
-                        ? `${Math.round(person.distance_km * 1000)}m`
-                        : `${person.distance_km.toFixed(1)}km`
-                      }
-                    </span>
-                  </div>
-                </div>
-
-                {/* Ubicación */}
-                {person.formatted_address && (
-                  <div className="flex items-center mt-2 text-sm text-gray-500">
-                    <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="truncate">
-                      {person.formatted_address}
-                    </span>
-                  </div>
-                )}
-
-                {/* Bio */}
-                {person.bio && (
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                    {person.bio}
+                <h4 className="text-lg font-medium text-gray-900 hover:text-blue-600 truncate">
+                  {person.full_name || 'Usuario sin nombre'}
+                </h4>
+                {person.occupation && (
+                  <p className="text-sm text-gray-600 truncate">
+                    {person.occupation}
                   </p>
-                )}
-
-                {/* Intereses */}
-                {person.interests && person.interests.length > 0 && (
-                  <div className="mt-3">
-                    <div className="flex flex-wrap gap-2">
-                      {person.interests.slice(0, 5).map((interest, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                        >
-                          {interest}
-                        </span>
-                      ))}
-                      {person.interests.length > 5 && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          +{person.interests.length - 5} más
-                        </span>
-                      )}
-                    </div>
-                  </div>
                 )}
               </div>
             </div>
 
+            {/* Ubicación */}
+            {person.formatted_address && (
+              <div className="flex items-center mb-3 text-sm text-gray-500">
+                <svg className="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="truncate">
+                  {person.formatted_address}
+                </span>
+              </div>
+            )}
+
+            {/* Bio */}
+            {person.bio && (
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                {person.bio}
+              </p>
+            )}
+
+            {/* Intereses */}
+            {person.interests && person.interests.length > 0 && (
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-1">
+                  {person.interests.slice(0, 3).map((interest, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                  {person.interests.length > 3 && (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      +{person.interests.length - 3}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Botón de acción */}
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
