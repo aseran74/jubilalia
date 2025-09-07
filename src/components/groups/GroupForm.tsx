@@ -93,21 +93,43 @@ const GroupForm: React.FC = () => {
     try {
       setLoading(true);
       
+      console.log('🔧 Iniciando subida de imagen:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        user: user?.id,
+        profile: profile?.id
+      });
+
+      // Verificar que el usuario esté autenticado
+      if (!user) {
+        throw new Error('Usuario no autenticado');
+      }
+
       // Subir imagen al bucket de grupos
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `group-images/${fileName}`;
 
+      console.log('🔧 Subiendo archivo:', { filePath, bucket: 'group-images' });
+
       const { error: uploadError } = await supabase.storage
-        .from('post-images') // Usamos el bucket post-images por ahora
+        .from('group-images') // Usar bucket específico para grupos
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('❌ Error de subida:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('✅ Imagen subida exitosamente');
 
       // Obtener URL pública
       const { data: { publicUrl } } = supabase.storage
-        .from('post-images')
+        .from('group-images')
         .getPublicUrl(filePath);
+
+      console.log('🔗 URL pública generada:', publicUrl);
 
       setFormData(prev => ({
         ...prev,
