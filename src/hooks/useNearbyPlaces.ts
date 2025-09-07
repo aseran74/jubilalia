@@ -31,7 +31,7 @@ export const useNearbyPlaces = (
     error: null,
   });
 
-  const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
+  const { isLoaded: mapsLoaded, isLoading: mapsLoading } = useGoogleMaps();
 
   useEffect(() => {
     if (!latitude || !longitude || !mapsLoaded || mapsLoading) {
