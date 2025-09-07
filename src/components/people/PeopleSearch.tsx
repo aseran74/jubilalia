@@ -43,7 +43,7 @@ const PeopleSearch: React.FC = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, full_name, email, avatar_url, bio, address, city, state, postal_code, country, occupation, interests, created_at')
         .limit(10);
 
       if (error) {
@@ -53,18 +53,32 @@ const PeopleSearch: React.FC = () => {
 
       console.log('✅ Usuarios iniciales cargados:', data);
       
-      // Convertir a formato LocationSearchResult
-      const formattedResults = data?.map(profile => ({
-        id: profile.id,
-        full_name: profile.full_name || 'Usuario',
-        email: profile.email || '',
-        formatted_address: profile.address || 'Ubicación no especificada',
-        occupation: profile.occupation || 'Sin ocupación',
-        interests: profile.interests || [],
-        age: null,
-        gender: null,
-        distance_km: null
-      })) || [];
+        // Convertir a formato LocationSearchResult
+        const formattedResults = data?.map(profile => {
+          // Construir dirección completa
+          let fullAddress = '';
+          if (profile.address) fullAddress += profile.address;
+          if (profile.city) fullAddress += (fullAddress ? ', ' : '') + profile.city;
+          if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
+          if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
+          if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
+          
+          return {
+            id: profile.id,
+            full_name: profile.full_name || 'Usuario',
+            email: profile.email || '',
+            avatar_url: profile.avatar_url,
+            bio: profile.bio,
+            formatted_address: fullAddress || 'Ubicación no especificada',
+            location_city: profile.city,
+            location_country: profile.country,
+            occupation: profile.occupation || 'Sin ocupación',
+            interests: profile.interests || [],
+            age: null,
+            gender: null,
+            distance_km: null
+          };
+        }) || [];
 
       setSearchResults(formattedResults);
       setFilteredResults(formattedResults);
@@ -108,7 +122,7 @@ const PeopleSearch: React.FC = () => {
         // Fallback: consulta directa a la tabla profiles
         const { data, error } = await supabase
           .from('profiles')
-          .select('*')
+          .select('id, full_name, email, avatar_url, bio, address, city, state, postal_code, country, occupation, interests, created_at')
           .limit(20);
 
         if (error) {
@@ -119,17 +133,31 @@ const PeopleSearch: React.FC = () => {
         console.log('✅ Resultados de consulta directa:', data);
         
         // Convertir a formato LocationSearchResult
-        const formattedResults = data?.map(profile => ({
-          id: profile.id,
-          full_name: profile.full_name || 'Usuario',
-          email: profile.email || '',
-          formatted_address: profile.address || 'Ubicación no especificada',
-          occupation: profile.occupation || 'Sin ocupación',
-          interests: profile.interests || [],
-          age: null, // No tenemos edad en profiles
-          gender: null, // No tenemos género en profiles
-          distance_km: null
-        })) || [];
+        const formattedResults = data?.map(profile => {
+          // Construir dirección completa
+          let fullAddress = '';
+          if (profile.address) fullAddress += profile.address;
+          if (profile.city) fullAddress += (fullAddress ? ', ' : '') + profile.city;
+          if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
+          if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
+          if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
+          
+          return {
+            id: profile.id,
+            full_name: profile.full_name || 'Usuario',
+            email: profile.email || '',
+            avatar_url: profile.avatar_url,
+            bio: profile.bio,
+            formatted_address: fullAddress || 'Ubicación no especificada',
+            location_city: profile.city,
+            location_country: profile.country,
+            occupation: profile.occupation || 'Sin ocupación',
+            interests: profile.interests || [],
+            age: null, // No tenemos edad en profiles
+            gender: null, // No tenemos género en profiles
+            distance_km: null
+          };
+        }) || [];
 
         setSearchResults(formattedResults);
         setFilteredResults(formattedResults);
