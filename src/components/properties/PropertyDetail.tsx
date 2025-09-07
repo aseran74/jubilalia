@@ -204,7 +204,7 @@ const PropertyDetail: React.FC = () => {
                   <img
                     src={property.images[0]}
                     alt={property.title}
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    className="w-full h-full object-contain transition-transform group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
@@ -223,7 +223,7 @@ const PropertyDetail: React.FC = () => {
                       <img
                         src={image}
                         alt={property.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        className="w-full h-full object-contain transition-transform group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
@@ -244,7 +244,7 @@ const PropertyDetail: React.FC = () => {
                       <img
                         src={image}
                         alt={`${property.title} - Imagen ${index + 4}`}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        className="w-full h-full object-contain transition-transform group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <button
@@ -258,6 +258,28 @@ const PropertyDetail: React.FC = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Miniaturas debajo */}
+              {property.images.length > 6 && (
+                <div className="p-2">
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {property.images.slice(6).map((image, index) => (
+                      <div
+                        key={index + 6}
+                        className="relative flex-shrink-0 w-20 h-16 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer"
+                      >
+                        <img
+                          src={image}
+                          alt={`${property.title} - Imagen ${index + 7}`}
+                          className="w-full h-full object-contain transition-transform group-hover:scale-105"
+                          onClick={() => window.open(image, '_blank')}
+                        />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
