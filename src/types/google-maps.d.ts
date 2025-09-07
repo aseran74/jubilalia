@@ -160,6 +160,10 @@ declare namespace google.maps.places {
       request: PlaceDetailsRequest,
       callback: (result: PlaceResult | null, status: PlacesServiceStatus) => void
     ): void;
+    nearbySearch(
+      request: PlaceSearchRequest,
+      callback: (results: PlaceResult[] | null, status: PlacesServiceStatus) => void
+    ): void;
   }
 
   interface PlaceDetailsRequest {
@@ -167,7 +171,20 @@ declare namespace google.maps.places {
     fields: string[];
   }
 
+  interface PlaceSearchRequest {
+    location: google.maps.LatLng;
+    radius: number;
+    type: string;
+  }
+
   interface PlaceResult {
+    place_id?: string;
+    name?: string;
+    rating?: number;
+    price_level?: number;
+    vicinity?: string;
+    types?: string[];
+    icon?: string;
     address_components?: GeocoderAddressComponent[];
     formatted_address?: string;
     geometry?: PlaceGeometry;

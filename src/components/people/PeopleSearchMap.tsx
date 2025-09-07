@@ -87,7 +87,7 @@ const PeopleSearchMap: React.FC<PeopleSearchMapProps> = ({
             `)}`;
           } else {
             // Para personas sin foto, crear un SVG con iniciales
-            const initials = person.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            const initials = (person.full_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
             iconUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
               <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="24" cy="24" r="21" fill="#10B981" stroke="#fff" stroke-width="3"/>

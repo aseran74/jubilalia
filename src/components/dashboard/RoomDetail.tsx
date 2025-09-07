@@ -539,11 +539,6 @@ const RoomDetail: React.FC = () => {
               </div>
 
               {/* Actividades Cercanas */}
-              {console.log('🎯 Renderizando NearbyPlaces en RoomDetail:', {
-                latitude: room.latitude || 40.4168,
-                longitude: room.longitude || -3.7038,
-                roomId: room.id
-              })}
               <div style={{border: '3px solid red', padding: '20px', margin: '20px 0'}}>
                 <h2>DEBUG: Sección de Actividades Cercanas</h2>
                 <p>Lat: {room.latitude || 40.4168}</p>

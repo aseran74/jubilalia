@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNearbyPlaces, getPlaceEmoji, getPlaceTypeName, NearbyPlace } from '../../hooks/useNearbyPlaces';
+import { useNearbyPlaces, getPlaceEmoji, NearbyPlace } from '../../hooks/useNearbyPlaces';
 
 interface NearbyPlacesProps {
   latitude: number;
@@ -96,7 +96,6 @@ interface PlaceItemProps {
 
 const PlaceItem: React.FC<PlaceItemProps> = ({ place }) => {
   const emoji = getPlaceEmoji(place.types);
-  const typeName = getPlaceTypeName(place.types);
   const distance = place.distance ? `${place.distance.toFixed(1)} km` : '';
 
   // Colores basados en el tipo de lugar

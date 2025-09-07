@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { environment } from '../config/environment';
 import { useGoogleMaps } from './useGoogleMaps';
 
 export interface NearbyPlace {
@@ -68,7 +67,7 @@ export const useNearbyPlaces = (
           document.createElement('div')
         );
 
-        const request: google.maps.places.PlaceSearchRequest = {
+        const request: any = {
           location: new window.google.maps.LatLng(latitude, longitude),
           radius: radius,
           type: types[0], // Google Places API solo acepta un tipo a la vez
@@ -76,12 +75,12 @@ export const useNearbyPlaces = (
 
         // Función para hacer la búsqueda
         const searchPlaces = (type: string): Promise<NearbyPlace[]> => {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve) => {
             const searchRequest = { ...request, type };
             
-            service.nearbySearch(searchRequest, (results, status) => {
+            service.nearbySearch(searchRequest, (results: any, status: any) => {
               if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-                const places: NearbyPlace[] = results.slice(0, 2).map((place) => ({
+                const places: NearbyPlace[] = results.slice(0, 2).map((place: any) => ({
                   id: place.place_id || Math.random().toString(),
                   name: place.name || 'Sin nombre',
                   rating: place.rating || 0,
