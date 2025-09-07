@@ -64,14 +64,32 @@ const PropertyDetail: React.FC = () => {
         .single();
 
       if (propertyError) throw propertyError;
-      setProperty(propertyData);
+
+      // Fetch images
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('property_images')
+        .select('image_url')
+        .eq('listing_id', id)
+        .order('order_index', { ascending: true });
+
+      if (imagesError) {
+        console.error('Error fetching images:', imagesError);
+      }
+
+      // Add images to property data
+      const propertyWithImages = {
+        ...propertyData,
+        images: imagesData?.map(img => img.image_url) || []
+      };
+
+      setProperty(propertyWithImages);
 
       // Fetch author details
-      if (propertyData.author_id) {
+      if (propertyData.profile_id) {
         const { data: authorData, error: authorError } = await supabase
           .from('profiles')
           .select('id, full_name, email, avatar_url')
-          .eq('id', propertyData.author_id)
+          .eq('id', propertyData.profile_id)
           .single();
 
         if (!authorError) {

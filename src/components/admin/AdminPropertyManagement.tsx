@@ -125,21 +125,14 @@ const AdminPropertyManagement: React.FC = () => {
         console.error('Error deleting images:', imagesError);
       }
 
-             // Eliminar requisitos (dependiendo del tipo)
-       const property = properties.find(p => p.id === propertyId);
-       if (property) {
-         const requirementsTable = property.listing_type === 'property_purchase' 
-           ? 'property_purchase_requirements' 
-           : 'property_rental_requirements';
-        
-        const { error: requirementsError } = await supabase
-          .from(requirementsTable)
-          .delete()
-          .eq('listing_id', propertyId);
+      // Eliminar amenidades si existen
+      const { error: amenitiesError } = await supabase
+        .from('property_amenities')
+        .delete()
+        .eq('listing_id', propertyId);
 
-        if (requirementsError) {
-          console.error('Error deleting requirements:', requirementsError);
-        }
+      if (amenitiesError) {
+        console.error('Error deleting amenities:', amenitiesError);
       }
 
       // Eliminar la propiedad
