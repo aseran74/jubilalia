@@ -8,6 +8,7 @@ import RoomDetailMap from '../maps/RoomDetailMap';
 import { 
   ArrowLeft, 
   Heart, 
+  Share2,
   MapPin, 
   Bed, 
   Bath, 
@@ -19,7 +20,6 @@ import {
   CheckCircle,
   ChevronRight,
   Dog,
-  Share2,
   Check
 } from 'lucide-react';
 
@@ -349,115 +349,109 @@ const RoomDetail: React.FC = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Contenido principal */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Galería de imágenes mejorada */}
+            {/* Galería de imágenes estilo idealista */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               {room.images && room.images.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2 p-2">
-                  {/* Imagen principal - ocupa 2 columnas */}
-                  <div className="col-span-2 relative h-80 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                    <img
-                      src={room.images[0]}
-                      alt={room.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button
-                        onClick={() => window.open(room.images[0], '_blank')}
-                        className="bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
-                      >
-                        Ver más grande
-                      </button>
+                <div className="relative">
+                  {/* Iconos de favorito y compartir */}
+                  <div className="absolute top-4 right-4 z-10 flex gap-2">
+                    <button
+                      onClick={handleFavorite}
+                      className={`p-3 rounded-full shadow-lg transition-all duration-200 ${
+                        isFavorite 
+                          ? 'bg-red-500 text-white' 
+                          : 'bg-white/90 text-gray-700 hover:bg-white'
+                      }`}
+                    >
+                      <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="p-3 rounded-full bg-white/90 text-gray-700 shadow-lg hover:bg-white transition-all duration-200"
+                    >
+                      <Share2 className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Layout principal: imagen grande + dos medianas */}
+                  <div className="grid grid-cols-3 gap-2 h-96">
+                    {/* Imagen principal - ocupa 2 columnas */}
+                    <div className="col-span-2 relative bg-gray-200 rounded-l-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={room.images[0]}
+                        alt={room.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => window.open(room.images[0], '_blank')}
+                          className="bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                          Ver más grande
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Columna derecha con dos imágenes medianas */}
+                    <div className="flex flex-col gap-2">
+                      {/* Segunda imagen */}
+                      {room.images.length > 1 && (
+                        <div className="relative flex-1 bg-gray-200 rounded-tr-lg overflow-hidden group cursor-pointer">
+                          <img
+                            src={room.images[1]}
+                            alt={room.title}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button
+                              onClick={() => window.open(room.images[1], '_blank')}
+                              className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                            >
+                              Ver más
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Tercera imagen */}
+                      {room.images.length > 2 && (
+                        <div className="relative flex-1 bg-gray-200 rounded-br-lg overflow-hidden group cursor-pointer">
+                          <img
+                            src={room.images[2]}
+                            alt={room.title}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button
+                              onClick={() => window.open(room.images[2], '_blank')}
+                              className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                            >
+                              Ver más
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Segunda imagen - ocupa 1 columna */}
-                  {room.images.length > 1 && (
-                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                      <img
-                        src={room.images[1]}
-                        alt={room.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button
-                          onClick={() => window.open(room.images[1], '_blank')}
-                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          Ver más
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Tercera imagen - ocupa 1 columna */}
-                  {room.images.length > 2 && (
-                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                      <img
-                        src={room.images[2]}
-                        alt={room.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button
-                          onClick={() => window.open(room.images[2], '_blank')}
-                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          Ver más
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Cuarta imagen - ocupa 1 columna */}
+
+                  {/* Fila de miniaturas */}
                   {room.images.length > 3 && (
-                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                      <img
-                        src={room.images[3]}
-                        alt={room.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button
-                          onClick={() => window.open(room.images[3], '_blank')}
-                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          Ver más
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Quinta imagen - ocupa 1 columna */}
-                  {room.images.length > 4 && (
-                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                      <img
-                        src={room.images[4]}
-                        alt={room.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button
-                          onClick={() => window.open(room.images[4], '_blank')}
-                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          Ver más
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Indicador de más imágenes */}
-                  {room.images.length > 5 && (
-                    <div className="relative h-40 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                      <img
-                        src={room.images[5]}
-                        alt={room.title}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <span className="text-white text-lg font-semibold">
-                          +{room.images.length - 5} más
-                        </span>
+                    <div className="p-2">
+                      <div className="flex gap-2 overflow-x-auto pb-2">
+                        {room.images.slice(3).map((image, index) => (
+                          <div
+                            key={index + 3}
+                            className="relative flex-shrink-0 w-20 h-16 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer"
+                          >
+                            <img
+                              src={image}
+                              alt={`${room.title} - Imagen ${index + 4}`}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              onClick={() => window.open(image, '_blank')}
+                            />
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}

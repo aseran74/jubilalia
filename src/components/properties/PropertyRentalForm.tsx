@@ -60,22 +60,12 @@ const PropertyRentalForm: React.FC = () => {
           console.log('🔍 PropertyRentalForm - Datos de propiedad:', propertyData, 'Error:', propertyError);
           if (propertyError) throw propertyError;
 
-          // Obtener requisitos de la propiedad
-          const { data: requirementsData, error: requirementsError } = await supabase
-            .from('property_rental_requirements')
-            .select('*')
-            .eq('listing_id', id)
-            .single();
-
-          console.log('🔍 PropertyRentalForm - Datos de requisitos:', requirementsData, 'Error:', requirementsError);
-          if (requirementsError) throw requirementsError;
-
           // Obtener imágenes
           const { data: imagesData, error: imagesError } = await supabase
             .from('property_images')
             .select('image_url')
             .eq('listing_id', id)
-            .order('created_at');
+            .order('order_index', { ascending: true });
 
           console.log('🔍 PropertyRentalForm - Datos de imágenes:', imagesData, 'Error:', imagesError);
           if (imagesError) throw imagesError;
@@ -84,18 +74,18 @@ const PropertyRentalForm: React.FC = () => {
           setFormData({
             title: propertyData.title || '',
             description: propertyData.description || '',
-            property_type: requirementsData.property_type || '',
+            property_type: propertyData.property_type || '',
             address: propertyData.address || '',
             city: propertyData.city || '',
             country: propertyData.country || 'España',
             price: propertyData.price?.toString() || '',
             available_from: propertyData.available_from ? new Date(propertyData.available_from) : null,
             available_until: propertyData.available_until ? new Date(propertyData.available_until) : null,
-            bedrooms: requirementsData.bedrooms?.toString() || '',
-            bathrooms: requirementsData.bathrooms?.toString() || '',
-            total_area: requirementsData.total_area?.toString() || '',
-            max_occupants: requirementsData.max_occupants?.toString() || '',
-            amenities: requirementsData.amenities || [],
+            bedrooms: propertyData.bedrooms?.toString() || '',
+            bathrooms: propertyData.bathrooms?.toString() || '',
+            total_area: propertyData.total_area?.toString() || '',
+            max_occupants: propertyData.max_occupants?.toString() || '',
+            amenities: [], // Las amenities se manejan por separado
             images: imagesData?.map(img => img.image_url) || [],
             is_featured: propertyData.is_featured || false
           });
@@ -286,34 +276,7 @@ const PropertyRentalForm: React.FC = () => {
         listingId = listing.id;
       }
 
-      // 2. Actualizar o crear los requisitos específicos para alquiler de propiedades
-      if (isEditing) {
-        const { error: requirementsError } = await supabase
-          .from('property_rental_requirements')
-          .update({
-            bedrooms: parseInt(formData.bedrooms),
-            bathrooms: parseInt(formData.bathrooms),
-            total_area: parseFloat(formData.total_area),
-            max_occupants: parseInt(formData.max_occupants),
-            property_type: formData.property_type
-          })
-          .eq('listing_id', listingId);
-
-        if (requirementsError) throw requirementsError;
-      } else {
-        const { error: requirementsError } = await supabase
-          .from('property_rental_requirements')
-          .insert({
-            listing_id: listingId,
-            bedrooms: parseInt(formData.bedrooms),
-            bathrooms: parseInt(formData.bathrooms),
-            total_area: parseFloat(formData.total_area),
-            max_occupants: parseInt(formData.max_occupants),
-            property_type: formData.property_type
-          });
-
-        if (requirementsError) throw requirementsError;
-      }
+      // 2. Los datos ya están guardados en property_listings, no necesitamos tabla separada
 
       // 3. Manejar amenidades
       if (isEditing) {

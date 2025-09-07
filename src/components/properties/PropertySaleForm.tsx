@@ -62,22 +62,12 @@ const PropertySaleForm: React.FC = () => {
           console.log('🔍 PropertySaleForm - Datos de propiedad:', propertyData, 'Error:', propertyError);
           if (propertyError) throw propertyError;
 
-          // Obtener requisitos de la propiedad
-          const { data: requirementsData, error: requirementsError } = await supabase
-            .from('property_purchase_requirements')
-            .select('*')
-            .eq('listing_id', id)
-            .single();
-
-          console.log('🔍 PropertySaleForm - Datos de requisitos:', requirementsData, 'Error:', requirementsError);
-          if (requirementsError) throw requirementsError;
-
           // Obtener imágenes
           const { data: imagesData, error: imagesError } = await supabase
             .from('property_images')
             .select('image_url')
             .eq('listing_id', id)
-            .order('created_at');
+            .order('order_index', { ascending: true });
 
           console.log('🔍 PropertySaleForm - Datos de imágenes:', imagesData, 'Error:', imagesError);
           if (imagesError) throw imagesError;
@@ -86,19 +76,19 @@ const PropertySaleForm: React.FC = () => {
           setFormData({
             title: propertyData.title || '',
             description: propertyData.description || '',
-            property_type: requirementsData.property_type || '',
+            property_type: propertyData.property_type || '',
             address: propertyData.address || '',
             city: propertyData.city || '',
             country: propertyData.country || 'España',
             price: propertyData.price?.toString() || '',
-            bedrooms: requirementsData.bedrooms?.toString() || '',
-            bathrooms: requirementsData.bathrooms?.toString() || '',
-            total_area: requirementsData.total_area?.toString() || '',
-            land_area: requirementsData.land_area?.toString() || '',
-            construction_year: requirementsData.construction_year?.toString() || '',
-            property_condition: requirementsData.property_condition || '',
-            parking_spaces: requirementsData.parking_spaces?.toString() || '',
-            amenities: requirementsData.amenities || [],
+            bedrooms: propertyData.bedrooms?.toString() || '',
+            bathrooms: propertyData.bathrooms?.toString() || '',
+            total_area: propertyData.total_area?.toString() || '',
+            land_area: propertyData.land_area?.toString() || '',
+            construction_year: propertyData.construction_year?.toString() || '',
+            property_condition: propertyData.property_condition || '',
+            parking_spaces: propertyData.parking_spaces?.toString() || '',
+            amenities: [], // Las amenities se manejan por separado
             images: imagesData?.map(img => img.image_url) || [],
             is_featured: propertyData.is_featured || false,
             available_from: propertyData.available_from ? new Date(propertyData.available_from) : null
@@ -318,40 +308,7 @@ const PropertySaleForm: React.FC = () => {
         listingId = listing.id;
       }
 
-      // 2. Actualizar o crear los requisitos específicos para compra de propiedades
-      if (isEditing) {
-        const { error: requirementsError } = await supabase
-          .from('property_purchase_requirements')
-          .update({
-            bedrooms: parseInt(formData.bedrooms),
-            bathrooms: parseInt(formData.bathrooms),
-            total_area: parseFloat(formData.total_area),
-            land_area: formData.land_area ? parseFloat(formData.land_area) : null,
-            construction_year: parseInt(formData.construction_year),
-            property_condition: formData.property_condition,
-            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
-            property_type: formData.property_type
-          })
-          .eq('listing_id', listingId);
-
-        if (requirementsError) throw requirementsError;
-      } else {
-        const { error: requirementsError } = await supabase
-          .from('property_purchase_requirements')
-          .insert({
-            listing_id: listingId,
-            bedrooms: parseInt(formData.bedrooms),
-            bathrooms: parseInt(formData.bathrooms),
-            total_area: parseFloat(formData.total_area),
-            land_area: formData.land_area ? parseFloat(formData.land_area) : null,
-            construction_year: parseInt(formData.construction_year),
-            property_condition: formData.property_condition,
-            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
-            property_type: formData.property_type
-          });
-
-        if (requirementsError) throw requirementsError;
-      }
+      // 2. Los datos ya están guardados en property_listings, no necesitamos tabla separada
 
       // 3. Manejar amenidades
       if (isEditing) {
