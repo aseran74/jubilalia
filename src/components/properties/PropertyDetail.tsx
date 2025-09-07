@@ -188,7 +188,7 @@ const PropertyDetail: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
             <div className="relative">
               {/* Iconos de favorito y compartir */}
-              <div className="absolute top-4 right-4 z-10 flex gap-2">
+              <div className="absolute top-4 right-4 z-20 flex gap-2">
                 <button className="p-3 rounded-full bg-white/90 text-gray-700 shadow-lg hover:bg-white transition-all duration-200">
                   <Heart className="w-5 h-5" />
                 </button>
@@ -198,7 +198,7 @@ const PropertyDetail: React.FC = () => {
               </div>
 
               {/* Layout 1+1+1: 3 columnas verticales */}
-              <div className="h-80 grid grid-cols-3 gap-2 p-2">
+              <div className="h-80 grid grid-cols-3 gap-2 p-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>
                 {/* Columna 1: 1 imagen grande */}
                 <div className="relative bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
                   <img
