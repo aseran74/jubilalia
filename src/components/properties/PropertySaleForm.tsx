@@ -29,7 +29,6 @@ interface PropertySaleFormData {
   parking_spaces: string;
   amenities: string[];
   images: string[];
-  is_featured: boolean;
   available_from: Date | null;
 }
 
@@ -90,7 +89,6 @@ const PropertySaleForm: React.FC = () => {
             parking_spaces: propertyData.parking_spaces?.toString() || '',
             amenities: [], // Las amenities se manejan por separado
             images: imagesData?.map(img => img.image_url) || [],
-            is_featured: propertyData.is_featured || false,
             available_from: propertyData.available_from ? new Date(propertyData.available_from) : null
           });
 
@@ -123,7 +121,6 @@ const PropertySaleForm: React.FC = () => {
     parking_spaces: '',
     amenities: [],
     images: [],
-    is_featured: false,
     available_from: null
   });
 
@@ -262,7 +259,6 @@ const PropertySaleForm: React.FC = () => {
             city: formData.city,
             country: formData.country,
             available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            is_featured: formData.is_featured,
             property_type: formData.property_type,
             bedrooms: parseInt(formData.bedrooms),
             bathrooms: parseInt(formData.bathrooms),
@@ -290,7 +286,6 @@ const PropertySaleForm: React.FC = () => {
             city: formData.city,
             country: formData.country,
             available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            is_featured: formData.is_featured,
             is_available: true,
             property_type: formData.property_type,
             bedrooms: parseInt(formData.bedrooms),
@@ -651,22 +646,6 @@ const PropertySaleForm: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Propiedad destacada
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="is_featured"
-                      name="is_featured"
-                      checked={formData.is_featured}
-                      onChange={(e) => setFormData(prev => ({ ...prev, is_featured: e.target.checked }))}
-                      className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-                    />
-                    <label htmlFor="is_featured" className="text-sm text-gray-700">
-                      Marcar como propiedad destacada (aparecerá en la página principal)
-                    </label>
-                  </div>
                 </div>
               </div>
             </div>
