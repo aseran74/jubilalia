@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPinIcon, HomeIcon, UsersIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, HomeIcon, UsersIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
+import RoomsMapFilters, { RoomFilters } from './RoomsMapFilters';
 
 // Declarar tipos de Google Maps localmente
 declare global {
@@ -25,6 +26,7 @@ interface Room {
   description: string;
   price: number;
   location: string;
+  city?: string;
   latitude?: number;
   longitude?: number;
   max_occupants: number;
@@ -42,11 +44,21 @@ interface Room {
 const RoomsMapView: React.FC = () => {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [filteredRooms, setFilteredRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<RoomFilters>({
+    minPrice: 0,
+    maxPrice: 2000,
+    maxOccupants: 10,
+    availableOnly: false,
+    hasImages: false,
+    city: ''
+  });
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -55,10 +67,14 @@ const RoomsMapView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (rooms.length > 0 && mapRef.current && !map && mapsLoaded) {
+    applyFilters();
+  }, [rooms, filters]);
+
+  useEffect(() => {
+    if (filteredRooms.length > 0 && mapRef.current && !map && mapsLoaded) {
       initializeMap();
     }
-  }, [rooms, map, mapsLoaded]);
+  }, [filteredRooms, map, mapsLoaded]);
 
   const fetchRooms = async () => {
     try {
@@ -135,6 +151,43 @@ const RoomsMapView: React.FC = () => {
     }
   };
 
+  const applyFilters = () => {
+    let filtered = [...rooms];
+
+    // Filtrar por precio
+    filtered = filtered.filter(room => 
+      room.price >= filters.minPrice && room.price <= filters.maxPrice
+    );
+
+    // Filtrar por ocupantes máximos
+    filtered = filtered.filter(room => 
+      room.max_occupants <= filters.maxOccupants
+    );
+
+    // Filtrar por ciudad
+    if (filters.city.trim()) {
+      filtered = filtered.filter(room => 
+        room.city?.toLowerCase().includes(filters.city.toLowerCase())
+      );
+    }
+
+    // Filtrar por disponibilidad
+    if (filters.availableOnly) {
+      filtered = filtered.filter(room => 
+        room.current_occupants < room.max_occupants
+      );
+    }
+
+    // Filtrar por imágenes
+    if (filters.hasImages) {
+      filtered = filtered.filter(room => 
+        room.primary_image_url && room.primary_image_url.trim() !== ''
+      );
+    }
+
+    setFilteredRooms(filtered);
+  };
+
   const initializeMap = () => {
     if (!window.google || !mapRef.current) return;
 
@@ -155,7 +208,7 @@ const RoomsMapView: React.FC = () => {
     // Crear marcadores para cada habitación
     const newMarkers: google.maps.Marker[] = [];
     
-    rooms.forEach((room) => {
+    filteredRooms.forEach((room) => {
       if (room.latitude && room.longitude) {
         const marker = new window.google.maps.Marker({
           position: { lat: room.latitude, lng: room.longitude },
@@ -266,8 +319,15 @@ const RoomsMapView: React.FC = () => {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-500">
-                {rooms.length} habitaciones encontradas
+                {filteredRooms.length} de {rooms.length} habitaciones
               </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <FunnelIcon className="w-5 h-5 mr-2" />
+                Filtros
+              </button>
               <Link
                 to="/dashboard/rooms"
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
@@ -366,6 +426,14 @@ const RoomsMapView: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Componente de Filtros */}
+      <RoomsMapFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClose={() => setShowFilters(false)}
+        isOpen={showFilters}
+      />
     </div>
   );
 };

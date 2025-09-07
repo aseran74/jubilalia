@@ -143,13 +143,29 @@ export const updateUserProfile = async (id: string, updates: Partial<UserProfile
   }
 };
 
+// Función para obtener la URL de redirección correcta según el entorno
+const getRedirectUrl = () => {
+  const origin = window.location.origin;
+  
+  // En desarrollo local, usar localhost
+  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    return `${origin}/auth/callback`;
+  }
+  
+  // En producción, usar la URL de Vercel
+  return 'https://jubilalia.vercel.app/auth/callback';
+};
+
 // Función para iniciar sesión con Google
 export const signInWithGoogle = async () => {
   try {
+    const redirectUrl = getRedirectUrl();
+    console.log('🔧 URL de redirección:', redirectUrl);
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: redirectUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
