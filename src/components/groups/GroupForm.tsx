@@ -139,6 +139,19 @@ const GroupForm: React.FC = () => {
       return;
     }
 
+    console.log('🔧 Creando grupo con datos:', {
+      user: user.id,
+      profile: profile.id,
+      profileExists: !!profile,
+      formData
+    });
+
+    // Verificar que el perfil existe y tiene un ID válido
+    if (!profile || !profile.id) {
+      setError('Error: Perfil de usuario no encontrado. Por favor, inicia sesión nuevamente.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -165,6 +178,7 @@ const GroupForm: React.FC = () => {
         }, 2000);
       } else {
         // Crear el grupo
+        console.log('🔧 Insertando grupo en la base de datos...');
         const { data: groupData, error: groupError } = await supabase
           .from('groups')
           .insert({
@@ -173,15 +187,20 @@ const GroupForm: React.FC = () => {
             image_url: formData.image_url || null,
             is_public: formData.is_public,
             max_members: formData.max_members,
-            created_by: profile.id,
-            current_members: 1
+            created_by: profile.id
           })
           .select()
           .single();
 
-        if (groupError) throw groupError;
+        if (groupError) {
+          console.error('❌ Error al crear grupo:', groupError);
+          throw groupError;
+        }
+
+        console.log('✅ Grupo creado exitosamente:', groupData);
 
         // Agregar al creador como miembro del grupo
+        console.log('🔧 Agregando creador como miembro del grupo...');
         const { error: memberError } = await supabase
           .from('group_members')
           .insert({
@@ -190,7 +209,12 @@ const GroupForm: React.FC = () => {
             role: 'admin'
           });
 
-        if (memberError) throw memberError;
+        if (memberError) {
+          console.error('❌ Error al agregar miembro:', memberError);
+          throw memberError;
+        }
+
+        console.log('✅ Miembro agregado exitosamente');
 
         setSuccess(true);
         setTimeout(() => {
