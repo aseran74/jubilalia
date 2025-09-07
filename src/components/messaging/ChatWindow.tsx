@@ -14,6 +14,7 @@ interface ChatWindowProps {
   loading: boolean;
   error: string | null;
   currentUserId: string;
+  isMobile?: boolean;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -22,7 +23,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onSendMessage,
   loading,
   error,
-  currentUserId
+  currentUserId,
+  isMobile = false
 }) => {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -67,11 +69,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   if (!conversation) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+        <div className="text-center px-4">
           <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Selecciona una conversación</h3>
           <p className="mt-1 text-sm text-gray-500">
-            Elige una conversación del panel izquierdo para comenzar a chatear.
+            {isMobile 
+              ? 'Toca el botón de menú para ver tus conversaciones.'
+              : 'Elige una conversación del panel izquierdo para comenzar a chatear.'
+            }
           </p>
         </div>
       </div>
@@ -80,39 +85,41 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   return (
     <div className="flex-1 flex flex-col bg-white">
-      {/* Header de la conversación */}
-      <div className="p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center space-x-3">
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            {conversation.other_user_avatar ? (
-              <img
-                src={conversation.other_user_avatar}
-                alt={conversation.other_user_name || 'Usuario'}
-                className="h-10 w-10 rounded-full object-cover"
-              />
-            ) : (
-              <UserCircleIcon className="h-10 w-10 text-gray-400" />
-            )}
-          </div>
+      {/* Header de la conversación - solo en desktop */}
+      {!isMobile && (
+        <div className="p-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center space-x-3">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
+              {conversation.other_user_avatar ? (
+                <img
+                  src={conversation.other_user_avatar}
+                  alt={conversation.other_user_name || 'Usuario'}
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+              ) : (
+                <UserCircleIcon className="h-10 w-10 text-gray-400" />
+              )}
+            </div>
 
-          {/* Información del usuario */}
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-medium text-gray-900">
-              {conversation.other_user_name || 'Usuario sin nombre'}
-            </h3>
-            <p className="text-sm text-gray-500">
-              {conversation.unread_count > 0 
-                ? `${conversation.unread_count} mensaje${conversation.unread_count === 1 ? '' : 's'} no leído${conversation.unread_count === 1 ? '' : 's'}`
-                : 'En línea'
-              }
-            </p>
+            {/* Información del usuario */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-medium text-gray-900">
+                {conversation.other_user_name || 'Usuario sin nombre'}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {conversation.unread_count > 0 
+                  ? `${conversation.unread_count} mensaje${conversation.unread_count === 1 ? '' : 's'} no leído${conversation.unread_count === 1 ? '' : 's'}`
+                  : 'En línea'
+                }
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Área de mensajes */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className={`flex-1 overflow-y-auto space-y-4 ${isMobile ? 'p-3' : 'p-4'}`}>
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <ArrowPathIcon className="h-6 w-6 text-gray-400 animate-spin" />
@@ -139,7 +146,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                  className={`${isMobile ? 'max-w-[85%]' : 'max-w-xs lg:max-w-md'} px-4 py-2 rounded-lg ${
                     isOwnMessage
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-gray-900'
@@ -168,7 +175,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Formulario para enviar mensajes */}
-      <div className="p-4 border-t border-gray-200 bg-gray-50">
+      <div className={`border-t border-gray-200 bg-gray-50 ${isMobile ? 'p-3' : 'p-4'}`}>
         <form onSubmit={handleSendMessage} className="flex space-x-3">
           <input
             type="text"
@@ -176,12 +183,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Escribe un mensaje..."
             disabled={sending}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+            className={`flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 ${isMobile ? 'text-base' : ''}`}
           />
           <button
             type="submit"
             disabled={!newMessage.trim() || sending}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className={`${isMobile ? 'px-3 py-2' : 'px-4 py-2'} bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
           >
             {sending ? (
               <ArrowPathIcon className="h-4 w-4 animate-spin" />

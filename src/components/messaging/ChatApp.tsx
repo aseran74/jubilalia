@@ -6,7 +6,9 @@ import { ChatMessage, UserConversation, CreateChatMessage } from '../../types/su
 import ChatSidebar from './ChatSidebar';
 import ChatWindow from './ChatWindow';
 import { 
-  UserCircleIcon
+  UserCircleIcon,
+  Bars3Icon,
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 
 const ChatApp: React.FC = () => {
@@ -17,9 +19,25 @@ const ChatApp: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Debug: mostrar estado de autenticación
   console.log('ChatApp - Estado de autenticación:', { user, profile, loading });
+
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setShowSidebar(true);
+      }
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   // Cargar conversaciones del usuario
   useEffect(() => {
@@ -150,6 +168,28 @@ const ChatApp: React.FC = () => {
 
     setSelectedConversation(newConversation);
     setMessages([]);
+    
+    // En móvil, ocultar sidebar cuando se selecciona una conversación
+    if (isMobile) {
+      setShowSidebar(false);
+    }
+  };
+
+  const handleSelectConversation = (conversation: UserConversation) => {
+    setSelectedConversation(conversation);
+    
+    // En móvil, ocultar sidebar cuando se selecciona una conversación
+    if (isMobile) {
+      setShowSidebar(false);
+    }
+  };
+
+  const handleBackToConversations = () => {
+    setSelectedConversation(null);
+    setMessages([]);
+    if (isMobile) {
+      setShowSidebar(true);
+    }
   };
 
   // Mostrar estado de carga mientras se verifica la autenticación
@@ -209,27 +249,97 @@ const ChatApp: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 relative">
+      {/* Overlay móvil */}
+      {isMobile && showSidebar && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
       {/* Sidebar con conversaciones */}
-      <ChatSidebar
-        conversations={conversations}
-        selectedConversation={selectedConversation}
-        onSelectConversation={setSelectedConversation}
-        onStartNewConversation={startNewConversation}
-        loading={loadingMessages}
-        error={error}
-        onRefresh={loadConversations}
-      />
+      <div className={`
+        ${isMobile 
+          ? `fixed top-0 left-0 h-full z-50 transform transition-transform duration-300 ${
+              showSidebar ? 'translate-x-0' : '-translate-x-full'
+            } w-80`
+          : 'relative'
+        }
+      `}>
+        <ChatSidebar
+          conversations={conversations}
+          selectedConversation={selectedConversation}
+          onSelectConversation={handleSelectConversation}
+          onStartNewConversation={startNewConversation}
+          loading={loadingMessages}
+          error={error}
+          onRefresh={loadConversations}
+          isMobile={isMobile}
+          onCloseSidebar={() => setShowSidebar(false)}
+        />
+      </div>
 
       {/* Ventana principal de chat */}
-      <ChatWindow
-        conversation={selectedConversation}
-        messages={messages}
-        onSendMessage={sendMessage}
-        loading={loadingMessages}
-        error={error}
-        currentUserId={profile.id}
-      />
+      <div className={`
+        flex-1 flex flex-col
+        ${isMobile && !showSidebar ? 'block' : 'hidden'}
+        ${!isMobile ? 'block' : ''}
+      `}>
+        {/* Header móvil */}
+        {isMobile && selectedConversation && (
+          <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center space-x-3">
+            <button
+              onClick={handleBackToConversations}
+              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full"
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+            </button>
+            <div className="flex items-center space-x-3">
+              {selectedConversation.other_user_avatar ? (
+                <img
+                  src={selectedConversation.other_user_avatar}
+                  alt={selectedConversation.other_user_name || 'Usuario'}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <UserCircleIcon className="h-8 w-8 text-gray-400" />
+              )}
+              <div>
+                <h3 className="text-sm font-medium text-gray-900">
+                  {selectedConversation.other_user_name || 'Usuario sin nombre'}
+                </h3>
+                <p className="text-xs text-gray-500">
+                  {selectedConversation.unread_count > 0 
+                    ? `${selectedConversation.unread_count} mensaje${selectedConversation.unread_count === 1 ? '' : 's'} no leído${selectedConversation.unread_count === 1 ? '' : 's'}`
+                    : 'En línea'
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <ChatWindow
+          conversation={selectedConversation}
+          messages={messages}
+          onSendMessage={sendMessage}
+          loading={loadingMessages}
+          error={error}
+          currentUserId={profile.id}
+          isMobile={isMobile}
+        />
+      </div>
+
+      {/* Botón para mostrar sidebar en móvil cuando no hay conversación seleccionada */}
+      {isMobile && !selectedConversation && (
+        <button
+          onClick={() => setShowSidebar(true)}
+          className="fixed top-4 left-4 z-30 p-2 bg-white rounded-lg shadow-lg border border-gray-200"
+        >
+          <Bars3Icon className="h-6 w-6 text-gray-600" />
+        </button>
+      )}
     </div>
   );
 };

@@ -15,16 +15,20 @@ interface ChatSidebarProps {
   loading: boolean;
   error: string | null;
   onRefresh: () => void;
+  isMobile?: boolean;
+  onCloseSidebar?: () => void;
 }
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({
   conversations,
   selectedConversation,
   onSelectConversation,
-
+  onStartNewConversation,
   loading,
   error,
-  onRefresh
+  onRefresh,
+  isMobile = false,
+  onCloseSidebar
 }) => {
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,18 +60,31 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   );
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+    <div className={`${isMobile ? 'w-full' : 'w-80'} bg-white border-r border-gray-200 flex flex-col h-full`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Mensajes</h2>
-          <button
-            onClick={() => setShowNewChat(!showNewChat)}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
-            title="Nueva conversación"
-          >
-            <PlusIcon className="h-5 w-5" />
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setShowNewChat(!showNewChat)}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
+              title="Nueva conversación"
+            >
+              <PlusIcon className="h-5 w-5" />
+            </button>
+            {isMobile && onCloseSidebar && (
+              <button
+                onClick={onCloseSidebar}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full"
+                title="Cerrar"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Buscador */}
