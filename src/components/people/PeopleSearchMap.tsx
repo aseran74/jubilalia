@@ -18,7 +18,7 @@ const PeopleSearchMap: React.FC<PeopleSearchMapProps> = ({
   const [map, setMap] = useState<any>(null);
   const [markers, setMarkers] = useState<any[]>([]);
   const [infoWindow, setInfoWindow] = useState<any>(null);
-  const { mapsLoading, mapsError } = useGoogleMaps();
+  const { isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
   useEffect(() => {
     if (!mapsLoading && !mapsError && mapRef.current && window.google?.maps) {

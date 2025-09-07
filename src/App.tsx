@@ -35,7 +35,6 @@ import AdminPropertyManagement from './components/admin/AdminPropertyManagement'
 import ActivityForm from './components/activities/ActivityForm';
 import ActivityList from './components/activities/ActivityList';
 import ActivityDetail from './components/activities/ActivityDetail';
-import ActivityMap from './components/activities/ActivityMap';
 
 // Componentes de posts
 import PostForm from './components/posts/PostForm';
@@ -45,7 +44,6 @@ import PostEdit from './components/posts/PostEdit';
 
 // Componentes de perfil y usuarios
 import ProfileForm from './components/profile/ProfileForm';
-import UserSearch from './components/users/UserSearch';
 import UserProfile from './components/users/UserProfile';
 import PeopleSearch from './components/people/PeopleSearch';
 

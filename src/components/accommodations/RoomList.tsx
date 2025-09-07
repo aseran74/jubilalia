@@ -191,21 +191,6 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
 
   const cities = [...new Set(rooms.map(room => room.city))];
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0
-    }).format(price);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
   if (loading) {
     return (

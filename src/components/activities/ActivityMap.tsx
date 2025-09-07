@@ -1,6 +1,32 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, Calendar, Users, Clock } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
+
+declare global {
+  namespace google.maps {
+    interface Map {
+      fitBounds(bounds: LatLngBounds): void;
+      getZoom(): number;
+      setZoom(zoom: number): void;
+    }
+    interface InfoWindow {
+      setContent(content: string): void;
+      open(map: Map, marker: Marker): void;
+      close(): void;
+    }
+    interface Marker {
+      setMap(map: Map | null): void;
+      getPosition(): LatLng | null;
+    }
+    interface LatLng {
+      lat(): number;
+      lng(): number;
+    }
+    interface LatLngBounds {
+      extend(point: LatLng): void;
+    }
+  }
+}
 
 interface Activity {
   id: string;
@@ -18,6 +44,11 @@ interface Activity {
   is_free: boolean;
   difficulty_level: string;
   tags: string[];
+  images: string[];
+  owner: {
+    full_name: string;
+    avatar_url?: string;
+  };
   latitude?: number;
   longitude?: number;
 }
@@ -49,7 +80,7 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [infoWindow, setInfoWindow] = useState<google.maps.InfoWindow | null>(null);
-  const { mapsLoading, mapsError } = useGoogleMaps();
+  const { isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
   useEffect(() => {
     if (mapsLoading || mapsError || !window.google?.maps) return;

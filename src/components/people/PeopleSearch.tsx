@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import LocationSelector from './LocationSelector';
 import PeopleSearchFilters from './PeopleSearchFilters';
@@ -9,6 +9,7 @@ import type { LocationSearchResult, SearchFilters } from '../../types/supabase';
 
 const PeopleSearch: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<LocationSearchResult[]>([]);
@@ -76,7 +77,7 @@ const PeopleSearch: React.FC = () => {
             interests: profile.interests || [],
             age: null,
             gender: null,
-            distance_km: null
+            distance_km: 0
           };
         }) || [];
 
@@ -155,7 +156,7 @@ const PeopleSearch: React.FC = () => {
             interests: profile.interests || [],
             age: null, // No tenemos edad en profiles
             gender: null, // No tenemos género en profiles
-            distance_km: null
+            distance_km: 0
           };
         }) || [];
 
@@ -223,13 +224,13 @@ const PeopleSearch: React.FC = () => {
   };
 
   const handlePersonSelect = (person: LocationSearchResult) => {
-    // Aquí puedes navegar al perfil de la persona o abrir un modal
-    console.log('Persona seleccionada:', person);
+    // Navegar al perfil de la persona
+    navigate(`/dashboard/users/${person.id}`);
   };
 
   const handlePersonClick = (person: LocationSearchResult) => {
-    // Aquí puedes navegar al perfil de la persona o abrir un modal
-    console.log('Persona clicada:', person);
+    // Navegar al perfil de la persona
+    navigate(`/dashboard/users/${person.id}`);
   };
 
   return (

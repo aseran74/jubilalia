@@ -12,7 +12,7 @@ import {
   PhoneIcon,
   EnvelopeIcon
 } from '@heroicons/react/24/outline';
-import { Heart, Share2, CheckCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import RoomDetailMap from '../maps/RoomDetailMap';
 import ImageGallery from '../ImageGallery';
 
@@ -49,7 +49,6 @@ const PropertyDetail: React.FC = () => {
   const [author, setAuthor] = useState<Author | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -305,10 +304,11 @@ const PropertyDetail: React.FC = () => {
                 Ubicación
               </h2>
               <div className="h-64 rounded-lg overflow-hidden">
-                <RoomDetailMap 
-                  latitude={property.latitude || 40.4168} 
+                <RoomDetailMap
+                  latitude={property.latitude || 40.4168}
                   longitude={property.longitude || -3.7038}
                   title={property.title}
+                  location={property.location}
                 />
               </div>
             </div>
