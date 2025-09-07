@@ -12,7 +12,8 @@ import {
   PhoneIcon,
   EnvelopeIcon
 } from '@heroicons/react/24/outline';
-import { Heart, Share2 } from 'lucide-react';
+import { Heart, Share2, CheckCircle } from 'lucide-react';
+import RoomDetailMap from '../maps/RoomDetailMap';
 
 interface Property {
   id: string;
@@ -25,6 +26,9 @@ interface Property {
   bathrooms: number;
   area: number;
   images: string[];
+  amenities: string[];
+  latitude?: number;
+  longitude?: number;
   created_at: string;
   status: string;
   author_id: string;
@@ -76,10 +80,22 @@ const PropertyDetail: React.FC = () => {
         console.error('Error fetching images:', imagesError);
       }
 
-      // Add images to property data
+      // Fetch amenities
+      const { data: amenitiesData, error: amenitiesError } = await supabase
+        .from('property_amenities')
+        .select('amenity_name')
+        .eq('listing_id', id)
+        .eq('is_available', true);
+
+      if (amenitiesError) {
+        console.error('Error fetching amenities:', amenitiesError);
+      }
+
+      // Add images and amenities to property data
       const propertyWithImages = {
         ...propertyData,
-        images: imagesData?.map(img => img.image_url) || []
+        images: imagesData?.map(img => img.image_url) || [],
+        amenities: amenitiesData?.map(amenity => amenity.amenity_name) || []
       };
 
       setProperty(propertyWithImages);
@@ -355,6 +371,82 @@ const PropertyDetail: React.FC = () => {
                   }`}>
                     {property.status === 'active' ? 'Activa' : 'Inactiva'}
                   </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Amenidades */}
+            {property.amenities && property.amenities.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Amenidades
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {property.amenities.map((amenity, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-gray-700">{amenity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Mapa */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Ubicación
+              </h2>
+              <div className="h-64 rounded-lg overflow-hidden">
+                <RoomDetailMap 
+                  latitude={property.latitude || 40.4168} 
+                  longitude={property.longitude || -3.7038}
+                  title={property.title}
+                />
+              </div>
+            </div>
+
+            {/* Actividades Cercanas */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Actividades Cercanas
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">🏪</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Supermercado</h3>
+                    <p className="text-sm text-gray-600">Carrefour - 0.5 km</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <span className="text-green-600 font-semibold">🏥</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Centro de Salud</h3>
+                    <p className="text-sm text-gray-600">Centro de Salud Norte - 0.8 km</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <span className="text-yellow-600 font-semibold">🚌</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Transporte Público</h3>
+                    <p className="text-sm text-gray-600">Parada de autobús - 0.2 km</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <span className="text-purple-600 font-semibold">🎓</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Educación</h3>
+                    <p className="text-sm text-gray-600">Colegio Público - 1.2 km</p>
+                  </div>
                 </div>
               </div>
             </div>
