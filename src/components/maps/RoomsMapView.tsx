@@ -39,6 +39,12 @@ interface Room {
     full_name: string;
     avatar_url?: string;
   };
+  // Propiedades adicionales para filtros
+  private_bathroom?: boolean;
+  has_balcony?: boolean;
+  smoking_allowed?: boolean;
+  pets_allowed?: boolean;
+  preferred_gender?: string;
 }
 
 const RoomsMapView: React.FC = () => {
@@ -57,7 +63,12 @@ const RoomsMapView: React.FC = () => {
     maxOccupants: 10,
     availableOnly: false,
     hasImages: false,
-    city: ''
+    city: '',
+    privateBathroom: false,
+    hasBalcony: false,
+    smokingAllowed: false,
+    petsAllowed: false,
+    gender: 'any'
   });
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
@@ -79,7 +90,9 @@ const RoomsMapView: React.FC = () => {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Obtener listings de habitaciones
+      const { data: listingsData, error: listingsError } = await supabase
         .from('property_listings')
         .select(`
           *,
@@ -91,13 +104,33 @@ const RoomsMapView: React.FC = () => {
         .eq('listing_type', 'room_rental')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching rooms:', error);
+      if (listingsError) {
+        console.error('Error fetching listings:', listingsError);
         return;
       }
 
+      // Obtener requisitos para cada listing
+      const roomsWithDetails = await Promise.all(
+        listingsData.map(async (listing) => {
+          const { data: requirementsData, error: requirementsError } = await supabase
+            .from('room_rental_requirements')
+            .select('*')
+            .eq('listing_id', listing.id)
+            .single();
+
+          if (requirementsError) {
+            console.error('Error fetching requirements for listing', listing.id, requirementsError);
+            return null;
+          }
+
+          return { ...listing, requirements: requirementsData };
+        })
+      );
+
+      const validRooms = roomsWithDetails.filter(room => room !== null);
+
       // Agregar coordenadas por defecto para habitaciones sin coordenadas y extraer imagen principal
-      const roomsWithCoords = (data || []).map((room) => {
+      const roomsWithCoords = validRooms.map((room) => {
         // Extraer la imagen principal
         const primaryImage = room.property_images?.find((img: any) => img.is_primary) || room.property_images?.[0];
         const primaryImageUrl = primaryImage?.image_url;
@@ -126,12 +159,24 @@ const RoomsMapView: React.FC = () => {
             ...room,
             latitude: coords.lat + (Math.random() - 0.5) * 0.01, // Pequeña variación
             longitude: coords.lng + (Math.random() - 0.5) * 0.01,
-            primary_image_url: primaryImageUrl
+            primary_image_url: primaryImageUrl,
+            // Propiedades para filtros
+            private_bathroom: room.requirements?.private_bathroom || false,
+            has_balcony: room.requirements?.has_balcony || false,
+            smoking_allowed: room.requirements?.smoking_allowed || false,
+            pets_allowed: room.requirements?.pets_allowed || false,
+            preferred_gender: room.requirements?.preferred_gender || 'any'
           };
         }
         return {
           ...room,
-          primary_image_url: primaryImageUrl
+          primary_image_url: primaryImageUrl,
+          // Propiedades para filtros
+          private_bathroom: room.requirements?.private_bathroom || false,
+          has_balcony: room.requirements?.has_balcony || false,
+          smoking_allowed: room.requirements?.smoking_allowed || false,
+          pets_allowed: room.requirements?.pets_allowed || false,
+          preferred_gender: room.requirements?.preferred_gender || 'any'
         };
       });
 
@@ -183,6 +228,28 @@ const RoomsMapView: React.FC = () => {
       filtered = filtered.filter(room => 
         room.primary_image_url && room.primary_image_url.trim() !== ''
       );
+    }
+    
+    // Filtros de características
+    if (filters.privateBathroom) {
+      filtered = filtered.filter(room => room.private_bathroom);
+    }
+    
+    if (filters.hasBalcony) {
+      filtered = filtered.filter(room => room.has_balcony);
+    }
+    
+    if (filters.smokingAllowed) {
+      filtered = filtered.filter(room => room.smoking_allowed);
+    }
+    
+    if (filters.petsAllowed) {
+      filtered = filtered.filter(room => room.pets_allowed);
+    }
+    
+    // Filtro por género
+    if (filters.gender !== 'any') {
+      filtered = filtered.filter(room => room.preferred_gender === filters.gender);
     }
 
     setFilteredRooms(filtered);
@@ -339,10 +406,10 @@ const RoomsMapView: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
         {/* Mapa */}
-        <div className="flex-1 relative">
-          <div ref={mapRef} className="w-full h-full" />
+        <div className="flex-1 relative min-h-[400px] lg:min-h-0">
+          <div ref={mapRef} className="w-full h-full min-h-[400px]" />
           
           {/* Controles del mapa */}
           <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-2">
@@ -354,7 +421,7 @@ const RoomsMapView: React.FC = () => {
         </div>
 
         {/* Panel lateral con lista de habitaciones */}
-        <div className="w-96 bg-white shadow-lg overflow-y-auto">
+        <div className="w-full lg:w-96 bg-white shadow-lg overflow-y-auto max-h-[400px] lg:max-h-none">
           <div className="p-4 border-b">
             <h2 className="text-lg font-semibold text-gray-900">Habitaciones</h2>
             <p className="text-sm text-gray-600">Haz clic en un marcador para ver detalles</p>

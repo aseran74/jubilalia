@@ -411,10 +411,10 @@ const PropertiesSaleMapView: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-80px)]">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
         {/* Mapa */}
-        <div className="flex-1 relative">
-          <div ref={mapRef} className="w-full h-full" />
+        <div className="flex-1 relative min-h-[400px] lg:min-h-0">
+          <div ref={mapRef} className="w-full h-full min-h-[400px]" />
           
           {/* Controles del mapa */}
           <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-2">
@@ -426,7 +426,7 @@ const PropertiesSaleMapView: React.FC = () => {
         </div>
 
         {/* Panel lateral con lista de propiedades */}
-        <div className="w-96 bg-white shadow-lg overflow-y-auto">
+        <div className="w-full lg:w-96 bg-white shadow-lg overflow-y-auto max-h-[400px] lg:max-h-none">
           <div className="p-4 border-b">
             <h2 className="text-lg font-semibold text-gray-900">Propiedades en Venta</h2>
             <p className="text-sm text-gray-600">Haz clic en un marcador para ver detalles</p>

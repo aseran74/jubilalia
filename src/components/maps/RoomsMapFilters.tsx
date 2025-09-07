@@ -8,6 +8,11 @@ export interface RoomFilters {
   availableOnly: boolean;
   hasImages: boolean;
   city: string;
+  privateBathroom: boolean;
+  hasBalcony: boolean;
+  smokingAllowed: boolean;
+  petsAllowed: boolean;
+  gender: string;
 }
 
 interface RoomsMapFiltersProps {
@@ -38,7 +43,12 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
       maxOccupants: 10,
       availableOnly: false,
       hasImages: false,
-      city: ''
+      city: '',
+      privateBathroom: false,
+      hasBalcony: false,
+      smokingAllowed: false,
+      petsAllowed: false,
+      gender: 'any'
     };
     setLocalFilters(defaultFilters);
     onFiltersChange(defaultFilters);
@@ -160,6 +170,81 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
               Solo con imágenes
             </label>
           </div>
+        </div>
+
+        {/* Filtros de características */}
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700">
+            Características
+          </label>
+          
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="privateBathroom"
+              checked={localFilters.privateBathroom}
+              onChange={(e) => handleFilterChange('privateBathroom', e.target.checked)}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="privateBathroom" className="ml-2 text-sm text-gray-700">
+              Baño privado
+            </label>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="hasBalcony"
+              checked={localFilters.hasBalcony}
+              onChange={(e) => handleFilterChange('hasBalcony', e.target.checked)}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="hasBalcony" className="ml-2 text-sm text-gray-700">
+              Balcón
+            </label>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="smokingAllowed"
+              checked={localFilters.smokingAllowed}
+              onChange={(e) => handleFilterChange('smokingAllowed', e.target.checked)}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="smokingAllowed" className="ml-2 text-sm text-gray-700">
+              Fumar permitido
+            </label>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="petsAllowed"
+              checked={localFilters.petsAllowed}
+              onChange={(e) => handleFilterChange('petsAllowed', e.target.checked)}
+              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+            />
+            <label htmlFor="petsAllowed" className="ml-2 text-sm text-gray-700">
+              Mascotas permitidas
+            </label>
+          </div>
+        </div>
+
+        {/* Filtro de género */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Género Preferido
+          </label>
+          <select
+            value={localFilters.gender}
+            onChange={(e) => handleFilterChange('gender', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          >
+            <option value="any">Cualquier género</option>
+            <option value="male">Solo hombres</option>
+            <option value="female">Solo mujeres</option>
+          </select>
         </div>
 
         {/* Botones de acción */}
