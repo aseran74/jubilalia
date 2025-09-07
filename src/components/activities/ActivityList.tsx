@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map } from 'lucide-react';
+import ActivityMap from './ActivityMap';
 
 interface Activity {
   id: string;
@@ -30,6 +31,7 @@ const ActivityList: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -106,6 +108,10 @@ const ActivityList: React.FC = () => {
     activity.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleActivitySelect = (activity: Activity) => {
+    navigate(`/dashboard/activities/${activity.id}`);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -153,6 +159,34 @@ const ActivityList: React.FC = () => {
         </div>
       </div>
 
+      {/* Controles de vista */}
+      <div className="flex justify-between items-center">
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              viewMode === 'list'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Search className="w-4 h-4" />
+            Lista
+          </button>
+          <button
+            onClick={() => setViewMode('map')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+              viewMode === 'map'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Map className="w-4 h-4" />
+            Mapa
+          </button>
+        </div>
+      </div>
+
       {/* Resultados */}
       <div className="mb-4">
         <p className="text-gray-600">
@@ -160,8 +194,10 @@ const ActivityList: React.FC = () => {
         </p>
       </div>
 
-      {/* Lista de actividades */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Vista según el modo seleccionado */}
+      {viewMode === 'list' ? (
+        /* Lista de actividades */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredActivities.map((activity) => (
           <div key={activity.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
             {/* Imagen */}
@@ -252,7 +288,15 @@ const ActivityList: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      ) : (
+        /* Vista del mapa */
+        <ActivityMap 
+          activities={filteredActivities}
+          onActivitySelect={handleActivitySelect}
+          className="w-full"
+        />
+      )}
 
       {filteredActivities.length === 0 && !loading && (
         <div className="text-center py-12">
