@@ -197,70 +197,66 @@ const PropertyDetail: React.FC = () => {
                 </button>
               </div>
 
-              {/* Layout 1+2+3: 1 grande, 2 medianas, 3 pequeñas */}
-              <div className="h-80">
-                {/* Primera fila: 1 imagen grande */}
-                <div className="h-1/2 p-2">
-                  <div className="relative h-full bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                    <img
-                      src={property.images[0]}
-                      alt={property.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button
-                        onClick={() => window.open(property.images[0], '_blank')}
-                        className="bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
-                      >
-                        Ver más grande
-                      </button>
-                    </div>
+              {/* Layout 1+1+1: 3 columnas verticales */}
+              <div className="h-80 grid grid-cols-3 gap-2 p-2">
+                {/* Columna 1: 1 imagen grande */}
+                <div className="relative bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                  <img
+                    src={property.images[0]}
+                    alt={property.title}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      onClick={() => window.open(property.images[0], '_blank')}
+                      className="bg-white/90 hover:bg-white text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Ver más grande
+                    </button>
                   </div>
                 </div>
 
-                {/* Segunda fila: 2 imágenes medianas */}
-                {property.images.length > 1 && (
-                  <div className="h-1/2 p-2 pt-0">
-                    <div className="grid grid-cols-2 gap-2 h-full">
-                      {property.images.slice(1, 3).map((image, index) => (
-                        <div key={index + 1} className="relative bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                          <img
-                            src={image}
-                            alt={property.title}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button
-                              onClick={() => window.open(image, '_blank')}
-                              className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
-                            >
-                              Ver más
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                {/* Columna 2: 2 imágenes apiladas verticalmente */}
+                <div className="flex flex-col gap-2">
+                  {property.images.slice(1, 3).map((image, index) => (
+                    <div key={index + 1} className="relative flex-1 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={image}
+                        alt={property.title}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => window.open(image, '_blank')}
+                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Ver más
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
 
-                {/* Tercera fila: 3 imágenes pequeñas */}
-                {property.images.length > 3 && (
-                  <div className="absolute bottom-2 left-2 right-2">
-                    <div className="grid grid-cols-3 gap-2">
-                      {property.images.slice(3, 6).map((image, index) => (
-                        <div key={index + 3} className="relative h-16 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
-                          <img
-                            src={image}
-                            alt={`${property.title} - Imagen ${index + 4}`}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                            onClick={() => window.open(image, '_blank')}
-                          />
-                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      ))}
+                {/* Columna 3: 3 imágenes apiladas verticalmente */}
+                <div className="flex flex-col gap-2">
+                  {property.images.slice(3, 6).map((image, index) => (
+                    <div key={index + 3} className="relative flex-1 bg-gray-200 rounded-lg overflow-hidden group cursor-pointer">
+                      <img
+                        src={image}
+                        alt={`${property.title} - Imagen ${index + 4}`}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => window.open(image, '_blank')}
+                          className="bg-white/90 hover:bg-white text-gray-800 px-3 py-1 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Ver más
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
