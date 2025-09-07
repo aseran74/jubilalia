@@ -32,6 +32,47 @@ const PeopleSearch: React.FC = () => {
     }
   }, [location.pathname]);
 
+  // Cargar usuarios iniciales
+  useEffect(() => {
+    loadInitialUsers();
+  }, []);
+
+  const loadInitialUsers = async () => {
+    try {
+      console.log('🔄 Cargando usuarios iniciales...');
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .limit(10);
+
+      if (error) {
+        console.error('❌ Error cargando usuarios iniciales:', error);
+        return;
+      }
+
+      console.log('✅ Usuarios iniciales cargados:', data);
+      
+      // Convertir a formato LocationSearchResult
+      const formattedResults = data?.map(profile => ({
+        id: profile.id,
+        full_name: profile.full_name || 'Usuario',
+        email: profile.email || '',
+        formatted_address: profile.address || 'Ubicación no especificada',
+        occupation: profile.occupation || 'Sin ocupación',
+        interests: profile.interests || [],
+        age: null,
+        gender: null,
+        distance_km: null
+      })) || [];
+
+      setSearchResults(formattedResults);
+      setFilteredResults(formattedResults);
+    } catch (err) {
+      console.error('❌ Error cargando usuarios iniciales:', err);
+    }
+  };
+
   // Buscar personas por ubicación
   const searchPeople = async () => {
     if (!searchLocation) return;
@@ -40,20 +81,61 @@ const PeopleSearch: React.FC = () => {
     setError(null);
 
     try {
-      const { data, error } = await supabase.rpc('search_profiles_by_location', {
-        search_lat: searchLocation.geometry.location.lat,
-        search_lng: searchLocation.geometry.location.lng,
-        max_distance_km: filters.maxDistance,
-        min_age: filters.ageRange[0],
-        max_age: filters.ageRange[1]
-      });
+      console.log('🔍 PeopleSearch: Iniciando búsqueda de personas...');
+      console.log('📍 Ubicación seleccionada:', searchLocation);
+      
+      // Primero intentar la función RPC
+      try {
+        const { data, error } = await supabase.rpc('search_profiles_by_location', {
+          search_lat: searchLocation.geometry.location.lat,
+          search_lng: searchLocation.geometry.location.lng,
+          max_distance_km: filters.maxDistance,
+          min_age: filters.ageRange[0],
+          max_age: filters.ageRange[1]
+        });
 
-      if (error) throw error;
+        if (error) {
+          console.log('⚠️ Función RPC no disponible, usando consulta directa:', error);
+          throw error;
+        }
 
-      setSearchResults(data || []);
-      setFilteredResults(data || []);
+        console.log('✅ Resultados de RPC:', data);
+        setSearchResults(data || []);
+        setFilteredResults(data || []);
+      } catch (rpcError) {
+        console.log('🔄 Usando consulta directa a la tabla profiles...');
+        
+        // Fallback: consulta directa a la tabla profiles
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .limit(20);
+
+        if (error) {
+          console.error('❌ Error en consulta directa:', error);
+          throw error;
+        }
+
+        console.log('✅ Resultados de consulta directa:', data);
+        
+        // Convertir a formato LocationSearchResult
+        const formattedResults = data?.map(profile => ({
+          id: profile.id,
+          full_name: profile.full_name || 'Usuario',
+          email: profile.email || '',
+          formatted_address: profile.address || 'Ubicación no especificada',
+          occupation: profile.occupation || 'Sin ocupación',
+          interests: profile.interests || [],
+          age: null, // No tenemos edad en profiles
+          gender: null, // No tenemos género en profiles
+          distance_km: null
+        })) || [];
+
+        setSearchResults(formattedResults);
+        setFilteredResults(formattedResults);
+      }
     } catch (err) {
-      console.error('Error searching people:', err);
+      console.error('❌ Error searching people:', err);
       setError('Error al buscar personas');
     } finally {
       setLoading(false);
