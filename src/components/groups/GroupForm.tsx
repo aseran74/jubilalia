@@ -9,8 +9,10 @@ import {
   PhotoIcon,
   GlobeAltIcon,
   LockClosedIcon,
-  UsersIcon
+  UsersIcon,
+  MapPinIcon
 } from '@heroicons/react/24/outline';
+import LocationSelector from '../common/LocationSelector';
 
 interface GroupFormData {
   name: string;
@@ -18,6 +20,13 @@ interface GroupFormData {
   image_url: string;
   is_public: boolean;
   max_members: number;
+  category: string;
+  city: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+  postal_code: string;
+  country: string;
 }
 
 const GroupForm: React.FC = () => {
@@ -33,7 +42,14 @@ const GroupForm: React.FC = () => {
     description: '',
     image_url: '',
     is_public: true,
-    max_members: 50
+    max_members: 50,
+    category: '',
+    city: '',
+    address: '',
+    latitude: null,
+    longitude: null,
+    postal_code: '',
+    country: 'España'
   });
 
   const isEditing = !!id;
@@ -56,7 +72,14 @@ const GroupForm: React.FC = () => {
             description: data.description || '',
             image_url: data.image_url || '',
             is_public: data.is_public ?? true,
-            max_members: data.max_members || 50
+            max_members: data.max_members || 50,
+            category: data.category || '',
+            city: data.city || '',
+            address: data.address || '',
+            latitude: data.latitude || null,
+            longitude: data.longitude || null,
+            postal_code: data.postal_code || '',
+            country: data.country || 'España'
           });
         } catch (error) {
           console.error('Error loading group:', error);
@@ -75,6 +98,24 @@ const GroupForm: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }));
+  };
+
+  const handleLocationSelect = (location: {
+    address: string;
+    city: string;
+    postal_code: string;
+    country: string;
+    coordinates?: { lat: number; lng: number };
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      address: location.address,
+      city: location.city,
+      postal_code: location.postal_code,
+      country: location.country,
+      latitude: location.coordinates?.lat || null,
+      longitude: location.coordinates?.lng || null
     }));
   };
 
@@ -161,6 +202,16 @@ const GroupForm: React.FC = () => {
       return;
     }
 
+    if (!formData.category) {
+      setError('La categoría del grupo es obligatoria');
+      return;
+    }
+
+    if (!formData.city.trim()) {
+      setError('La ciudad del grupo es obligatoria');
+      return;
+    }
+
     console.log('🔧 Creando grupo con datos:', {
       user: user.id,
       profile: profile.id,
@@ -188,6 +239,13 @@ const GroupForm: React.FC = () => {
             image_url: formData.image_url,
             is_public: formData.is_public,
             max_members: formData.max_members,
+            category: formData.category,
+            city: formData.city,
+            address: formData.address,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+            postal_code: formData.postal_code,
+            country: formData.country,
             updated_at: new Date().toISOString()
           })
           .eq('id', id);
@@ -209,6 +267,13 @@ const GroupForm: React.FC = () => {
             image_url: formData.image_url || null,
             is_public: formData.is_public,
             max_members: formData.max_members,
+            category: formData.category,
+            city: formData.city.trim(),
+            address: formData.address || null,
+            latitude: formData.latitude,
+            longitude: formData.longitude,
+            postal_code: formData.postal_code || null,
+            country: formData.country,
             created_by: profile.id
           })
           .select()
@@ -415,6 +480,71 @@ const GroupForm: React.FC = () => {
                   <p className="text-xs text-gray-500 mt-1">
                     Mínimo: 2, Máximo: 1000
                   </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Categoría y Localización */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <MapPinIcon className="w-5 h-5 mr-2" />
+                Categoría y Localización
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Categoría *
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="">Selecciona una categoría</option>
+                    <option value="Retiros">Retiros</option>
+                    <option value="Deportes">Deportes</option>
+                    <option value="Hobbies">Hobbies</option>
+                    <option value="Comida">Comida</option>
+                    <option value="Cartas">Cartas</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ciudad *
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Madrid, Barcelona, Valencia..."
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ubicación
+                  </label>
+                  <LocationSelector
+                    onLocationSelect={handleLocationSelect}
+                    placeholder="Buscar dirección específica (opcional)"
+                    label="Dirección"
+                  />
+                  {formData.address && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        <strong>Dirección seleccionada:</strong> {formData.address}
+                      </p>
+                      <p className="text-xs text-green-600 mt-1">
+                        {formData.city}, {formData.postal_code}, {formData.country}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

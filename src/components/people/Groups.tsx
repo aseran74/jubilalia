@@ -9,7 +9,12 @@ import {
   PlusIcon,
   UsersIcon,
   UserGroupIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  MapPinIcon,
+  TagIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface Group {
@@ -24,16 +29,89 @@ interface Group {
   created_at: string;
   is_member?: boolean;
   role?: string;
+  category: string;
+  city: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  postal_code?: string;
+  country: string;
 }
 
 const Groups: React.FC = () => {
   const navigate = useNavigate();
   const { profile, isAdmin } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
   const [showGroupPosts, setShowGroupPosts] = useState(false);
   const [showGroupMembers, setShowGroupMembers] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Estados para filtros
+  const [filters, setFilters] = useState({
+    search: '',
+    category: '',
+    city: '',
+    isPublic: true
+  });
+
+  // Aplicar filtros
+  const applyFilters = () => {
+    let filtered = [...groups];
+
+    // Filtro por búsqueda (nombre o descripción)
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(group => 
+        group.name.toLowerCase().includes(searchLower) ||
+        group.description.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Filtro por categoría
+    if (filters.category) {
+      filtered = filtered.filter(group => group.category === filters.category);
+    }
+
+    // Filtro por ciudad
+    if (filters.city) {
+      filtered = filtered.filter(group => 
+        group.city.toLowerCase().includes(filters.city.toLowerCase())
+      );
+    }
+
+    // Filtro por visibilidad
+    if (filters.isPublic !== null) {
+      filtered = filtered.filter(group => group.is_public === filters.isPublic);
+    }
+
+    setFilteredGroups(filtered);
+  };
+
+  // Aplicar filtros cuando cambien
+  useEffect(() => {
+    applyFilters();
+  }, [groups, filters]);
+
+  // Manejar cambios en filtros
+  const handleFilterChange = (key: string, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  // Limpiar filtros
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      category: '',
+      city: '',
+      isPublic: true
+    });
+  };
 
   // Cargar grupos
   const fetchGroups = async () => {
@@ -279,9 +357,109 @@ const Groups: React.FC = () => {
           </button>
         </div>
 
+        {/* Filtros */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+              <FunnelIcon className="w-5 h-5 mr-2" />
+              Filtros
+            </h2>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="text-sm text-gray-600 hover:text-gray-800 flex items-center"
+              >
+                <FunnelIcon className="w-4 h-4 mr-1" />
+                {showFilters ? 'Ocultar' : 'Mostrar'} filtros
+              </button>
+              <button
+                onClick={clearFilters}
+                className="text-sm text-red-600 hover:text-red-800 flex items-center"
+              >
+                <XMarkIcon className="w-4 h-4 mr-1" />
+                Limpiar
+              </button>
+            </div>
+          </div>
+
+          {showFilters && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Búsqueda */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Buscar
+                </label>
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    placeholder="Nombre o descripción..."
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Categoría */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Categoría
+                </label>
+                <select
+                  value={filters.category}
+                  onChange={(e) => handleFilterChange('category', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">Todas las categorías</option>
+                  <option value="Retiros">Retiros</option>
+                  <option value="Deportes">Deportes</option>
+                  <option value="Hobbies">Hobbies</option>
+                  <option value="Comida">Comida</option>
+                  <option value="Cartas">Cartas</option>
+                </select>
+              </div>
+
+              {/* Ciudad */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ciudad
+                </label>
+                <input
+                  type="text"
+                  value={filters.city}
+                  onChange={(e) => handleFilterChange('city', e.target.value)}
+                  placeholder="Madrid, Barcelona..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Visibilidad */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Visibilidad
+                </label>
+                <select
+                  value={filters.isPublic ? 'public' : 'private'}
+                  onChange={(e) => handleFilterChange('isPublic', e.target.value === 'public')}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="public">Públicos</option>
+                  <option value="private">Privados</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Contador de resultados */}
+          <div className="mt-4 text-sm text-gray-600">
+            Mostrando {filteredGroups.length} de {groups.length} grupos
+          </div>
+        </div>
+
         {/* Lista de grupos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {groups.map((group) => (
+          {filteredGroups.map((group) => (
             <div key={group.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="p-6">
                 <div className="flex items-center space-x-3 mb-4">
@@ -305,6 +483,22 @@ const Groups: React.FC = () => {
                 </div>
 
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">{group.description}</p>
+
+                {/* Categoría y Localización */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {group.category && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <TagIcon className="w-3 h-3 mr-1" />
+                      {group.category}
+                    </span>
+                  )}
+                  {group.city && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <MapPinIcon className="w-3 h-3 mr-1" />
+                      {group.city}
+                    </span>
+                  )}
+                </div>
 
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                   <div className="flex items-center text-sm text-gray-500">
@@ -373,11 +567,18 @@ const Groups: React.FC = () => {
           ))}
         </div>
 
-        {groups.length === 0 && (
+        {filteredGroups.length === 0 && (
           <div className="text-center py-12">
             <UsersIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No hay grupos disponibles</h3>
-            <p className="text-gray-500 mb-6">Sé el primero en crear un grupo y conectar con otros usuarios.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {groups.length === 0 ? 'No hay grupos disponibles' : 'No se encontraron grupos'}
+            </h3>
+            <p className="text-gray-500 mb-6">
+              {groups.length === 0 
+                ? 'Sé el primero en crear un grupo y conectar con otros usuarios.'
+                : 'Intenta ajustar los filtros para encontrar grupos que coincidan con tus criterios.'
+              }
+            </p>
             <button
               onClick={() => navigate('/dashboard/groups/create')}
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
