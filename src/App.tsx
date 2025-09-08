@@ -46,6 +46,7 @@ import PostEdit from './components/posts/PostEdit';
 import ProfileForm from './components/profile/ProfileForm';
 import UserProfile from './components/users/UserProfile';
 import PeopleSearch from './components/people/PeopleSearch';
+import Settings from './components/dashboard/Settings';
 
 // Componentes de grupos
 import Groups from './components/people/Groups';
@@ -181,7 +182,7 @@ const DashboardLayout: React.FC = () => {
             {/* Perfil y Configuración */}
             <Route path="/profile" element={<ProfileForm />} />
             <Route path="/profiles/:id/edit" element={<ProfileForm />} />
-            <Route path="/settings" element={<div className="p-6">Configuración</div>} />
+            <Route path="/dashboard/settings" element={<Settings />} />
             
             {/* Demo */}
             <Route path="/calendar-demo" element={<CalendarDemo />} />
