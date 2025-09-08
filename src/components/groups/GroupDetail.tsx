@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import GroupPosts from './GroupPosts';
 import { 
   ArrowLeftIcon,
   UsersIcon,
@@ -9,7 +10,8 @@ import {
   TagIcon,
   CalendarIcon,
   UserGroupIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface Group {
@@ -58,6 +60,7 @@ const GroupDetail: React.FC = () => {
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
+  const [showPosts, setShowPosts] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -205,6 +208,16 @@ const GroupDetail: React.FC = () => {
     }
   };
 
+  // Ver posts del grupo
+  const viewGroupPosts = () => {
+    setShowPosts(true);
+  };
+
+  // Cerrar vista de posts
+  const closeGroupPosts = () => {
+    setShowPosts(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -292,7 +305,7 @@ const GroupDetail: React.FC = () => {
                     {group.is_member ? (
                       <>
                         <button
-                          onClick={() => navigate('/groups')}
+                          onClick={viewGroupPosts}
                           className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center"
                         >
                           <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
@@ -356,6 +369,34 @@ const GroupDetail: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Vista de Posts del Grupo */}
+      {showPosts && group && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-5/6 flex flex-col">
+            {/* Header del modal */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Posts de {group.name}
+              </h2>
+              <button
+                onClick={closeGroupPosts}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-500" />
+              </button>
+            </div>
+            
+            {/* Contenido del modal */}
+            <div className="flex-1 overflow-hidden">
+              <GroupPosts 
+                groupId={group.id}
+                onClose={closeGroupPosts}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
