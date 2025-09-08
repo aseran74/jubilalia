@@ -109,7 +109,8 @@ const ActivityList: React.FC = () => {
   );
 
   const handleActivitySelect = (activity: Activity) => {
-    navigate(`/dashboard/activities/${activity.id}`);
+    console.log('🔗 Navegando a detalles de actividad:', activity.title, 'ID:', activity.id);
+    navigate(`/activities/${activity.id}`);
   };
 
   if (loading) {

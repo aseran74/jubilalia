@@ -189,7 +189,7 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
                 <span>${activity.city}</span>
               </div>
             </div>
-            <button class="mt-3 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 w-full">
+            <button id="details-btn-${activity.id}" class="mt-3 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 w-full">
               Ver detalles
             </button>
           </div>
@@ -200,9 +200,12 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
         
         // Manejar clic en el botón "Ver detalles"
         setTimeout(() => {
-          const button = document.querySelector('.bg-blue-600');
+          const button = document.getElementById(`details-btn-${activity.id}`);
           if (button) {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔗 Navegando a detalles de actividad:', activity.title);
               onActivitySelect(activity);
               infoWindow.close();
             });
