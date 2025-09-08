@@ -139,8 +139,14 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
 
   const handleSendMessage = async (memberId: string, memberName: string) => {
     try {
-      // Navegar al chat con el miembro seleccionado
-      navigate(`/dashboard/messages?user=${memberId}&name=${encodeURIComponent(memberName)}`);
+      // Navegar al chat con el miembro seleccionado usando location.state
+      navigate('/messages', {
+        state: {
+          startNewChat: true,
+          otherUserId: memberId,
+          otherUserName: memberName
+        }
+      });
       onClose(); // Cerrar el modal de miembros
     } catch (error) {
       console.error('Error al iniciar conversación:', error);

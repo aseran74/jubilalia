@@ -48,8 +48,10 @@ const ChatApp: React.FC = () => {
 
   // Manejar nueva conversación desde la búsqueda de usuarios
   useEffect(() => {
+    console.log('ChatApp - location.state:', location.state);
     if (location.state?.startNewChat && profile?.id) {
       const { otherUserId, otherUserName } = location.state;
+      console.log('ChatApp - Iniciando nueva conversación:', { otherUserId, otherUserName });
       startNewConversation(otherUserId, otherUserName);
       // Limpiar el estado de navegación
       window.history.replaceState({}, document.title);
@@ -156,6 +158,8 @@ const ChatApp: React.FC = () => {
   };
 
   const startNewConversation = (otherUserId: string, otherUserName: string, otherUserAvatar?: string) => {
+    console.log('ChatApp - startNewConversation llamado con:', { otherUserId, otherUserName, otherUserAvatar });
+    
     const newConversation: UserConversation = {
       conversation_id: `temp-${Date.now()}`,
       other_user_id: otherUserId,
@@ -166,6 +170,7 @@ const ChatApp: React.FC = () => {
       unread_count: 0
     };
 
+    console.log('ChatApp - Nueva conversación creada:', newConversation);
     setSelectedConversation(newConversation);
     setMessages([]);
     
