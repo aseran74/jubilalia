@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPinIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 
 interface GooglePlacesLocation {
   place_id: string;
@@ -40,41 +41,15 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  // Cargar Google Places API
+  // Usar el hook de Google Maps
+  const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
+
+  // Inicializar autocomplete cuando Google Maps esté cargado
   useEffect(() => {
-    // Verificar si ya está cargado
-    if (window.google && window.google.maps && window.google.maps.places) {
+    if (mapsLoaded && !mapsError) {
       initializeAutocomplete();
-      return;
     }
-
-    // Verificar si la API key está disponible
-    const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
-    if (!apiKey) {
-      console.error('Google Places API key no encontrada en VITE_GOOGLE_PLACES_API_KEY');
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      if (window.google && window.google.maps && window.google.maps.places) {
-        initializeAutocomplete();
-      }
-    };
-    script.onerror = () => {
-      console.error('Error al cargar Google Places API');
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
+  }, [mapsLoaded, mapsError]);
 
   // Inicializar autocompletado
   const initializeAutocomplete = () => {

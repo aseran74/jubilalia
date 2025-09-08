@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import type { GooglePlacesLocation } from '../../types/supabase';
+import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 
 interface LocationSelectorProps {
   onLocationSelect: (location: GooglePlacesLocation) => void;
@@ -16,31 +17,15 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Usar el hook de Google Maps
+  const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
+
+  // Inicializar autocomplete cuando Google Maps esté cargado
   useEffect(() => {
-    const loadGooglePlacesAPI = () => {
-      if (window.google && window.google.maps) {
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_PLACES_API_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        setIsLoading(false);
-        initializeAutocomplete();
-      };
-      script.onerror = () => {
-        setIsLoading(false);
-        console.error('Error loading Google Places API');
-      };
-      document.head.appendChild(script);
-    };
-
-    loadGooglePlacesAPI();
-  }, [onLocationSelect]);
+    if (mapsLoaded && !mapsError) {
+      initializeAutocomplete();
+    }
+  }, [mapsLoaded, mapsError, onLocationSelect]);
 
   const initializeAutocomplete = () => {
     if (!inputRef.current || !window.google) return;

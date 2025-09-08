@@ -38,9 +38,9 @@ export const useUnreadMessages = () => {
   const fetchUnreadCount = async () => {
     try {
       const { count, error } = await supabase
-        .from('messages')
+        .from('chat_messages')
         .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', profile?.id)
+        .eq('receiver_id', profile?.id)
         .eq('is_read', false);
 
       if (error) {
@@ -57,7 +57,7 @@ export const useUnreadMessages = () => {
   const markAsRead = async (messageId: string) => {
     try {
       const { error } = await supabase
-        .from('messages')
+        .from('chat_messages')
         .update({ is_read: true })
         .eq('id', messageId);
 
@@ -76,9 +76,9 @@ export const useUnreadMessages = () => {
   const markAllAsRead = async () => {
     try {
       const { error } = await supabase
-        .from('messages')
+        .from('chat_messages')
         .update({ is_read: true })
-        .eq('recipient_id', profile?.id)
+        .eq('receiver_id', profile?.id)
         .eq('is_read', false);
 
       if (error) {
