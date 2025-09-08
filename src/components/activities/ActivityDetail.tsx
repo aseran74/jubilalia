@@ -114,6 +114,8 @@ const ActivityDetail: React.FC = () => {
 
       // Obtener información del propietario
       let ownerData = null;
+      console.log('🔍 ActivityDetail: activityData.profile_id:', activityData.profile_id);
+      
       if (activityData.profile_id) {
         const { data: owner, error: ownerError } = await supabase
           .from('profiles')
@@ -121,9 +123,13 @@ const ActivityDetail: React.FC = () => {
           .eq('id', activityData.profile_id)
           .single();
         
+        console.log('👤 ActivityDetail: owner data:', owner, 'error:', ownerError);
+        
         if (!ownerError) {
           ownerData = owner;
         }
+      } else {
+        console.log('⚠️ ActivityDetail: No profile_id found for activity');
       }
 
       // Obtener las imágenes
@@ -863,25 +869,37 @@ const ActivityDetail: React.FC = () => {
             {/* Información del organizador */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Organizador</h3>
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                  {activity.owner.avatar_url ? (
-                    <img
-                      src={activity.owner.avatar_url}
-                      alt={activity.owner.full_name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
+              {activity.owner ? (
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                    {activity.owner.avatar_url ? (
+                      <img
+                        src={activity.owner.avatar_url}
+                        alt={activity.owner.full_name}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-8 h-8 text-gray-600" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{activity.owner.full_name}</h4>
+                    {activity.owner.bio && (
+                      <p className="text-gray-600 text-sm">{activity.owner.bio}</p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
                     <User className="w-8 h-8 text-gray-600" />
-                  )}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Organizador no disponible</h4>
+                    <p className="text-gray-600 text-sm">Información del organizador no encontrada</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">{activity.owner.full_name}</h4>
-                  {activity.owner.bio && (
-                    <p className="text-gray-600 text-sm">{activity.owner.bio}</p>
-                  )}
-                </div>
-              </div>
+              )}
 
               <div className="space-y-3">
                 {activity.contact_phone && (
