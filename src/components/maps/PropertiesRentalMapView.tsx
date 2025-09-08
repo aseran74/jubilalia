@@ -472,8 +472,27 @@ const PropertiesRentalMapView: React.FC = () => {
                 }`}
                 onClick={() => setSelectedProperty(property)}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                <div className="flex items-start space-x-3">
+                  {/* Imagen de la propiedad */}
+                  <div className="flex-shrink-0">
+                    {property.primary_image_url ? (
+                      <img 
+                        src={property.primary_image_url} 
+                        alt={property.title}
+                        className="w-16 h-16 object-cover rounded-lg"
+                        onError={(e) => {
+                          console.log('Error cargando imagen en card:', e.currentTarget.src);
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <HomeIcon className="w-6 h-6 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-gray-900 mb-1">{property.title}</h3>
                     <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                       {property.description}
