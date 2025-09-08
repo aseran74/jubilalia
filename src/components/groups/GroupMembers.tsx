@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { 
   UsersIcon,
@@ -40,6 +41,7 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
   onClose,
   currentUserId
 }) => {
+  const navigate = useNavigate();
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
       setLoading(true);
       setError(null);
 
-      // Usar consulta directa con join manual para evitar problemas de tipos
+      // Usar consulta con join directo - ahora debería funcionar con las políticas RLS corregidas
       const { data, error } = await supabase
         .from('group_members')
         .select(`
@@ -58,51 +60,35 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
           profile_id,
           group_id,
           role,
-          joined_at
+          joined_at,
+          profiles!inner(
+            id,
+            full_name,
+            avatar_url,
+            bio,
+            city,
+            country,
+            created_at
+          )
         `)
         .eq('group_id', groupId)
         .order('joined_at', { ascending: true });
 
       if (error) throw error;
 
-      // Obtener los perfiles por separado
-      const profileIds = data?.map(item => item.profile_id) || [];
-      
-      if (profileIds.length === 0) {
-        setMembers([]);
-        return;
-      }
+      console.log('Datos de miembros obtenidos:', data);
 
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name,
-          avatar_url,
-          bio,
-          city,
-          country,
-          created_at
-        `)
-        .in('id', profileIds);
-
-      if (profilesError) throw profilesError;
-
-      // Combinar los datos
-      const combinedData = data?.map(member => ({
-        ...member,
-        profiles: profilesData?.find(profile => profile.id === member.profile_id) || {
-          id: '',
-          full_name: 'Usuario sin nombre',
-          avatar_url: null,
-          bio: null,
-          city: null,
-          country: null,
-          created_at: ''
-        }
+      // Mapear los datos al formato esperado
+      const membersData = data?.map(member => ({
+        id: member.id,
+        profile_id: member.profile_id,
+        group_id: member.group_id,
+        role: member.role,
+        joined_at: member.joined_at,
+        profiles: member.profiles
       })) || [];
 
-      setMembers(combinedData);
+      setMembers(membersData);
     } catch (err: any) {
       console.error('Error fetching group members:', err);
       setError(err.message || 'Error al cargar los miembros');
@@ -148,6 +134,16 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
         return 'Miembro';
       default:
         return 'Miembro';
+    }
+  };
+
+  const handleSendMessage = async (memberId: string, memberName: string) => {
+    try {
+      // Navegar al chat con el miembro seleccionado
+      navigate(`/dashboard/messages?user=${memberId}&name=${encodeURIComponent(memberName)}`);
+      onClose(); // Cerrar el modal de miembros
+    } catch (error) {
+      console.error('Error al iniciar conversación:', error);
     }
   };
 
@@ -274,7 +270,8 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
                   {/* Botón de contacto (si no es el usuario actual) */}
                   {member.profile_id !== currentUserId && (
                     <button
-                      className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full"
+                      onClick={() => handleSendMessage(member.profile_id, member.profiles.full_name)}
+                      className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors"
                       title="Enviar mensaje"
                     >
                       <EnvelopeIcon className="h-5 w-5" />
