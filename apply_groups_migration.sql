@@ -1,5 +1,5 @@
--- Aplicar migración de grupos a Supabase
--- Este script debe ejecutarse en el SQL Editor de Supabase
+-- Aplicar migración de grupos
+-- Ejecutar este script en Supabase SQL Editor
 
 -- Crear tabla de grupos
 CREATE TABLE IF NOT EXISTS groups (
@@ -11,7 +11,14 @@ CREATE TABLE IF NOT EXISTS groups (
     image_url TEXT,
     created_by UUID REFERENCES profiles(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    category VARCHAR(100),
+    city VARCHAR(100),
+    address TEXT,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    postal_code VARCHAR(20),
+    country VARCHAR(100)
 );
 
 -- Crear tabla de miembros de grupos
@@ -36,17 +43,16 @@ CREATE TABLE IF NOT EXISTS group_posts (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Crear tabla de comentarios en posts
+-- Crear tabla de comentarios de posts
 CREATE TABLE IF NOT EXISTS group_post_comments (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     post_id UUID REFERENCES group_posts(id) ON DELETE CASCADE,
     author_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Crear tabla de likes en posts
+-- Crear tabla de likes de posts
 CREATE TABLE IF NOT EXISTS group_post_likes (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     post_id UUID REFERENCES group_posts(id) ON DELETE CASCADE,
@@ -63,25 +69,22 @@ ALTER TABLE group_post_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE group_post_likes ENABLE ROW LEVEL SECURITY;
 
 -- Políticas para groups
-CREATE POLICY "Groups are viewable by everyone if public" ON groups
-    FOR SELECT USING (is_public = true);
-
-CREATE POLICY "Group members can view their groups" ON groups
-    FOR SELECT USING (
-        id IN (
-            SELECT group_id FROM group_members 
-            WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
-        )
-    );
+CREATE POLICY "Groups are viewable by everyone" ON groups
+    FOR SELECT USING (true);
 
 CREATE POLICY "Users can create groups" ON groups
     FOR INSERT WITH CHECK (
-        created_by = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        created_by = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
-CREATE POLICY "Group admins can update their groups" ON groups
+CREATE POLICY "Group creators can update their groups" ON groups
     FOR UPDATE USING (
-        created_by = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        created_by = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
+    );
+
+CREATE POLICY "Group creators can delete their groups" ON groups
+    FOR DELETE USING (
+        created_by = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
 -- Políticas para group_members
@@ -89,18 +92,18 @@ CREATE POLICY "Group members are viewable by group members" ON group_members
     FOR SELECT USING (
         group_id IN (
             SELECT group_id FROM group_members 
-            WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+            WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
         )
     );
 
 CREATE POLICY "Users can join groups" ON group_members
     FOR INSERT WITH CHECK (
-        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
 CREATE POLICY "Users can leave groups" ON group_members
     FOR DELETE USING (
-        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
 -- Políticas para group_posts
@@ -108,98 +111,89 @@ CREATE POLICY "Group posts are viewable by group members" ON group_posts
     FOR SELECT USING (
         group_id IN (
             SELECT group_id FROM group_members 
-            WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+            WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
         )
     );
 
 CREATE POLICY "Group members can create posts" ON group_posts
     FOR INSERT WITH CHECK (
-        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()) AND
-        group_id IN (
+        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
+        AND group_id IN (
             SELECT group_id FROM group_members 
-            WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+            WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
         )
     );
 
 CREATE POLICY "Authors can update their posts" ON group_posts
     FOR UPDATE USING (
-        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
 CREATE POLICY "Authors can delete their posts" ON group_posts
     FOR DELETE USING (
-        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
 -- Políticas para group_post_comments
 CREATE POLICY "Comments are viewable by group members" ON group_post_comments
     FOR SELECT USING (
         post_id IN (
-            SELECT id FROM group_posts 
-            WHERE group_id IN (
-                SELECT group_id FROM group_members 
-                WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
-            )
+            SELECT gp.id FROM group_posts gp
+            JOIN group_members gm ON gp.group_id = gm.group_id
+            WHERE gm.profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
         )
     );
 
 CREATE POLICY "Group members can create comments" ON group_post_comments
     FOR INSERT WITH CHECK (
-        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()) AND
-        post_id IN (
-            SELECT id FROM group_posts 
-            WHERE group_id IN (
-                SELECT group_id FROM group_members 
-                WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
-            )
+        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
+        AND post_id IN (
+            SELECT gp.id FROM group_posts gp
+            JOIN group_members gm ON gp.group_id = gm.group_id
+            WHERE gm.profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
         )
-    );
-
-CREATE POLICY "Authors can update their comments" ON group_post_comments
-    FOR UPDATE USING (
-        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
     );
 
 CREATE POLICY "Authors can delete their comments" ON group_post_comments
     FOR DELETE USING (
-        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        author_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
 -- Políticas para group_post_likes
 CREATE POLICY "Likes are viewable by group members" ON group_post_likes
     FOR SELECT USING (
         post_id IN (
-            SELECT id FROM group_posts 
-            WHERE group_id IN (
-                SELECT group_id FROM group_members 
-                WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
-            )
+            SELECT gp.id FROM group_posts gp
+            JOIN group_members gm ON gp.group_id = gm.group_id
+            WHERE gm.profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
         )
     );
 
 CREATE POLICY "Group members can like posts" ON group_post_likes
     FOR INSERT WITH CHECK (
-        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()) AND
-        post_id IN (
-            SELECT id FROM group_posts 
-            WHERE group_id IN (
-                SELECT group_id FROM group_members 
-                WHERE profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
-            )
+        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
+        AND post_id IN (
+            SELECT gp.id FROM group_posts gp
+            JOIN group_members gm ON gp.group_id = gm.group_id
+            WHERE gm.profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
         )
     );
 
 CREATE POLICY "Users can unlike posts" ON group_post_likes
     FOR DELETE USING (
-        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid())
+        profile_id = (SELECT id FROM profiles WHERE auth_user_id = auth.uid()::uuid)
     );
 
--- Crear índices para mejorar el rendimiento
+-- Crear índices
 CREATE INDEX IF NOT EXISTS idx_groups_created_by ON groups(created_by);
-CREATE INDEX IF NOT EXISTS idx_groups_is_public ON groups(is_public);
 CREATE INDEX IF NOT EXISTS idx_group_members_group_id ON group_members(group_id);
 CREATE INDEX IF NOT EXISTS idx_group_members_profile_id ON group_members(profile_id);
 CREATE INDEX IF NOT EXISTS idx_group_posts_group_id ON group_posts(group_id);
 CREATE INDEX IF NOT EXISTS idx_group_posts_author_id ON group_posts(author_id);
 CREATE INDEX IF NOT EXISTS idx_group_post_comments_post_id ON group_post_comments(post_id);
 CREATE INDEX IF NOT EXISTS idx_group_post_likes_post_id ON group_post_likes(post_id);
+
+-- Crear bucket para imágenes de posts si no existe
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('post-images', 'post-images', true)
+ON CONFLICT (id) DO NOTHING;
