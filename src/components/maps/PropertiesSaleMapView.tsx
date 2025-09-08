@@ -122,6 +122,8 @@ const PropertiesSaleMapView: React.FC = () => {
       }
 
       // Asignar coordenadas por defecto si no existen y extraer imagen principal
+      console.log('🔍 Datos brutos de propiedades:', data);
+      
       const propertiesWithCoords = data?.map(property => {
         // Extraer la imagen principal
         const primaryImage = property.property_images?.find((img: any) => img.is_primary) || property.property_images?.[0];
@@ -131,7 +133,8 @@ const PropertiesSaleMapView: React.FC = () => {
           hasImages: !!property.property_images,
           imagesCount: property.property_images?.length || 0,
           primaryImageUrl: primaryImageUrl,
-          allImages: property.property_images
+          allImages: property.property_images,
+          rawPropertyImages: property.property_images
         });
         
         if (!property.latitude || !property.longitude) {
@@ -224,7 +227,9 @@ const PropertiesSaleMapView: React.FC = () => {
 
         console.log(`📸 Creando InfoWindow para: ${property.title}`, {
           hasImage: !!property.primary_image_url,
-          imageUrl: property.primary_image_url
+          imageUrl: property.primary_image_url,
+          propertyImages: property.property_images,
+          allPropertyData: property
         });
 
         const infoWindow = new window.google.maps.InfoWindow({
