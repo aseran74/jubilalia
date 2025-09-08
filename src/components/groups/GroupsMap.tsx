@@ -138,23 +138,23 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
       // Agregar evento de clic al marcador
       marker.addListener('click', () => {
         const content = `
-          <div style="padding: 12px; max-width: 300px; font-family: system-ui, -apple-system, sans-serif;">
+          <div style="padding: 8px; max-width: 200px; font-family: system-ui, -apple-system, sans-serif;">
             ${group.image_url ? `
-              <div style="margin-bottom: 12px;">
-                <img src="${group.image_url}" alt="${group.name}" style="width: 100%; height: 128px; object-fit: cover; border-radius: 8px;" onerror="console.log('Error cargando imagen:', this.src)">
+              <div style="margin-bottom: 8px;">
+                <img src="${group.image_url}" alt="${group.name}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 6px;" onerror="console.log('Error cargando imagen:', this.src)">
               </div>
-            ` : '<div style="margin-bottom: 12px; height: 128px; background-color: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 14px;">Sin imagen</div>'}
-            <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #111827;">${group.name}</h3>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">${group.description.substring(0, 100)}${group.description.length > 100 ? '...' : ''}</p>
-            <div style="display: flex; align-items: center; gap: 16px; font-size: 14px; margin-bottom: 8px;">
-              <span style="color: #10B981; font-weight: 600;">${group.current_members}/${group.max_members} miembros</span>
-              <span style="display: flex; align-items: center; gap: 4px;">🏷️ ${group.category}</span>
+            ` : '<div style="margin-bottom: 8px; height: 80px; background-color: #f3f4f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 12px;">Sin imagen</div>'}
+            <h3 style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #111827;">${group.name}</h3>
+            <p style="color: #6b7280; font-size: 12px; margin-bottom: 6px;">${group.description.substring(0, 60)}${group.description.length > 60 ? '...' : ''}</p>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; margin-bottom: 6px;">
+              <span style="color: #10B981; font-weight: 600;">${group.current_members}/${group.max_members}</span>
+              <span style="display: flex; align-items: center; gap: 2px;">🏷️ ${group.category}</span>
             </div>
-            <div style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: #6b7280; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 2px; font-size: 10px; color: #6b7280; margin-bottom: 6px;">
               <span>📍</span>
-              <span>${group.city}, ${group.country}</span>
+              <span>${group.city}</span>
             </div>
-            <button id="details-btn-${group.id}" style="margin-top: 8px; padding: 6px 12px; background-color: #10B981; color: white; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; hover: background-color: #059669; width: 100%;">
+            <button id="details-btn-${group.id}" style="margin-top: 4px; padding: 4px 8px; background-color: #10B981; color: white; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; hover: background-color: #059669; width: 100%;">
               Ver detalles
             </button>
           </div>
