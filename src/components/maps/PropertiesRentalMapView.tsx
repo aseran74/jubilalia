@@ -231,20 +231,20 @@ const PropertiesRentalMapView: React.FC = () => {
 
         const infoWindow = new window.google.maps.InfoWindow({
           content: `
-            <div class="p-3 max-w-xs">
+            <div style="padding: 12px; max-width: 300px; font-family: system-ui, -apple-system, sans-serif;">
               ${property.primary_image_url ? `
-                <div class="mb-3">
-                  <img src="${property.primary_image_url}" alt="${property.title}" class="w-full h-32 object-cover rounded-lg" onerror="console.log('Error cargando imagen:', this.src)">
+                <div style="margin-bottom: 12px;">
+                  <img src="${property.primary_image_url}" alt="${property.title}" style="width: 100%; height: 128px; object-fit: cover; border-radius: 8px;" onerror="console.log('Error cargando imagen:', this.src)">
                 </div>
-              ` : '<div class="mb-3 h-32 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-sm">Sin imagen</div>'}
-              <h3 class="font-semibold text-lg mb-2">${property.title}</h3>
-              <p class="text-gray-600 text-sm mb-2">${property.address}, ${property.city}</p>
-              <div class="flex items-center gap-4 text-sm">
-                ${property.price ? `<span class="text-blue-600 font-semibold">${property.price.toLocaleString()} €/mes</span>` : ''}
-                ${property.bedrooms ? `<span class="flex items-center gap-1">🏠 ${property.bedrooms}</span>` : ''}
-                ${property.bathrooms ? `<span class="flex items-center gap-1">🚿 ${property.bathrooms}</span>` : ''}
+              ` : '<div style="margin-bottom: 12px; height: 128px; background-color: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 14px;">Sin imagen</div>'}
+              <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #111827;">${property.title}</h3>
+              <p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">${property.address}, ${property.city}</p>
+              <div style="display: flex; align-items: center; gap: 16px; font-size: 14px;">
+                ${property.price ? `<span style="color: #2563eb; font-weight: 600;">${property.price.toLocaleString()} €/mes</span>` : ''}
+                ${property.bedrooms ? `<span style="display: flex; align-items: center; gap: 4px;">🏠 ${property.bedrooms}</span>` : ''}
+                ${property.bathrooms ? `<span style="display: flex; align-items: center; gap: 4px;">🚿 ${property.bathrooms}</span>` : ''}
               </div>
-              <button id="details-btn-${property.id}" class="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+              <button id="details-btn-${property.id}" style="margin-top: 8px; padding: 6px 12px; background-color: #2563eb; color: white; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; hover: background-color: #1d4ed8;">
                 Ver detalles
               </button>
             </div>
