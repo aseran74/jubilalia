@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import type { GooglePlacesLocation } from '../../types/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
@@ -69,9 +69,9 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           placeholder={placeholder}
           onChange={handleInputChange}
           className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          disabled={isLoading}
+          disabled={!mapsLoaded}
         />
-        {isLoading && (
+        {!mapsLoaded && (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
           </div>
