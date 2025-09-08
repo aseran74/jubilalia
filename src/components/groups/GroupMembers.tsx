@@ -85,7 +85,7 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
         group_id: member.group_id,
         role: member.role,
         joined_at: member.joined_at,
-        profiles: member.profiles
+        profiles: Array.isArray(member.profiles) ? member.profiles[0] : member.profiles
       })) || [];
 
       setMembers(membersData);

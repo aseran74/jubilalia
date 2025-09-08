@@ -42,7 +42,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   // Usar el hook de Google Maps
-  const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
+  const { isLoaded: mapsLoaded, error: mapsError } = useGoogleMaps();
 
   // Inicializar autocomplete cuando Google Maps esté cargado
   useEffect(() => {
