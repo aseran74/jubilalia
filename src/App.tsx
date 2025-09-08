@@ -306,6 +306,15 @@ const App: React.FC = () => {
           <Route path="/login" element={<JubilaliaLogin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          
+          {/* Rutas accesibles desde landing page */}
+          <Route path="/profile" element={<ProfileForm />} />
+          <Route path="/activities" element={<ActivityList />} />
+          <Route path="/activities/map" element={<ActivityList />} />
+          <Route path="/activities/create" element={<ActivityForm />} />
+          <Route path="/activities/:id" element={<ActivityDetail />} />
+          <Route path="/activities/:id/edit" element={<ActivityForm />} />
+          
           <Route path="/debug" element={<DebugAuth />} />
           <Route path="/test-connection" element={<ConnectionTest />} />
           <Route path="/test-google-places" element={<GooglePlacesTest />} />
