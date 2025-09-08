@@ -153,7 +153,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
             </Link>
             
             <Link
-              to="/rooms"
+              to="/dashboard/rooms"
               onClick={() => setIsDropdownOpen(false)}
               className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
             >
@@ -162,7 +162,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
             </Link>
             
             <Link
-              to="/rooms/map"
+              to="/dashboard/rooms/map"
               onClick={() => setIsDropdownOpen(false)}
               className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
             >
@@ -171,7 +171,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
             </Link>
             
             <Link
-              to="/properties/sale"
+              to="/dashboard/properties/sale"
               onClick={() => setIsDropdownOpen(false)}
               className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
             >
@@ -180,7 +180,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
             </Link>
             
             <Link
-              to="/messages"
+              to="/dashboard/messages"
               onClick={() => setIsDropdownOpen(false)}
               className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
             >

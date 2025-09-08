@@ -24,6 +24,7 @@ const ChatApp: React.FC = () => {
 
   // Debug: mostrar estado de autenticación
   console.log('ChatApp - Estado de autenticación:', { user, profile, loading });
+  console.log('ChatApp - Estado de UI:', { isMobile, showSidebar, selectedConversation: !!selectedConversation });
 
   // Detectar si es móvil
   useEffect(() => {
@@ -287,8 +288,10 @@ const ChatApp: React.FC = () => {
       {/* Ventana principal de chat */}
       <div className={`
         flex-1 flex flex-col
-        ${isMobile && !showSidebar ? 'block' : 'hidden'}
-        ${!isMobile ? 'block' : ''}
+        ${isMobile 
+          ? (showSidebar ? 'hidden' : 'block')
+          : 'block'
+        }
       `}>
         {/* Header móvil */}
         {isMobile && selectedConversation && (

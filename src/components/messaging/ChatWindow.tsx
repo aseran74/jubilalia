@@ -66,6 +66,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     });
   };
 
+  console.log('ChatWindow - conversation:', conversation);
+  
   if (!conversation) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
