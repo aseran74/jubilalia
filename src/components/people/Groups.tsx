@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import GroupPosts from '../groups/GroupPosts';
 import GroupMembers from '../groups/GroupMembers';
+import GroupsMap from '../groups/GroupsMap';
 import AdminButtons from '../common/AdminButtons';
 import { 
   PlusIcon,
@@ -14,7 +15,8 @@ import {
   TagIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
-  XMarkIcon
+  XMarkIcon,
+  MapIcon
 } from '@heroicons/react/24/outline';
 
 interface Group {
@@ -48,6 +50,7 @@ const Groups: React.FC = () => {
   const [showGroupPosts, setShowGroupPosts] = useState(false);
   const [showGroupMembers, setShowGroupMembers] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   
   // Estados para filtros
   const [filters, setFilters] = useState({
@@ -202,6 +205,12 @@ const Groups: React.FC = () => {
   const viewGroupMembers = (group: Group) => {
     setSelectedGroup(group);
     setShowGroupMembers(true);
+  };
+
+  // Manejar selección de grupo desde el mapa
+  const handleGroupSelect = (group: Group) => {
+    console.log('🔗 Navegando a detalles de grupo:', group.name);
+    navigate(`/groups/${group.id}`);
   };
 
   // Volver a la lista de grupos
@@ -457,7 +466,37 @@ const Groups: React.FC = () => {
           </div>
         </div>
 
-        {/* Lista de grupos */}
+        {/* Controles de vista */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                viewMode === 'list'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <UsersIcon className="w-4 h-4" />
+              Lista
+            </button>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                viewMode === 'map'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              <MapIcon className="w-4 h-4" />
+              Mapa
+            </button>
+          </div>
+        </div>
+
+        {/* Vista según el modo seleccionado */}
+        {viewMode === 'list' ? (
+          /* Lista de grupos */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {filteredGroups.map((group) => (
             <div key={group.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -566,6 +605,14 @@ const Groups: React.FC = () => {
             </div>
           ))}
         </div>
+        ) : (
+          /* Vista del mapa */
+          <GroupsMap 
+            groups={filteredGroups}
+            onGroupSelect={handleGroupSelect}
+            className="w-full h-96 mb-8"
+          />
+        )}
 
         {filteredGroups.length === 0 && (
           <div className="text-center py-12">
