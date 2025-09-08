@@ -50,41 +50,59 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
       setLoading(true);
       setError(null);
 
-      // Usar una consulta SQL directa para evitar problemas de cache
-      const { data, error } = await supabase.rpc('get_group_members', {
-        group_id_param: groupId
-      });
+      // Usar consulta directa con join manual para evitar problemas de tipos
+      const { data, error } = await supabase
+        .from('group_members')
+        .select(`
+          id,
+          profile_id,
+          group_id,
+          role,
+          joined_at
+        `)
+        .eq('group_id', groupId)
+        .order('joined_at', { ascending: true });
 
-      if (error) {
-        console.error('RPC error, trying direct query:', error);
-        
-        // Fallback a consulta directa si RPC falla
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('group_members')
-          .select(`
-            id,
-            profile_id,
-            group_id,
-            role,
-            joined_at,
-            profiles!inner(
-              id,
-              full_name,
-              avatar_url,
-              bio,
-              city,
-              country,
-              created_at
-            )
-          `)
-          .eq('group_id', groupId)
-          .order('joined_at', { ascending: true });
+      if (error) throw error;
 
-        if (fallbackError) throw fallbackError;
-        setMembers(fallbackData || []);
-      } else {
-        setMembers(data || []);
+      // Obtener los perfiles por separado
+      const profileIds = data?.map(item => item.profile_id) || [];
+      
+      if (profileIds.length === 0) {
+        setMembers([]);
+        return;
       }
+
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          full_name,
+          avatar_url,
+          bio,
+          city,
+          country,
+          created_at
+        `)
+        .in('id', profileIds);
+
+      if (profilesError) throw profilesError;
+
+      // Combinar los datos
+      const combinedData = data?.map(member => ({
+        ...member,
+        profiles: profilesData?.find(profile => profile.id === member.profile_id) || {
+          id: '',
+          full_name: 'Usuario sin nombre',
+          avatar_url: null,
+          bio: null,
+          city: null,
+          country: null,
+          created_at: ''
+        }
+      })) || [];
+
+      setMembers(combinedData);
     } catch (err: any) {
       console.error('Error fetching group members:', err);
       setError(err.message || 'Error al cargar los miembros');
