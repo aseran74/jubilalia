@@ -58,6 +58,8 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
   // Cargar posts del grupo
   const fetchPosts = async () => {
     try {
+      console.log('🔍 GroupPosts: Cargando posts para groupId:', groupId);
+      
       const { data, error } = await supabase
         .from('group_posts')
         .select(`
@@ -66,6 +68,8 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
         `)
         .eq('group_id', groupId)
         .order('created_at', { ascending: false });
+
+      console.log('📝 GroupPosts: Datos de posts:', data, 'Error:', error);
 
       if (error) throw error;
 
@@ -148,6 +152,8 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
         imageUrl = publicUrl;
       }
 
+      console.log('📝 GroupPosts: Creando post para groupId:', groupId, 'authorId:', profile.id);
+      
       const { error } = await supabase
         .from('group_posts')
         .insert({

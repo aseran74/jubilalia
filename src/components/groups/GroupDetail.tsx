@@ -391,7 +391,6 @@ const GroupDetail: React.FC = () => {
             <div className="flex-1 overflow-hidden">
               <GroupPosts 
                 groupId={group.id}
-                onClose={closeGroupPosts}
               />
             </div>
           </div>
