@@ -210,7 +210,7 @@ const Groups: React.FC = () => {
   // Manejar selección de grupo desde el mapa
   const handleGroupSelect = (group: Group) => {
     console.log('🔗 Navegando a detalles de grupo:', group.name);
-    navigate(`/groups/${group.id}`);
+    navigate(`/dashboard/groups/${group.id}`);
   };
 
   // Volver a la lista de grupos
