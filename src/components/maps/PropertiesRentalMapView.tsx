@@ -106,15 +106,11 @@ const PropertiesRentalMapView: React.FC = () => {
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      // Obtener propiedades básicas
+      const { data: propertiesData, error } = await supabase
         .from('property_listings')
-        .select(`
-          *,
-          property_images(
-            image_url,
-            is_primary
-          )
-        `)
+        .select('*')
         .eq('listing_type', 'property_rental')
         .order('created_at', { ascending: false });
 
@@ -123,17 +119,49 @@ const PropertiesRentalMapView: React.FC = () => {
         return;
       }
 
+      console.log('🔍 Datos brutos de propiedades:', propertiesData);
+
+      // Obtener las imágenes por separado (mismo método que la vista de lista)
+      const propertyIds = propertiesData?.map(property => property.id) || [];
+      console.log('🆔 IDs de propiedades encontrados:', propertyIds);
+      
+      const { data: imagesData, error: imagesError } = await supabase
+        .from('property_images')
+        .select('listing_id, image_url, is_primary')
+        .in('listing_id', propertyIds);
+
+      console.log('🖼️ Datos de imágenes obtenidos:', {
+        count: imagesData?.length || 0,
+        data: imagesData,
+        error: imagesError
+      });
+
+      if (imagesError) {
+        console.error('Error fetching images:', imagesError);
+        return;
+      }
+
+      // Crear un mapa de imágenes por listing_id
+      const imagesMap = new Map();
+      imagesData?.forEach(img => {
+        if (!imagesMap.has(img.listing_id)) {
+          imagesMap.set(img.listing_id, []);
+        }
+        imagesMap.get(img.listing_id).push(img);
+      });
+
       // Asignar coordenadas por defecto si no existen y extraer imagen principal
-      const propertiesWithCoords = data?.map(property => {
-        // Extraer la imagen principal
-        const primaryImage = property.property_images?.find((img: any) => img.is_primary) || property.property_images?.[0];
+      const propertiesWithCoords = propertiesData?.map(property => {
+        // Obtener imágenes de esta propiedad
+        const propertyImages = imagesMap.get(property.id) || [];
+        const primaryImage = propertyImages.find((img: any) => img.is_primary) || propertyImages[0];
         const primaryImageUrl = primaryImage?.image_url;
         
         console.log(`🏠 Propiedad: ${property.title}`, {
-          hasImages: !!property.property_images,
-          imagesCount: property.property_images?.length || 0,
+          hasImages: propertyImages.length > 0,
+          imagesCount: propertyImages.length,
           primaryImageUrl: primaryImageUrl,
-          allImages: property.property_images
+          allImages: propertyImages
         });
         
         if (!property.latitude || !property.longitude) {
