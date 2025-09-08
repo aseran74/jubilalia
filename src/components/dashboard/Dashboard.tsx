@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
 
   const dashboardCards = [
     {
-      title: 'Propiedades en Venta',
+      title: 'Venta',
       description: 'Busca y publica propiedades para comprar y jubilarte tranquilamente',
       icon: BuildingOfficeIcon,
       href: '/dashboard/properties/sale',
@@ -28,7 +28,7 @@ const Dashboard: React.FC = () => {
       ]
     },
     {
-      title: 'Propiedades en Alquiler',
+      title: 'Alquiler',
       description: 'Busca y publica propiedades para alquilar y jubilarte tranquilamente',
       icon: BuildingOfficeIcon,
       href: '/dashboard/properties/rental',
@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
     },
     {
       title: 'Habitaciones',
-      description: 'Busca y publica habitaciones para alquilar',
+      description: 'Busca y publica habitaciones para alquilar y compartir gastos con un compañero/a',
       icon: BuildingOfficeIcon,
       href: '/dashboard/rooms',
       color: 'bg-yellow-500',

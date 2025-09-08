@@ -8,7 +8,12 @@ import {
   BriefcaseIcon,
   TagIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ShieldCheckIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  PhoneIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline';
 
 interface ProfileFormData {
@@ -25,6 +30,8 @@ interface ProfileFormData {
   country: string;
   occupation: string;
   interests: string[];
+  is_public: boolean;
+  share_contact_info: boolean;
 }
 
 const ProfileForm: React.FC = () => {
@@ -42,7 +49,9 @@ const ProfileForm: React.FC = () => {
     postal_code: '',
     country: 'España',
     occupation: '',
-    interests: []
+    interests: [],
+    is_public: true,
+    share_contact_info: false
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +72,9 @@ const ProfileForm: React.FC = () => {
         postal_code: profile.postal_code || '',
         country: profile.country || 'España',
         occupation: profile.occupation || '',
-        interests: profile.interests || []
+        interests: profile.interests || [],
+        is_public: profile.is_public ?? true,
+        share_contact_info: profile.share_contact_info ?? false
       });
       if (profile.avatar_url) {
         setAvatarUrl(profile.avatar_url);
@@ -72,8 +83,13 @@ const ProfileForm: React.FC = () => {
   }, [profile]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleInterestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,6 +136,8 @@ const ProfileForm: React.FC = () => {
           occupation: formData.occupation || null,
           interests: formData.interests,
           avatar_url: avatarUrl,
+          is_public: formData.is_public,
+          share_contact_info: formData.share_contact_info,
           updated_at: new Date().toISOString(),
         })
         .select()
@@ -365,6 +383,82 @@ const ProfileForm: React.FC = () => {
               </label>
             </div>
           ))}
+        </div>
+
+        {/* Configuración de Privacidad */}
+        <h3 className="text-xl font-semibold text-gray-800 mt-8 mb-4 flex items-center">
+          <ShieldCheckIcon className="w-6 h-6 mr-3 text-green-500" /> Configuración de Privacidad
+        </h3>
+        <div className="bg-gray-50 rounded-lg p-6 space-y-6">
+          {/* Perfil Público/Privado */}
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                {formData.is_public ? (
+                  <EyeIcon className="w-5 h-5 text-green-500 mr-2" />
+                ) : (
+                  <EyeSlashIcon className="w-5 h-5 text-gray-500 mr-2" />
+                )}
+                <h4 className="text-lg font-medium text-gray-900">Mi perfil es público</h4>
+              </div>
+              <p className="text-sm text-gray-600">
+                {formData.is_public 
+                  ? 'Otros usuarios pueden ver tu perfil y contactarte'
+                  : 'Tu perfil es privado y solo tú puedes verlo'
+                }
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="is_public"
+                checked={formData.is_public}
+                onChange={handleChange}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+            </label>
+          </div>
+
+          {/* Compartir Datos de Contacto */}
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <PhoneIcon className="w-5 h-5 text-blue-500 mr-2" />
+                <h4 className="text-lg font-medium text-gray-900">Compartir mis datos de contacto</h4>
+              </div>
+              <p className="text-sm text-gray-600">
+                {formData.share_contact_info 
+                  ? 'Otros usuarios pueden ver tu teléfono y email'
+                  : 'Tu información de contacto permanece privada'
+                }
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="share_contact_info"
+                checked={formData.share_contact_info}
+                onChange={handleChange}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          {/* Información adicional */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <EnvelopeIcon className="w-5 h-5 text-blue-500 mr-2 mt-0.5" />
+              <div>
+                <h5 className="text-sm font-medium text-blue-900 mb-1">Información importante</h5>
+                <p className="text-sm text-blue-700">
+                  Si tu perfil es privado, otros usuarios no podrán encontrarte en búsquedas ni ver tu información. 
+                  Los datos de contacto solo se comparten si activas esta opción y tu perfil es público.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="pt-6">
