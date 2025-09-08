@@ -11,7 +11,6 @@ interface ChatSidebarProps {
   conversations: UserConversation[];
   selectedConversation: UserConversation | null;
   onSelectConversation: (conversation: UserConversation) => void;
-  onStartNewConversation: (otherUserId: string, otherUserName: string, otherUserAvatar?: string) => void;
   loading: boolean;
   error: string | null;
   onRefresh: () => void;
@@ -23,7 +22,6 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   conversations,
   selectedConversation,
   onSelectConversation,
-  onStartNewConversation,
   loading,
   error,
   onRefresh,

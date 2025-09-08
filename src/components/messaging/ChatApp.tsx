@@ -271,7 +271,6 @@ const ChatApp: React.FC = () => {
           conversations={conversations}
           selectedConversation={selectedConversation}
           onSelectConversation={handleSelectConversation}
-          onStartNewConversation={startNewConversation}
           loading={loadingMessages}
           error={error}
           onRefresh={loadConversations}

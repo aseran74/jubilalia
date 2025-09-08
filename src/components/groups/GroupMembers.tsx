@@ -14,12 +14,13 @@ interface GroupMember {
   group_id: string;
   role: string;
   joined_at: string;
-  profile: {
+  profiles: {
     id: string;
     full_name: string;
     avatar_url: string | null;
     bio: string | null;
-    location: string | null;
+    city: string | null;
+    country: string | null;
     created_at: string;
   };
 }
@@ -49,29 +50,41 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
-        .from('group_members')
-        .select(`
-          id,
-          profile_id,
-          group_id,
-          role,
-          joined_at,
-          profile:profiles(
+      // Usar una consulta SQL directa para evitar problemas de cache
+      const { data, error } = await supabase.rpc('get_group_members', {
+        group_id_param: groupId
+      });
+
+      if (error) {
+        console.error('RPC error, trying direct query:', error);
+        
+        // Fallback a consulta directa si RPC falla
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('group_members')
+          .select(`
             id,
-            full_name,
-            avatar_url,
-            bio,
-            location,
-            created_at
-          )
-        `)
-        .eq('group_id', groupId)
-        .order('joined_at', { ascending: true });
+            profile_id,
+            group_id,
+            role,
+            joined_at,
+            profiles!inner(
+              id,
+              full_name,
+              avatar_url,
+              bio,
+              city,
+              country,
+              created_at
+            )
+          `)
+          .eq('group_id', groupId)
+          .order('joined_at', { ascending: true });
 
-      if (error) throw error;
-
-      setMembers(data || []);
+        if (fallbackError) throw fallbackError;
+        setMembers(fallbackData || []);
+      } else {
+        setMembers(data || []);
+      }
     } catch (err: any) {
       console.error('Error fetching group members:', err);
       setError(err.message || 'Error al cargar los miembros');
@@ -190,10 +203,10 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
                 >
                   {/* Avatar */}
                   <div className="flex-shrink-0">
-                    {member.profile.avatar_url ? (
+                    {member.profiles.avatar_url ? (
                       <img
-                        src={member.profile.avatar_url}
-                        alt={member.profile.full_name}
+                        src={member.profiles.avatar_url}
+                        alt={member.profiles.full_name}
                         className="h-12 w-12 rounded-full object-cover"
                       />
                     ) : (
@@ -205,27 +218,31 @@ const GroupMembers: React.FC<GroupMembersProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       <h3 className="text-lg font-medium text-gray-900 truncate">
-                        {member.profile.full_name || 'Usuario sin nombre'}
+                        {member.profiles.full_name || 'Usuario sin nombre'}
                       </h3>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(member.role)}`}>
                         {getRoleLabel(member.role)}
                       </span>
                     </div>
                     
-                    {member.profile.bio && (
+                    {member.profiles.bio && (
                       <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                        {member.profile.bio}
+                        {member.profiles.bio}
                       </p>
                     )}
                     
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      {member.profile.location && (
+                      {(member.profiles.city || member.profiles.country) && (
                         <div className="flex items-center space-x-1">
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          <span>{member.profile.location}</span>
+                          <span>
+                            {[member.profiles.city, member.profiles.country]
+                              .filter(Boolean)
+                              .join(', ')}
+                          </span>
                         </div>
                       )}
                       
