@@ -12,8 +12,7 @@ import {
   CalendarIcon,
   UserGroupIcon,
   ChatBubbleLeftRightIcon,
-  XMarkIcon,
-  MessageCircleIcon
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface Group {
@@ -355,7 +354,7 @@ const GroupDetail: React.FC = () => {
                             onClick={viewTelegramChat}
                             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
                           >
-                            <MessageCircleIcon className="w-5 h-5 mr-2" />
+                            <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
                             Chat Telegram
                           </button>
                         )}
@@ -453,7 +452,7 @@ const GroupDetail: React.FC = () => {
             {/* Header del modal */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                <MessageCircleIcon className="w-6 h-6 mr-2 text-blue-600" />
+                <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2 text-blue-600" />
                 Chat de Telegram - {group.name}
               </h2>
               <button
