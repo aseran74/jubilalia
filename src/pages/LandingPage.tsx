@@ -242,7 +242,7 @@ const LandingPage: React.FC = () => {
           </h1>
           
                      <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
-             Somos la primera plataforma que conecta a personas senior ,  para compartir vivienda, 
+             Somos la primera plataforma que conecta a personas senior ,  para compartir vivienda o crear comunidades , 
              crear amistades y disfrutar de actividades juntos. ¡Únete a nuestra comunidad!
            </p>
 
