@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { SidebarProvider } from './context/SidebarContext';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
@@ -311,8 +312,16 @@ const App: React.FC = () => {
           
           {/* Rutas accesibles desde landing page */}
           <Route path="/profile" element={<ProfileForm />} />
-          <Route path="/activities" element={<ActivityList />} />
-          <Route path="/activities/map" element={<ActivityList />} />
+          <Route path="/activities" element={
+            <SidebarProvider>
+              <ActivityList />
+            </SidebarProvider>
+          } />
+          <Route path="/activities/map" element={
+            <SidebarProvider>
+              <ActivityList />
+            </SidebarProvider>
+          } />
           <Route path="/activities/create" element={<ActivityForm />} />
           <Route path="/activities/:id" element={<ActivityDetail />} />
           <Route path="/activities/:id/edit" element={<ActivityForm />} />

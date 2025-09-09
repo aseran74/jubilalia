@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, Menu } from 'lucide-react';
 import ActivityMap from './ActivityMap';
+import { useAuth } from '../../hooks/useAuth';
+import { useSidebar } from '../../context/SidebarContext';
 
 interface Activity {
   id: string;
@@ -33,6 +35,8 @@ const ActivityList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
+  const { toggleMobileSidebar } = useSidebar();
 
   useEffect(() => {
     fetchActivities();
@@ -126,7 +130,16 @@ const ActivityList: React.FC = () => {
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Actividades</h1>
+          <div className="flex items-center gap-4">
+            {/* Botón hamburger para móvil */}
+            <button
+              onClick={toggleMobileSidebar}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <Menu className="w-6 h-6 text-gray-600" />
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900">Actividades</h1>
+          </div>
           <button
             onClick={() => navigate('/dashboard/activities/create')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
