@@ -51,7 +51,7 @@ interface GroupMember {
     city: string | null;
     country: string | null;
     created_at: string;
-  };
+  } | null;
 }
 
 const GroupDetail: React.FC = () => {
@@ -139,7 +139,13 @@ const GroupDetail: React.FC = () => {
         return;
       }
 
-      setMembers(membersData || []);
+      // Transformar los datos para convertir profiles de array a objeto
+      const transformedData = (membersData || []).map(member => ({
+        ...member,
+        profiles: member.profiles[0] || null
+      }));
+
+      setMembers(transformedData);
     } catch (error) {
       console.error('Error fetching members:', error);
     } finally {
@@ -373,7 +379,7 @@ const GroupDetail: React.FC = () => {
                   </div>
                   
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{member.profiles?.full_name}</h3>
+                    <h3 className="font-semibold text-gray-900">{member.profiles?.full_name || 'Usuario desconocido'}</h3>
                     <p className="text-sm text-gray-600 capitalize">{member.role}</p>
                     {member.profiles?.city && (
                       <p className="text-xs text-gray-500">{member.profiles.city}</p>

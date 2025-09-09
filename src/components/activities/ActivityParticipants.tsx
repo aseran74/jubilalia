@@ -18,7 +18,7 @@ interface Participant {
     country?: string;
     phone?: string;
     email?: string;
-  };
+  } | null;
 }
 
 interface ActivityParticipantsProps {
@@ -64,7 +64,13 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
 
       if (error) throw error;
 
-      setParticipants(data || []);
+      // Transformar los datos para convertir profiles de array a objeto
+      const transformedData = (data || []).map(participant => ({
+        ...participant,
+        profiles: participant.profiles[0] || null
+      }));
+
+      setParticipants(transformedData);
     } catch (err: any) {
       console.error('Error fetching participants:', err);
       setError(err.message || 'Error al cargar los participantes');
@@ -190,7 +196,7 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium text-gray-900 truncate">
-                    {participant.profiles?.full_name}
+                    {participant.profiles?.full_name || 'Usuario desconocido'}
                   </h4>
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(participant.status)}`}
@@ -220,16 +226,16 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
                 </div>
 
                 {/* Información de contacto (solo para organizadores) */}
-                {isOrganizer && (participant.profiles?.phone || participant.profiles?.email) && (
+                {isOrganizer && participant.profiles && (participant.profiles.phone || participant.profiles.email) && (
                   <div className="mt-3 pt-3 border-t border-gray-100">
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      {participant.profiles?.phone && (
+                      {participant.profiles.phone && (
                         <div className="flex items-center">
                           <Phone className="w-3 h-3 mr-1" />
                           <span>{participant.profiles.phone}</span>
                         </div>
                       )}
-                      {participant.profiles?.email && (
+                      {participant.profiles.email && (
                         <div className="flex items-center">
                           <Mail className="w-3 h-3 mr-1" />
                           <span>{participant.profiles.email}</span>
