@@ -183,12 +183,7 @@ const Groups: React.FC = () => {
 
       if (error) throw error;
 
-      // Actualizar el contador de miembros
-      await supabase
-        .from('groups')
-        .update({ current_members: (groups.find(g => g.id === groupId)?.current_members || 0) + 1 })
-        .eq('id', groupId);
-
+      // El trigger actualiza automáticamente el contador de miembros
       fetchGroups();
     } catch (error) {
       console.error('Error joining group:', error);
@@ -238,12 +233,7 @@ const Groups: React.FC = () => {
 
       if (error) throw error;
 
-      // Actualizar el contador de miembros
-      await supabase
-        .from('groups')
-        .update({ current_members: (groups.find(g => g.id === groupId)?.current_members || 0) - 1 })
-        .eq('id', groupId);
-
+      // El trigger actualiza automáticamente el contador de miembros
       fetchGroups();
       if (selectedGroup?.id === groupId) {
         setSelectedGroup(null);
@@ -574,12 +564,12 @@ const Groups: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      <button
-                        onClick={() => joinGroup(group.id)}
+                    <button
+                      onClick={() => joinGroup(group.id)}
                         className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Unirse
-                      </button>
+                    >
+                      Unirse
+                    </button>
                       <button
                         onClick={() => viewGroupMembers(group)}
                         className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-1"
