@@ -1,0 +1,21 @@
+{
+  "name": "jubilalia-telegram-backend",
+  "version": "1.0.0",
+  "description": "Backend para integración con Telegram en Jubilalia",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-telegram-bot-api": "^0.64.0",
+    "dotenv": "^16.3.1",
+    "@supabase/supabase-js": "^2.38.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
