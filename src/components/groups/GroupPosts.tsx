@@ -103,6 +103,8 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
   // Cargar comentarios de un post
   const fetchComments = async (postId: string) => {
     try {
+      console.log('🔍 Cargando comentarios para post:', postId);
+      
       const { data, error } = await supabase
         .from('group_post_comments')
         .select(`
@@ -112,7 +114,19 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      console.log('💬 Datos de comentarios:', { data, error });
+
+      if (error) {
+        console.error('❌ Error al cargar comentarios:', error);
+        console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+        console.error('❌ Detalles del error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
 
       setComments(prev => ({
         ...prev,
@@ -121,8 +135,10 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
           author: comment.profiles
         })) || []
       }));
+      
+      console.log('✅ Comentarios cargados exitosamente');
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.error('❌ Error fetching comments:', error);
     }
   };
 
@@ -210,23 +226,42 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
 
   // Crear comentario
   const createComment = async (postId: string) => {
-    if (!profile || !newComment[postId]?.trim()) return;
+    if (!profile || !newComment[postId]?.trim()) {
+      console.log('❌ No se puede crear comentario:', { profile: !!profile, comment: newComment[postId] });
+      return;
+    }
 
     try {
-      const { error } = await supabase
+      console.log('💬 Creando comentario para post:', postId, 'contenido:', newComment[postId]);
+      
+      const { data, error } = await supabase
         .from('group_post_comments')
         .insert({
           post_id: postId,
           author_id: profile.id,
           content: newComment[postId]
+        })
+        .select();
+
+      console.log('📝 Resultado de crear comentario:', { data, error });
+
+      if (error) {
+        console.error('❌ Error al crear comentario:', error);
+        console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+        console.error('❌ Detalles del error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
         });
+        throw error;
+      }
 
-      if (error) throw error;
-
+      console.log('✅ Comentario creado exitosamente');
       setNewComment(prev => ({ ...prev, [postId]: '' }));
       fetchComments(postId);
     } catch (error) {
-      console.error('Error creating comment:', error);
+      console.error('❌ Error creating comment:', error);
     }
   };
 

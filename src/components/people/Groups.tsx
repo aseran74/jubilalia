@@ -120,6 +120,7 @@ const Groups: React.FC = () => {
   const fetchGroups = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Cargando grupos para usuario:', profile?.id);
       
       // Obtener grupos públicos
       const { data: publicGroups, error: publicError } = await supabase
@@ -127,7 +128,12 @@ const Groups: React.FC = () => {
         .select('*')
         .eq('is_public', true);
 
-      if (publicError) throw publicError;
+      console.log('📊 Grupos públicos:', { data: publicGroups, error: publicError });
+
+      if (publicError) {
+        console.error('❌ Error al cargar grupos públicos:', publicError);
+        throw publicError;
+      }
 
       // Obtener grupos de los que es miembro
       const { data: memberGroups, error: memberError } = await supabase
@@ -138,7 +144,13 @@ const Groups: React.FC = () => {
         `)
         .eq('group_members.profile_id', profile?.id || '');
 
-      if (memberError) throw memberError;
+      console.log('👥 Grupos como miembro:', { data: memberGroups, error: memberError });
+
+      if (memberError) {
+        console.error('❌ Error al cargar grupos como miembro:', memberError);
+        console.error('❌ Error completo:', JSON.stringify(memberError, null, 2));
+        throw memberError;
+      }
 
       // Combinar los grupos y eliminar duplicados
       const allGroups = [...(publicGroups || [])];
@@ -161,8 +173,16 @@ const Groups: React.FC = () => {
       });
 
       setGroups(processedGroups);
+      console.log('✅ Grupos cargados exitosamente:', processedGroups.length);
     } catch (error) {
-      console.error('Error fetching groups:', error);
+      console.error('❌ Error fetching groups:', error);
+      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
+      console.error('❌ Detalles del error:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
     } finally {
       setLoading(false);
     }
