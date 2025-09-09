@@ -48,7 +48,7 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
           status,
           joined_at,
           notes,
-          profiles!inner(
+          profiles!activity_participants_profile_id_fkey(
             id,
             full_name,
             avatar_url,

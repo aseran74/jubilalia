@@ -122,7 +122,7 @@ const GroupDetail: React.FC = () => {
           group_id,
           role,
           joined_at,
-          profiles!inner(
+          profiles!group_members_profile_id_fkey(
             id,
             full_name,
             avatar_url,
