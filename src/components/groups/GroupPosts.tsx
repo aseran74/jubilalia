@@ -109,7 +109,7 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
         .from('group_post_comments')
         .select(`
           *,
-          profiles!group_post_comments_author_id_fkey(full_name, avatar_url)
+          profiles(full_name, avatar_url)
         `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
