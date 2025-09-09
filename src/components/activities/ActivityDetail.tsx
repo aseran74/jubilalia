@@ -51,6 +51,7 @@ interface ActivityDetail {
   difficulty_level: string;
   tags: string[];
   images: string[];
+  profile_id: string;
   owner: {
     id: string;
     full_name: string;
@@ -739,7 +740,7 @@ const ActivityDetail: React.FC = () => {
                 <div className="mt-6">
                   <ActivityParticipants 
                     activityId={activity.id} 
-                    isOrganizer={profile?.id === activity.profile_id}
+                    isOrganizer={isOwner}
                   />
                 </div>
               </div>

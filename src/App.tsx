@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
-import { SidebarProvider } from './context/SidebarContext';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
@@ -35,7 +34,6 @@ import AdminPropertyManagement from './components/admin/AdminPropertyManagement'
 // Componentes de actividades
 import ActivityForm from './components/activities/ActivityForm';
 import ActivityList from './components/activities/ActivityList';
-import ActivityListWithSidebar from './components/activities/ActivityListWithSidebar';
 import ActivityDetail from './components/activities/ActivityDetail';
 
 // Componentes de posts

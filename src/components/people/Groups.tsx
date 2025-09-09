@@ -174,14 +174,14 @@ const Groups: React.FC = () => {
 
       setGroups(processedGroups);
       console.log('✅ Grupos cargados exitosamente:', processedGroups.length);
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error fetching groups:', error);
       console.error('❌ Error completo:', JSON.stringify(error, null, 2));
       console.error('❌ Detalles del error:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
+        message: error instanceof Error ? error.message : 'Error desconocido',
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
       });
     } finally {
       setLoading(false);

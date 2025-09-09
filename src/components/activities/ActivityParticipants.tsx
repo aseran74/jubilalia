@@ -173,7 +173,7 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
             <div className="flex items-start space-x-3">
               {/* Avatar */}
               <div className="flex-shrink-0">
-                {participant.profiles.avatar_url ? (
+                {participant.profiles?.avatar_url ? (
                   <img
                     src={participant.profiles.avatar_url}
                     alt={participant.profiles.full_name}
@@ -190,7 +190,7 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-medium text-gray-900 truncate">
-                    {participant.profiles.full_name}
+                    {participant.profiles?.full_name}
                   </h4>
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(participant.status)}`}
@@ -199,7 +199,7 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
                   </span>
                 </div>
 
-                {participant.profiles.bio && (
+                {participant.profiles?.bio && (
                   <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                     {participant.profiles.bio}
                   </p>
@@ -211,7 +211,7 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
                     <span>Se unió {formatDate(participant.joined_at)}</span>
                   </div>
                   
-                  {participant.profiles.city && (
+                  {participant.profiles?.city && (
                     <div className="flex items-center">
                       <MapPin className="w-3 h-3 mr-1" />
                       <span>{participant.profiles.city}</span>
@@ -220,16 +220,16 @@ const ActivityParticipants: React.FC<ActivityParticipantsProps> = ({
                 </div>
 
                 {/* Información de contacto (solo para organizadores) */}
-                {isOrganizer && (participant.profiles.phone || participant.profiles.email) && (
+                {isOrganizer && (participant.profiles?.phone || participant.profiles?.email) && (
                   <div className="mt-3 pt-3 border-t border-gray-100">
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      {participant.profiles.phone && (
+                      {participant.profiles?.phone && (
                         <div className="flex items-center">
                           <Phone className="w-3 h-3 mr-1" />
                           <span>{participant.profiles.phone}</span>
                         </div>
                       )}
-                      {participant.profiles.email && (
+                      {participant.profiles?.email && (
                         <div className="flex items-center">
                           <Mail className="w-3 h-3 mr-1" />
                           <span>{participant.profiles.email}</span>

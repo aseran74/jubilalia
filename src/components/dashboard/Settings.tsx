@@ -31,8 +31,8 @@ const Settings: React.FC = () => {
   useEffect(() => {
     if (profile) {
       setSettings({
-        is_public: profile.is_public ?? true,
-        share_contact_info: profile.share_contact_info ?? false
+        is_public: (profile as any).is_public ?? true,
+        share_contact_info: (profile as any).share_contact_info ?? false
       });
     }
   }, [profile]);

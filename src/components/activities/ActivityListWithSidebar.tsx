@@ -37,7 +37,7 @@ const ActivityListWithSidebar: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
 
   // Detectar si es móvil
   useEffect(() => {

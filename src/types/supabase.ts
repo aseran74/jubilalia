@@ -1027,6 +1027,8 @@ export interface UserProfile {
   occupation: string | null;
   interests: string[] | null;
   is_admin: boolean; // Campo para identificar administradores
+  is_public: boolean | null; // Campo para controlar visibilidad del perfil
+  share_contact_info: boolean | null; // Campo para controlar si compartir información de contacto
   created_at: string | null;
   updated_at: string | null;
   

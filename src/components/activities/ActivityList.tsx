@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, ArrowLeft } from 'lucide-react';
 import ActivityMap from './ActivityMap';
-import { useAuth } from '../../hooks/useAuth';
 
 interface Activity {
   id: string;
@@ -34,7 +33,6 @@ const ActivityList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
 
   useEffect(() => {
     fetchActivities();
@@ -62,24 +60,24 @@ const ActivityList: React.FC = () => {
       
       // CONSULTA MUY SIMPLE PARA DEBUG
       console.log('🔍 Haciendo consulta básica...');
-      const { data, error } = await supabase
+      const { data: activitiesData, error: activitiesError } = await supabase
         .from('activities')
         .select('*');
 
       console.log('📊 Resultado de consulta básica:', {
-        count: data?.length || 0,
-        data: data,
-        error: error
+        count: activitiesData?.length || 0,
+        data: activitiesData,
+        error: activitiesError
       });
 
-      if (error) {
-        console.error('❌ Error en consulta básica:', error);
+      if (activitiesError) {
+        console.error('❌ Error en consulta básica:', activitiesError);
         setActivities([]);
         setLoading(false);
         return;
       }
 
-      if (!data || data.length === 0) {
+      if (!activitiesData || activitiesData.length === 0) {
         console.log('⚠️ No se encontraron actividades en consulta básica');
         setActivities([]);
         setLoading(false);
@@ -87,7 +85,7 @@ const ActivityList: React.FC = () => {
       }
 
       // Usar los datos básicos por ahora
-      const activitiesWithBasicInfo = data.map(activity => ({
+      const activitiesWithBasicInfo = activitiesData.map(activity => ({
         ...activity,
         images: [],
         owner: { full_name: 'Usuario', avatar_url: undefined }

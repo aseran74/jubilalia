@@ -253,7 +253,6 @@ const PropertiesSaleMapView: React.FC = () => {
         console.log(`📸 Creando InfoWindow para: ${property.title}`, {
           hasImage: !!property.primary_image_url,
           imageUrl: property.primary_image_url,
-          propertyImages: property.property_images,
           allPropertyData: property
         });
 

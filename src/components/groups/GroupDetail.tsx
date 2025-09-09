@@ -361,7 +361,7 @@ const GroupDetail: React.FC = () => {
               {members.map((member) => (
                 <div key={member.id} className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
                   <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                    {member.profiles.avatar_url ? (
+                    {member.profiles?.avatar_url ? (
                       <img
                         src={member.profiles.avatar_url}
                         alt={member.profiles.full_name}
@@ -373,9 +373,9 @@ const GroupDetail: React.FC = () => {
                   </div>
                   
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{member.profiles.full_name}</h3>
+                    <h3 className="font-semibold text-gray-900">{member.profiles?.full_name}</h3>
                     <p className="text-sm text-gray-600 capitalize">{member.role}</p>
-                    {member.profiles.city && (
+                    {member.profiles?.city && (
                       <p className="text-xs text-gray-500">{member.profiles.city}</p>
                     )}
                   </div>
