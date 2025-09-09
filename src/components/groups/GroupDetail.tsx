@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import GroupPosts from './GroupPosts';
-import TelegramChat from '../telegram/TelegramChat';
 import { 
   ArrowLeftIcon,
   UsersIcon,
@@ -12,7 +11,8 @@ import {
   CalendarIcon,
   UserGroupIcon,
   ChatBubbleLeftRightIcon,
-  XMarkIcon
+  XMarkIcon,
+  LinkIcon
 } from '@heroicons/react/24/outline';
 
 interface Group {
@@ -32,7 +32,7 @@ interface Group {
   longitude?: number;
   postal_code?: string;
   country: string;
-  telegram_group_id?: string;
+  telegram_group_name?: string;
   is_member?: boolean;
   role?: string;
 }
@@ -63,7 +63,6 @@ const GroupDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [showPosts, setShowPosts] = useState(false);
-  const [showTelegram, setShowTelegram] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -221,39 +220,6 @@ const GroupDetail: React.FC = () => {
     setShowPosts(false);
   };
 
-  // Ver chat de Telegram
-  const viewTelegramChat = () => {
-    setShowTelegram(true);
-  };
-
-  // Cerrar chat de Telegram
-  const closeTelegramChat = () => {
-    setShowTelegram(false);
-  };
-
-  // Enviar mensaje a Telegram
-  const handleSendTelegramMessage = async (message: string) => {
-    if (!group?.telegram_group_id) return false;
-    
-    try {
-      const response = await fetch('http://localhost:3001/api/telegram/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          groupId: group.telegram_group_id,
-          message: message
-        })
-      });
-
-      const data = await response.json();
-      return data.success;
-    } catch (error) {
-      console.error('Error sending Telegram message:', error);
-      return false;
-    }
-  };
 
   if (loading) {
     return (
@@ -349,14 +315,16 @@ const GroupDetail: React.FC = () => {
                           Ver Posts
                         </button>
                         
-                        {group.telegram_group_id && (
-                          <button
-                            onClick={viewTelegramChat}
+                        {group.telegram_group_name && (
+                          <a
+                            href={`https://t.me/${group.telegram_group_name}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
                           >
-                            <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
-                            Chat Telegram
-                          </button>
+                            <LinkIcon className="w-5 h-5 mr-2" />
+                            Unirse a Telegram
+                          </a>
                         )}
                         
                         <button
@@ -445,35 +413,6 @@ const GroupDetail: React.FC = () => {
         </div>
       )}
 
-      {/* Chat de Telegram */}
-      {showTelegram && group && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-5/6 flex flex-col">
-            {/* Header del modal */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-                <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2 text-blue-600" />
-                Chat de Telegram - {group.name}
-              </h2>
-              <button
-                onClick={closeTelegramChat}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <XMarkIcon className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-            
-            {/* Contenido del modal */}
-            <div className="flex-1 overflow-hidden p-6">
-              <TelegramChat 
-                groupId={group.id}
-                telegramGroupId={group.telegram_group_id}
-                onSendMessage={handleSendTelegramMessage}
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

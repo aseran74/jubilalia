@@ -27,6 +27,7 @@ interface GroupFormData {
   longitude: number | null;
   postal_code: string;
   country: string;
+  telegram_group_name: string;
 }
 
 const GroupForm: React.FC = () => {
@@ -49,7 +50,8 @@ const GroupForm: React.FC = () => {
     latitude: null,
     longitude: null,
     postal_code: '',
-    country: 'España'
+    country: 'España',
+    telegram_group_name: ''
   });
 
   const isEditing = !!id;
@@ -79,7 +81,8 @@ const GroupForm: React.FC = () => {
             latitude: data.latitude || null,
             longitude: data.longitude || null,
             postal_code: data.postal_code || '',
-            country: data.country || 'España'
+            country: data.country || 'España',
+            telegram_group_name: data.telegram_group_name || ''
           });
         } catch (error) {
           console.error('Error loading group:', error);
@@ -590,6 +593,50 @@ const GroupForm: React.FC = () => {
                     >
                       Seleccionar imagen
                     </label>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Telegram */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+                Grupo de Telegram (Opcional)
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nombre del grupo de Telegram
+                  </label>
+                  <input
+                    type="text"
+                    name="telegram_group_name"
+                    value={formData.telegram_group_name}
+                    onChange={handleInputChange}
+                    placeholder="nombre_del_grupo (sin @)"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Si tienes un grupo de Telegram para este grupo, introduce solo el nombre (ej: jubilados_san_juan)
+                  </p>
+                </div>
+                
+                {formData.telegram_group_name && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>Enlace generado:</strong>{' '}
+                      <a 
+                        href={`https://t.me/${formData.telegram_group_name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 underline"
+                      >
+                        https://t.me/{formData.telegram_group_name}
+                      </a>
+                    </p>
                   </div>
                 )}
               </div>
