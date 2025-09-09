@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import AdminButtons from '../common/AdminButtons';
+import ActivityParticipants from './ActivityParticipants';
 import { 
   Calendar, 
   Clock, 
@@ -732,6 +733,14 @@ const ActivityDetail: React.FC = () => {
                       </span>
                     )}
                   </div>
+                </div>
+
+                {/* Lista de participantes */}
+                <div className="mt-6">
+                  <ActivityParticipants 
+                    activityId={activity.id} 
+                    isOrganizer={profile?.id === activity.profile_id}
+                  />
                 </div>
               </div>
 
