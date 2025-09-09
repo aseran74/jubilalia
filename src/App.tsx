@@ -35,6 +35,7 @@ import AdminPropertyManagement from './components/admin/AdminPropertyManagement'
 // Componentes de actividades
 import ActivityForm from './components/activities/ActivityForm';
 import ActivityList from './components/activities/ActivityList';
+import ActivityListWithSidebar from './components/activities/ActivityListWithSidebar';
 import ActivityDetail from './components/activities/ActivityDetail';
 
 // Componentes de posts
@@ -312,16 +313,8 @@ const App: React.FC = () => {
           
           {/* Rutas accesibles desde landing page */}
           <Route path="/profile" element={<ProfileForm />} />
-          <Route path="/activities" element={
-            <SidebarProvider>
-              <ActivityList />
-            </SidebarProvider>
-          } />
-          <Route path="/activities/map" element={
-            <SidebarProvider>
-              <ActivityList />
-            </SidebarProvider>
-          } />
+          <Route path="/activities" element={<ActivityListWithSidebar />} />
+          <Route path="/activities/map" element={<ActivityListWithSidebar />} />
           <Route path="/activities/create" element={<ActivityForm />} />
           <Route path="/activities/:id" element={<ActivityDetail />} />
           <Route path="/activities/:id/edit" element={<ActivityForm />} />
