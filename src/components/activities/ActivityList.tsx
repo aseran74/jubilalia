@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, Menu } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, ArrowLeft } from 'lucide-react';
 import ActivityMap from './ActivityMap';
 import { useAuth } from '../../hooks/useAuth';
-import { useSidebar } from '../../context/SidebarContext';
 
 interface Activity {
   id: string;
@@ -36,7 +35,6 @@ const ActivityList: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const { toggleMobileSidebar } = useSidebar();
 
   useEffect(() => {
     fetchActivities();
@@ -131,12 +129,13 @@ const ActivityList: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-4">
-            {/* Botón hamburger para móvil */}
+            {/* Botón volver */}
             <button
-              onClick={toggleMobileSidebar}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              onClick={() => navigate('/')}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2"
             >
-              <Menu className="w-6 h-6 text-gray-600" />
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <span className="text-gray-600 font-medium">Volver</span>
             </button>
             <h1 className="text-2xl font-bold text-gray-900">Actividades</h1>
           </div>
