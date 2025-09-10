@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   UserGroupIcon as Users, 
   BuildingOfficeIcon as Building, 
@@ -15,7 +15,11 @@ import {
   BuildingOfficeIcon as Facebook,
   BuildingOfficeIcon as Twitter,
   BuildingOfficeIcon as Instagram,
-  BuildingOfficeIcon as Linkedin
+  BuildingOfficeIcon as Linkedin,
+  UserIcon as User,
+  HomeIcon as Home,
+  CurrencyEuroIcon as CurrencyEuro,
+  KeyIcon as Key
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
@@ -64,7 +68,7 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3">
+            <button onClick={() => navigate('/')} className="flex items-center space-x-3">
               <img 
                 src="/images/jubilogo.svg" 
                 alt="Logo" 
@@ -72,7 +76,7 @@ const LandingPage: React.FC = () => {
                   isScrolled ? 'filter brightness-0' : 'filter brightness-0 invert'
                 }`}
               />
-            </Link>
+            </button>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8">
@@ -126,20 +130,20 @@ const LandingPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <Link
-                    to="/login"
+                  <button
+                    onClick={() => navigate('/login')}
                     className={`font-medium transition-colors hover:text-green-500 ${
                       isScrolled ? 'text-gray-700' : 'text-white'
                     }`}
                   >
                     Iniciar Sesión
-                  </Link>
-                  <Link
-                    to="/register"
+                  </button>
+                  <button
+                    onClick={() => navigate('/register')}
                     className="bg-green-500 text-white px-6 py-3 rounded-full font-medium hover:bg-green-600 transition-colors"
                   >
                     Registrarse
-                  </Link>
+                  </button>
                 </>
               )}
             </div>
@@ -195,27 +199,27 @@ const LandingPage: React.FC = () => {
               <div className="pt-4 border-t border-gray-200">
                 {user ? (
                   <div className="space-y-3">
-                    <Link
-                      to="/dashboard"
+                    <button
+                      onClick={() => navigate('/dashboard')}
                       className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
                     >
                       Ir al Dashboard
-                    </Link>
+                    </button>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <Link
-                      to="/login"
+                    <button
+                      onClick={() => navigate('/login')}
                       className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
                     >
                       Iniciar Sesión
-                    </Link>
-                    <Link
-                      to="/register"
+                    </button>
+                    <button
+                      onClick={() => navigate('/register')}
                       className="block w-full bg-green-500 text-white px-6 py-3 rounded-full font-medium hover:bg-green-600 transition-colors text-center"
                     >
                       Registrarse
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
@@ -242,7 +246,7 @@ const LandingPage: React.FC = () => {
           </h1>
           
                      <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
-             Somos la primera plataforma que conecta a personas senior ,  para compartir vivienda o crear comunidades , 
+             Somos la primera plataforma que conecta a personas senior ,  para compartir vivienda o crear comunidades donde jubilarse , 
              crear amistades y disfrutar de actividades juntos. ¡Únete a nuestra comunidad!
            </p>
 
@@ -287,6 +291,112 @@ const LandingPage: React.FC = () => {
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <ChevronDown className="w-6 h-6 text-white/60" />
+        </div>
+      </section>
+
+      {/* Cards de Funcionalidades */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+              Nuestras Funcionalidades
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Descubre todo lo que puedes hacer en nuestra plataforma
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+            {/* Card Grupos */}
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-green-200 group">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
+                <Users className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Grupos</h3>
+              <p className="text-gray-600 mb-6">
+                Únete a grupos de personas con intereses similares y crea comunidades
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/groups')}
+                className="inline-flex items-center text-green-600 hover:text-green-700 font-medium transition-colors"
+              >
+                Explorar Grupos
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
+
+            {/* Card Personas */}
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-blue-200 group">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                <User className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Personas</h3>
+              <p className="text-gray-600 mb-6">
+                Conecta con personas senior en tu área y haz nuevas amistades
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/users')}
+                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Conocer Personas
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
+
+            {/* Card Habitaciones */}
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-purple-200 group">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
+                <Home className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Habitaciones</h3>
+              <p className="text-gray-600 mb-6">
+                Encuentra habitaciones disponibles para compartir vivienda
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/rooms')}
+                className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium transition-colors"
+              >
+                Ver Habitaciones
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
+
+            {/* Card Venta */}
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-orange-200 group">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-orange-200 transition-colors">
+                <CurrencyEuro className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Venta</h3>
+              <p className="text-gray-600 mb-6">
+                Explora propiedades en venta ideales para tu jubilación
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/properties/sale')}
+                className="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium transition-colors"
+              >
+                Ver Propiedades
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
+
+            {/* Card Alquiler */}
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-teal-200 group">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-teal-200 transition-colors">
+                <Key className="w-8 h-8 text-teal-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Alquiler</h3>
+              <p className="text-gray-600 mb-6">
+                Encuentra propiedades en alquiler perfectas para tu estilo de vida
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/properties/rental')}
+                className="inline-flex items-center text-teal-600 hover:text-teal-700 font-medium transition-colors"
+              >
+                Ver Alquileres
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
