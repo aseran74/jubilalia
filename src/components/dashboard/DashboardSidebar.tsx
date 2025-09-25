@@ -18,7 +18,10 @@ import {
   Bars3Icon,
   XMarkIcon,
   ShieldCheckIcon,
-  MapIcon
+  MapIcon,
+  HomeModernIcon,
+  KeyIcon,
+  CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -77,16 +80,16 @@ const DashboardSidebar: React.FC = () => {
   const navigationGroups: NavigationGroup[] = [
     {
       name: 'Habitaciones',
-      icon: BuildingOfficeIcon,
+      icon: HomeModernIcon,
       items: [
         { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MagnifyingGlassIcon },
+        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MapIcon },
         { name: 'Publicar habitación', href: '/dashboard/rooms/create', icon: PlusIcon },
       ]
     },
     {
       name: 'Alquiler',
-      icon: BuildingOfficeIcon,
+      icon: KeyIcon,
       items: [
         { name: 'Buscar alquiler', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/properties/rental/map', icon: MapIcon },
@@ -95,7 +98,7 @@ const DashboardSidebar: React.FC = () => {
     },
     {
       name: 'Venta',
-      icon: BuildingOfficeIcon,
+      icon: CurrencyDollarIcon,
       items: [
         { name: 'Buscar venta', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/properties/sale/map', icon: MapIcon },
@@ -204,13 +207,15 @@ const DashboardSidebar: React.FC = () => {
               isMobileOpen ? 'translate-x-0' : '-translate-x-full'
             } w-80`
           : `relative ${
-              isCollapsed ? 'w-16' : 'w-64'
+              isCollapsed ? 'w-20' : 'w-64'
             }`
         }
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className={`flex items-center justify-between border-b border-gray-200 ${
+            isCollapsed && !isMobile ? 'p-3' : 'p-4'
+          }`}>
             {(!isCollapsed || isMobile) && (
               <h1 className="text-xl font-bold text-gray-900">Jubilalia</h1>
             )}
@@ -240,14 +245,20 @@ const DashboardSidebar: React.FC = () => {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
-          <div className="px-4 space-y-2">
+          <div className={`space-y-2 ${
+            isCollapsed && !isMobile ? 'px-2' : 'px-4'
+          }`}>
             {/* Landing Page Link */}
             <Link
               to="/"
               onClick={() => isMobile && setIsMobileOpen(false)}
-              className="flex items-center px-3 py-3 rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200"
+              className={`flex items-center rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200 ${
+                isCollapsed && !isMobile ? 'px-2 py-3 justify-center' : 'px-3 py-3'
+              }`}
             >
-              <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 flex-shrink-0 ${
+                isCollapsed && !isMobile ? '' : 'mr-3'
+              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
               {(!isCollapsed || isMobile) && 'Ir a Jubilalia'}
@@ -264,13 +275,17 @@ const DashboardSidebar: React.FC = () => {
                 key={item.href}
                 to={item.href}
                 onClick={() => isMobile && setIsMobileOpen(false)}
-                className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center rounded-lg text-sm font-medium transition-colors ${
                   isActive(item.href)
                     ? 'bg-green-100 text-green-700'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                } ${
+                  isCollapsed && !isMobile ? 'px-2 py-3 justify-center' : 'px-3 py-3'
                 }`}
               >
-                <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                <item.icon className={`w-5 h-5 flex-shrink-0 ${
+                  isCollapsed && !isMobile ? '' : 'mr-3'
+                }`} />
                 {(!isCollapsed || isMobile) && item.name}
               </Link>
             ))}
@@ -283,14 +298,18 @@ const DashboardSidebar: React.FC = () => {
               <div key={group.name} className="space-y-1">
                 <button
                   onClick={() => toggleGroup(group.name)}
-                  className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between rounded-lg text-sm font-medium transition-colors ${
                     isGroupActive(group)
                       ? 'bg-green-50 text-green-700'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  } ${
+                    isCollapsed && !isMobile ? 'px-2 py-3' : 'px-3 py-3'
                   }`}
                 >
                   <div className="flex items-center">
-                    <group.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                    <group.icon className={`w-5 h-5 flex-shrink-0 ${
+                      isCollapsed && !isMobile ? '' : 'mr-3'
+                    }`} />
                     {group.name}
                   </div>
                   {openGroups.includes(group.name) ? (
@@ -393,14 +412,14 @@ const DashboardSidebar: React.FC = () => {
             {isCollapsed && !isMobile && navigationGroups.map((group) => (
               <div key={group.name} className="relative group">
                 <button
-                  className="w-full flex items-center justify-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                   title={group.name}
                 >
                   <group.icon className="w-5 h-5" />
                 </button>
                 
                 {/* Tooltip for collapsed groups */}
-                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                   {group.name}
                 </div>
               </div>
@@ -410,14 +429,14 @@ const DashboardSidebar: React.FC = () => {
             {isAdmin && isCollapsed && !isMobile && (
               <div className="relative group">
                 <button
-                  className="w-full flex items-center justify-center p-3 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
                   title={adminGroup.name}
                 >
                   <adminGroup.icon className="w-5 h-5" />
                 </button>
                 
                 {/* Tooltip for collapsed admin group */}
-                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                   {adminGroup.name}
                 </div>
               </div>
@@ -426,7 +445,9 @@ const DashboardSidebar: React.FC = () => {
         </nav>
 
         {/* User Section */}
-        <div className="border-t border-gray-200 p-4">
+        <div className={`border-t border-gray-200 ${
+          isCollapsed && !isMobile ? 'p-3' : 'p-4'
+        }`}>
           {(!isCollapsed || isMobile) ? (
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
@@ -455,11 +476,13 @@ const DashboardSidebar: React.FC = () => {
           
           <button
             onClick={handleSignOut}
-            className={`mt-3 w-full flex items-center px-3 py-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
-              (isCollapsed && !isMobile) ? 'justify-center' : ''
+            className={`mt-3 w-full flex items-center rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
+              isCollapsed && !isMobile ? 'px-2 py-3 justify-center' : 'px-3 py-3'
             }`}
           >
-            <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3 flex-shrink-0" />
+            <ArrowRightOnRectangleIcon className={`w-5 h-5 flex-shrink-0 ${
+              isCollapsed && !isMobile ? '' : 'mr-3'
+            }`} />
             {(!isCollapsed || isMobile) && 'Cerrar sesión'}
           </button>
         </div>

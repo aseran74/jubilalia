@@ -72,7 +72,7 @@ const LandingPage: React.FC = () => {
               <img 
                 src="/images/jubilogo.svg" 
                 alt="Logo" 
-                className={`w-48 h-15 transition-all duration-300 ${
+                className={`w-38 h-12 transition-all duration-300 ${
                   isScrolled ? 'filter brightness-0' : 'filter brightness-0 invert'
                 }`}
               />
@@ -229,15 +229,15 @@ const LandingPage: React.FC = () => {
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-600 via-blue-600 to-purple-600 overflow-hidden pt-20 sm:pt-24 lg:pt-0">
+      <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-600 via-blue-600 to-purple-600 overflow-hidden pt-32 sm:pt-36 lg:pt-40">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-12 sm:py-16 lg:py-20">
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
             Conecta, Comparte,
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
@@ -245,10 +245,10 @@ const LandingPage: React.FC = () => {
             </span>
           </h1>
           
-                     <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed">
-             Somos la primera plataforma que conecta a personas senior ,  para compartir vivienda o crear comunidades donde jubilarse , 
-             crear amistades y disfrutar de actividades juntos. ¡Únete a nuestra comunidad!
-           </p>
+          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed">
+            Somos la primera plataforma que conecta a personas senior, para compartir vivienda o crear comunidades donde jubilarse, 
+            crear amistades y disfrutar de actividades juntos. ¡Únete a nuestra comunidad!
+          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
