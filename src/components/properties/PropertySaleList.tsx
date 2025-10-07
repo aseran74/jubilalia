@@ -230,8 +230,7 @@ const PropertySaleList: React.FC = () => {
             setBedrooms={setBedrooms}
             bathrooms={bathrooms}
             setBathrooms={setBathrooms}
-            selectedAmenities={selectedAmenities}
-            setSelectedAmenities={setSelectedAmenities}
+          selectedAmenities={selectedAmenities}
             cities={cities}
             propertyTypes={propertyTypes}
             onOpenAdvancedFilters={() => setShowFiltersModal(true)}

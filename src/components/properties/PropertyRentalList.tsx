@@ -297,7 +297,6 @@ const PropertyRentalList: React.FC = () => {
           bathrooms={bathrooms}
           setBathrooms={setBathrooms}
           selectedAmenities={selectedAmenities}
-          setSelectedAmenities={setSelectedAmenities}
           cities={cities}
           propertyTypes={propertyTypes}
           onOpenAdvancedFilters={() => setIsFiltersModalOpen(true)}

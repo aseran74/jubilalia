@@ -19,7 +19,6 @@ interface UnifiedPropertyFilterProps {
   bathrooms: number;
   setBathrooms: (value: number) => void;
   selectedAmenities: string[];
-  setSelectedAmenities: (value: string[]) => void;
   
   // Datos para opciones
   cities: string[];
@@ -47,7 +46,6 @@ const UnifiedPropertyFilter: React.FC<UnifiedPropertyFilterProps> = ({
   bathrooms,
   setBathrooms,
   selectedAmenities,
-  setSelectedAmenities,
   cities,
   propertyTypes,
   showListingType = false,
@@ -127,7 +125,7 @@ const UnifiedPropertyFilter: React.FC<UnifiedPropertyFilterProps> = ({
             max={maxPrice}
             step="100"
             value={priceRange.min}
-            onChange={(e) => setPriceRange((prev: { min: number; max: number }) => ({ ...prev, min: Number(e.target.value) }))}
+            onChange={(e) => setPriceRange({ ...priceRange, min: Number(e.target.value) })}
             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
           <input
@@ -136,7 +134,7 @@ const UnifiedPropertyFilter: React.FC<UnifiedPropertyFilterProps> = ({
             max={maxPrice}
             step="100"
             value={priceRange.max}
-            onChange={(e) => setPriceRange((prev: { min: number; max: number }) => ({ ...prev, max: Number(e.target.value) }))}
+            onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) })}
             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
         </div>
