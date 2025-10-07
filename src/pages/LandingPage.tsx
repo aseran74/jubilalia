@@ -52,10 +52,10 @@ const LandingPage: React.FC = () => {
     console.log('handleGetStarted - Usuario:', user);
     if (user) {
       console.log('handleGetStarted - Navegando al dashboard...');
-      navigate('/dashboard');
-    } else {
+              navigate('/dashboard');
+      } else {
       console.log('handleGetStarted - Navegando al registro...');
-      navigate('/register');
+        navigate('/register');
     }
   };
 
@@ -90,16 +90,16 @@ const LandingPage: React.FC = () => {
                 { id: 'faq', label: 'FAQ' },
                 { id: 'contact', label: 'Contacto' }
               ].map((item) => (
-                <button 
+              <button 
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
                   className={`relative px-4 py-2 font-medium transition-all duration-300 hover:text-green-500 group ${
-                    isScrolled ? 'text-gray-700' : 'text-white'
-                  }`}
-                >
+                  isScrolled ? 'text-gray-700' : 'text-white'
+                }`}
+              >
                   {item.label}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full"></span>
-                </button>
+              </button>
               ))}
             </div>
 
@@ -151,10 +151,10 @@ const LandingPage: React.FC = () => {
 
         {/* Enhanced Mobile Menu */}
         <div className={`lg:hidden transition-all duration-500 overflow-hidden ${
-          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}>
           <div className="bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-xl">
-            <div className="px-4 py-6 space-y-2">
+            <div className="px-4 py-6 space-y-2 max-h-[80vh] overflow-y-auto">
               {[
                 { id: 'home', label: 'Inicio', icon: '🏠' },
                 { id: 'how-it-works', label: 'Cómo Funciona', icon: '⚙️' },
@@ -162,15 +162,15 @@ const LandingPage: React.FC = () => {
                 { id: 'faq', label: 'FAQ', icon: '❓' },
                 { id: 'contact', label: 'Contacto', icon: '📞' }
               ].map((item) => (
-                <button 
+              <button 
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
                   className="flex items-center w-full text-left text-gray-700 hover:text-green-500 font-medium py-3 px-4 rounded-lg hover:bg-green-50 transition-all duration-300 group"
-                >
+              >
                   <span className="text-lg mr-3 group-hover:scale-110 transition-transform duration-300">{item.icon}</span>
                   <span>{item.label}</span>
                   <ArrowRight className="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform duration-300" />
-                </button>
+              </button>
               ))}
               
               <div className="pt-4 border-t border-gray-200 mt-4">
@@ -187,11 +187,10 @@ const LandingPage: React.FC = () => {
                         console.log('Botón Dashboard móvil - Navegando...');
                         navigate('/dashboard');
                       }}
-                      className="flex items-center w-full text-left text-gray-700 hover:text-green-500 font-medium py-3 px-4 rounded-lg hover:bg-green-50 transition-all duration-300 group"
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl text-center flex items-center justify-center gap-2"
                     >
-                      <span className="text-lg mr-3">📊</span>
+                      <span className="text-lg">📊</span>
                       <span>Ir al Dashboard</span>
-                      <ArrowRight className="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform duration-300" />
                     </button>
                   </div>
                 ) : (
@@ -223,7 +222,7 @@ const LandingPage: React.FC = () => {
         {/* Modern Geometric Background */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Animated Grid Pattern */}
-          <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-10">
             <div className="absolute inset-0" style={{
               backgroundImage: `
                 linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -326,7 +325,7 @@ const LandingPage: React.FC = () => {
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="flex flex-col items-center space-y-2">
             <span className="text-white/60 text-sm font-medium">Desliza para explorar</span>
-            <ChevronDown className="w-6 h-6 text-white/60" />
+          <ChevronDown className="w-6 h-6 text-white/60" />
           </div>
         </div>
       </section>
@@ -360,18 +359,18 @@ const LandingPage: React.FC = () => {
               <div className="relative z-10">
                 <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
                   <Users className="w-10 h-10 text-green-600" />
-                </div>
+              </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-green-700 transition-colors">Grupos</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   Únete a grupos de personas con intereses similares y crea comunidades duraderas
-                </p>
-                <button 
-                  onClick={() => navigate('/dashboard/groups')}
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/groups')}
                   className="inline-flex items-center text-green-600 hover:text-green-700 font-semibold transition-all duration-300 group-hover:scale-105"
-                >
-                  Explorar Grupos
+              >
+                Explorar Grupos
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </button>
+              </button>
               </div>
             </div>
 
@@ -381,18 +380,18 @@ const LandingPage: React.FC = () => {
               <div className="relative z-10">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
                   <User className="w-10 h-10 text-blue-600" />
-                </div>
+              </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-blue-700 transition-colors">Personas</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   Conecta con personas senior en tu área y haz nuevas amistades significativas
-                </p>
-                <button 
-                  onClick={() => navigate('/dashboard/users')}
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/users')}
                   className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold transition-all duration-300 group-hover:scale-105"
-                >
-                  Conocer Personas
+              >
+                Conocer Personas
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </button>
+              </button>
               </div>
             </div>
 
@@ -402,18 +401,18 @@ const LandingPage: React.FC = () => {
               <div className="relative z-10">
                 <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
                   <Home className="w-10 h-10 text-purple-600" />
-                </div>
+              </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-purple-700 transition-colors">Habitaciones</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   Encuentra habitaciones disponibles para compartir vivienda de forma segura
-                </p>
-                <button 
-                  onClick={() => navigate('/dashboard/rooms')}
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/rooms')}
                   className="inline-flex items-center text-purple-600 hover:text-purple-700 font-semibold transition-all duration-300 group-hover:scale-105"
-                >
-                  Ver Habitaciones
+              >
+                Ver Habitaciones
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </button>
+              </button>
               </div>
             </div>
 
@@ -423,18 +422,18 @@ const LandingPage: React.FC = () => {
               <div className="relative z-10">
                 <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
                   <CurrencyEuro className="w-10 h-10 text-orange-600" />
-                </div>
+              </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-orange-700 transition-colors">Venta</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   Explora propiedades en venta ideales para tu jubilación y futuro
-                </p>
-                <button 
-                  onClick={() => navigate('/dashboard/properties/sale')}
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/properties/sale')}
                   className="inline-flex items-center text-orange-600 hover:text-orange-700 font-semibold transition-all duration-300 group-hover:scale-105"
-                >
-                  Ver Propiedades
+              >
+                Ver Propiedades
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </button>
+              </button>
               </div>
             </div>
 
@@ -444,18 +443,18 @@ const LandingPage: React.FC = () => {
               <div className="relative z-10">
                 <div className="w-20 h-20 bg-gradient-to-br from-teal-100 to-teal-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
                   <Key className="w-10 h-10 text-teal-600" />
-                </div>
+              </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-teal-700 transition-colors">Alquiler</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Encuentra propiedades en alquiler perfectas para tu estilo de vida
-                </p>
-                <button 
-                  onClick={() => navigate('/dashboard/properties/rental')}
+                Encuentra propiedades en alquiler perfectas para tu estilo de vida
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/properties/rental')}
                   className="inline-flex items-center text-teal-600 hover:text-teal-700 font-semibold transition-all duration-300 group-hover:scale-105"
-                >
-                  Ver Alquileres
+              >
+                Ver Alquileres
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </button>
+              </button>
               </div>
             </div>
           </div>
@@ -486,7 +485,7 @@ const LandingPage: React.FC = () => {
             </div>
             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
               ¿Cómo Funciona <span className="gradient-text">Nuestra Plataforma?</span>
-            </h2>
+             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               En solo 3 pasos simples puedes empezar a disfrutar de todos los beneficios de nuestra plataforma
             </p>
@@ -498,15 +497,15 @@ const LandingPage: React.FC = () => {
               <div className="relative">
                 <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
                   <span className="text-4xl font-bold text-green-600">1</span>
-                </div>
+              </div>
                 <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">✓</span>
                 </div>
               </div>
               <h3 className="text-2xl font-bold text-gray-800 mb-6 group-hover:text-green-700 transition-colors">Crea tu Perfil</h3>
               <p className="text-gray-600 leading-relaxed text-lg">
-                Regístrate y completa tu perfil con tus intereses, preferencias y lo que buscas en nuestra plataforma
-              </p>
+                 Regístrate y completa tu perfil con tus intereses, preferencias y lo que buscas en nuestra plataforma
+               </p>
               <div className="mt-6">
                 <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-50 text-green-700 text-sm font-medium">
                   <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
@@ -521,7 +520,7 @@ const LandingPage: React.FC = () => {
               <div className="relative">
                 <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
                   <span className="text-4xl font-bold text-blue-600">2</span>
-                </div>
+              </div>
                 <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">✓</span>
                 </div>
@@ -544,7 +543,7 @@ const LandingPage: React.FC = () => {
               <div className="relative">
                 <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
                   <span className="text-4xl font-bold text-purple-600">3</span>
-                </div>
+              </div>
                 <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">✓</span>
                 </div>
@@ -598,7 +597,7 @@ const LandingPage: React.FC = () => {
             </div>
             <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
               ¿Qué Hacemos en <span className="gradient-text">Nuestra Plataforma?</span>
-            </h2>
+             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Nuestra plataforma ofrece múltiples servicios para mejorar tu calidad de vida y conectar con personas afines
             </p>
@@ -673,17 +672,17 @@ const LandingPage: React.FC = () => {
               <div className="relative z-10">
                 <h3 className="text-3xl font-bold text-gray-800 mb-6">
                   ¿Listo para transformar tu jubilación?
-                </h3>
+            </h3>
                 <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
                   Únete a miles de jubilados que ya están disfrutando de una vida más conectada, social y llena de oportunidades
-                </p>
+             </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <button
-                    onClick={handleGetStarted}
+            <button
+              onClick={handleGetStarted}
                     className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
-                  >
-                    Empezar Ahora
-                  </button>
+            >
+              Empezar Ahora
+            </button>
                   <button
                     onClick={() => scrollToSection('contact')}
                     className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-300"
@@ -890,14 +889,14 @@ const LandingPage: React.FC = () => {
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <img 
-                  src="/images/jubilogo.svg" 
-                  alt="Logo" 
+                         <div>
+               <div className="flex items-center space-x-3 mb-4">
+                 <img 
+                   src="/images/jubilogo.svg" 
+                   alt="Logo" 
                   className="w-24 h-8 filter brightness-0 invert"
-                />
-              </div>
+                 />
+               </div>
               <p className="text-gray-400">
                 Conectando jubilados para una vida mejor juntos.
               </p>

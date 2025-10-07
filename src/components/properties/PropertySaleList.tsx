@@ -131,8 +131,8 @@ const PropertySaleList: React.FC = () => {
 
   const filteredProperties = properties.filter(property => {
     const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          property.city.toLowerCase().includes(searchTerm.toLowerCase());
+                         property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         property.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCity = !selectedCity || property.city === selectedCity;
     const matchesPropertyType = !propertyType || property.purchase_requirements.property_type === propertyType;
@@ -144,7 +144,7 @@ const PropertySaleList: React.FC = () => {
   });
 
   const cities = [...new Set(properties.map(property => property.city))];
-  
+
   const propertyTypes = [
     'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet',
     'Finca', 'Comunidad', 'Local comercial', 'Oficina', 'Nave industrial'
@@ -152,7 +152,7 @@ const PropertySaleList: React.FC = () => {
 
   const formatPrice = (price: number) => new Intl.NumberFormat('es-ES', {
     style: 'currency', currency: 'EUR', minimumFractionDigits: 0
-  }).format(price);
+    }).format(price);
 
 
   const handleClearFilters = () => {
@@ -196,14 +196,14 @@ const PropertySaleList: React.FC = () => {
             </p>
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={() => navigate('/dashboard/properties/sale/map')}
               className="px-4 py-2.5 bg-white text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all flex items-center gap-2 font-medium shadow-sm"
             >
               <MapPin className="w-4 h-4" />
               Ver en Mapa
             </button>
-            <button 
+            <button
               onClick={() => navigate('/dashboard/properties/sale/create')}
               className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 font-medium shadow-sm"
             >
@@ -237,7 +237,7 @@ const PropertySaleList: React.FC = () => {
             maxPrice={1000000}
           />
         </div>
-
+        
 
         {/* Active Filters Tags */}
         {areFiltersActive && (
@@ -309,7 +309,7 @@ const PropertySaleList: React.FC = () => {
                   {amenity}
                   <button onClick={() => setSelectedAmenities(prev => prev.filter(a => a !== amenity))} className="ml-0.5 text-gray-500 hover:text-gray-900">
                     <X className="w-3.5 h-3.5" />
-                  </button>
+            </button>
                 </span>
               ))}
             </div>
@@ -401,7 +401,7 @@ const PropertySaleList: React.FC = () => {
           </button>
         </div>
       )}
-      
+
       {/* Modal de Filtros Avanzados */}
       {showFiltersModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -427,39 +427,39 @@ const PropertySaleList: React.FC = () => {
                 step={10000}
               />
 
-              <div>
+          <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-4">
                   Amenidades Disponibles
                 </label>
-                <AmenitiesFilter
-                  selectedAmenities={selectedAmenities}
-                  onAmenitiesChange={setSelectedAmenities}
-                />
+            <AmenitiesFilter
+              selectedAmenities={selectedAmenities}
+              onAmenitiesChange={setSelectedAmenities}
+            />
                 {selectedAmenities.length > 0 && (
                   <p className="mt-3 text-sm text-green-600 font-medium">
                     ✓ {selectedAmenities.length} amenidad{selectedAmenities.length !== 1 ? 'es' : ''} seleccionada{selectedAmenities.length !== 1 ? 's' : ''}
                   </p>
                 )}
               </div>
-            </div>
-
+          </div>
+          
             {/* Footer del Modal */}
             <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={() => {
+            <button
+              onClick={() => {
                   setPriceRange({ min: 0, max: 1000000 });
-                  setSelectedAmenities([]);
-                }}
+                setSelectedAmenities([]);
+              }}
                 className="flex-1 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-              >
+            >
                 Limpiar Filtros
-              </button>
-              <button
+            </button>
+            <button
                 onClick={() => setShowFiltersModal(false)}
                 className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm"
-              >
+            >
                 Aplicar Filtros
-              </button>
+            </button>
             </div>
           </div>
         </div>
