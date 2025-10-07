@@ -1,6 +1,6 @@
 // Tipos para el sistema de propiedades de Jubilalia
 
-export type ListingType = 'room_rental' | 'property_rental' | 'property_purchase' | 'seasonal_rental';
+export type ListingType = 'room_rental' | 'property_rental' | 'property_purchase' | 'coliving' | 'seasonal_rental';
 export type PriceType = 'monthly' | 'total' | 'per_person';
 export type GenderPreference = 'any' | 'male' | 'female';
 export type PropertyManagementType = 'self_managed' | 'professional' | 'cooperative';

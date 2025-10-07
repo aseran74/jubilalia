@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import CompactNumberStepper from '../common/CompactNumberStepper';
 import AmenitiesFilter from '../common/AmenitiesFilter';
-import Modal from '../common/Modal';
-import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car, Plus, FunnelIcon } from 'lucide-react';
+import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car, Plus, SlidersHorizontal, X } from 'lucide-react';
+import PriceRangeSlider from '../common/PriceRangeSlider';
 
 interface PropertySale {
   id: string;
@@ -36,11 +36,12 @@ const PropertySaleList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
+  const [propertyType, setPropertyType] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -48,120 +49,65 @@ const PropertySaleList: React.FC = () => {
     fetchProperties();
   }, []);
 
-
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Iniciando fetch de propiedades en venta...');
-      
-      // Obtener propiedades con sus requisitos y propietarios
       const { data: propertiesData, error } = await supabase
         .from('property_listings')
-        .select(`
-          id,
-          title,
-          description,
-          address,
-          city,
-          price,
-          available_from,
-          profile_id,
-          listing_type,
-          is_available
-        `)
+        .select(`id, title, description, address, city, price, available_from, profile_id, listing_type, is_available`)
         .eq('listing_type', 'property_purchase')
         .eq('is_available', true);
-
-      console.log('📊 Datos de propiedades obtenidos:', {
-        count: propertiesData?.length || 0,
-        data: propertiesData,
-        error: error
-      });
 
       if (error) {
         console.error('Error fetching properties:', error);
         return;
       }
 
-      // Obtener los requisitos de las propiedades por separado
       const propertyIds = propertiesData?.map(property => property.id) || [];
-      console.log('🆔 IDs de propiedades encontrados:', propertyIds);
       
       const { data: requirementsData, error: requirementsError } = await supabase
         .from('property_purchase_requirements')
         .select('*')
         .in('listing_id', propertyIds);
 
-      console.log('📋 Datos de requisitos obtenidos:', {
-        count: requirementsData?.length || 0,
-        data: requirementsData,
-        error: requirementsError
-      });
-
       if (requirementsError) {
         console.error('Error fetching requirements:', requirementsError);
         return;
       }
 
-      // Obtener los perfiles de los propietarios
       const profileIds = propertiesData?.map(property => property.profile_id).filter(Boolean) || [];
-      console.log('👤 IDs de perfiles encontrados:', profileIds);
       
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
         .in('id', profileIds);
 
-      console.log('👤 Datos de perfiles obtenidos:', {
-        count: profilesData?.length || 0,
-        data: profilesData,
-        error: profilesError
-      });
-
       if (profilesError) {
         console.error('Error fetching profiles:', profilesError);
         return;
       }
 
-      // Obtener las imágenes
       const { data: imagesData, error: imagesError } = await supabase
         .from('property_images')
         .select('listing_id, image_url')
         .in('listing_id', propertyIds);
-
-      console.log('🖼️ Datos de imágenes obtenidos:', {
-        count: imagesData?.length || 0,
-        data: imagesData,
-        error: imagesError
-      });
 
       if (imagesError) {
         console.error('Error fetching images:', imagesError);
         return;
       }
 
-      // Crear un mapa de requisitos por listing_id
-      const requirementsMap = new Map();
-      requirementsData?.forEach(req => {
-        requirementsMap.set(req.listing_id, req);
-      });
+      const requirementsMap = new Map(requirementsData?.map(req => [req.listing_id, req]));
+      const profilesMap = new Map(profilesData?.map(profile => [profile.id, profile]));
+      const imagesMap = new Map<string, string[]>();
 
-      // Crear un mapa de perfiles por id
-      const profilesMap = new Map();
-      profilesData?.forEach(profile => {
-        profilesMap.set(profile.id, profile);
-      });
-
-      // Crear un mapa de imágenes por listing_id
-      const imagesMap = new Map();
       imagesData?.forEach(img => {
         if (!imagesMap.has(img.listing_id)) {
           imagesMap.set(img.listing_id, []);
         }
-        imagesMap.get(img.listing_id).push(img.image_url);
+        imagesMap.get(img.listing_id)!.push(img.image_url);
       });
 
-      // Transformar los datos para que sean más fáciles de usar
       const transformedProperties = propertiesData?.map(property => ({
         id: property.id,
         title: property.title,
@@ -175,11 +121,6 @@ const PropertySaleList: React.FC = () => {
         images: imagesMap.get(property.id) || []
       })) || [];
 
-      console.log('🔄 Propiedades transformadas:', {
-        count: transformedProperties.length,
-        properties: transformedProperties
-      });
-
       setProperties(transformedProperties);
     } catch (error) {
       console.error('Error:', error);
@@ -190,35 +131,50 @@ const PropertySaleList: React.FC = () => {
 
   const filteredProperties = properties.filter(property => {
     const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         property.city.toLowerCase().includes(searchTerm.toLowerCase());
+                          property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          property.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCity = !selectedCity || property.city === selectedCity;
-    const matchesPrice = (priceRange.min === 0 || property.price >= priceRange.min) && 
-                        (priceRange.max === 0 || property.price <= priceRange.max);
+    const matchesPropertyType = !propertyType || property.purchase_requirements.property_type === propertyType;
+    const matchesPrice = property.price >= priceRange.min && property.price <= priceRange.max;
     const matchesBedrooms = bedrooms === 0 || property.purchase_requirements.bedrooms >= bedrooms;
     const matchesBathrooms = bathrooms === 0 || property.purchase_requirements.bathrooms >= bathrooms;
 
-    return matchesSearch && matchesCity && matchesPrice && matchesBedrooms && matchesBathrooms;
+    return matchesSearch && matchesCity && matchesPropertyType && matchesPrice && matchesBedrooms && matchesBathrooms;
   });
 
   const cities = [...new Set(properties.map(property => property.city))];
+  
+  const propertyTypes = [
+    'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet',
+    'Finca', 'Comunidad', 'Local comercial', 'Oficina', 'Nave industrial'
+  ];
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 0
-    }).format(price);
+  const formatPrice = (price: number) => new Intl.NumberFormat('es-ES', {
+    style: 'currency', currency: 'EUR', minimumFractionDigits: 0
+  }).format(price);
+
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedCity('');
+    setPropertyType('');
+    setPriceRange({ min: 0, max: 1000000 });
+    setBedrooms(0);
+    setBathrooms(0);
+    setSelectedAmenities([]);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  const activeFiltersCount = [
+    selectedCity,
+    propertyType,
+    bedrooms > 0,
+    bathrooms > 0,
+    priceRange.min !== 0 || priceRange.max !== 1000000,
+    selectedAmenities.length > 0
+  ].filter(Boolean).length;
+
+  const areFiltersActive = activeFiltersCount > 0 || searchTerm !== '';
 
   if (loading) {
     return (
@@ -229,27 +185,27 @@ const PropertySaleList: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 p-6 space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex justify-between items-center">
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Propiedades en Venta</h1>
-            <p className="text-gray-600 mt-1">
-              {filteredProperties.length} propiedades encontradas
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">Propiedades en Venta</h1>
+            <p className="text-gray-600">
+              {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad disponible' : 'propiedades disponibles'}
             </p>
           </div>
           <div className="flex gap-3">
-            <button
+            <button 
               onClick={() => navigate('/dashboard/properties/sale/map')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              className="px-4 py-2.5 bg-white text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all flex items-center gap-2 font-medium shadow-sm"
             >
               <MapPin className="w-4 h-4" />
               Ver en Mapa
             </button>
-            <button
+            <button 
               onClick={() => navigate('/dashboard/properties/sale/create')}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 font-medium shadow-sm"
             >
               <Plus className="w-4 h-4" />
               Publicar Propiedad
@@ -258,22 +214,11 @@ const PropertySaleList: React.FC = () => {
         </div>
       </div>
 
-      {/* Filtros y búsqueda */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Filtros de búsqueda</h2>
-          <button
-            onClick={fetchProperties}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Recargar
-          </button>
-        </div>
-        
-        <div className="space-y-4">
-          {/* Fila 1: Búsqueda y Ciudad */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Filters Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="p-4 space-y-2">
+          {/* Fila 1: Búsqueda, Ciudad y Tipo de Vivienda */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -295,228 +240,292 @@ const PropertySaleList: React.FC = () => {
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
+
+            <select
+              value={propertyType}
+              onChange={(e) => setPropertyType(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="">Todos los tipos</option>
+              {propertyTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
           </div>
           
           {/* Fila 2: Precio, Habitaciones, Baños y Más Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                placeholder="Min/€"
-                value={priceRange.min || ''}
-                onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-              <input
-                type="number"
-                placeholder="Max/€"
-                value={priceRange.max || ''}
-                onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* 30% - Barra de precio */}
+            <div className="w-full">
+              <PriceRangeSlider
+                min={0}
+                max={1000000}
+                value={priceRange}
+                onChange={setPriceRange}
+                step={10000}
+                className="text-sm"
               />
             </div>
             
-            <CompactNumberStepper
-              label="Habitaciones"
-              value={bedrooms}
-              onChange={setBedrooms}
-              max={5}
-            />
+            {/* 33% - Habitaciones y Baños centrados */}
+            <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-300 rounded-lg">
+                <Bed className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Habitaciones</span>
+                <CompactNumberStepper label="" value={bedrooms} onChange={setBedrooms} max={5} />
+              </div>
+
+              <div className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-300 rounded-lg">
+                <Bath className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Baños</span>
+                <CompactNumberStepper label="" value={bathrooms} onChange={setBathrooms} max={4} />
+              </div>
+            </div>
             
-            <CompactNumberStepper
-              label="Baños"
-              value={bathrooms}
-              onChange={setBathrooms}
-              max={4}
-            />
-            
-            <button
-              onClick={() => setIsFiltersModalOpen(true)}
-              className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <FunnelIcon className="w-4 h-4 mr-2" />
-              <span className="text-sm">Más filtros</span>
-              {selectedAmenities.length > 0 && (
-                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                  {selectedAmenities.length}
-                </span>
-              )}
-            </button>
+            {/* 33% - Más Filtros centrado */}
+            <div className="flex items-center justify-center">
+              <button
+                onClick={() => setShowFiltersModal(true)}
+                className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                <span>Más Filtros</span>
+                {selectedAmenities.length > 0 && (
+                  <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded-full">
+                    {selectedAmenities.length}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
+
+
+        {/* Active Filters Tags */}
+        {areFiltersActive && (
+          <div className="px-4 py-3 bg-green-50 border-t border-green-100">
+            <div className="flex items-center flex-wrap gap-2">
+              <span className="text-sm font-semibold text-gray-700">Filtros activos:</span>
+              
+              {searchTerm && (
+                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
+                  <Search className="w-3 h-3" />
+                  "{searchTerm}"
+                  <button onClick={() => setSearchTerm('')} className="ml-0.5 text-gray-500 hover:text-gray-900">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              )}
+
+              {selectedCity && (
+                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
+                  <MapPin className="w-3 h-3" />
+                  {selectedCity}
+                  <button onClick={() => setSelectedCity('')} className="ml-0.5 text-gray-500 hover:text-gray-900">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              )}
+
+              {propertyType && (
+                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
+                  <Building className="w-3 h-3" />
+                  {propertyType}
+                  <button onClick={() => setPropertyType('')} className="ml-0.5 text-gray-500 hover:text-gray-900">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              )}
+
+              {bedrooms > 0 && (
+                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
+                  <Bed className="w-3 h-3" />
+                  {bedrooms}+ hab.
+                  <button onClick={() => setBedrooms(0)} className="ml-0.5 text-gray-500 hover:text-gray-900">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              )}
+
+              {bathrooms > 0 && (
+                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
+                  <Bath className="w-3 h-3" />
+                  {bathrooms}+ baños
+                  <button onClick={() => setBathrooms(0)} className="ml-0.5 text-gray-500 hover:text-gray-900">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              )}
+
+              {(priceRange.min !== 0 || priceRange.max !== 1000000) && (
+                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
+                  {formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}
+                  <button onClick={() => setPriceRange({ min: 0, max: 1000000 })} className="ml-0.5 text-gray-500 hover:text-gray-900">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              )}
+
+              {selectedAmenities.map(amenity => (
+                <span key={amenity} className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
+                  {amenity}
+                  <button onClick={() => setSelectedAmenities(prev => prev.filter(a => a !== amenity))} className="ml-0.5 text-gray-500 hover:text-gray-900">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Resultados */}
-      <div className="mb-4">
-        <p className="text-gray-600">
-          Se encontraron <span className="font-semibold text-green-600">{filteredProperties.length}</span> propiedades
-        </p>
-      </div>
-
-      {/* Lista de propiedades */}
+      {/* Property Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProperties.map((property) => (
-          <div key={property.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-            {/* Imagen */}
-            <div className="h-48 bg-gray-200 relative">
+          <div key={property.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-green-200 transition-all duration-300 group">
+            <div className="h-48 bg-gray-200 relative overflow-hidden">
               {property.images && property.images.length > 0 ? (
-                <img
-                  src={property.images[0]}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
+                <img src={property.images[0]} alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                   <Building className="w-12 h-12" />
                 </div>
               )}
-              
-              {/* Badges */}
-              <div className="absolute top-3 left-3 space-y-2">
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <div className="absolute top-3 left-3 flex flex-col gap-2">
+                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/95 text-blue-700 shadow-sm backdrop-blur-sm">
                   {property.purchase_requirements.property_type}
                 </span>
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/95 text-orange-700 shadow-sm backdrop-blur-sm">
                   {property.purchase_requirements.property_condition}
                 </span>
               </div>
-
-              {/* Botón de favorito */}
-              <button className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
-                <Heart className="w-4 h-4 text-gray-600" />
+              <button className="absolute top-3 right-3 p-2 bg-white/95 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-sm hover:scale-110">
+                <Heart className="w-4 h-4 text-gray-600 hover:text-red-500 transition-colors" />
               </button>
             </div>
-
-            {/* Contenido */}
-            <div className="p-4">
-              <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
-                {property.title}
-              </h3>
-              
-              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                {property.description}
-              </p>
-
-              {/* Ubicación */}
-              <div className="flex items-center text-gray-500 text-sm mb-3">
-                <MapPin className="w-4 h-4 mr-1" />
-                <span>{property.city}</span>
+            <div className="p-5">
+              <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">{property.title}</h3>
+              <p className="text-gray-600 text-sm mb-3 line-clamp-2">{property.description}</p>
+              <div className="flex items-center text-gray-500 text-sm mb-4">
+                <MapPin className="w-4 h-4 mr-1.5 text-green-600" />
+                <span className="font-medium">{property.city}</span>
               </div>
-
-              {/* Características */}
-              <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
-                <div className="flex items-center">
-                  <Bed className="w-4 h-4 mr-1" />
-                  <span>{property.purchase_requirements.bedrooms}</span>
-                </div>
-                <div className="flex items-center">
-                  <Bath className="w-4 h-4 mr-1" />
-                  <span>{property.purchase_requirements.bathrooms}</span>
-                </div>
-                <div className="flex items-center">
-                  <Square className="w-4 h-4 mr-1" />
-                  <span>{property.purchase_requirements.total_area}m²</span>
-                </div>
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-4 pb-4 border-b border-gray-100">
+                <div className="flex items-center gap-1"><Bed className="w-4 h-4 text-gray-400" /><span className="font-medium">{property.purchase_requirements.bedrooms}</span></div>
+                <div className="flex items-center gap-1"><Bath className="w-4 h-4 text-gray-400" /><span className="font-medium">{property.purchase_requirements.bathrooms}</span></div>
+                <div className="flex items-center gap-1"><Square className="w-4 h-4 text-gray-400" /><span className="font-medium">{property.purchase_requirements.total_area}m²</span></div>
                 {property.purchase_requirements.parking_spaces > 0 && (
-                  <div className="flex items-center">
-                    <Car className="w-4 h-4 mr-1" />
-                    <span>{property.purchase_requirements.parking_spaces}</span>
-                  </div>
+                  <div className="flex items-center gap-1"><Car className="w-4 h-4 text-gray-400" /><span className="font-medium">{property.purchase_requirements.parking_spaces}</span></div>
                 )}
               </div>
-
-              {/* Información adicional */}
-              <div className="flex items-center justify-between mb-4 text-sm text-gray-500">
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-1" />
-                  <span>{property.purchase_requirements.construction_year}</span>
-                </div>
-                {property.purchase_requirements.land_area && (
-                  <div className="flex items-center">
-                    <Square className="w-4 h-4 mr-1" />
-                    <span>Terreno: {property.purchase_requirements.land_area}m²</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Precio */}
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <div className="text-2xl font-bold text-green-600">
-                    {formatPrice(property.price)}
-                  </div>
-                  <div className="text-sm text-gray-500">Precio de venta</div>
+                  <div className="text-2xl font-bold text-green-600">{formatPrice(property.price)}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Precio de venta</div>
                 </div>
-                <div className="text-right text-sm text-gray-500">
-                  <div>Publicado el</div>
-                  <div className="font-medium">{formatDate(property.available_from)}</div>
+                <div className="text-right text-xs text-gray-500">
+                  <div className="flex items-center gap-1 justify-end">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span className="font-medium">{property.purchase_requirements.construction_year}</span>
+                  </div>
                 </div>
               </div>
-
-              {/* Botones de acción */}
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <button 
                   onClick={() => navigate(`/dashboard/properties/sale/${property.id}`)}
-                  className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center"
+                  className="flex-1 bg-green-600 text-white py-2.5 px-4 rounded-lg font-semibold hover:bg-green-700 transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow"
                 >
-                  <Eye className="w-4 h-4 mr-2" />
+                  <Eye className="w-4 h-4" />
                   Ver Detalles
                 </button>
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="px-4 py-2.5 border-2 border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all">
                   <MessageCircle className="w-4 h-4" />
                 </button>
               </div>
-
             </div>
           </div>
         ))}
       </div>
 
       {filteredProperties.length === 0 && !loading && (
-        <div className="text-center py-12">
-          <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron propiedades</h3>
-          <p className="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+        <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Building className="w-10 h-10 text-gray-400" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No se encontraron propiedades</h3>
+          <p className="text-gray-500 mb-6">Intenta ajustar los filtros de búsqueda para ver más resultados</p>
+          <button
+            onClick={handleClearFilters}
+            className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium inline-flex items-center gap-2"
+          >
+            <X className="w-4 h-4" />
+            Limpiar filtros
+          </button>
         </div>
       )}
+      
+      {/* Modal de Filtros Avanzados */}
+      {showFiltersModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header del Modal */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+              <h2 className="text-2xl font-bold text-gray-900">Filtros Avanzados</h2>
+              <button
+                onClick={() => setShowFiltersModal(false)}
+                className="p-2 hover:bg-white rounded-full transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+            
+            {/* Contenido del Modal */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-8">
+              <PriceRangeSlider
+                min={0}
+                max={1000000}
+                value={priceRange}
+                onChange={setPriceRange}
+                step={10000}
+              />
 
-      {/* Modal de Filtros */}
-      <Modal
-        isOpen={isFiltersModalOpen}
-        onClose={() => setIsFiltersModalOpen(false)}
-        title="Filtros Avanzados"
-        size="lg"
-      >
-        <div className="space-y-6">
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Amenidades</h4>
-            <AmenitiesFilter
-              selectedAmenities={selectedAmenities}
-              onAmenitiesChange={setSelectedAmenities}
-            />
-          </div>
-          
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <button
-              onClick={() => {
-                setSelectedAmenities([]);
-                setBedrooms(0);
-                setBathrooms(0);
-                setPriceRange({ min: 0, max: 1000000 });
-              }}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Limpiar filtros
-            </button>
-            <button
-              onClick={() => setIsFiltersModalOpen(false)}
-              className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Aplicar filtros
-            </button>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-4">
+                  Amenidades Disponibles
+                </label>
+                <AmenitiesFilter
+                  selectedAmenities={selectedAmenities}
+                  onAmenitiesChange={setSelectedAmenities}
+                />
+                {selectedAmenities.length > 0 && (
+                  <p className="mt-3 text-sm text-green-600 font-medium">
+                    ✓ {selectedAmenities.length} amenidad{selectedAmenities.length !== 1 ? 'es' : ''} seleccionada{selectedAmenities.length !== 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Footer del Modal */}
+            <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => {
+                  setPriceRange({ min: 0, max: 1000000 });
+                  setSelectedAmenities([]);
+                }}
+                className="flex-1 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Limpiar Filtros
+              </button>
+              <button
+                onClick={() => setShowFiltersModal(false)}
+                className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+              >
+                Aplicar Filtros
+              </button>
+            </div>
           </div>
         </div>
-      </Modal>
+      )}
     </div>
   );
 };

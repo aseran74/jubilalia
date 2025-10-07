@@ -18,10 +18,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ShieldCheckIcon,
-  MapIcon,
-  HomeModernIcon,
-  KeyIcon,
-  CurrencyDollarIcon
+  MapIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -80,16 +77,16 @@ const DashboardSidebar: React.FC = () => {
   const navigationGroups: NavigationGroup[] = [
     {
       name: 'Habitaciones',
-      icon: HomeModernIcon,
+      icon: BuildingOfficeIcon,
       items: [
         { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MapIcon },
+        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MagnifyingGlassIcon },
         { name: 'Publicar habitación', href: '/dashboard/rooms/create', icon: PlusIcon },
       ]
     },
     {
       name: 'Alquiler',
-      icon: KeyIcon,
+      icon: BuildingOfficeIcon,
       items: [
         { name: 'Buscar alquiler', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/properties/rental/map', icon: MapIcon },
@@ -98,7 +95,7 @@ const DashboardSidebar: React.FC = () => {
     },
     {
       name: 'Venta',
-      icon: CurrencyDollarIcon,
+      icon: BuildingOfficeIcon,
       items: [
         { name: 'Buscar venta', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/properties/sale/map', icon: MapIcon },

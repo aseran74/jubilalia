@@ -41,6 +41,7 @@ interface Property {
   construction_year: number | null;
   available_from: string | null;
   available_until: string | null;
+  listing_type: string;
   created_at: string;
   primary_image_url?: string;
 }
@@ -59,7 +60,9 @@ const PropertiesRentalMapView: React.FC = () => {
   // Filtros
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
+  const [selectedListingType, setSelectedListingType] = useState<string>('');
+  const [selectedPropertyType, setSelectedPropertyType] = useState<string>('');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -80,9 +83,12 @@ const PropertiesRentalMapView: React.FC = () => {
       
       const matchesCity = !selectedCity || property.city === selectedCity;
       
+      const matchesListingType = !selectedListingType || property.listing_type === selectedListingType;
+      
+      const matchesPropertyType = !selectedPropertyType || property.property_type === selectedPropertyType;
+      
       const matchesPrice = !property.price || 
-                          ((priceRange.min === 0 || property.price >= priceRange.min) && 
-                           (priceRange.max === 0 || property.price <= priceRange.max));
+                          (property.price >= priceRange.min && property.price <= priceRange.max);
       
       const matchesBedrooms = bedrooms === 0 || (property.bedrooms && property.bedrooms >= bedrooms);
       
@@ -91,11 +97,11 @@ const PropertiesRentalMapView: React.FC = () => {
       // TODO: Implementar filtro de amenidades cuando tengamos los datos en la base
       const matchesAmenities = selectedAmenities.length === 0; // Por ahora siempre true
       
-      return matchesSearch && matchesCity && matchesPrice && matchesBedrooms && matchesBathrooms && matchesAmenities;
+      return matchesSearch && matchesCity && matchesListingType && matchesPropertyType && matchesPrice && matchesBedrooms && matchesBathrooms && matchesAmenities;
     });
     
     setFilteredProperties(filtered);
-  }, [properties, searchTerm, selectedCity, priceRange, bedrooms, bathrooms, selectedAmenities]);
+  }, [properties, searchTerm, selectedCity, selectedListingType, selectedPropertyType, priceRange, bedrooms, bathrooms, selectedAmenities]);
 
   useEffect(() => {
     if (filteredProperties.length > 0 && mapRef.current && !map && mapsLoaded) {
@@ -107,11 +113,10 @@ const PropertiesRentalMapView: React.FC = () => {
     try {
       setLoading(true);
       
-      // Obtener propiedades básicas
+      // Obtener todas las propiedades (sin filtrar por tipo inicialmente)
       const { data: propertiesData, error } = await supabase
         .from('property_listings')
         .select('*')
-        .eq('listing_type', 'property_rental')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -236,6 +241,15 @@ const PropertiesRentalMapView: React.FC = () => {
 
     filteredProperties.forEach(property => {
       if (property.latitude && property.longitude) {
+        // Determinar el color del marcador según el tipo de propiedad
+        const markerColors: { [key: string]: string } = {
+          'property_rental': '#3B82F6',    // Azul para alquiler
+          'property_purchase': '#10B981',  // Verde para venta
+          'coliving': '#8B5CF6',           // Púrpura para coliving
+          'room_rental': '#F59E0B'         // Amarillo para habitaciones
+        };
+        const markerColor = markerColors[property.listing_type] || '#3B82F6';
+        
         const marker = new window.google.maps.Marker({
           position: { lat: property.latitude, lng: property.longitude },
           map: mapInstance,
@@ -243,7 +257,7 @@ const PropertiesRentalMapView: React.FC = () => {
           icon: {
             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
               <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="12" fill="#3B82F6" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="16" cy="16" r="12" fill="${markerColor}" stroke="#ffffff" stroke-width="2"/>
                 <path d="M12 12h8v8h-8z" fill="#ffffff"/>
               </svg>
             `),
@@ -348,9 +362,9 @@ const PropertiesRentalMapView: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Mapa de Propiedades en Alquiler</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Mapa de Propiedades</h1>
               <p className="text-gray-600 mt-1">
-                Explora propiedades en alquiler disponibles en el mapa
+                Explora propiedades de alquiler, venta y proyectos coliving en el mapa
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -368,8 +382,8 @@ const PropertiesRentalMapView: React.FC = () => {
           
           {/* Filtros */}
           <div className="space-y-4">
-            {/* Fila 1: Búsqueda y Ciudad */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Fila 1: Búsqueda, Ciudad, Tipo de Operación y Tipo de Vivienda */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
                 <input
                   type="text"
@@ -390,27 +404,68 @@ const PropertiesRentalMapView: React.FC = () => {
                   <option key={city} value={city}>{city}</option>
                 ))}
               </select>
+              
+              <select
+                value={selectedListingType}
+                onChange={(e) => setSelectedListingType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Tipo de operación</option>
+                <option value="property_rental">Alquiler</option>
+                <option value="property_purchase">Venta</option>
+                <option value="coliving">Coliving</option>
+                <option value="room_rental">Habitaciones</option>
+              </select>
+              
+              <select
+                value={selectedPropertyType}
+                onChange={(e) => setSelectedPropertyType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Tipo de vivienda</option>
+                {[...new Set(properties.map(p => p.property_type))].map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
             </div>
             
-            {/* Fila 2: Precio, Habitaciones, Baños y Más Filtros */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="flex space-x-2">
+            {/* Fila 2: Rango de Precio con Slider */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-gray-700">
+                  Rango de precio: {priceRange.min}€ - {priceRange.max}€
+                </label>
+                <button
+                  onClick={() => setPriceRange({ min: 0, max: 5000 })}
+                  className="text-xs text-blue-600 hover:text-blue-700"
+                >
+                  Resetear
+                </button>
+              </div>
+              <div className="flex items-center gap-4">
                 <input
-                  type="number"
-                  placeholder="Min/€"
-                  value={priceRange.min || ''}
+                  type="range"
+                  min="0"
+                  max="5000"
+                  step="100"
+                  value={priceRange.min}
                   onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
                 <input
-                  type="number"
-                  placeholder="Max/€"
-                  value={priceRange.max || ''}
+                  type="range"
+                  min="0"
+                  max="5000"
+                  step="100"
+                  value={priceRange.max}
                   onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
               </div>
-              
+            </div>
+            
+            {/* Fila 3: Habitaciones, Baños y Más Filtros */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <CompactNumberStepper
                 label="Habitaciones"
                 value={bedrooms}
@@ -447,11 +502,26 @@ const PropertiesRentalMapView: React.FC = () => {
         <div className="flex-1 relative min-h-[400px] lg:min-h-0">
           <div ref={mapRef} className="w-full h-full min-h-[400px]" />
           
-          {/* Controles del mapa */}
-          <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-2">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span>Propiedades en alquiler</span>
+          {/* Controles del mapa - Leyenda */}
+          <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3">
+            <h3 className="text-xs font-semibold text-gray-700 mb-2">Tipos de Propiedad</h3>
+            <div className="space-y-1.5">
+              <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Alquiler</span>
+              </div>
+              <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>Venta</span>
+              </div>
+              <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <span>Coliving</span>
+              </div>
+              <div className="flex items-center space-x-2 text-xs text-gray-600">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span>Habitaciones</span>
+              </div>
             </div>
           </div>
         </div>
@@ -459,7 +529,7 @@ const PropertiesRentalMapView: React.FC = () => {
         {/* Panel lateral con lista de propiedades */}
         <div className="w-full lg:w-96 bg-white shadow-lg overflow-y-auto max-h-[400px] lg:max-h-none">
           <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">Propiedades en Alquiler</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Propiedades Disponibles</h2>
             <p className="text-sm text-gray-600">Haz clic en un marcador para ver detalles</p>
           </div>
           

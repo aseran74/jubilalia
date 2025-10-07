@@ -61,65 +61,46 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navbar Transparente */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
+      {/* Enhanced Navbar */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+        isScrolled ? 'bg-white/95 backdrop-blur-md shadow-xl border-b border-gray-100' : 'bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <button onClick={() => navigate('/')} className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate('/')} 
+              className="flex items-center space-x-3 group transition-all duration-300 hover:scale-105"
+            >
               <img 
                 src="/images/jubilogo.svg" 
-                alt="Logo" 
-                className={`w-38 h-12 transition-all duration-300 ${
+                alt="Jubilalia Logo" 
+                className={`w-38 h-12 transition-all duration-500 ${
                   isScrolled ? 'filter brightness-0' : 'filter brightness-0 invert'
-                }`}
+                } group-hover:scale-110`}
               />
             </button>
 
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-8">
-              <button 
-                onClick={() => scrollToSection('home')}
-                className={`font-medium transition-colors hover:text-green-500 ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                Inicio
-              </button>
-              <button 
-                onClick={() => scrollToSection('how-it-works')}
-                className={`font-medium transition-colors hover:text-green-500 ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                Cómo Funciona
-              </button>
-              <button 
-                onClick={() => scrollToSection('what-we-do')}
-                className={`font-medium transition-colors hover:text-green-500 ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                Qué Hacemos
-              </button>
-              <button 
-                onClick={() => scrollToSection('faq')}
-                className={`font-medium transition-colors hover:text-green-500 ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                FAQ
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className={`font-medium transition-colors hover:text-green-500 ${
-                  isScrolled ? 'text-gray-700' : 'text-white'
-                }`}
-              >
-                Contacto
-              </button>
+            <div className="hidden lg:flex items-center space-x-1">
+              {[
+                { id: 'home', label: 'Inicio' },
+                { id: 'how-it-works', label: 'Cómo Funciona' },
+                { id: 'what-we-do', label: 'Qué Hacemos' },
+                { id: 'faq', label: 'FAQ' },
+                { id: 'contact', label: 'Contacto' }
+              ].map((item) => (
+                <button 
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className={`relative px-4 py-2 font-medium transition-all duration-300 hover:text-green-500 group ${
+                    isScrolled ? 'text-gray-700' : 'text-white'
+                  }`}
+                >
+                  {item.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-green-500 transition-all duration-300 group-hover:w-full"></span>
+                </button>
+              ))}
             </div>
 
             {/* CTA Buttons */}
@@ -132,7 +113,7 @@ const LandingPage: React.FC = () => {
                 <>
                   <button
                     onClick={() => navigate('/login')}
-                    className={`font-medium transition-colors hover:text-green-500 ${
+                    className={`font-medium transition-all duration-300 hover:text-green-500 hover:scale-105 ${
                       isScrolled ? 'text-gray-700' : 'text-white'
                     }`}
                   >
@@ -140,7 +121,7 @@ const LandingPage: React.FC = () => {
                   </button>
                   <button
                     onClick={() => navigate('/register')}
-                    className="bg-green-500 text-white px-6 py-3 rounded-full font-medium hover:bg-green-600 transition-colors"
+                    className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
                   >
                     Registrarse
                   </button>
@@ -151,361 +132,533 @@ const LandingPage: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2"
+              className="lg:hidden p-2 rounded-lg transition-all duration-300 hover:bg-white/10"
             >
-              {isMenuOpen ? (
-                <X className={`w-6 h-6 ${isScrolled ? 'text-gray-800' : 'text-white'}`} />
-              ) : (
-                <Menu className={`w-6 h-6 ${isScrolled ? 'text-gray-800' : 'text-white'}`} />
-              )}
+              <div className="relative w-6 h-6">
+                <span className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-0.5 bg-current transition-all duration-300 ${
+                  isMenuOpen ? 'rotate-45' : ''
+                }`}></span>
+                <span className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-0.5 bg-current transition-all duration-300 ${
+                  isMenuOpen ? 'opacity-0' : ''
+                }`}></span>
+                <span className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-0.5 bg-current transition-all duration-300 ${
+                  isMenuOpen ? '-rotate-45' : ''
+                }`}></span>
+              </div>
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="lg:hidden bg-white/95 backdrop-blur-md border-t border-gray-200">
-            <div className="px-4 py-6 space-y-4">
-              <button 
-                onClick={() => scrollToSection('home')}
-                className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
-              >
-                Inicio
-              </button>
-              <button 
-                onClick={() => scrollToSection('how-it-works')}
-                className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
-              >
-                Cómo Funciona
-              </button>
-              <button 
-                onClick={() => scrollToSection('what-we-do')}
-                className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
-              >
-                Qué Hacemos
-              </button>
-              <button 
-                onClick={() => scrollToSection('faq')}
-                className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
-              >
-                FAQ
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
-              >
-                Contacto
-              </button>
-              <div className="pt-4 border-t border-gray-200">
+        {/* Enhanced Mobile Menu */}
+        <div className={`lg:hidden transition-all duration-500 overflow-hidden ${
+          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <div className="bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-xl">
+            <div className="px-4 py-6 space-y-2">
+              {[
+                { id: 'home', label: 'Inicio', icon: '🏠' },
+                { id: 'how-it-works', label: 'Cómo Funciona', icon: '⚙️' },
+                { id: 'what-we-do', label: 'Qué Hacemos', icon: '🎯' },
+                { id: 'faq', label: 'FAQ', icon: '❓' },
+                { id: 'contact', label: 'Contacto', icon: '📞' }
+              ].map((item) => (
+                <button 
+                  key={item.id}
+                  onClick={() => scrollToSection(item.id)}
+                  className="flex items-center w-full text-left text-gray-700 hover:text-green-500 font-medium py-3 px-4 rounded-lg hover:bg-green-50 transition-all duration-300 group"
+                >
+                  <span className="text-lg mr-3 group-hover:scale-110 transition-transform duration-300">{item.icon}</span>
+                  <span>{item.label}</span>
+                  <ArrowRight className="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform duration-300" />
+                </button>
+              ))}
+              
+              <div className="pt-4 border-t border-gray-200 mt-4">
                 {user ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <button
                       onClick={() => navigate('/dashboard')}
-                      className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
+                      className="flex items-center w-full text-left text-gray-700 hover:text-green-500 font-medium py-3 px-4 rounded-lg hover:bg-green-50 transition-all duration-300 group"
                     >
-                      Ir al Dashboard
+                      <span className="text-lg mr-3">📊</span>
+                      <span>Ir al Dashboard</span>
+                      <ArrowRight className="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform duration-300" />
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <button
                       onClick={() => navigate('/login')}
-                      className="block w-full text-left text-gray-700 hover:text-green-500 font-medium py-2"
+                      className="flex items-center w-full text-left text-gray-700 hover:text-green-500 font-medium py-3 px-4 rounded-lg hover:bg-green-50 transition-all duration-300 group"
                     >
-                      Iniciar Sesión
+                      <span className="text-lg mr-3">🔑</span>
+                      <span>Iniciar Sesión</span>
+                      <ArrowRight className="w-4 h-4 ml-auto group-hover:translate-x-1 transition-transform duration-300" />
                     </button>
                     <button
                       onClick={() => navigate('/register')}
-                      className="block w-full bg-green-500 text-white px-6 py-3 rounded-full font-medium hover:bg-green-600 transition-colors text-center"
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl text-center"
                     >
-                      Registrarse
+                      Registrarse Ahora
                     </button>
                   </div>
                 )}
               </div>
             </div>
           </div>
-        )}
+        </div>
       </nav>
 
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-green-600 via-blue-600 to-purple-600 overflow-hidden pt-32 sm:pt-36 lg:pt-40">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        {/* Enhanced Background Pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-300 rounded-full blur-2xl opacity-30 animate-pulse" style={{animationDelay: '2s'}}></div>
+        </div>
+
+        {/* Floating Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-white rounded-full opacity-60 animate-bounce" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute top-1/3 right-1/3 w-3 h-3 bg-yellow-300 rounded-full opacity-70 animate-bounce" style={{animationDelay: '1.5s'}}></div>
+          <div className="absolute bottom-1/3 left-1/3 w-5 h-5 bg-white rounded-full opacity-50 animate-bounce" style={{animationDelay: '2.5s'}}></div>
+          <div className="absolute bottom-1/4 right-1/4 w-2 h-2 bg-yellow-300 rounded-full opacity-80 animate-bounce" style={{animationDelay: '3s'}}></div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-12 sm:py-16 lg:py-20">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+          {/* Badge */}
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-medium mb-8 animate-fade-in">
+            <span className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+            Plataforma #1 para Jubilados
+          </div>
+
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight animate-fade-in-up">
             Conecta, Comparte,
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 animate-gradient-x">
               Vive Mejor
             </span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed animate-fade-in-up" style={{animationDelay: '0.2s'}}>
             Somos la primera plataforma que conecta a personas senior, para compartir vivienda o crear comunidades donde jubilarse, 
             crear amistades y disfrutar de actividades juntos. ¡Únete a nuestra comunidad!
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fade-in-up" style={{animationDelay: '0.4s'}}>
             <button
               onClick={handleGetStarted}
-              className="bg-white text-green-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+              className="group bg-white text-green-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-2xl flex items-center space-x-2 hover:scale-105 transform"
             >
               <span>Empezar Ahora</span>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-green-600 transition-all duration-200 flex items-center space-x-2"
+              className="group border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-green-600 transition-all duration-300 flex items-center space-x-2 hover:scale-105 transform backdrop-blur-sm"
             >
               <span>Saber Más</span>
-              <ChevronDown className="w-5 h-5" />
+              <ChevronDown className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
             </button>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">500+</div>
-              <div className="text-white/80">Usuarios Activos</div>
+          {/* Enhanced Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 max-w-5xl mx-auto animate-fade-in-up" style={{animationDelay: '0.6s'}}>
+            <div className="text-center group">
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">500+</div>
+              <div className="text-white/80 text-sm md:text-base">Usuarios Activos</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">150+</div>
-              <div className="text-white/80">Alojamientos</div>
+            <div className="text-center group">
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">150+</div>
+              <div className="text-white/80 text-sm md:text-base">Alojamientos</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">50+</div>
-              <div className="text-white/80">Actividades</div>
+            <div className="text-center group">
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">50+</div>
+              <div className="text-white/80 text-sm md:text-base">Actividades</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-white mb-2">4.9</div>
-              <div className="text-white/80">Valoración</div>
+            <div className="text-center group">
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">4.9</div>
+              <div className="text-white/80 text-sm md:text-base">Valoración</div>
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
+        {/* Enhanced Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronDown className="w-6 h-6 text-white/60" />
+          <div className="flex flex-col items-center space-y-2">
+            <span className="text-white/60 text-sm font-medium">Desliza para explorar</span>
+            <ChevronDown className="w-6 h-6 text-white/60" />
+          </div>
         </div>
       </section>
 
       {/* Cards de Funcionalidades */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-              Nuestras Funcionalidades
+      <section className="py-24 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-green-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              Funcionalidades Principales
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+              Nuestras <span className="gradient-text">Funcionalidades</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Descubre todo lo que puedes hacer en nuestra plataforma
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Descubre todo lo que puedes hacer en nuestra plataforma diseñada específicamente para jubilados
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
             {/* Card Grupos */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-green-200 group">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
-                <Users className="w-8 h-8 text-green-600" />
+            <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-green-200 hover-lift relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
+                  <Users className="w-10 h-10 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-green-700 transition-colors">Grupos</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Únete a grupos de personas con intereses similares y crea comunidades duraderas
+                </p>
+                <button 
+                  onClick={() => navigate('/dashboard/groups')}
+                  className="inline-flex items-center text-green-600 hover:text-green-700 font-semibold transition-all duration-300 group-hover:scale-105"
+                >
+                  Explorar Grupos
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Grupos</h3>
-              <p className="text-gray-600 mb-6">
-                Únete a grupos de personas con intereses similares y crea comunidades
-              </p>
-              <button 
-                onClick={() => navigate('/dashboard/groups')}
-                className="inline-flex items-center text-green-600 hover:text-green-700 font-medium transition-colors"
-              >
-                Explorar Grupos
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </button>
             </div>
 
             {/* Card Personas */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-blue-200 group">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
-                <User className="w-8 h-8 text-blue-600" />
+            <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-blue-200 hover-lift relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
+                  <User className="w-10 h-10 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-blue-700 transition-colors">Personas</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Conecta con personas senior en tu área y haz nuevas amistades significativas
+                </p>
+                <button 
+                  onClick={() => navigate('/dashboard/users')}
+                  className="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold transition-all duration-300 group-hover:scale-105"
+                >
+                  Conocer Personas
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Personas</h3>
-              <p className="text-gray-600 mb-6">
-                Conecta con personas senior en tu área y haz nuevas amistades
-              </p>
-              <button 
-                onClick={() => navigate('/dashboard/users')}
-                className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                Conocer Personas
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </button>
             </div>
 
             {/* Card Habitaciones */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-purple-200 group">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
-                <Home className="w-8 h-8 text-purple-600" />
+            <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-purple-200 hover-lift relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
+                  <Home className="w-10 h-10 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-purple-700 transition-colors">Habitaciones</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Encuentra habitaciones disponibles para compartir vivienda de forma segura
+                </p>
+                <button 
+                  onClick={() => navigate('/dashboard/rooms')}
+                  className="inline-flex items-center text-purple-600 hover:text-purple-700 font-semibold transition-all duration-300 group-hover:scale-105"
+                >
+                  Ver Habitaciones
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Habitaciones</h3>
-              <p className="text-gray-600 mb-6">
-                Encuentra habitaciones disponibles para compartir vivienda
-              </p>
-              <button 
-                onClick={() => navigate('/dashboard/rooms')}
-                className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium transition-colors"
-              >
-                Ver Habitaciones
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </button>
             </div>
 
             {/* Card Venta */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-orange-200 group">
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-orange-200 transition-colors">
-                <CurrencyEuro className="w-8 h-8 text-orange-600" />
+            <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-orange-200 hover-lift relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
+                  <CurrencyEuro className="w-10 h-10 text-orange-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-orange-700 transition-colors">Venta</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Explora propiedades en venta ideales para tu jubilación y futuro
+                </p>
+                <button 
+                  onClick={() => navigate('/dashboard/properties/sale')}
+                  className="inline-flex items-center text-orange-600 hover:text-orange-700 font-semibold transition-all duration-300 group-hover:scale-105"
+                >
+                  Ver Propiedades
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Venta</h3>
-              <p className="text-gray-600 mb-6">
-                Explora propiedades en venta ideales para tu jubilación
-              </p>
-              <button 
-                onClick={() => navigate('/dashboard/properties/sale')}
-                className="inline-flex items-center text-orange-600 hover:text-orange-700 font-medium transition-colors"
-              >
-                Ver Propiedades
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </button>
             </div>
 
             {/* Card Alquiler */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-8 text-center border border-gray-100 hover:border-teal-200 group">
-              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-teal-200 transition-colors">
-                <Key className="w-8 h-8 text-teal-600" />
+            <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-teal-200 hover-lift relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-teal-100 to-teal-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
+                  <Key className="w-10 h-10 text-teal-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-teal-700 transition-colors">Alquiler</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Encuentra propiedades en alquiler perfectas para tu estilo de vida
+                </p>
+                <button 
+                  onClick={() => navigate('/dashboard/properties/rental')}
+                  className="inline-flex items-center text-teal-600 hover:text-teal-700 font-semibold transition-all duration-300 group-hover:scale-105"
+                >
+                  Ver Alquileres
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Alquiler</h3>
-              <p className="text-gray-600 mb-6">
-                Encuentra propiedades en alquiler perfectas para tu estilo de vida
-              </p>
-              <button 
-                onClick={() => navigate('/dashboard/properties/rental')}
-                className="inline-flex items-center text-teal-600 hover:text-teal-700 font-medium transition-colors"
-              >
-                Ver Alquileres
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </button>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center mt-20">
+            <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform cursor-pointer" onClick={handleGetStarted}>
+              <span>Explorar Todas las Funcionalidades</span>
+              <ArrowRight className="w-5 h-5 ml-2" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Cómo Funciona */}
-      <section id="how-it-works" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-                         <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-               ¿Cómo Funciona Nuestra Plataforma?
-             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+      <section id="how-it-works" className="py-24 bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-10 right-10 w-72 h-72 bg-purple-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 left-10 w-96 h-96 bg-green-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+              Proceso Simple
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+              ¿Cómo Funciona <span className="gradient-text">Nuestra Plataforma?</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               En solo 3 pasos simples puedes empezar a disfrutar de todos los beneficios de nuestra plataforma
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-green-600">1</span>
+          <div className="grid md:grid-cols-3 gap-12">
+            {/* Paso 1 */}
+            <div className="group text-center relative">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
+                  <span className="text-4xl font-bold text-green-600">1</span>
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">Crea tu Perfil</h3>
-                             <p className="text-gray-600">
-                 Regístrate y completa tu perfil con tus intereses, preferencias y lo que buscas en nuestra plataforma
-               </p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 group-hover:text-green-700 transition-colors">Crea tu Perfil</h3>
+              <p className="text-gray-600 leading-relaxed text-lg">
+                Regístrate y completa tu perfil con tus intereses, preferencias y lo que buscas en nuestra plataforma
+              </p>
+              <div className="mt-6">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-green-50 text-green-700 text-sm font-medium">
+                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                  Verificación Segura
+                </div>
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-blue-600">2</span>
+            {/* Conector */}
+            <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-0.5 bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 z-0"></div>
+
+            {/* Paso 2 */}
+            <div className="group text-center relative">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
+                  <span className="text-4xl font-bold text-blue-600">2</span>
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">Explora Opciones</h3>
-              <p className="text-gray-600">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 group-hover:text-blue-700 transition-colors">Explora Opciones</h3>
+              <p className="text-gray-600 leading-relaxed text-lg">
                 Descubre alojamientos, encuentra compañeros o únete a actividades que te interesen
               </p>
+              <div className="mt-6">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                  Búsqueda Inteligente
+                </div>
+              </div>
             </div>
 
-            <div className="text-center">
-              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-purple-600">3</span>
+            {/* Conector */}
+            <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-purple-200 z-0"></div>
+
+            {/* Paso 3 */}
+            <div className="group text-center relative">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-all duration-500 shadow-lg group-hover:shadow-xl">
+                  <span className="text-4xl font-bold text-purple-600">3</span>
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">Conecta y Disfruta</h3>
-              <p className="text-gray-600">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6 group-hover:text-purple-700 transition-colors">Conecta y Disfruta</h3>
+              <p className="text-gray-600 leading-relaxed text-lg">
                 Chatea con otros usuarios, organiza encuentros y construye amistades duraderas
               </p>
+              <div className="mt-6">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-50 text-purple-700 text-sm font-medium">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                  Comunidad Activa
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center mt-20">
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 max-w-2xl mx-auto">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                ¿Listo para empezar tu viaje?
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Únete a miles de jubilados que ya están disfrutando de una vida más conectada y social
+              </p>
+              <button
+                onClick={handleGetStarted}
+                className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+              >
+                Empezar Ahora
+              </button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Qué Hacemos */}
-      <section id="what-we-do" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-                         <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
-               ¿Qué Hacemos en Nuestra Plataforma?
-             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Nuestra plataforma ofrece múltiples servicios para mejorar tu calidad de vida
+      <section id="what-we-do" className="py-24 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-20 w-80 h-80 bg-pink-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+              Nuestros Servicios
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+              ¿Qué Hacemos en <span className="gradient-text">Nuestra Plataforma?</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Nuestra plataforma ofrece múltiples servicios para mejorar tu calidad de vida y conectar con personas afines
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center p-6 rounded-xl bg-gradient-to-br from-green-50 to-blue-50">
-              <Users className="w-16 h-16 text-green-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Compartir Habitación</h3>
-              <p className="text-gray-600">
-                Encuentra compañeros compatibles para compartir vivienda y reducir gastos
+            <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-green-50 to-blue-50 hover:from-green-100 hover:to-blue-100 transition-all duration-500 hover-lift border border-green-100 hover:border-green-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Users className="w-10 h-10 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-green-700 transition-colors">Compartir Habitación</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Encuentra compañeros compatibles para compartir vivienda y reducir gastos de forma segura
               </p>
+              <div className="mt-4">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                  Ahorro Garantizado
+                </div>
+              </div>
             </div>
 
-            <div className="text-center p-6 rounded-xl bg-gradient-to-br from-blue-50 to-purple-50">
-              <Building className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Alojamientos Grandes</h3>
-              <p className="text-gray-600">
-                Explora casas y pisos grandes para vivir en comunidad
+            <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-all duration-500 hover-lift border border-blue-100 hover:border-blue-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Building className="w-10 h-10 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-blue-700 transition-colors">Alojamientos Grandes</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Explora casas y pisos grandes para vivir en comunidad con todas las comodidades
               </p>
+              <div className="mt-4">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                  Espacios Amplios
+                </div>
+              </div>
             </div>
 
-            <div className="text-center p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50">
-              <MessageCircle className="w-16 h-16 text-purple-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Red Social</h3>
-              <p className="text-gray-600">
-                Conecta con otros jubilados y comparte experiencias
+            <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 transition-all duration-500 hover-lift border border-purple-100 hover:border-purple-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <MessageCircle className="w-10 h-10 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-purple-700 transition-colors">Red Social</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Conecta con otros jubilados y comparte experiencias, consejos y momentos especiales
               </p>
+              <div className="mt-4">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-medium">
+                  Comunidad Activa
+                </div>
+              </div>
             </div>
 
-            <div className="text-center p-6 rounded-xl bg-gradient-to-br from-pink-50 to-orange-50">
-              <Calendar className="w-16 h-16 text-pink-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Actividades</h3>
-              <p className="text-gray-600">
-                Participa en eventos y actividades organizadas por la comunidad
+            <div className="group text-center p-8 rounded-3xl bg-gradient-to-br from-pink-50 to-orange-50 hover:from-pink-100 hover:to-orange-100 transition-all duration-500 hover-lift border border-pink-100 hover:border-pink-200">
+              <div className="w-20 h-20 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <Calendar className="w-10 h-10 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-pink-700 transition-colors">Actividades</h3>
+              <p className="text-gray-600 leading-relaxed">
+                Participa en eventos y actividades organizadas por la comunidad o crea las tuyas propias
               </p>
+              <div className="mt-4">
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-medium">
+                  Eventos Regulares
+                </div>
+              </div>
             </div>
           </div>
 
           {/* CTA Section */}
-          <div className="text-center mt-16">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-              ¿Listo para empezar?
-            </h3>
-                         <p className="text-gray-600 mb-8">
-               Únete a miles de jubilados que ya están disfrutando de nuestra plataforma
-             </p>
-            <button
-              onClick={handleGetStarted}
-              className="bg-green-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-green-600 transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              Empezar Ahora
-            </button>
+          <div className="text-center mt-20">
+            <div className="bg-white rounded-3xl p-12 shadow-2xl border border-gray-100 max-w-4xl mx-auto relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50 opacity-50"></div>
+              <div className="relative z-10">
+                <h3 className="text-3xl font-bold text-gray-800 mb-6">
+                  ¿Listo para transformar tu jubilación?
+                </h3>
+                <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                  Únete a miles de jubilados que ya están disfrutando de una vida más conectada, social y llena de oportunidades
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <button
+                    onClick={handleGetStarted}
+                    className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+                  >
+                    Empezar Ahora
+                  </button>
+                  <button
+                    onClick={() => scrollToSection('contact')}
+                    className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-full font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-300"
+                  >
+                    Más Información
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -611,16 +764,6 @@ const LandingPage: React.FC = () => {
                     <p className="text-gray-600">hola@jubilalia.com</p>
                   </div>
                 </div>
-
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Oficina</h4>
-                    <p className="text-gray-600">Calle Mayor 123, Madrid, España</p>
-                  </div>
-                </div>
               </div>
 
               {/* Redes Sociales */}
@@ -713,14 +856,14 @@ const LandingPage: React.FC = () => {
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
-                         <div>
-               <div className="flex items-center space-x-3 mb-4">
-                 <img 
-                   src="/images/jubilogo.svg" 
-                   alt="Logo" 
-                   className="w-24 h-8"
-                 />
-               </div>
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                <img 
+                  src="/images/jubilogo.svg" 
+                  alt="Logo" 
+                  className="w-24 h-8 filter brightness-0 invert"
+                />
+              </div>
               <p className="text-gray-400">
                 Conectando jubilados para una vida mejor juntos.
               </p>
