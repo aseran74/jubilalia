@@ -474,8 +474,6 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Conector */}
-            <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-0.5 bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 z-0"></div>
 
             {/* Paso 2 */}
             <div className="group text-center relative">
@@ -499,8 +497,6 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Conector */}
-            <div className="hidden md:block absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-purple-200 z-0"></div>
 
             {/* Paso 3 */}
             <div className="group text-center relative">
