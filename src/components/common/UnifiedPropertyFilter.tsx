@@ -1,7 +1,6 @@
 import React from 'react';
-import { Search, FunnelIcon } from 'lucide-react';
+import { FunnelIcon } from 'lucide-react';
 import CompactNumberStepper from './CompactNumberStepper';
-import PriceRangeSlider from './PriceRangeSlider';
 
 interface UnifiedPropertyFilterProps {
   // Estados de filtros
@@ -57,16 +56,18 @@ const UnifiedPropertyFilter: React.FC<UnifiedPropertyFilterProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      {/* Fila 1: Búsqueda, Ciudad, Tipo de Operación y Tipo de Vivienda */}
+      {/* Fila 1: Búsqueda (50%), Ciudad (25%), Tipo de Operación (25%) y Tipo de Vivienda (25%) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Buscar propiedades..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+        <div className="md:col-span-2">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Buscar propiedades..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </div>
         
         <select
@@ -126,7 +127,7 @@ const UnifiedPropertyFilter: React.FC<UnifiedPropertyFilterProps> = ({
             max={maxPrice}
             step="100"
             value={priceRange.min}
-            onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
+            onChange={(e) => setPriceRange((prev: { min: number; max: number }) => ({ ...prev, min: Number(e.target.value) }))}
             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
           <input
@@ -135,7 +136,7 @@ const UnifiedPropertyFilter: React.FC<UnifiedPropertyFilterProps> = ({
             max={maxPrice}
             step="100"
             value={priceRange.max}
-            onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
+            onChange={(e) => setPriceRange((prev: { min: number; max: number }) => ({ ...prev, max: Number(e.target.value) }))}
             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
         </div>

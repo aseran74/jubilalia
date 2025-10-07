@@ -334,7 +334,8 @@ export const getPropertyStats = async (): Promise<{ success: boolean; data?: Pro
       room_rental: 0,
       property_rental: 0,
       property_purchase: 0,
-      seasonal_rental: 0
+      seasonal_rental: 0,
+      coliving: 0
     };
 
     listingsByType?.forEach(listing => {

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import CompactNumberStepper from '../common/CompactNumberStepper';
+import UnifiedPropertyFilter from '../common/UnifiedPropertyFilter';
 import AmenitiesFilter from '../common/AmenitiesFilter';
-import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car, Plus, SlidersHorizontal, X } from 'lucide-react';
 import PriceRangeSlider from '../common/PriceRangeSlider';
+import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car, Plus, X } from 'lucide-react';
 
 interface PropertySale {
   id: string;
@@ -216,88 +216,27 @@ const PropertySaleList: React.FC = () => {
 
       {/* Filters Section */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 space-y-2">
-          {/* Fila 1: Búsqueda, Ciudad y Tipo de Vivienda */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar propiedades..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-            
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="">Todas las ciudades</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-
-            <select
-              value={propertyType}
-              onChange={(e) => setPropertyType(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="">Todos los tipos</option>
-              {propertyTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-          
-          {/* Fila 2: Precio, Habitaciones, Baños y Más Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* 30% - Barra de precio */}
-            <div className="w-full">
-              <PriceRangeSlider
-                min={0}
-                max={1000000}
-                value={priceRange}
-                onChange={setPriceRange}
-                step={10000}
-                className="text-sm"
-              />
-            </div>
-            
-            {/* 33% - Habitaciones y Baños centrados */}
-            <div className="flex items-center justify-center gap-4">
-              <div className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-300 rounded-lg">
-                <Bed className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Habitaciones</span>
-                <CompactNumberStepper label="" value={bedrooms} onChange={setBedrooms} max={5} />
-              </div>
-
-              <div className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-300 rounded-lg">
-                <Bath className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Baños</span>
-                <CompactNumberStepper label="" value={bathrooms} onChange={setBathrooms} max={4} />
-              </div>
-            </div>
-            
-            {/* 33% - Más Filtros centrado */}
-            <div className="flex items-center justify-center">
-              <button
-                onClick={() => setShowFiltersModal(true)}
-                className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-              >
-                <SlidersHorizontal className="w-4 h-4 mr-2" />
-                <span>Más Filtros</span>
-                {selectedAmenities.length > 0 && (
-                  <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded-full">
-                    {selectedAmenities.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
+        <div className="p-4">
+          <UnifiedPropertyFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+            selectedPropertyType={propertyType}
+            setSelectedPropertyType={setPropertyType}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            bedrooms={bedrooms}
+            setBedrooms={setBedrooms}
+            bathrooms={bathrooms}
+            setBathrooms={setBathrooms}
+            selectedAmenities={selectedAmenities}
+            setSelectedAmenities={setSelectedAmenities}
+            cities={cities}
+            propertyTypes={propertyTypes}
+            onOpenAdvancedFilters={() => setShowFiltersModal(true)}
+            maxPrice={1000000}
+          />
         </div>
 
 
