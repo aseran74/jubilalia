@@ -172,7 +172,12 @@ const LandingPage: React.FC = () => {
               
               <div className="pt-4 border-t border-gray-200 mt-4">
                 {user ? (
-                  <div className="space-y-2">
+                  <div className="space-y-4">
+                    {/* Profile Card for Mobile */}
+                    <div className="flex items-center justify-center mb-4">
+                      <ProfileCard isTransparent={false} />
+                    </div>
+                    
                     <button
                       onClick={() => navigate('/dashboard')}
                       className="flex items-center w-full text-left text-gray-700 hover:text-green-500 font-medium py-3 px-4 rounded-lg hover:bg-green-50 transition-all duration-300 group"
