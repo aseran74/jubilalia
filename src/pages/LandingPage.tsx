@@ -49,10 +49,13 @@ const LandingPage: React.FC = () => {
   };
 
   const handleGetStarted = () => {
+    console.log('handleGetStarted - Usuario:', user);
     if (user) {
-              navigate('/dashboard');
-      } else {
-        navigate('/register');
+      console.log('handleGetStarted - Navegando al dashboard...');
+      navigate('/dashboard');
+    } else {
+      console.log('handleGetStarted - Navegando al registro...');
+      navigate('/register');
     }
   };
 
@@ -179,7 +182,11 @@ const LandingPage: React.FC = () => {
                     </div>
                     
                     <button
-                      onClick={() => navigate('/dashboard')}
+                      onClick={() => {
+                        console.log('Botón Dashboard móvil - Usuario:', user);
+                        console.log('Botón Dashboard móvil - Navegando...');
+                        navigate('/dashboard');
+                      }}
                       className="flex items-center w-full text-left text-gray-700 hover:text-green-500 font-medium py-3 px-4 rounded-lg hover:bg-green-50 transition-all duration-300 group"
                     >
                       <span className="text-lg mr-3">📊</span>
