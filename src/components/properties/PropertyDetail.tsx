@@ -377,12 +377,17 @@ const PropertyDetail: React.FC = () => {
                     </p>
                   </div>
 
-                  {/* Miembros de la comunidad */}
+                  {/* Miembros de la comunidad / Miembros apuntados */}
                   {property.coliving_data.show_members_publicly && property.coliving_data.members && property.coliving_data.members.length > 0 && (
                     <div className="bg-white rounded-lg p-4 border border-purple-200">
                       <div className="text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
                         <span>👥</span>
-                        <span>Miembros de la Comunidad ({property.coliving_data.members.length})</span>
+                        <span>
+                          {window.location.pathname.includes('/sale/') 
+                            ? `Miembros Apuntados (${property.coliving_data.members.length})`
+                            : `Miembros de la Comunidad (${property.coliving_data.members.length})`
+                          }
+                        </span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {property.coliving_data.members.map(member => (
