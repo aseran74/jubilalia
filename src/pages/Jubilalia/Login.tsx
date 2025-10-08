@@ -189,16 +189,12 @@ const JubilaliaLogin: React.FC = () => {
                   <div className="flex-1">
                     <h4 className="text-sm font-medium text-purple-800 mb-2">👑 Usuario Administrador</h4>
                     <div className="space-y-1 text-sm text-purple-700">
-                      <p><strong>Email:</strong> admin@jubilalia.com</p>
-                      <p><strong>Contraseña:</strong> admin123</p>
+                      <p><strong>Email:</strong> alvaroserr@gmail.com</p>
+                      <p className="text-xs italic">Álvaro Serrano (Admin)</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ email: 'admin@jubilalia.com', password: 'admin123' })}
-                      className="mt-2 text-xs text-purple-600 hover:text-purple-800 font-medium underline"
-                    >
-                      Usar credenciales de admin
-                    </button>
+                    <p className="mt-2 text-xs text-purple-600">
+                      Usuario con privilegios de administrador
+                    </p>
                   </div>
                 </div>
               </div>
