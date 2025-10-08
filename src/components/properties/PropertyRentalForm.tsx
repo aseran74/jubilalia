@@ -167,6 +167,7 @@ const PropertyRentalForm: React.FC = () => {
   });
 
   const [availableUsers, setAvailableUsers] = useState<Array<{id: string, full_name: string, avatar_url?: string}>>([]);
+  const [memberSearchTerm, setMemberSearchTerm] = useState('');
 
   // Cargar usuarios disponibles cuando se selecciona Comunidad Coliving
   useEffect(() => {
@@ -694,6 +695,18 @@ const PropertyRentalForm: React.FC = () => {
                           <label className="block text-sm font-medium text-gray-700 mb-3">
                             Seleccionar miembros de la comunidad
                           </label>
+                          
+                          {/* Filtro de búsqueda */}
+                          <div className="mb-3">
+                            <input
+                              type="text"
+                              placeholder="Buscar por nombre..."
+                              value={memberSearchTerm}
+                              onChange={(e) => setMemberSearchTerm(e.target.value)}
+                              className="w-full px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                            />
+                          </div>
+
                           <div className="bg-white rounded-lg border border-purple-200 p-4 max-h-64 overflow-y-auto">
                             {availableUsers.length === 0 ? (
                               <p className="text-sm text-gray-500 text-center py-4">
@@ -701,35 +714,49 @@ const PropertyRentalForm: React.FC = () => {
                               </p>
                             ) : (
                               <div className="space-y-2">
-                                {availableUsers.map(user => (
-                                  <label 
-                                    key={user.id} 
-                                    className="flex items-center space-x-3 p-2 hover:bg-purple-50 rounded-lg cursor-pointer transition-colors"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={formData.coliving_selected_members?.includes(user.id) || false}
-                                      onChange={() => handleMemberToggle(user.id)}
-                                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
-                                    />
-                                    <div className="flex items-center space-x-3 flex-1">
-                                      {user.avatar_url ? (
-                                        <img 
-                                          src={user.avatar_url} 
-                                          alt={user.full_name}
-                                          className="w-8 h-8 rounded-full object-cover"
-                                        />
-                                      ) : (
-                                        <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-                                          <span className="text-purple-700 text-sm font-medium">
-                                            {user.full_name.charAt(0).toUpperCase()}
-                                          </span>
-                                        </div>
-                                      )}
-                                      <span className="text-sm text-gray-900">{user.full_name}</span>
-                                    </div>
-                                  </label>
-                                ))}
+                                {(() => {
+                                  const filteredUsers = availableUsers.filter(user => 
+                                    user.full_name.toLowerCase().includes(memberSearchTerm.toLowerCase())
+                                  );
+
+                                  if (filteredUsers.length === 0) {
+                                    return (
+                                      <p className="text-sm text-gray-500 text-center py-4">
+                                        No se encontraron usuarios con ese nombre
+                                      </p>
+                                    );
+                                  }
+
+                                  return filteredUsers.map(user => (
+                                    <label 
+                                      key={user.id} 
+                                      className="flex items-center space-x-3 p-2 hover:bg-purple-50 rounded-lg cursor-pointer transition-colors"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={formData.coliving_selected_members?.includes(user.id) || false}
+                                        onChange={() => handleMemberToggle(user.id)}
+                                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+                                      />
+                                      <div className="flex items-center space-x-3 flex-1">
+                                        {user.avatar_url ? (
+                                          <img 
+                                            src={user.avatar_url} 
+                                            alt={user.full_name}
+                                            className="w-8 h-8 rounded-full object-cover"
+                                          />
+                                        ) : (
+                                          <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
+                                            <span className="text-purple-700 text-sm font-medium">
+                                              {user.full_name.charAt(0).toUpperCase()}
+                                            </span>
+                                          </div>
+                                        )}
+                                        <span className="text-sm text-gray-900">{user.full_name}</span>
+                                      </div>
+                                    </label>
+                                  ));
+                                })()}
                               </div>
                             )}
                           </div>
