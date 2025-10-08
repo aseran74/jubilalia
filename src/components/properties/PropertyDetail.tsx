@@ -123,26 +123,30 @@ const PropertyDetail: React.FC = () => {
           if (coliving.show_members_publicly) {
             const { data: membersData, error: membersError } = await supabase
               .from('coliving_members')
-              .select(`
-                id,
-                profile_id,
-                joined_at,
-                profiles:profile_id (
-                  id,
-                  full_name,
-                  avatar_url
-                )
-              `)
+              .select('id, profile_id, joined_at')
               .eq('listing_id', id)
               .eq('status', 'active');
 
-            if (!membersError && membersData) {
-              colivingData.members = membersData.map(m => ({
-                id: m.profile_id,
-                full_name: m.profiles?.full_name || 'Usuario',
-                avatar_url: m.profiles?.avatar_url,
-                joined_at: m.joined_at
-              }));
+            if (!membersError && membersData && membersData.length > 0) {
+              // Obtener los perfiles de los miembros
+              const profileIds = membersData.map(m => m.profile_id);
+              const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, full_name, avatar_url')
+                .in('id', profileIds);
+
+              if (!profilesError && profilesData) {
+                const profilesMap = new Map(profilesData.map(p => [p.id, p]));
+                colivingData.members = membersData.map(m => {
+                  const profile = profilesMap.get(m.profile_id);
+                  return {
+                    id: m.profile_id,
+                    full_name: profile?.full_name || 'Usuario',
+                    avatar_url: profile?.avatar_url,
+                    joined_at: m.joined_at
+                  };
+                });
+              }
             }
           }
         }
