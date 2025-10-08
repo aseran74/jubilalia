@@ -30,6 +30,10 @@ interface PropertySaleFormData {
   amenities: string[];
   images: string[];
   available_from: Date | null;
+  // Campos específicos para Coliving
+  coliving_total_spots?: string;
+  coliving_community_description?: string;
+  coliving_housing_type?: 'individual_apartments' | 'shared_house' | '';
 }
 
 const PropertySaleForm: React.FC = () => {
@@ -71,6 +75,21 @@ const PropertySaleForm: React.FC = () => {
           console.log('🔍 PropertySaleForm - Datos de imágenes:', imagesData, 'Error:', imagesError);
           if (imagesError) throw imagesError;
 
+          // Obtener datos de coliving si es una comunidad
+          let colivingData = null;
+          if (propertyData.property_type === 'Comunidad Coliving') {
+            const { data: coliving, error: colivingError } = await supabase
+              .from('coliving_requirements')
+              .select('*')
+              .eq('listing_id', id)
+              .single();
+
+            console.log('🔍 PropertySaleForm - Datos de coliving:', coliving, 'Error:', colivingError);
+            if (!colivingError && coliving) {
+              colivingData = coliving;
+            }
+          }
+
           // Actualizar el formulario con los datos obtenidos
           setFormData({
             title: propertyData.title || '',
@@ -89,7 +108,11 @@ const PropertySaleForm: React.FC = () => {
             parking_spaces: propertyData.parking_spaces?.toString() || '',
             amenities: [], // Las amenities se manejan por separado
             images: imagesData?.map(img => img.image_url) || [],
-            available_from: propertyData.available_from ? new Date(propertyData.available_from) : null
+            available_from: propertyData.available_from ? new Date(propertyData.available_from) : null,
+            // Datos de coliving
+            coliving_total_spots: colivingData?.total_spots?.toString() || '',
+            coliving_community_description: colivingData?.community_description || '',
+            coliving_housing_type: colivingData?.housing_type || '',
           });
 
         } catch (error) {
@@ -121,7 +144,11 @@ const PropertySaleForm: React.FC = () => {
     parking_spaces: '',
     amenities: [],
     images: [],
-    available_from: null
+    available_from: null,
+    // Campos específicos para Coliving
+    coliving_total_spots: '',
+    coliving_community_description: '',
+    coliving_housing_type: '',
   });
 
   const availableAmenities = [
@@ -151,6 +178,7 @@ const PropertySaleForm: React.FC = () => {
   ];
 
   const propertyTypes = [
+    'Comunidad Coliving',
     'Apartamento',
     'Casa',
     'Estudio',
@@ -159,7 +187,6 @@ const PropertySaleForm: React.FC = () => {
     'Villa',
     'Chalet',
     'Finca',
-    'Comunidad',
     'Local comercial',
     'Oficina',
     'Nave industrial'
@@ -303,7 +330,28 @@ const PropertySaleForm: React.FC = () => {
         listingId = listing.id;
       }
 
-      // 2. Los datos ya están guardados en property_listings, no necesitamos tabla separada
+      // 2. Guardar datos específicos de Coliving si aplica (sin available_spots para venta)
+      if (formData.property_type === 'Comunidad Coliving' && formData.coliving_total_spots && formData.coliving_community_description && formData.coliving_housing_type) {
+        if (isEditing) {
+          // Eliminar requisitos existentes y crear nuevos
+          await supabase
+            .from('coliving_requirements')
+            .delete()
+            .eq('listing_id', listingId);
+        }
+
+        const { error: colivingError } = await supabase
+          .from('coliving_requirements')
+          .insert({
+            listing_id: listingId,
+            total_spots: parseInt(formData.coliving_total_spots),
+            available_spots: parseInt(formData.coliving_total_spots), // En venta, todas las plazas están disponibles inicialmente
+            community_description: formData.coliving_community_description,
+            housing_type: formData.coliving_housing_type
+          });
+
+        if (colivingError) throw colivingError;
+      }
 
       // 3. Manejar amenidades
       if (isEditing) {
@@ -628,10 +676,113 @@ const PropertySaleForm: React.FC = () => {
               </div>
             </div>
 
+            {/* Campos específicos para Coliving/Comunidad */}
+            {formData.property_type === 'Comunidad Coliving' && (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  <span className="text-2xl">🏘️</span>
+                  Configuración de Comunidad Coliving
+                </h3>
+                
+                <div className="space-y-6">
+                  {/* Número total de plazas (sin disponibles para venta) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Número total de plazas
+                    </label>
+                    <input
+                      type="number"
+                      name="coliving_total_spots"
+                      value={formData.coliving_total_spots}
+                      onChange={handleInputChange}
+                      min="1"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Ej: 10"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Total de personas que podrán vivir en la comunidad una vez comprada</p>
+                  </div>
+
+                  {/* Descripción de la comunidad */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Descripción de la comunidad
+                    </label>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-3">
+                      <p className="text-sm text-blue-800 mb-2">
+                        <strong>💡 ¿Qué incluir en esta descripción?</strong>
+                      </p>
+                      <ul className="text-xs text-blue-700 space-y-1 list-disc list-inside">
+                        <li>¿Es solo para parejas o también para individuos?</li>
+                        <li>¿Qué incluye cada unidad? (cocina propia, baño privado, etc.)</li>
+                        <li>¿Qué espacios son compartidos? (sala común, jardín, cocina, etc.)</li>
+                        <li>¿Qué tipo de convivencia se busca? (activa, tranquila, etc.)</li>
+                        <li>¿Hay servicios incluidos? (limpieza, actividades, etc.)</li>
+                        <li>Explica el precio: ¿Cómo se divide entre los compradores?</li>
+                      </ul>
+                    </div>
+                    <textarea
+                      name="coliving_community_description"
+                      value={formData.coliving_community_description}
+                      onChange={handleInputChange}
+                      rows={6}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Ejemplo: Comunidad diseñada para personas mayores de 55 años que buscan un estilo de vida activo y social. Cada unidad cuenta con cocina completa equipada, baño privado y dormitorio independiente. Los espacios comunes incluyen sala de estar amplia, jardín con zona de huerto, y sala de actividades. El precio total se divide entre los compradores según el número de plazas adquiridas..."
+                    />
+                  </div>
+
+                  {/* Tipo de vivienda */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Tipo de estructura de vivienda
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="relative flex items-start p-4 border-2 rounded-lg cursor-pointer hover:bg-purple-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="coliving_housing_type"
+                          value="individual_apartments"
+                          checked={formData.coliving_housing_type === 'individual_apartments'}
+                          onChange={handleInputChange}
+                          className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500"
+                        />
+                        <div className="ml-3">
+                          <span className="block text-sm font-medium text-gray-900">
+                            🏢 Apartamentos individuales
+                          </span>
+                          <span className="block text-xs text-gray-500 mt-1">
+                            Cada persona/pareja tiene su propio apartamento completo con cocina y baño privados
+                          </span>
+                        </div>
+                      </label>
+
+                      <label className="relative flex items-start p-4 border-2 rounded-lg cursor-pointer hover:bg-purple-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="coliving_housing_type"
+                          value="shared_house"
+                          checked={formData.coliving_housing_type === 'shared_house'}
+                          onChange={handleInputChange}
+                          className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500"
+                        />
+                        <div className="ml-3">
+                          <span className="block text-sm font-medium text-gray-900">
+                            🏠 Casa grupal compartida
+                          </span>
+                          <span className="block text-xs text-gray-500 mt-1">
+                            Habitaciones privadas con espacios comunes compartidos (cocina, sala, baños)
+                          </span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Fechas y Destacada */}
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                4.5. Fechas y Promoción
+                {formData.property_type === 'Comunidad Coliving' ? '5' : '4.5'}. Fechas y Promoción
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -653,7 +804,7 @@ const PropertySaleForm: React.FC = () => {
             {/* Precio */}
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                5. Precio
+                {formData.property_type === 'Comunidad Coliving' ? '6' : '5'}. Precio
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -686,7 +837,7 @@ const PropertySaleForm: React.FC = () => {
             {/* Amenidades */}
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                6. Amenidades
+                {formData.property_type === 'Comunidad Coliving' ? '7' : '6'}. Amenidades
               </h3>
               
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -707,7 +858,7 @@ const PropertySaleForm: React.FC = () => {
             {/* Imágenes */}
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                7. Imágenes de la propiedad
+                {formData.property_type === 'Comunidad Coliving' ? '8' : '7'}. Imágenes de la propiedad
               </h3>
               
               <ImageUpload 

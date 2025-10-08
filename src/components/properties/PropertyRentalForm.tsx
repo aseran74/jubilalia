@@ -76,7 +76,7 @@ const PropertyRentalForm: React.FC = () => {
 
           // Obtener datos de coliving si es una comunidad
           let colivingData = null;
-          if (propertyData.property_type === 'Comunidad') {
+          if (propertyData.property_type === 'Comunidad Coliving') {
             const { data: coliving, error: colivingError } = await supabase
               .from('coliving_requirements')
               .select('*')
@@ -167,6 +167,7 @@ const PropertyRentalForm: React.FC = () => {
   ];
 
   const propertyTypes = [
+    'Comunidad Coliving',
     'Apartamento',
     'Casa',
     'Estudio',
@@ -174,8 +175,7 @@ const PropertyRentalForm: React.FC = () => {
     'Duplex',
     'Villa',
     'Chalet',
-    'Finca',
-    'Comunidad'
+    'Finca'
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -302,7 +302,7 @@ const PropertyRentalForm: React.FC = () => {
       }
 
       // 2. Guardar datos específicos de Coliving si aplica
-      if (formData.property_type === 'Comunidad' && formData.coliving_total_spots && formData.coliving_available_spots && formData.coliving_community_description && formData.coliving_housing_type) {
+      if (formData.property_type === 'Comunidad Coliving' && formData.coliving_total_spots && formData.coliving_available_spots && formData.coliving_community_description && formData.coliving_housing_type) {
         if (isEditing) {
           // Eliminar requisitos existentes y crear nuevos
           await supabase
@@ -590,7 +590,7 @@ const PropertyRentalForm: React.FC = () => {
             </div>
 
             {/* Campos específicos para Coliving/Comunidad */}
-            {formData.property_type === 'Comunidad' && (
+            {formData.property_type === 'Comunidad Coliving' && (
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                   <span className="text-2xl">🏘️</span>
@@ -713,7 +713,7 @@ const PropertyRentalForm: React.FC = () => {
             {/* Precio y disponibilidad */}
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                {formData.property_type === 'Comunidad' ? '5' : '4'}. Precio y disponibilidad
+                {formData.property_type === 'Comunidad Coliving' ? '5' : '4'}. Precio y disponibilidad
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -761,7 +761,7 @@ const PropertyRentalForm: React.FC = () => {
             {/* Amenidades */}
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                {formData.property_type === 'Comunidad' ? '6' : '5'}. Amenidades
+                {formData.property_type === 'Comunidad Coliving' ? '6' : '5'}. Amenidades
               </h3>
               
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -782,7 +782,7 @@ const PropertyRentalForm: React.FC = () => {
             {/* Imágenes */}
             <div>
               <h3 className="text-xl font-semibold text-gray-800 mb-6">
-                {formData.property_type === 'Comunidad' ? '7' : '6'}. Imágenes de la propiedad
+                {formData.property_type === 'Comunidad Coliving' ? '7' : '6'}. Imágenes de la propiedad
               </h3>
               
               <ImageUpload 
