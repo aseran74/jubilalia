@@ -401,12 +401,16 @@ const PropertySaleForm: React.FC = () => {
             .eq('listing_id', listingId);
         }
 
+        // Calcular plazas disponibles: total - miembros apuntados
+        const membersCount = formData.coliving_selected_members?.length || 0;
+        const availableSpots = parseInt(formData.coliving_total_spots) - membersCount;
+
         const { error: colivingError } = await supabase
           .from('coliving_requirements')
           .insert({
             listing_id: listingId,
             total_spots: parseInt(formData.coliving_total_spots),
-            available_spots: parseInt(formData.coliving_total_spots), // En venta, todas las plazas están disponibles inicialmente
+            available_spots: availableSpots, // Total - miembros apuntados
             community_description: formData.coliving_community_description,
             housing_type: formData.coliving_housing_type,
             price_per_apartment: formData.coliving_price_per_apartment ? parseFloat(formData.coliving_price_per_apartment) : null,
@@ -830,9 +834,16 @@ const PropertySaleForm: React.FC = () => {
                               </div>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            Seleccionados: {formData.coliving_selected_members?.length || 0} miembros apuntados
-                          </p>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="text-xs text-gray-500">
+                              Seleccionados: {formData.coliving_selected_members?.length || 0} miembros apuntados
+                            </p>
+                            {formData.coliving_total_spots && (
+                              <p className="text-xs font-medium text-purple-600">
+                                Plazas disponibles: {parseInt(formData.coliving_total_spots) - (formData.coliving_selected_members?.length || 0)}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
