@@ -54,7 +54,26 @@ const PropertySaleList: React.FC = () => {
       setLoading(true);
       const { data: propertiesData, error } = await supabase
         .from('property_listings')
-        .select(`id, title, description, address, city, price, available_from, profile_id, listing_type, is_available`)
+        .select(`
+          id,
+          title,
+          description,
+          address,
+          city,
+          price,
+          available_from,
+          profile_id,
+          listing_type,
+          is_available,
+          property_type,
+          bedrooms,
+          bathrooms,
+          total_area,
+          land_area,
+          construction_year,
+          property_condition,
+          parking_spaces
+        `)
         .eq('listing_type', 'property_purchase')
         .eq('is_available', true);
 
@@ -108,18 +127,31 @@ const PropertySaleList: React.FC = () => {
         imagesMap.get(img.listing_id)!.push(img.image_url);
       });
 
-      const transformedProperties = propertiesData?.map(property => ({
-        id: property.id,
-        title: property.title,
-        description: property.description,
-        address: property.address,
-        city: property.city,
-        price: property.price,
-        available_from: property.available_from,
-        purchase_requirements: requirementsMap.get(property.id) || {},
-        owner: profilesMap.get(property.profile_id) || { full_name: 'Propietario' },
-        images: imagesMap.get(property.id) || []
-      })) || [];
+      const transformedProperties = propertiesData?.map(property => {
+        const requirements = requirementsMap.get(property.id) || {};
+        return {
+          id: property.id,
+          title: property.title,
+          description: property.description,
+          address: property.address,
+          city: property.city,
+          price: property.price,
+          available_from: property.available_from,
+          purchase_requirements: {
+            ...requirements,
+            bedrooms: property.bedrooms || requirements.bedrooms || 0,
+            bathrooms: property.bathrooms || requirements.bathrooms || 0,
+            total_area: property.total_area || requirements.total_area || 0,
+            land_area: property.land_area || requirements.land_area || 0,
+            construction_year: property.construction_year || requirements.construction_year || 0,
+            property_condition: property.property_condition || requirements.property_condition || '',
+            parking_spaces: property.parking_spaces || requirements.parking_spaces || 0,
+            property_type: property.property_type || requirements.property_type || ''
+          },
+          owner: profilesMap.get(property.profile_id) || { full_name: 'Propietario' },
+          images: imagesMap.get(property.id) || []
+        };
+      }) || [];
 
       setProperties(transformedProperties);
     } catch (error) {
@@ -135,7 +167,9 @@ const PropertySaleList: React.FC = () => {
                          property.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCity = !selectedCity || property.city === selectedCity;
-    const matchesPropertyType = !propertyType || property.purchase_requirements.property_type === propertyType;
+    // Comparación case-insensitive para property_type
+    const matchesPropertyType = !propertyType || 
+      property.purchase_requirements.property_type?.toLowerCase() === propertyType.toLowerCase();
     const matchesPrice = property.price >= priceRange.min && property.price <= priceRange.max;
     const matchesBedrooms = bedrooms === 0 || property.purchase_requirements.bedrooms >= bedrooms;
     const matchesBathrooms = bathrooms === 0 || property.purchase_requirements.bathrooms >= bathrooms;

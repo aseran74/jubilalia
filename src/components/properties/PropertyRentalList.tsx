@@ -65,7 +65,12 @@ const PropertyRentalList: React.FC = () => {
           available_from,
           profile_id,
           listing_type,
-          is_available
+          is_available,
+          property_type,
+          bedrooms,
+          bathrooms,
+          total_area,
+          max_occupants
         `)
         .eq('listing_type', 'property_rental')
         .eq('is_available', true);
@@ -160,18 +165,28 @@ const PropertyRentalList: React.FC = () => {
       });
 
       // Transformar los datos para que sean más fáciles de usar
-      const transformedProperties = propertiesData?.map(property => ({
-        id: property.id,
-        title: property.title,
-        description: property.description,
-        address: property.address,
-        city: property.city,
-        price: property.price,
-        available_from: property.available_from,
-        rental_requirements: requirementsMap.get(property.id) || {},
-        owner: profilesMap.get(property.profile_id) || { full_name: 'Propietario' },
-        images: imagesMap.get(property.id) || []
-      })) || [];
+      const transformedProperties = propertiesData?.map(property => {
+        const requirements = requirementsMap.get(property.id) || {};
+        return {
+          id: property.id,
+          title: property.title,
+          description: property.description,
+          address: property.address,
+          city: property.city,
+          price: property.price,
+          available_from: property.available_from,
+          rental_requirements: {
+            ...requirements,
+            bedrooms: property.bedrooms || requirements.bedrooms || 0,
+            bathrooms: property.bathrooms || requirements.bathrooms || 0,
+            total_area: property.total_area || requirements.total_area || 0,
+            max_occupants: property.max_occupants || requirements.max_occupants || 1,
+            property_type: property.property_type || requirements.property_type || ''
+          },
+          owner: profilesMap.get(property.profile_id) || { full_name: 'Propietario' },
+          images: imagesMap.get(property.id) || []
+        };
+      }) || [];
 
       console.log('🔄 Propiedades transformadas:', {
         count: transformedProperties.length,
@@ -192,7 +207,9 @@ const PropertyRentalList: React.FC = () => {
                          property.city.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCity = !selectedCity || property.city === selectedCity;
-    const matchesPropertyType = !propertyType || property.rental_requirements.property_type === propertyType;
+    // Comparación case-insensitive para property_type
+    const matchesPropertyType = !propertyType || 
+      property.rental_requirements.property_type?.toLowerCase() === propertyType.toLowerCase();
     const matchesPrice = (priceRange.min === 0 || property.price >= priceRange.min) && 
                         (priceRange.max === 0 || property.price <= priceRange.max);
     const matchesBedrooms = bedrooms === 0 || property.rental_requirements.bedrooms >= bedrooms;
