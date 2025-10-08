@@ -41,6 +41,13 @@ interface Property {
     housing_type: 'individual_apartments' | 'shared_house';
     price_per_apartment?: number;
     price_per_unit?: number;
+    show_members_publicly?: boolean;
+    members?: Array<{
+      id: string;
+      full_name: string;
+      avatar_url?: string;
+      joined_at: string;
+    }>;
   };
 }
 
@@ -111,6 +118,33 @@ const PropertyDetail: React.FC = () => {
 
         if (!colivingError && coliving) {
           colivingData = coliving;
+
+          // Cargar miembros si show_members_publicly es true
+          if (coliving.show_members_publicly) {
+            const { data: membersData, error: membersError } = await supabase
+              .from('coliving_members')
+              .select(`
+                id,
+                profile_id,
+                joined_at,
+                profiles:profile_id (
+                  id,
+                  full_name,
+                  avatar_url
+                )
+              `)
+              .eq('listing_id', id)
+              .eq('status', 'active');
+
+            if (!membersError && membersData) {
+              colivingData.members = membersData.map(m => ({
+                id: m.profile_id,
+                full_name: m.profiles?.full_name || 'Usuario',
+                avatar_url: m.profiles?.avatar_url,
+                joined_at: m.joined_at
+              }));
+            }
+          }
         }
       }
 
@@ -342,6 +376,46 @@ const PropertyDetail: React.FC = () => {
                       {property.coliving_data.community_description}
                     </p>
                   </div>
+
+                  {/* Miembros de la comunidad */}
+                  {property.coliving_data.show_members_publicly && property.coliving_data.members && property.coliving_data.members.length > 0 && (
+                    <div className="bg-white rounded-lg p-4 border border-purple-200">
+                      <div className="text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
+                        <span>👥</span>
+                        <span>Miembros de la Comunidad ({property.coliving_data.members.length})</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {property.coliving_data.members.map(member => (
+                          <div 
+                            key={member.id}
+                            className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
+                          >
+                            {member.avatar_url ? (
+                              <img 
+                                src={member.avatar_url} 
+                                alt={member.full_name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-purple-300 flex items-center justify-center">
+                                <span className="text-purple-700 font-medium">
+                                  {member.full_name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-gray-900">
+                                {member.full_name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Desde {new Date(member.joined_at).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' })}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

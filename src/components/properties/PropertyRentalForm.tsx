@@ -33,6 +33,8 @@ interface PropertyRentalFormData {
   coliving_available_spots?: string;
   coliving_community_description?: string;
   coliving_housing_type?: 'individual_apartments' | 'shared_house' | '';
+  coliving_show_members_publicly?: boolean;
+  coliving_selected_members?: string[];
 }
 
 const PropertyRentalForm: React.FC = () => {
@@ -86,6 +88,18 @@ const PropertyRentalForm: React.FC = () => {
             console.log('🔍 PropertyRentalForm - Datos de coliving:', coliving, 'Error:', colivingError);
             if (!colivingError && coliving) {
               colivingData = coliving;
+
+              // Cargar miembros si show_members_publicly es true
+              if (coliving.show_members_publicly) {
+                const { data: members, error: membersError } = await supabase
+                  .from('coliving_members')
+                  .select('profile_id')
+                  .eq('listing_id', id);
+
+                if (!membersError && members) {
+                  colivingData.members = members.map(m => m.profile_id);
+                }
+              }
             }
           }
 
@@ -111,6 +125,8 @@ const PropertyRentalForm: React.FC = () => {
             coliving_available_spots: colivingData?.available_spots?.toString() || '',
             coliving_community_description: colivingData?.community_description || '',
             coliving_housing_type: colivingData?.housing_type || '',
+            coliving_show_members_publicly: colivingData?.show_members_publicly || false,
+            coliving_selected_members: colivingData?.members || [],
           });
 
         } catch (error) {
@@ -146,7 +162,36 @@ const PropertyRentalForm: React.FC = () => {
     coliving_available_spots: '',
     coliving_community_description: '',
     coliving_housing_type: '',
+    coliving_show_members_publicly: false,
+    coliving_selected_members: [],
   });
+
+  const [availableUsers, setAvailableUsers] = useState<Array<{id: string, full_name: string, avatar_url?: string}>>([]);
+
+  // Cargar usuarios disponibles cuando se selecciona Comunidad Coliving
+  useEffect(() => {
+    if (formData.property_type === 'Comunidad Coliving') {
+      fetchAvailableUsers();
+    }
+  }, [formData.property_type]);
+
+  const fetchAvailableUsers = async () => {
+    try {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .order('full_name', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching users:', error);
+        return;
+      }
+
+      setAvailableUsers(users || []);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const availableAmenities = [
     'WiFi',
@@ -206,6 +251,15 @@ const PropertyRentalForm: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleMemberToggle = (memberId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      coliving_selected_members: prev.coliving_selected_members?.includes(memberId)
+        ? prev.coliving_selected_members.filter(id => id !== memberId)
+        : [...(prev.coliving_selected_members || []), memberId]
     }));
   };
 
@@ -318,10 +372,35 @@ const PropertyRentalForm: React.FC = () => {
             total_spots: parseInt(formData.coliving_total_spots),
             available_spots: parseInt(formData.coliving_available_spots),
             community_description: formData.coliving_community_description,
-            housing_type: formData.coliving_housing_type
+            housing_type: formData.coliving_housing_type,
+            show_members_publicly: formData.coliving_show_members_publicly || false
           });
 
         if (colivingError) throw colivingError;
+
+        // Guardar miembros si están seleccionados
+        if (formData.coliving_show_members_publicly && formData.coliving_selected_members && formData.coliving_selected_members.length > 0) {
+          // Eliminar miembros existentes si estamos editando
+          if (isEditing) {
+            await supabase
+              .from('coliving_members')
+              .delete()
+              .eq('listing_id', listingId);
+          }
+
+          // Insertar nuevos miembros
+          const membersData = formData.coliving_selected_members.map(profileId => ({
+            listing_id: listingId,
+            profile_id: profileId,
+            status: 'active'
+          }));
+
+          const { error: membersError } = await supabase
+            .from('coliving_members')
+            .insert(membersData);
+
+          if (membersError) throw membersError;
+        }
       }
 
       // 3. Manejar amenidades
@@ -578,6 +657,87 @@ const PropertyRentalForm: React.FC = () => {
                           </div>
                         </label>
                       </div>
+                    </div>
+
+                    {/* Gestión de miembros */}
+                    <div className="mt-6 pt-6 border-t border-purple-300">
+                      <h4 className="text-md font-semibold text-gray-800 mb-4">
+                        👥 Miembros de la Comunidad
+                      </h4>
+
+                      {/* Checkbox para hacer pública la lista */}
+                      <div className="mb-4">
+                        <label className="flex items-start space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.coliving_show_members_publicly || false}
+                            onChange={(e) => setFormData(prev => ({ 
+                              ...prev, 
+                              coliving_show_members_publicly: e.target.checked 
+                            }))}
+                            className="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+                          />
+                          <div>
+                            <span className="text-sm font-medium text-gray-900">
+                              Mostrar miembros públicamente
+                            </span>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Si activas esta opción, cualquier persona podrá ver quiénes viven en la comunidad
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+
+                      {/* Selector de miembros (solo si está marcado como público) */}
+                      {formData.coliving_show_members_publicly && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-3">
+                            Seleccionar miembros de la comunidad
+                          </label>
+                          <div className="bg-white rounded-lg border border-purple-200 p-4 max-h-64 overflow-y-auto">
+                            {availableUsers.length === 0 ? (
+                              <p className="text-sm text-gray-500 text-center py-4">
+                                Cargando usuarios...
+                              </p>
+                            ) : (
+                              <div className="space-y-2">
+                                {availableUsers.map(user => (
+                                  <label 
+                                    key={user.id} 
+                                    className="flex items-center space-x-3 p-2 hover:bg-purple-50 rounded-lg cursor-pointer transition-colors"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={formData.coliving_selected_members?.includes(user.id) || false}
+                                      onChange={() => handleMemberToggle(user.id)}
+                                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+                                    />
+                                    <div className="flex items-center space-x-3 flex-1">
+                                      {user.avatar_url ? (
+                                        <img 
+                                          src={user.avatar_url} 
+                                          alt={user.full_name}
+                                          className="w-8 h-8 rounded-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
+                                          <span className="text-purple-700 text-sm font-medium">
+                                            {user.full_name.charAt(0).toUpperCase()}
+                                          </span>
+                                        </div>
+                                      )}
+                                      <span className="text-sm text-gray-900">{user.full_name}</span>
+                                    </div>
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Seleccionados: {formData.coliving_selected_members?.length || 0} miembros
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
