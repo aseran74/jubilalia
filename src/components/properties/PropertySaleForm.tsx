@@ -34,6 +34,8 @@ interface PropertySaleFormData {
   coliving_total_spots?: string;
   coliving_community_description?: string;
   coliving_housing_type?: 'individual_apartments' | 'shared_house' | '';
+  coliving_price_per_apartment?: string;
+  coliving_price_per_unit?: string;
 }
 
 const PropertySaleForm: React.FC = () => {
@@ -113,6 +115,8 @@ const PropertySaleForm: React.FC = () => {
             coliving_total_spots: colivingData?.total_spots?.toString() || '',
             coliving_community_description: colivingData?.community_description || '',
             coliving_housing_type: colivingData?.housing_type || '',
+            coliving_price_per_apartment: colivingData?.price_per_apartment?.toString() || '',
+            coliving_price_per_unit: colivingData?.price_per_unit?.toString() || '',
           });
 
         } catch (error) {
@@ -149,6 +153,8 @@ const PropertySaleForm: React.FC = () => {
     coliving_total_spots: '',
     coliving_community_description: '',
     coliving_housing_type: '',
+    coliving_price_per_apartment: '',
+    coliving_price_per_unit: '',
   });
 
   const availableAmenities = [
@@ -347,7 +353,9 @@ const PropertySaleForm: React.FC = () => {
             total_spots: parseInt(formData.coliving_total_spots),
             available_spots: parseInt(formData.coliving_total_spots), // En venta, todas las plazas están disponibles inicialmente
             community_description: formData.coliving_community_description,
-            housing_type: formData.coliving_housing_type
+            housing_type: formData.coliving_housing_type,
+            price_per_apartment: formData.coliving_price_per_apartment ? parseFloat(formData.coliving_price_per_apartment) : null,
+            price_per_unit: formData.coliving_price_per_unit ? parseFloat(formData.coliving_price_per_unit) : null
           });
 
         if (colivingError) throw colivingError;
@@ -590,6 +598,57 @@ const PropertySaleForm: React.FC = () => {
                         </label>
                       </div>
                     </div>
+
+                    {/* Precios específicos según tipo de estructura */}
+                    {formData.coliving_housing_type && (
+                      <div className="mt-6 pt-6 border-t border-purple-300">
+                        <h4 className="text-md font-semibold text-gray-800 mb-4">
+                          💰 Precios por Unidad
+                        </h4>
+                        
+                        {formData.coliving_housing_type === 'individual_apartments' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Precio por apartamento individual (€)
+                            </label>
+                            <input
+                              type="number"
+                              name="coliving_price_per_apartment"
+                              value={formData.coliving_price_per_apartment}
+                              onChange={handleInputChange}
+                              min="0"
+                              step="1000"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              placeholder="Ej: 150000"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Precio de compra de cada apartamento individual completo
+                            </p>
+                          </div>
+                        )}
+
+                        {formData.coliving_housing_type === 'shared_house' && (
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Precio por unidad/habitación (€)
+                            </label>
+                            <input
+                              type="number"
+                              name="coliving_price_per_unit"
+                              value={formData.coliving_price_per_unit}
+                              onChange={handleInputChange}
+                              min="0"
+                              step="1000"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              placeholder="Ej: 50000"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Precio de compra de cada unidad/habitación en la casa compartida
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

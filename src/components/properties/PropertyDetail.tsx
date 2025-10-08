@@ -34,6 +34,14 @@ interface Property {
   created_at: string;
   status: string;
   author_id: string;
+  coliving_data?: {
+    total_spots: number;
+    available_spots: number;
+    community_description: string;
+    housing_type: 'individual_apartments' | 'shared_house';
+    price_per_apartment?: number;
+    price_per_unit?: number;
+  };
 }
 
 interface Author {
@@ -92,11 +100,26 @@ const PropertyDetail: React.FC = () => {
         console.error('Error fetching amenities:', amenitiesError);
       }
 
-      // Add images and amenities to property data
+      // Fetch coliving data if property is Comunidad Coliving
+      let colivingData = null;
+      if (propertyData.property_type === 'Comunidad Coliving') {
+        const { data: coliving, error: colivingError } = await supabase
+          .from('coliving_requirements')
+          .select('*')
+          .eq('listing_id', id)
+          .single();
+
+        if (!colivingError && coliving) {
+          colivingData = coliving;
+        }
+      }
+
+      // Add images, amenities and coliving data to property data
       const propertyWithImages = {
         ...propertyData,
         images: imagesData?.map(img => img.image_url) || [],
-        amenities: amenitiesData?.map(amenity => amenity.amenity_name) || []
+        amenities: amenitiesData?.map(amenity => amenity.amenity_name) || [],
+        coliving_data: colivingData
       };
 
       setProperty(propertyWithImages);
@@ -243,6 +266,85 @@ const PropertyDetail: React.FC = () => {
                 {property.description}
               </p>
             </div>
+
+            {/* Coliving Information */}
+            {property.property_type === 'Comunidad Coliving' && property.coliving_data && (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="text-2xl">🏘️</span>
+                  Información de la Comunidad Coliving
+                </h2>
+                
+                <div className="space-y-6">
+                  {/* Plazas disponibles */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg p-4 border border-purple-200">
+                      <div className="text-sm text-gray-600 mb-1">Total de plazas</div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        {property.coliving_data.total_spots}
+                      </div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-purple-200">
+                      <div className="text-sm text-gray-600 mb-1">Plazas disponibles</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {property.coliving_data.available_spots}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tipo de estructura */}
+                  <div className="bg-white rounded-lg p-4 border border-purple-200">
+                    <div className="text-sm font-medium text-gray-700 mb-2">Tipo de estructura</div>
+                    <div className="flex items-center gap-2">
+                      {property.coliving_data.housing_type === 'individual_apartments' ? (
+                        <>
+                          <span className="text-xl">🏢</span>
+                          <span className="text-gray-900 font-medium">Apartamentos individuales</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xl">🏠</span>
+                          <span className="text-gray-900 font-medium">Casa grupal compartida</span>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      {property.coliving_data.housing_type === 'individual_apartments' 
+                        ? 'Cada persona/pareja tiene su propio apartamento completo con cocina y baño privados'
+                        : 'Habitaciones privadas con espacios comunes compartidos (cocina, sala, baños)'
+                      }
+                    </p>
+                  </div>
+
+                  {/* Precios por unidad */}
+                  {(property.coliving_data.price_per_apartment || property.coliving_data.price_per_unit) && (
+                    <div className="bg-white rounded-lg p-4 border border-purple-200">
+                      <div className="text-sm font-medium text-gray-700 mb-2">💰 Precio por unidad</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {property.coliving_data.price_per_apartment 
+                          ? `${property.coliving_data.price_per_apartment.toLocaleString('es-ES')}€ / apartamento`
+                          : `${property.coliving_data.price_per_unit?.toLocaleString('es-ES')}€ / unidad`
+                        }
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {property.coliving_data.price_per_apartment 
+                          ? 'Precio de compra de cada apartamento individual'
+                          : 'Precio de compra de cada unidad/habitación'
+                        }
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Descripción de la comunidad */}
+                  <div className="bg-white rounded-lg p-4 border border-purple-200">
+                    <div className="text-sm font-medium text-gray-700 mb-3">Sobre la comunidad</div>
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {property.coliving_data.community_description}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Property Details */}
             <div className="bg-white rounded-lg shadow-sm p-6">
