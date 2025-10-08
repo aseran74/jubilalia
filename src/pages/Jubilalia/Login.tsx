@@ -176,27 +176,55 @@ const JubilaliaLogin: React.FC = () => {
                </Link>
             </div>
 
-            {/* Ejemplo de usuario para pruebas */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5">
-                  <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-medium text-blue-800 mb-2">Usuario de prueba</h4>
-                  <div className="space-y-1 text-sm text-blue-700">
-                    <p><strong>Email:</strong> test@example.com</p>
-                    <p><strong>Contraseña:</strong> password</p>
+            {/* Usuarios de prueba */}
+            <div className="space-y-3">
+              {/* Usuario Admin */}
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ email: 'test@example.com', password: 'password' })}
-                    className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium underline"
-                  >
-                    Usar credenciales de prueba
-                  </button>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-purple-800 mb-2">👑 Usuario Administrador</h4>
+                    <div className="space-y-1 text-sm text-purple-700">
+                      <p><strong>Email:</strong> admin@jubilalia.com</p>
+                      <p><strong>Contraseña:</strong> admin123</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ email: 'admin@jubilalia.com', password: 'admin123' })}
+                      className="mt-2 text-xs text-purple-600 hover:text-purple-800 font-medium underline"
+                    >
+                      Usar credenciales de admin
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Usuario Normal */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Usuario de prueba</h4>
+                    <div className="space-y-1 text-sm text-blue-700">
+                      <p><strong>Email:</strong> test@example.com</p>
+                      <p><strong>Contraseña:</strong> password</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ email: 'test@example.com', password: 'password' })}
+                      className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium underline"
+                    >
+                      Usar credenciales de prueba
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
