@@ -222,6 +222,7 @@ const PropertyRentalList: React.FC = () => {
   
   // Tipos de vivienda consistentes con los formularios
   const propertyTypes = [
+    'Comunidad Coliving',
     'Apartamento',
     'Casa',
     'Estudio',
@@ -229,8 +230,7 @@ const PropertyRentalList: React.FC = () => {
     'Duplex',
     'Villa',
     'Chalet',
-    'Finca',
-    'Comunidad'
+    'Finca'
   ];
 
   const formatPrice = (price: number) => {

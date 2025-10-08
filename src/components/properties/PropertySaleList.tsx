@@ -180,8 +180,8 @@ const PropertySaleList: React.FC = () => {
   const cities = [...new Set(properties.map(property => property.city))];
 
   const propertyTypes = [
-    'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet',
-    'Finca', 'Comunidad', 'Local comercial', 'Oficina', 'Nave industrial'
+    'Comunidad Coliving', 'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet',
+    'Finca', 'Local comercial', 'Oficina', 'Nave industrial'
   ];
 
   const formatPrice = (price: number) => new Intl.NumberFormat('es-ES', {
