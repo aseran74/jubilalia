@@ -56,6 +56,7 @@ const RoomsMapView: React.FC = () => {
   const [mapCenter, setMapCenter] = useState({ lat: 40.4168, lng: -3.7038 }); // Madrid por defecto
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [showRoomList, setShowRoomList] = useState(false);
   const [filters, setFilters] = useState<RoomFilters>({
@@ -83,8 +84,14 @@ const RoomsMapView: React.FC = () => {
   }, [rooms, filters]);
 
   useEffect(() => {
-    if (filteredRooms.length > 0 && mapRef.current && !map && mapsLoaded) {
+    if (mapRef.current && !map && mapsLoaded && rooms.length > 0) {
       initializeMap();
+    }
+  }, [map, mapsLoaded, rooms]);
+
+  useEffect(() => {
+    if (map && mapsLoaded) {
+      updateMarkers();
     }
   }, [filteredRooms, map, mapsLoaded]);
 
@@ -272,15 +279,22 @@ const RoomsMapView: React.FC = () => {
     });
 
     setMap(mapInstance);
+  };
 
-    // Crear marcadores para cada habitación
+  const updateMarkers = () => {
+    if (!map || !window.google) return;
+
+    // Limpiar marcadores anteriores
+    markers.forEach(marker => marker.setMap(null));
+
+    // Crear marcadores para las habitaciones filtradas
     const newMarkers: google.maps.Marker[] = [];
     
     filteredRooms.forEach((room) => {
       if (room.latitude && room.longitude) {
         const marker = new window.google.maps.Marker({
           position: { lat: room.latitude, lng: room.longitude },
-          map: mapInstance,
+          map: map,
           title: room.title,
           icon: {
             url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
@@ -322,7 +336,7 @@ const RoomsMapView: React.FC = () => {
 
         marker.addListener('click', () => {
           setSelectedRoom(room);
-          infoWindow.open(mapInstance, marker);
+          infoWindow.open(map, marker);
           
           // Agregar event listener para el botón de detalles después de que se abra el InfoWindow
           setTimeout(() => {
@@ -342,7 +356,7 @@ const RoomsMapView: React.FC = () => {
       }
     });
 
-    // Los marcadores se manejan automáticamente por Google Maps
+    setMarkers(newMarkers);
   };
 
   const getAvailableSpots = (room: Room) => {
@@ -448,7 +462,7 @@ const RoomsMapView: React.FC = () => {
           </div>
           
           <div className="divide-y divide-gray-200">
-            {rooms.map((room) => (
+            {filteredRooms.map((room) => (
               <div
                 key={room.id}
                 className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
@@ -524,10 +538,10 @@ const RoomsMapView: React.FC = () => {
             ))}
           </div>
           
-          {rooms.length === 0 && (
+          {filteredRooms.length === 0 && (
             <div className="p-8 text-center text-gray-500">
               <HomeIcon className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-              <p>No hay habitaciones disponibles</p>
+              <p>No hay habitaciones que coincidan con los filtros</p>
             </div>
           )}
         </div>
