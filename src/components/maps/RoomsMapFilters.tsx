@@ -57,20 +57,28 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg border border-gray-200 w-80 max-h-[80vh] overflow-y-auto">
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-md hover:bg-gray-100"
-          >
-            <XMarkIcon className="w-5 h-5 text-gray-500" />
-          </button>
+    <div 
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold text-gray-900">Filtros de Búsqueda</h3>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6 text-gray-500" />
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="p-4 space-y-6">
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Precio */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -137,39 +145,6 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             placeholder="Ej: Madrid, Barcelona..."
           />
-        </div>
-
-        {/* Filtros de disponibilidad */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">
-            Disponibilidad
-          </label>
-          
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="availableOnly"
-              checked={localFilters.availableOnly}
-              onChange={(e) => handleFilterChange('availableOnly', e.target.checked)}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-            />
-            <label htmlFor="availableOnly" className="ml-2 text-sm text-gray-700">
-              Solo habitaciones disponibles
-            </label>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="hasImages"
-              checked={localFilters.hasImages}
-              onChange={(e) => handleFilterChange('hasImages', e.target.checked)}
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-            />
-            <label htmlFor="hasImages" className="ml-2 text-sm text-gray-700">
-              Solo con imágenes
-            </label>
-          </div>
         </div>
 
         {/* Filtros de características */}
@@ -247,21 +222,24 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
           </select>
         </div>
 
+        </div>
+        
         {/* Botones de acción */}
-        <div className="flex space-x-3 pt-4 border-t border-gray-200">
+        <div className="flex space-x-4 pt-6 mt-6 border-t border-gray-200">
           <button
             onClick={resetFilters}
-            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="flex-1 px-6 py-3 text-base font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            Limpiar
+            Limpiar Filtros
           </button>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="flex-1 px-6 py-3 text-base font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            Aplicar
+            Aplicar Filtros
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
