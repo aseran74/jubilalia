@@ -18,7 +18,7 @@ interface UnifiedPropertyFilterProps {
   setBedrooms: (value: number) => void;
   bathrooms: number;
   setBathrooms: (value: number) => void;
-  selectedAmenities: string[];
+  selectedAmenities?: string[];
   
   // Datos para opciones
   cities: string[];
@@ -26,7 +26,7 @@ interface UnifiedPropertyFilterProps {
   
   // Configuración
   showListingType?: boolean;
-  onOpenAdvancedFilters: () => void;
+  onOpenAdvancedFilters?: () => void;
   maxPrice?: number;
 }
 
@@ -156,18 +156,20 @@ const UnifiedPropertyFilter: React.FC<UnifiedPropertyFilterProps> = ({
           max={4}
         />
         
-        <button
-          onClick={onOpenAdvancedFilters}
-          className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <FunnelIcon className="w-4 h-4 mr-2" />
-          <span className="text-sm">Más filtros</span>
-          {selectedAmenities.length > 0 && (
-            <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-              {selectedAmenities.length}
-            </span>
-          )}
-        </button>
+        {onOpenAdvancedFilters && (
+          <button
+            onClick={onOpenAdvancedFilters}
+            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <FunnelIcon className="w-4 h-4 mr-2" />
+            <span className="text-sm">Más filtros</span>
+            {selectedAmenities && selectedAmenities.length > 0 && (
+              <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                {selectedAmenities.length}
+              </span>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

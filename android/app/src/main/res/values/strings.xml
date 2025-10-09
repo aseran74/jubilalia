@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Jubilalia</string>
+    <string name="title_activity_main">Jubilalia</string>
+    <string name="package_name">com.jubilalia.app</string>
+    <string name="custom_url_scheme">com.jubilalia.app</string>
+</resources>

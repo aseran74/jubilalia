@@ -63,7 +63,6 @@ const PropertiesRentalMapView: React.FC = () => {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -91,14 +90,11 @@ const PropertiesRentalMapView: React.FC = () => {
       
       const matchesBathrooms = bathrooms === 0 || (property.bathrooms && property.bathrooms >= bathrooms);
       
-      // TODO: Implementar filtro de amenidades cuando tengamos los datos en la base
-      const matchesAmenities = selectedAmenities.length === 0; // Por ahora siempre true
-      
-      return matchesSearch && matchesCity && matchesListingType && matchesPropertyType && matchesPrice && matchesBedrooms && matchesBathrooms && matchesAmenities;
+      return matchesSearch && matchesCity && matchesListingType && matchesPropertyType && matchesPrice && matchesBedrooms && matchesBathrooms;
     });
     
     setFilteredProperties(filtered);
-  }, [properties, searchTerm, selectedCity, selectedListingType, selectedPropertyType, priceRange, bedrooms, bathrooms, selectedAmenities]);
+  }, [properties, searchTerm, selectedCity, selectedListingType, selectedPropertyType, priceRange, bedrooms, bathrooms]);
 
   useEffect(() => {
     if (filteredProperties.length > 0 && mapRef.current && !map && mapsLoaded) {

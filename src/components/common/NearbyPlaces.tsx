@@ -89,29 +89,11 @@ const NearbyPlaces: React.FC<NearbyPlacesProps> = ({
     );
   }
 
-  // Verificar si son datos de ejemplo
-  const isMockData = places.length > 0 && places[0].id.startsWith('mock-');
-
   return (
     <div className={`bg-white rounded-lg shadow-sm p-6 ${className}`}>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Actividades Cercanas
-        </h2>
-        {isMockData && (
-          <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-            Datos de ejemplo
-          </span>
-        )}
-      </div>
-      
-      {isMockData && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">
-            ℹ️ <strong>Nota:</strong> Estos son lugares de ejemplo. Para ver lugares reales, configura <code className="bg-blue-100 px-1 rounded">VITE_GOOGLE_PLACES_API_KEY</code> en tu archivo <code className="bg-blue-100 px-1 rounded">.env</code>
-          </p>
-        </div>
-      )}
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        Actividades Cercanas
+      </h2>
       
       <div className="space-y-4">
         {places.map((place) => (
