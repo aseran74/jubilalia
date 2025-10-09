@@ -27,19 +27,28 @@
 
 **Opción B - APK Firmado (para publicar):**
 1. En el menú: **Build → Generate Signed Bundle / APK**
-2. Selecciona **APK** → Next
-3. Si no tienes keystore:
-   - Click en **"Create new..."**
-   - Rellena los datos:
-     - Key store path: `C:\Proyectos\Jubilalia\jubilalia-keystore.jks`
-     - Password: (elige uno seguro y guárdalo)
-     - Alias: `jubilalia`
-     - Validity: 25 años
+2. Selecciona **APK** → Click **Next**
+3. Si no tienes keystore, click en **"Create new..."**:
+   - **Key store path:** `C:\Proyectos\Jubilalia\jubilalia-release.jks`
+   - **Password:** Elige una contraseña segura (ej: `Jubilalia2025!`)
+   - **Confirm:** Repite la contraseña
+   - **Alias:** `jubilalia`
+   - **Password:** Misma contraseña (o diferente si prefieres)
+   - **Confirm:** Repite la contraseña del alias
+   - **Validity (years):** `25`
+   - **Certificate:**
      - First and Last Name: Tu nombre
-     - Organization: Jubilalia
+     - Organizational Unit: `Jubilalia`
+     - Organization: `Jubilalia`
+     - City or Locality: Tu ciudad
+     - State or Province: Tu provincia
+     - Country Code (XX): `ES`
    - Click **OK**
-4. Selecciona **release** → Finish
-5. El APK estará en: `android/app/build/outputs/apk/release/app-release.apk`
+4. Verás el keystore cargado, selecciona **release** → Click **Finish**
+5. Espera a que compile (3-10 minutos)
+6. El APK estará en: `android/app/build/outputs/apk/release/app-release.apk`
+
+**⚠️ IMPORTANTE:** Guarda el archivo `.jks` y las contraseñas en un lugar seguro. Los necesitarás para futuras actualizaciones.
 
 ---
 
@@ -163,6 +172,20 @@ Las variables de entorno se incluyen automáticamente en el build:
 ---
 
 ## 🐛 Solución de Problemas
+
+### **Error: "Keystore file not found for signing config"**
+Este error aparece cuando intentas generar un APK firmado sin keystore.
+
+**Solución:**
+1. En Android Studio: **Build → Generate Signed Bundle / APK**
+2. Selecciona **APK** → **Next**
+3. Click en **"Create new..."** (NO uses uno existente)
+4. Rellena todos los campos como se indica arriba
+5. Asegúrate de que el path sea: `C:\Proyectos\Jubilalia\jubilalia-release.jks`
+6. Guarda las contraseñas en un lugar seguro
+7. Intenta generar el APK de nuevo
+
+**Alternativa:** Si solo necesitas probar la app, usa **Build → Build APK(s)** (APK de debug, no requiere keystore)
 
 ### **Error: "SDK not found"**
 - Instala Android SDK desde Android Studio
