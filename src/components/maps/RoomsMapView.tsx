@@ -57,6 +57,7 @@ const RoomsMapView: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [showRoomList, setShowRoomList] = useState(false);
   const [filters, setFilters] = useState<RoomFilters>({
     minPrice: 0,
     maxPrice: 2000,
@@ -408,8 +409,8 @@ const RoomsMapView: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
         {/* Mapa */}
-        <div className="flex-1 relative min-h-[400px] lg:min-h-0">
-          <div ref={mapRef} className="w-full h-full min-h-[400px]" />
+        <div className="flex-1 relative">
+          <div ref={mapRef} className="w-full h-full" />
           
           {/* Controles del mapa */}
           <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-2">
@@ -418,13 +419,32 @@ const RoomsMapView: React.FC = () => {
               <span>Habitaciones disponibles</span>
             </div>
           </div>
+          
+          {/* Botón para mostrar lista en móvil */}
+          <button
+            onClick={() => setShowRoomList(!showRoomList)}
+            className="lg:hidden absolute bottom-6 right-6 bg-green-600 text-white rounded-full p-4 shadow-lg hover:bg-green-700 transition-colors z-10"
+          >
+            <HomeIcon className="w-6 h-6" />
+          </button>
         </div>
 
         {/* Panel lateral con lista de habitaciones */}
-        <div className="w-full lg:w-96 bg-white shadow-lg overflow-y-auto max-h-[400px] lg:max-h-none">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold text-gray-900">Habitaciones</h2>
-            <p className="text-sm text-gray-600">Haz clic en un marcador para ver detalles</p>
+        <div className={`${showRoomList ? 'block' : 'hidden'} lg:block lg:w-96 bg-white shadow-lg overflow-y-auto ${showRoomList ? 'fixed inset-0 z-50 lg:relative lg:inset-auto' : ''}`}>
+          <div className="p-4 border-b flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Habitaciones</h2>
+              <p className="text-sm text-gray-600">Haz clic en un marcador para ver detalles</p>
+            </div>
+            {/* Botón cerrar en móvil */}
+            <button
+              onClick={() => setShowRoomList(false)}
+              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
           
           <div className="divide-y divide-gray-200">
