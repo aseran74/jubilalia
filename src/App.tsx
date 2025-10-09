@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { useMobileApp } from './hooks/useMobileApp';
+import { Heart } from 'lucide-react';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
+import AppSplash from './pages/AppSplash';
 
 // Componentes de autenticación
 import SignUpForm from './components/auth/SignUpForm';
@@ -298,11 +301,27 @@ const DebugAuth: React.FC = () => {
 
 // Componente principal de la aplicación
 const App: React.FC = () => {
+  const { isMobileApp, isLoading } = useMobileApp();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-orange-50">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Heart className="w-8 h-8 text-white" />
+          </div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={isMobileApp ? <AppSplash /> : <LandingPage />} />
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/signin" element={<JubilaliaLogin />} />
           <Route path="/signup" element={<SignUpForm />} />
           <Route path="/login" element={<JubilaliaLogin />} />

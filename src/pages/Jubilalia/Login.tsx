@@ -10,6 +10,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { isMobileApp } from '../../utils/mobileDetection';
 
 const JubilaliaLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -55,7 +56,13 @@ const JubilaliaLogin: React.FC = () => {
       await signIn(formData.email, formData.password);
       
       console.log('✅ Login exitoso');
-      navigate('/dashboard');
+      
+      // Redirigir según el tipo de app
+      if (isMobileApp()) {
+        navigate('/landing');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       console.error('❌ Error en login:', error);
       setFormError(error.message || 'Error al iniciar sesión. Verifica tus credenciales.');
@@ -73,7 +80,13 @@ const JubilaliaLogin: React.FC = () => {
       await signInWithGoogle();
       
       console.log('✅ Login con Google exitoso');
-      navigate('/dashboard');
+      
+      // Redirigir según el tipo de app
+      if (isMobileApp()) {
+        navigate('/landing');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       console.error('❌ Error en login con Google:', error);
       setFormError('Error al iniciar sesión con Google: ' + error.message);

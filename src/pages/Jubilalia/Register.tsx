@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
+import { isMobileApp } from '../../utils/mobileDetection';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -213,7 +214,13 @@ const Register: React.FC = () => {
           }
 
           console.log('✅ Perfil creado exitosamente');
-          navigate('/dashboard');
+          
+          // Redirigir según el tipo de app
+          if (isMobileApp()) {
+            navigate('/landing');
+          } else {
+            navigate('/dashboard');
+          }
         } catch (profileError) {
           console.error('❌ Error en creación de perfil:', profileError);
           setFormError('Error al crear el perfil. Inténtalo de nuevo.');
