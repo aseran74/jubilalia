@@ -434,13 +434,34 @@ const RoomsMapView: React.FC = () => {
             </div>
           </div>
           
-          {/* Botón para mostrar lista en móvil */}
-          <button
-            onClick={() => setShowRoomList(!showRoomList)}
-            className="lg:hidden absolute bottom-6 right-6 bg-green-600 text-white rounded-full p-4 shadow-lg hover:bg-green-700 transition-colors z-10"
-          >
-            <HomeIcon className="w-6 h-6" />
-          </button>
+          {/* Botón flotante arriba en el centro para móvil */}
+          <div className="lg:hidden absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
+            <div className="bg-white rounded-full shadow-xl border border-gray-200 flex items-center divide-x divide-gray-200">
+              {/* Botón filtros */}
+              <button
+                onClick={() => {
+                  setShowFilters(!showFilters);
+                  setShowRoomList(false);
+                }}
+                className="px-5 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors rounded-l-full"
+              >
+                <FunnelIcon className="w-5 h-5 text-gray-700" />
+                <span className="text-sm font-medium text-gray-700">Filtros</span>
+              </button>
+              
+              {/* Botón lista con contador */}
+              <button
+                onClick={() => {
+                  setShowRoomList(!showRoomList);
+                  setShowFilters(false);
+                }}
+                className="px-5 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors rounded-r-full"
+              >
+                <HomeIcon className="w-5 h-5 text-green-600" />
+                <span className="bg-green-600 text-white text-xs font-semibold px-2 py-1 rounded-full min-w-[28px] text-center">{filteredRooms.length}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Panel lateral con lista de habitaciones */}

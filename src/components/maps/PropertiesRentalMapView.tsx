@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPinIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, HomeIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
-import UnifiedPropertyFilter from '../common/UnifiedPropertyFilter';
+import PropertiesRentalMapFilters, { PropertyRentalFilters } from './PropertiesRentalMapFilters';
 
 // Declarar tipos de Google Maps localmente
 declare global {
@@ -55,15 +55,19 @@ const PropertiesRentalMapView: React.FC = () => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [showPropertyList, setShowPropertyList] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
-  // Filtros
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedListingType, setSelectedListingType] = useState<string>('');
-  const [selectedPropertyType, setSelectedPropertyType] = useState<string>('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
-  const [bedrooms, setBedrooms] = useState(0);
-  const [bathrooms, setBathrooms] = useState(0);
+  // Filtros consolidados
+  const [filters, setFilters] = useState<PropertyRentalFilters>({
+    searchTerm: '',
+    selectedCity: '',
+    selectedListingType: '',
+    selectedPropertyType: '',
+    minPrice: 0,
+    maxPrice: 5000,
+    bedrooms: 0,
+    bathrooms: 0
+  });
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -74,32 +78,38 @@ const PropertiesRentalMapView: React.FC = () => {
   useEffect(() => {
     // Aplicar filtros
     const filtered = properties.filter(property => {
-      const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           property.address.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = property.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+                           property.description.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+                           property.address.toLowerCase().includes(filters.searchTerm.toLowerCase());
       
-      const matchesCity = !selectedCity || property.city === selectedCity;
+      const matchesCity = !filters.selectedCity || property.city === filters.selectedCity;
       
-      const matchesListingType = !selectedListingType || property.listing_type === selectedListingType;
+      const matchesListingType = !filters.selectedListingType || property.listing_type === filters.selectedListingType;
       
-      const matchesPropertyType = !selectedPropertyType || property.property_type === selectedPropertyType;
+      const matchesPropertyType = !filters.selectedPropertyType || property.property_type === filters.selectedPropertyType;
       
       const matchesPrice = !property.price || 
-                          (property.price >= priceRange.min && property.price <= priceRange.max);
+                          (property.price >= filters.minPrice && property.price <= filters.maxPrice);
       
-      const matchesBedrooms = bedrooms === 0 || (property.bedrooms && property.bedrooms >= bedrooms);
+      const matchesBedrooms = filters.bedrooms === 0 || (property.bedrooms && property.bedrooms >= filters.bedrooms);
       
-      const matchesBathrooms = bathrooms === 0 || (property.bathrooms && property.bathrooms >= bathrooms);
+      const matchesBathrooms = filters.bathrooms === 0 || (property.bathrooms && property.bathrooms >= filters.bathrooms);
       
       return matchesSearch && matchesCity && matchesListingType && matchesPropertyType && matchesPrice && matchesBedrooms && matchesBathrooms;
     });
     
     setFilteredProperties(filtered);
-  }, [properties, searchTerm, selectedCity, selectedListingType, selectedPropertyType, priceRange, bedrooms, bathrooms]);
+  }, [properties, filters]);
 
   useEffect(() => {
-    if (filteredProperties.length > 0 && mapRef.current && !map && mapsLoaded) {
+    if (mapRef.current && !map && mapsLoaded && properties.length > 0) {
       initializeMap();
+    }
+  }, [map, mapsLoaded, properties]);
+
+  useEffect(() => {
+    if (map && mapsLoaded) {
+      updateMarkers();
     }
   }, [filteredProperties, map, mapsLoaded]);
 
@@ -227,6 +237,10 @@ const PropertiesRentalMapView: React.FC = () => {
     });
 
     setMap(mapInstance);
+  };
+
+  const updateMarkers = () => {
+    if (!map || !window.google) return;
 
     // Limpiar marcadores anteriores
     markers.forEach(marker => marker.setMap(null));
@@ -246,7 +260,7 @@ const PropertiesRentalMapView: React.FC = () => {
         
         const marker = new window.google.maps.Marker({
           position: { lat: property.latitude, lng: property.longitude },
-          map: mapInstance,
+          map: map,
           title: property.title,
           icon: {
             url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
@@ -288,7 +302,7 @@ const PropertiesRentalMapView: React.FC = () => {
         });
 
         marker.addListener('click', () => {
-          infoWindow.open(mapInstance, marker);
+          infoWindow.open(map, marker);
           setSelectedProperty(property);
           
           // Agregar event listener para el botón de detalles después de que se abra el InfoWindow
@@ -315,7 +329,7 @@ const PropertiesRentalMapView: React.FC = () => {
     if (newMarkers.length > 0) {
       const bounds = new window.google.maps.LatLngBounds();
       newMarkers.forEach(marker => bounds.extend(marker.getPosition()!));
-      mapInstance.fitBounds(bounds);
+      map.fitBounds(bounds);
     }
   };
 
@@ -373,27 +387,6 @@ const PropertiesRentalMapView: React.FC = () => {
               </Link>
             </div>
           </div>
-          
-          {/* Filtros */}
-          <UnifiedPropertyFilter
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedCity={selectedCity}
-            setSelectedCity={setSelectedCity}
-            selectedListingType={selectedListingType}
-            setSelectedListingType={setSelectedListingType}
-            selectedPropertyType={selectedPropertyType}
-            setSelectedPropertyType={setSelectedPropertyType}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            bedrooms={bedrooms}
-            setBedrooms={setBedrooms}
-            bathrooms={bathrooms}
-            setBathrooms={setBathrooms}
-            cities={[...new Set(properties.map(p => p.city))]}
-            propertyTypes={[...new Set(properties.map(p => p.property_type))]}
-            showListingType={true}
-          />
         </div>
       </div>
 
@@ -425,13 +418,34 @@ const PropertiesRentalMapView: React.FC = () => {
             </div>
           </div>
           
-          {/* Botón para mostrar lista en móvil */}
-          <button
-            onClick={() => setShowPropertyList(!showPropertyList)}
-            className="lg:hidden absolute bottom-6 right-6 bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition-colors z-10"
-          >
-            <HomeIcon className="w-6 h-6" />
-          </button>
+          {/* Botón flotante arriba en el centro para móvil */}
+          <div className="lg:hidden absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
+            <div className="bg-white rounded-full shadow-xl border border-gray-200 flex items-center divide-x divide-gray-200">
+              {/* Botón filtros */}
+              <button
+                onClick={() => {
+                  setShowFilters(!showFilters);
+                  setShowPropertyList(false);
+                }}
+                className="px-5 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors rounded-l-full"
+              >
+                <FunnelIcon className="w-5 h-5 text-gray-700" />
+                <span className="text-sm font-medium text-gray-700">Filtros</span>
+              </button>
+              
+              {/* Botón lista con contador */}
+              <button
+                onClick={() => {
+                  setShowPropertyList(!showPropertyList);
+                  setShowFilters(false);
+                }}
+                className="px-5 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors rounded-r-full"
+              >
+                <HomeIcon className="w-5 h-5 text-blue-600" />
+                <span className="bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full min-w-[28px] text-center">{filteredProperties.length}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Panel lateral con lista de propiedades */}
@@ -535,6 +549,15 @@ const PropertiesRentalMapView: React.FC = () => {
         </div>
       </div>
 
+      {/* Componente de Filtros Modal */}
+      <PropertiesRentalMapFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClose={() => setShowFilters(false)}
+        isOpen={showFilters}
+        cities={[...new Set(properties.map(p => p.city))]}
+        propertyTypes={['Comunidad Coliving', 'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet', 'Casa rural']}
+      />
     </div>
   );
 };
