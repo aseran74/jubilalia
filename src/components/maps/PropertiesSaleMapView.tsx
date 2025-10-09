@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPinIcon, HomeIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
-import CompactNumberStepper from '../common/CompactNumberStepper';
-import AmenitiesFilter from '../common/AmenitiesFilter';
-import Modal from '../common/Modal';
+import UnifiedPropertyFilter from '../common/UnifiedPropertyFilter';
 
 // Declarar tipos de Google Maps localmente
 declare global {
@@ -61,7 +59,7 @@ const PropertiesSaleMapView: React.FC = () => {
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
+  const [selectedPropertyType, setSelectedPropertyType] = useState<string>('');
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -78,6 +76,8 @@ const PropertiesSaleMapView: React.FC = () => {
       
       const matchesCity = !selectedCity || property.city === selectedCity;
       
+      const matchesPropertyType = !selectedPropertyType || property.property_type?.toLowerCase() === selectedPropertyType.toLowerCase();
+      
       const matchesPrice = !property.price || 
                           ((priceRange.min === 0 || property.price >= priceRange.min) && 
                            (priceRange.max === 0 || property.price <= priceRange.max));
@@ -89,11 +89,11 @@ const PropertiesSaleMapView: React.FC = () => {
       // TODO: Implementar filtro de amenidades cuando tengamos los datos en la base
       const matchesAmenities = selectedAmenities.length === 0; // Por ahora siempre true
       
-      return matchesSearch && matchesCity && matchesPrice && matchesBedrooms && matchesBathrooms && matchesAmenities;
+      return matchesSearch && matchesCity && matchesPropertyType && matchesPrice && matchesBedrooms && matchesBathrooms && matchesAmenities;
     });
     
     setFilteredProperties(filtered);
-  }, [properties, searchTerm, selectedCity, priceRange, bedrooms, bathrooms, selectedAmenities]);
+  }, [properties, searchTerm, selectedCity, selectedPropertyType, priceRange, bedrooms, bathrooms, selectedAmenities]);
 
   useEffect(() => {
     if (filteredProperties.length > 0 && mapRef.current && !map && mapsLoaded) {
@@ -365,78 +365,23 @@ const PropertiesSaleMapView: React.FC = () => {
           </div>
           
           {/* Filtros */}
-          <div className="space-y-4">
-            {/* Fila 1: Búsqueda y Ciudad */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar propiedades..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-              
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                <option value="">Todas las ciudades</option>
-                {[...new Set(properties.map(p => p.city))].map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-            </div>
-            
-            {/* Fila 2: Precio, Habitaciones, Baños y Más Filtros */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="flex space-x-2">
-                <input
-                  type="number"
-                  placeholder="Min/€"
-                  value={priceRange.min || ''}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-                <input
-                  type="number"
-                  placeholder="Max/€"
-                  value={priceRange.max || ''}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-              
-              <CompactNumberStepper
-                label="Habitaciones"
-                value={bedrooms}
-                onChange={setBedrooms}
-                max={5}
-              />
-              
-              <CompactNumberStepper
-                label="Baños"
-                value={bathrooms}
-                onChange={setBathrooms}
-                max={4}
-              />
-              
-              <button
-                onClick={() => setIsFiltersModalOpen(true)}
-                className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <FunnelIcon className="w-4 h-4 mr-2" />
-                <span className="text-sm">Más filtros</span>
-                {selectedAmenities.length > 0 && (
-                  <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                    {selectedAmenities.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
+          <UnifiedPropertyFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+            selectedPropertyType={selectedPropertyType}
+            setSelectedPropertyType={setSelectedPropertyType}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            bedrooms={bedrooms}
+            setBedrooms={setBedrooms}
+            bathrooms={bathrooms}
+            setBathrooms={setBathrooms}
+            cities={[...new Set(properties.map(p => p.city))]}
+            propertyTypes={[...new Set(properties.map(p => p.property_type))]}
+            showListingType={false}
+          />
         </div>
       </div>
 
@@ -543,44 +488,6 @@ const PropertiesSaleMapView: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal de Filtros */}
-      <Modal
-        isOpen={isFiltersModalOpen}
-        onClose={() => setIsFiltersModalOpen(false)}
-        title="Filtros Avanzados"
-        size="lg"
-      >
-        <div className="space-y-6">
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Amenidades</h4>
-            <AmenitiesFilter
-              selectedAmenities={selectedAmenities}
-              onAmenitiesChange={setSelectedAmenities}
-            />
-          </div>
-          
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <button
-              onClick={() => {
-                setSelectedAmenities([]);
-                setBedrooms(0);
-                setBathrooms(0);
-                setPriceRange({ min: 0, max: 1000000 });
-              }}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Limpiar filtros
-            </button>
-            <button
-              onClick={() => setIsFiltersModalOpen(false)}
-              className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Aplicar filtros
-            </button>
-          </div>
-        </div>
-      </Modal>
 
     </div>
   );

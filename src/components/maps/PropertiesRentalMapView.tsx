@@ -1,11 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { MapPinIcon, HomeIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
-import CompactNumberStepper from '../common/CompactNumberStepper';
-import AmenitiesFilter from '../common/AmenitiesFilter';
-import Modal from '../common/Modal';
+import UnifiedPropertyFilter from '../common/UnifiedPropertyFilter';
 
 // Declarar tipos de Google Maps localmente
 declare global {
@@ -66,7 +64,6 @@ const PropertiesRentalMapView: React.FC = () => {
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -381,119 +378,25 @@ const PropertiesRentalMapView: React.FC = () => {
           </div>
           
           {/* Filtros */}
-          <div className="space-y-4">
-            {/* Fila 1: Búsqueda, Ciudad, Tipo de Operación y Tipo de Vivienda */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar propiedades..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              
-              <select
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Todas las ciudades</option>
-                {[...new Set(properties.map(p => p.city))].map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-              
-              <select
-                value={selectedListingType}
-                onChange={(e) => setSelectedListingType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Tipo de operación</option>
-                <option value="property_rental">Alquiler</option>
-                <option value="property_purchase">Venta</option>
-                <option value="coliving">Coliving</option>
-                <option value="room_rental">Habitaciones</option>
-              </select>
-              
-              <select
-                value={selectedPropertyType}
-                onChange={(e) => setSelectedPropertyType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Tipo de vivienda</option>
-                {[...new Set(properties.map(p => p.property_type))].map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-            
-            {/* Fila 2: Rango de Precio con Slider */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700">
-                  Rango de precio: {priceRange.min}€ - {priceRange.max}€
-                </label>
-                <button
-                  onClick={() => setPriceRange({ min: 0, max: 5000 })}
-                  className="text-xs text-blue-600 hover:text-blue-700"
-                >
-                  Resetear
-                </button>
-              </div>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="0"
-                  max="5000"
-                  step="100"
-                  value={priceRange.min}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="5000"
-                  step="100"
-                  value={priceRange.max}
-                  onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                />
-              </div>
-            </div>
-            
-            {/* Fila 3: Habitaciones, Baños y Más Filtros */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <CompactNumberStepper
-                label="Habitaciones"
-                value={bedrooms}
-                onChange={setBedrooms}
-                max={5}
-              />
-              
-              <CompactNumberStepper
-                label="Baños"
-                value={bathrooms}
-                onChange={setBathrooms}
-                max={4}
-              />
-              
-              <button
-                onClick={() => setIsFiltersModalOpen(true)}
-                className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <FunnelIcon className="w-4 h-4 mr-2" />
-                <span className="text-sm">Más filtros</span>
-                {selectedAmenities.length > 0 && (
-                  <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                    {selectedAmenities.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
+          <UnifiedPropertyFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+            selectedListingType={selectedListingType}
+            setSelectedListingType={setSelectedListingType}
+            selectedPropertyType={selectedPropertyType}
+            setSelectedPropertyType={setSelectedPropertyType}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            bedrooms={bedrooms}
+            setBedrooms={setBedrooms}
+            bathrooms={bathrooms}
+            setBathrooms={setBathrooms}
+            cities={[...new Set(properties.map(p => p.city))]}
+            propertyTypes={[...new Set(properties.map(p => p.property_type))]}
+            showListingType={true}
+          />
         </div>
       </div>
 
@@ -615,44 +518,6 @@ const PropertiesRentalMapView: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal de Filtros */}
-      <Modal
-        isOpen={isFiltersModalOpen}
-        onClose={() => setIsFiltersModalOpen(false)}
-        title="Filtros Avanzados"
-        size="lg"
-      >
-        <div className="space-y-6">
-          <div>
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Amenidades</h4>
-            <AmenitiesFilter
-              selectedAmenities={selectedAmenities}
-              onAmenitiesChange={setSelectedAmenities}
-            />
-          </div>
-          
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <button
-              onClick={() => {
-                setSelectedAmenities([]);
-                setBedrooms(0);
-                setBathrooms(0);
-                setPriceRange({ min: 0, max: 5000 });
-              }}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              Limpiar filtros
-            </button>
-            <button
-              onClick={() => setIsFiltersModalOpen(false)}
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Aplicar filtros
-            </button>
-          </div>
-        </div>
-      </Modal>
 
     </div>
   );

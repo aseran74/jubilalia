@@ -21,6 +21,17 @@ const NearbyPlaces: React.FC<NearbyPlacesProps> = ({
     ['supermarket', 'hospital', 'transit_station', 'school', 'pharmacy', 'bank']
   );
 
+  // Debug logs
+  console.log('🗺️ NearbyPlaces Debug:', {
+    latitude,
+    longitude,
+    radius,
+    loading,
+    error,
+    placesCount: places.length,
+    places
+  });
+
   if (loading) {
     return (
       <div className={`bg-white rounded-lg shadow-sm p-6 ${className}`}>
@@ -59,24 +70,49 @@ const NearbyPlaces: React.FC<NearbyPlacesProps> = ({
     );
   }
 
-  if (places.length === 0) {
+  if (places.length === 0 && !loading) {
     return (
       <div className={`bg-white rounded-lg shadow-sm p-6 ${className}`}>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           Actividades Cercanas
         </h2>
         <div className="text-center py-8">
-          <p className="text-gray-500">No se encontraron lugares cercanos</p>
+          <p className="text-gray-500 mb-2">No se encontraron lugares cercanos</p>
+          <p className="text-xs text-gray-400">
+            Coordenadas: {latitude.toFixed(4)}, {longitude.toFixed(4)}
+          </p>
+          {error && (
+            <p className="text-xs text-red-500 mt-2">Error: {error}</p>
+          )}
         </div>
       </div>
     );
   }
 
+  // Verificar si son datos de ejemplo
+  const isMockData = places.length > 0 && places[0].id.startsWith('mock-');
+
   return (
     <div className={`bg-white rounded-lg shadow-sm p-6 ${className}`}>
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
-        Actividades Cercanas
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-gray-900">
+          Actividades Cercanas
+        </h2>
+        {isMockData && (
+          <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+            Datos de ejemplo
+          </span>
+        )}
+      </div>
+      
+      {isMockData && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            ℹ️ <strong>Nota:</strong> Estos son lugares de ejemplo. Para ver lugares reales, configura <code className="bg-blue-100 px-1 rounded">VITE_GOOGLE_PLACES_API_KEY</code> en tu archivo <code className="bg-blue-100 px-1 rounded">.env</code>
+          </p>
+        </div>
+      )}
+      
       <div className="space-y-4">
         {places.map((place) => (
           <PlaceItem key={place.id} place={place} />

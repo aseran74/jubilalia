@@ -61,3 +61,4 @@ COMMENT ON COLUMN coliving_requirements.total_spots IS 'Número total de plazas 
 COMMENT ON COLUMN coliving_requirements.available_spots IS 'Número de plazas disponibles actualmente';
 COMMENT ON COLUMN coliving_requirements.community_description IS 'Descripción detallada de la comunidad y lo que incluye cada unidad';
 COMMENT ON COLUMN coliving_requirements.housing_type IS 'Tipo de estructura: apartamentos individuales o casa compartida';
+

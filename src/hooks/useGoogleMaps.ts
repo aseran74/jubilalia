@@ -55,6 +55,12 @@ export const useGoogleMaps = () => {
         setIsLoaded(true);
         setIsLoading(false);
         console.log('✅ Google Maps cargado exitosamente');
+        console.log('🔍 Verificando APIs disponibles:', {
+          hasGoogle: !!window.google,
+          hasMaps: !!(window.google && window.google.maps),
+          hasPlaces: !!(window.google && window.google.maps && window.google.maps.places),
+          hasPlacesService: !!(window.google && window.google.maps && window.google.maps.places && window.google.maps.places.PlacesService)
+        });
       };
 
       script.onerror = () => {

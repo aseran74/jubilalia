@@ -111,3 +111,4 @@ COMMENT ON COLUMN coliving_members.profile_id IS 'ID del usuario que es miembro'
 COMMENT ON COLUMN coliving_members.joined_at IS 'Fecha en que se unió a la comunidad';
 COMMENT ON COLUMN coliving_members.status IS 'Estado del miembro: active, inactive, pending';
 COMMENT ON COLUMN coliving_requirements.show_members_publicly IS 'Si se muestra públicamente la lista de miembros';
+
