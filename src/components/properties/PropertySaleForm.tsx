@@ -238,10 +238,7 @@ const PropertySaleForm: React.FC = () => {
     'Duplex',
     'Villa',
     'Chalet',
-    'Finca',
-    'Local comercial',
-    'Oficina',
-    'Nave industrial'
+    'Casa rural'
   ];
 
   const propertyConditions = [
@@ -910,7 +907,7 @@ const PropertySaleForm: React.FC = () => {
                 3. Características
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Habitaciones

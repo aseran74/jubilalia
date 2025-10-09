@@ -181,7 +181,7 @@ const PropertySaleList: React.FC = () => {
 
   const propertyTypes = [
     'Comunidad Coliving', 'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet',
-    'Finca', 'Local comercial', 'Oficina', 'Nave industrial'
+    'Casa rural'
   ];
 
   const formatPrice = (price: number) => new Intl.NumberFormat('es-ES', {
