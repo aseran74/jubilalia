@@ -123,55 +123,113 @@ const PropertiesSaleMapFilters: React.FC<PropertiesSaleMapFiltersProps> = ({
           </select>
         </div>
 
-        {/* Precio */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Precio Máximo (€)
+        {/* Precio con range slider doble */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Rango de Precio
           </label>
-          <input
-            type="number"
-            min="0"
-            value={localFilters.maxPrice || ''}
-            onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            placeholder="Sin límite"
-          />
+          <div className="space-y-4">
+            {/* Slider mínimo */}
+            <div className="space-y-2">
+              <label className="text-xs text-gray-500">Precio mínimo</label>
+              <input
+                type="range"
+                min="0"
+                max="1000000"
+                step="10000"
+                value={localFilters.minPrice}
+                onChange={(e) => {
+                  const newMin = parseInt(e.target.value);
+                  if (newMin <= localFilters.maxPrice) {
+                    handleFilterChange('minPrice', newMin);
+                  }
+                }}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+              />
+            </div>
+            
+            {/* Slider máximo */}
+            <div className="space-y-2">
+              <label className="text-xs text-gray-500">Precio máximo</label>
+              <input
+                type="range"
+                min="0"
+                max="1000000"
+                step="10000"
+                value={localFilters.maxPrice}
+                onChange={(e) => {
+                  const newMax = parseInt(e.target.value);
+                  if (newMax >= localFilters.minPrice) {
+                    handleFilterChange('maxPrice', newMax);
+                  }
+                }}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+              />
+            </div>
+            
+            {/* Valores seleccionados */}
+            <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+              <span className="font-semibold text-green-600 text-lg">
+                €{localFilters.minPrice.toLocaleString()}
+              </span>
+              <span className="text-gray-400">—</span>
+              <span className="font-semibold text-green-600 text-lg">
+                {localFilters.maxPrice === 1000000 ? 'Sin límite' : `€${localFilters.maxPrice.toLocaleString()}`}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Habitaciones */}
+        {/* Habitaciones con step */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Habitaciones Mínimas
           </label>
-          <select
-            value={localFilters.bedrooms}
-            onChange={(e) => handleFilterChange('bedrooms', parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value={0}>Cualquier cantidad</option>
-            <option value={1}>1+ habitación</option>
-            <option value={2}>2+ habitaciones</option>
-            <option value={3}>3+ habitaciones</option>
-            <option value={4}>4+ habitaciones</option>
-            <option value={5}>5+ habitaciones</option>
-          </select>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleFilterChange('bedrooms', Math.max(0, localFilters.bedrooms - 1))}
+              className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-lg font-semibold text-gray-600">−</span>
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-2xl font-semibold text-gray-900">{localFilters.bedrooms || 'Cualquier'}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleFilterChange('bedrooms', localFilters.bedrooms + 1)}
+              className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-lg font-semibold text-gray-600">+</span>
+            </button>
+          </div>
         </div>
 
-        {/* Baños */}
+        {/* Baños con step */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Baños Mínimos
           </label>
-          <select
-            value={localFilters.bathrooms}
-            onChange={(e) => handleFilterChange('bathrooms', parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value={0}>Cualquier cantidad</option>
-            <option value={1}>1+ baño</option>
-            <option value={2}>2+ baños</option>
-            <option value={3}>3+ baños</option>
-          </select>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleFilterChange('bathrooms', Math.max(0, localFilters.bathrooms - 1))}
+              className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-lg font-semibold text-gray-600">−</span>
+            </button>
+            <div className="flex-1 text-center">
+              <span className="text-2xl font-semibold text-gray-900">{localFilters.bathrooms || 'Cualquier'}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleFilterChange('bathrooms', localFilters.bathrooms + 1)}
+              className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-lg font-semibold text-gray-600">+</span>
+            </button>
+          </div>
         </div>
 
         </div>

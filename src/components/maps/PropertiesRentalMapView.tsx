@@ -556,7 +556,7 @@ const PropertiesRentalMapView: React.FC = () => {
         onClose={() => setShowFilters(false)}
         isOpen={showFilters}
         cities={[...new Set(properties.map(p => p.city))]}
-        propertyTypes={['Comunidad Coliving', 'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet', 'Casa rural']}
+        propertyTypes={['Comunidad Coliving', 'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet', 'Finca']}
       />
     </div>
   );
