@@ -147,8 +147,8 @@ const ActivityList: React.FC = () => {
           </button>
         </div>
         
-        {/* Búsqueda */}
-        <div className="relative">
+        {/* Búsqueda - oculto en móvil cuando está en modo mapa */}
+        <div className={`relative ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
@@ -333,6 +333,54 @@ const ActivityList: React.FC = () => {
           <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron actividades</h3>
           <p className="text-gray-500">Intenta ajustar los filtros de búsqueda o crear una nueva actividad</p>
+        </div>
+      )}
+
+      {/* Modal de búsqueda para móvil en modo mapa */}
+      {viewMode === 'map' && showSearchInMap && (
+        <div 
+          className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+          onClick={() => setShowSearchInMap(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">Buscar Actividades</h3>
+                <button
+                  onClick={() => setShowSearchInMap(false)}
+                  className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Buscar actividades..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  autoFocus
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200">
+              <button
+                onClick={() => setShowSearchInMap(false)}
+                className="w-full px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Buscar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
