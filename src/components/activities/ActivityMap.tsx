@@ -272,8 +272,8 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
       
       <div 
         ref={mapRef} 
-        className="w-full h-96"
-        style={{ minHeight: '400px' }}
+        className="w-full"
+        style={{ minHeight: '600px', height: '600px' }}
       />
       
       <div className="p-4 bg-gray-50 border-t border-gray-200">

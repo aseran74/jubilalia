@@ -32,6 +32,7 @@ const ActivityList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [showSearchInMap, setShowSearchInMap] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -302,11 +303,29 @@ const ActivityList: React.FC = () => {
         </div>
       ) : (
         /* Vista del mapa */
-        <ActivityMap 
-          activities={filteredActivities}
-          onActivitySelect={handleActivitySelect}
-          className="w-full"
-        />
+        <div className="relative">
+          <ActivityMap 
+            activities={filteredActivities}
+            onActivitySelect={handleActivitySelect}
+            className="w-full"
+          />
+          
+          {/* Botón flotante para búsqueda en modo mapa - solo móvil */}
+          <div className="lg:hidden absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
+            <button
+              onClick={() => setShowSearchInMap(!showSearchInMap)}
+              className="bg-white rounded-full shadow-xl border border-gray-200 px-6 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors"
+            >
+              <Search className="w-5 h-5 text-gray-700" />
+              <span className="text-sm font-medium text-gray-700">Buscar</span>
+              {searchTerm && (
+                <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                  1
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
       )}
 
       {filteredActivities.length === 0 && !loading && (

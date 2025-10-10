@@ -23,6 +23,7 @@ const PeopleSearch: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Detectar si estamos en la ruta del mapa
   useEffect(() => {
@@ -260,11 +261,54 @@ const PeopleSearch: React.FC = () => {
         />
       </div>
 
-      {/* Filtros */}
-      <PeopleSearchFilters
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-      />
+      {/* Filtros - ocultos en modo mapa móvil, siempre visibles en desktop o modo lista */}
+      <div className={viewMode === 'map' ? 'hidden lg:block' : 'block'}>
+        <PeopleSearchFilters
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+        />
+      </div>
+      
+      {/* Filtros Modal para móvil en modo mapa */}
+      {viewMode === 'map' && showFilters && (
+        <div 
+          className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+          onClick={() => setShowFilters(false)}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">Filtros de Búsqueda</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <PeopleSearchFilters
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+              />
+            </div>
+            <div className="p-6 border-t border-gray-200">
+              <button
+                onClick={() => setShowFilters(false)}
+                className="w-full px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Aplicar Filtros
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Controles de vista */}
       <div className="flex justify-between items-center">
@@ -325,10 +369,31 @@ const PeopleSearch: React.FC = () => {
               onPersonSelect={handlePersonSelect}
             />
           ) : (
-            <PeopleSearchMap
-              searchResults={filteredResults}
-              onPersonSelect={handlePersonSelect}
-            />
+            <div className="relative">
+              <PeopleSearchMap
+                searchResults={filteredResults}
+                onPersonSelect={handlePersonSelect}
+                className=""
+              />
+              
+              {/* Botón flotante para filtros en modo mapa - solo móvil */}
+              <div className="lg:hidden absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="bg-white rounded-full shadow-xl border border-gray-200 px-6 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors"
+                >
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                  </svg>
+                  <span className="text-sm font-medium text-gray-700">Filtros</span>
+                  {(filters.interests.length > 0 || filters.gender || filters.occupation) && (
+                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
+                      {(filters.interests.length || 0) + (filters.gender ? 1 : 0) + (filters.occupation ? 1 : 0)}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
           )}
         </>
       )}
