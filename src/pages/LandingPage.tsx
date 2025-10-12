@@ -420,7 +420,7 @@ const LandingPage: React.FC = () => {
               </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-purple-700 transition-colors">Habitaciones</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Encuentra habitaciones disponibles para compartir vivienda de forma segura
+                  Encuentra habitaciones disponibles para compartir vivienda de forma segura. Si vives solo, encuentra compañeros con nuestro sistema Jubilalia, con los que compartir tu vivienda y compartir gastos y experiencias únicas.
               </p>
               <button 
                 onClick={() => navigate('/dashboard/rooms')}
