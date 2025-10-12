@@ -10,7 +10,8 @@ import {
   UserIcon,
   CalendarIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircle } from 'lucide-react';
 import RoomDetailMap from '../maps/RoomDetailMap';
@@ -34,6 +35,7 @@ interface Property {
   created_at: string;
   status: string;
   author_id: string;
+  url?: string;
   coliving_data?: {
     total_spots: number;
     available_spots: number;
@@ -538,6 +540,15 @@ const PropertyDetail: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-3">
+                  {property.url && (
+                    <button 
+                      onClick={() => window.open(property.url, '_blank')}
+                      className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                    >
+                      <ArrowTopRightOnSquareIcon className="w-4 h-4 mr-2" />
+                      Visitar Sitio Web
+                    </button>
+                  )}
                   <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
                     <PhoneIcon className="w-4 h-4 mr-2" />
                     Llamar

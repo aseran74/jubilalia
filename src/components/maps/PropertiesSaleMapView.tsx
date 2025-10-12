@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MapPinIcon, HomeIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
-import PropertiesSaleMapFilters, { PropertySaleFilters } from './PropertiesSaleMapFilters';
+import PropertiesSaleMapFilters from './PropertiesSaleMapFilters';
+import UnifiedPropertyFilter from '../common/UnifiedPropertyFilter';
 
 // Declarar tipos de Google Maps localmente
 declare global {
@@ -39,6 +40,7 @@ interface Property {
   construction_year: number | null;
   created_at: string;
   primary_image_url?: string;
+  url?: string;
 }
 
 const PropertiesSaleMapView: React.FC = () => {
@@ -54,16 +56,33 @@ const PropertiesSaleMapView: React.FC = () => {
   const [showPropertyList, setShowPropertyList] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   
-  // Filtros consolidados
-  const [filters, setFilters] = useState<PropertySaleFilters>({
-    searchTerm: '',
-    selectedCity: '',
-    minPrice: 0,
-    maxPrice: 1000000,
-    bedrooms: 0,
-    bathrooms: 0,
-    selectedPropertyType: ''
-  });
+  // Filtros compatibles con UnifiedPropertyFilter
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [propertyType, setPropertyType] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000000 });
+  const [bedrooms, setBedrooms] = useState(0);
+  const [bathrooms, setBathrooms] = useState(0);
+  
+  // Crear objeto filters compatible con el modal
+  const filters = {
+    searchTerm,
+    selectedCity,
+    minPrice: priceRange.min,
+    maxPrice: priceRange.max,
+    bedrooms,
+    bathrooms,
+    selectedPropertyType: propertyType
+  };
+  
+  const setFilters = (newFilters: typeof filters) => {
+    setSearchTerm(newFilters.searchTerm);
+    setSelectedCity(newFilters.selectedCity);
+    setPriceRange({ min: newFilters.minPrice, max: newFilters.maxPrice });
+    setBedrooms(newFilters.bedrooms);
+    setBathrooms(newFilters.bathrooms);
+    setPropertyType(newFilters.selectedPropertyType);
+  };
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -74,27 +93,27 @@ const PropertiesSaleMapView: React.FC = () => {
   useEffect(() => {
     // Aplicar filtros
     const filtered = properties.filter(property => {
-      const matchesSearch = property.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-                           property.description.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-                           property.address.toLowerCase().includes(filters.searchTerm.toLowerCase());
+      const matchesSearch = property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           property.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           property.address.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesCity = !filters.selectedCity || property.city === filters.selectedCity;
+      const matchesCity = !selectedCity || property.city === selectedCity;
       
-      const matchesPropertyType = !filters.selectedPropertyType || property.property_type?.toLowerCase() === filters.selectedPropertyType.toLowerCase();
+      const matchesPropertyType = !propertyType || property.property_type?.toLowerCase() === propertyType.toLowerCase();
       
       const matchesPrice = !property.price || 
-                          ((filters.minPrice === 0 || property.price >= filters.minPrice) && 
-                           (filters.maxPrice === 0 || property.price <= filters.maxPrice));
+                          ((priceRange.min === 0 || property.price >= priceRange.min) && 
+                           (priceRange.max === 1000000 || property.price <= priceRange.max));
       
-      const matchesBedrooms = filters.bedrooms === 0 || (property.bedrooms && property.bedrooms >= filters.bedrooms);
+      const matchesBedrooms = bedrooms === 0 || (property.bedrooms && property.bedrooms >= bedrooms);
       
-      const matchesBathrooms = filters.bathrooms === 0 || (property.bathrooms && property.bathrooms >= filters.bathrooms);
+      const matchesBathrooms = bathrooms === 0 || (property.bathrooms && property.bathrooms >= bathrooms);
       
       return matchesSearch && matchesCity && matchesPropertyType && matchesPrice && matchesBedrooms && matchesBathrooms;
     });
     
     setFilteredProperties(filtered);
-  }, [properties, filters]);
+  }, [properties, searchTerm, selectedCity, propertyType, priceRange, bedrooms, bathrooms]);
 
   useEffect(() => {
     if (mapRef.current && !map && mapsLoaded && properties.length > 0) {
@@ -378,6 +397,35 @@ const PropertiesSaleMapView: React.FC = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
+        {/* Panel de filtros para PC y tablet */}
+        <div className="hidden lg:block lg:w-80 bg-white shadow-lg border-r border-gray-200 overflow-y-auto">
+          <div className="p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <FunnelIcon className="w-5 h-5 text-blue-500" />
+              Filtros
+            </h3>
+            <UnifiedPropertyFilter
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              selectedCity={selectedCity}
+              setSelectedCity={setSelectedCity}
+              selectedPropertyType={propertyType}
+              setSelectedPropertyType={setPropertyType}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              bedrooms={bedrooms}
+              setBedrooms={setBedrooms}
+              bathrooms={bathrooms}
+              setBathrooms={setBathrooms}
+              selectedAmenities={[]}
+              cities={[...new Set(properties.map(p => p.city))]}
+              propertyTypes={['Comunidad Coliving', 'Apartamento', 'Casa', 'Estudio', 'Loft', 'Duplex', 'Villa', 'Chalet', 'Casa rural']}
+              onOpenAdvancedFilters={() => {}}
+              maxPrice={1000000}
+            />
+          </div>
+        </div>
+
         {/* Mapa */}
         <div className="flex-1 relative">
           <div ref={mapRef} className="w-full h-full" />
