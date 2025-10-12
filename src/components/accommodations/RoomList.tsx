@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, X } from 'lucide-react';
+import { Search, Plus, X, Info } from 'lucide-react';
 import RoomCard from './RoomCard';
 import { supabase } from '../../lib/supabase';
 import PriceRangeSlider from '../common/PriceRangeSlider';
+import CompartirInfoModal from './CompartirInfoModal';
 
 interface Room {
   id: string;
@@ -50,6 +51,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     gender: 'male' as string
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   // Función para cargar datos reales de Supabase
   const fetchRooms = async () => {
@@ -215,13 +217,22 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
               <h1 className="text-3xl font-bold text-gray-900">Compartir - Habitaciones Disponibles</h1>
               <p className="text-gray-600 mt-2">Encuentra tu hogar ideal para la jubilación</p>
             </div>
-            <button
-              onClick={() => navigate('/dashboard/rooms/create')}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Publicar Habitación
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowInfoModal(true)}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <Info className="w-5 h-5" />
+                ¿Cómo funciona?
+              </button>
+              <button
+                onClick={() => navigate('/dashboard/rooms/create')}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Publicar Habitación
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -461,6 +472,9 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
           </div>
         </div>
       )}
+
+      {/* Modal de información */}
+      <CompartirInfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
     </div>
   );
 };

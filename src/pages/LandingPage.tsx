@@ -16,7 +16,13 @@ import {
   UserIcon as User,
   HomeIcon as Home,
   CurrencyEuroIcon as CurrencyEuro,
-  KeyIcon as Key
+  KeyIcon as Key,
+  HeartIcon as Heart,
+  SparklesIcon as Sparkles,
+  ShieldCheckIcon as Shield,
+  SparklesIcon as Spray,
+  CakeIcon as UtensilsCrossed,
+  GiftIcon as PartyPopper
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
@@ -710,6 +716,163 @@ const LandingPage: React.FC = () => {
 
       {/* Stats Section */}
       <StatsSection />
+
+      {/* Compartir - Vive acompañado */}
+      <section id="compartir" className="py-20 bg-gradient-to-b from-green-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
+              <Heart className="w-8 h-8 text-green-600" />
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              💚 Vive acompañado, vive mejor con Jubilalia
+            </h2>
+            <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+              Porque sabemos que en España viven solas, con 65 o más años, aproximadamente <strong>1.511.000 mujeres</strong> y <strong>620.400 hombres</strong>,
+              en Jubilalia creamos soluciones reales para que puedan disfrutar de una convivencia plena, tranquila y feliz.
+            </p>
+          </div>
+
+          {/* Nueva forma de vivir */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-12">
+            <div className="flex items-center mb-6">
+              <Sparkles className="w-8 h-8 text-yellow-500 mr-4" />
+              <h3 className="text-3xl font-bold text-gray-900">Una nueva forma de vivir la madurez</h3>
+            </div>
+            <p className="text-lg text-gray-700 leading-relaxed">
+              En Jubilalia creemos que la felicidad no tiene edad.
+              Muchas personas viven solas, no por elección, sino porque la vida ha cambiado sus caminos.
+              Por eso hemos creado un sistema sencillo, humano y seguro que te permite encontrar a alguien compatible para compartir casa, gastos… y experiencias.
+            </p>
+          </div>
+
+          {/* Cómo funciona */}
+          <div className="mb-12">
+            <div className="flex items-center justify-center mb-8">
+              <MessageCircle className="w-8 h-8 text-blue-500 mr-4" />
+              <h3 className="text-3xl font-bold text-gray-900">💬 Cómo funciona</h3>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500 hover:shadow-xl transition-shadow">
+                <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Te conocemos</h4>
+                <p className="text-gray-700">
+                  Nos cuentas quién eres, cómo vives, qué te gusta y qué esperas de la convivencia.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500 hover:shadow-xl transition-shadow">
+                <div className="w-12 h-12 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Buscamos por ti</h4>
+                <p className="text-gray-700">
+                  En Jubilalia buscamos personas afines que también quieran compartir hogar o compañía.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500 hover:shadow-xl transition-shadow">
+                <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Os conectamos</h4>
+                <p className="text-gray-700">
+                  Os ponemos en contacto para que os conozcáis sin compromiso. Podéis convivir unos días de prueba.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-yellow-500 hover:shadow-xl transition-shadow">
+                <div className="w-12 h-12 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">4</div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Nueva etapa</h4>
+                <p className="text-gray-700">
+                  Si todo encaja, empieza una etapa de compañía, ahorro y vida compartida.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Ejemplo real */}
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow-xl p-8 md:p-12 mb-12 border-l-8 border-blue-500">
+            <div className="flex items-center mb-6">
+              <Home className="w-8 h-8 text-blue-600 mr-4" />
+              <h3 className="text-2xl font-bold text-gray-900">🏡 Ejemplo real: María y Pepa, del Barrio del Pilar</h3>
+            </div>
+            <div className="space-y-4 text-gray-800 text-lg">
+              <p>
+                <strong>María Gonzalo Zamorano (68)</strong> y <strong>Pepa Martínez Serra (71)</strong>, ambas viudas con pensiones de 1.400 €, se conocieron gracias a Jubilalia.
+                Al principio dudaban, pero tras unos días conviviendo descubrieron que se entendían a la perfección.
+              </p>
+              <p>
+                María alquiló su casa por 1.400 €, y acordaron pagar 700 € cada una.
+                <strong className="text-blue-700"> Ahora, cada una dispone de 1.800 € netos al mes</strong>, viven acompañadas, comparten risas, comidas y nuevas aventuras.
+              </p>
+              <p className="italic text-blue-900 font-medium">
+                Con Jubilalia han encontrado algo más que un techo compartido: una amiga, tranquilidad y una vida activa.
+              </p>
+            </div>
+          </div>
+
+          {/* Servicios */}
+          <div className="mb-12">
+            <div className="text-center mb-10">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">🌸 Servicios que hacen la vida más fácil</h3>
+              <p className="text-lg text-gray-700">
+                Porque vivir bien no es solo compartir casa: es disfrutar cada día con tranquilidad, sabor y bienestar.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-orange-400">
+                <UtensilsCrossed className="w-10 h-10 text-orange-500 mb-4" />
+                <h4 className="text-xl font-bold text-gray-900 mb-2">🍽️ Alimentación</h4>
+                <p className="text-sm text-gray-600 mb-2 font-semibold">TAPPERS</p>
+                <p className="text-gray-700">
+                  Menús caseros, equilibrados y listos para calentar. Sin preocuparse por cocinar.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-blue-400">
+                <Spray className="w-10 h-10 text-blue-500 mb-4" />
+                <h4 className="text-xl font-bold text-gray-900 mb-2">🧹 Limpieza</h4>
+                <p className="text-sm text-gray-600 mb-2 font-semibold">CÉS GOURMET</p>
+                <p className="text-gray-700">
+                  Tu hogar siempre limpio, cuidado y a tu gusto. Más tiempo para ti.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-red-400">
+                <Shield className="w-10 h-10 text-red-500 mb-4" />
+                <h4 className="text-xl font-bold text-gray-900 mb-2">💊 Bienestar</h4>
+                <p className="text-sm text-gray-600 mb-2 font-semibold">ADESLAS</p>
+                <p className="text-gray-700">
+                  Seguros de hogar y salud. Vivir acompañado y vivir seguro.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-purple-400">
+                <PartyPopper className="w-10 h-10 text-purple-500 mb-4" />
+                <h4 className="text-xl font-bold text-gray-900 mb-2">🎉 Actividades</h4>
+                <p className="text-sm text-gray-600 mb-2 font-semibold">OCIO Y BIENESTAR</p>
+                <p className="text-gray-700">
+                  Campeonatos, viajes, escapadas. Porque compartir es disfrutar.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonio */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl shadow-xl p-8 md:p-12 border-2 border-green-200">
+            <div className="flex items-center justify-center mb-6">
+              <Users className="w-8 h-8 text-green-600 mr-4" />
+              <h3 className="text-2xl font-bold text-gray-900">💬 En palabras de María y Pepa</h3>
+            </div>
+            <blockquote className="text-xl italic text-gray-800 text-center border-l-4 border-green-500 pl-6">
+              "Gracias a Jubilalia hemos vuelto a reír, a viajar, a sentirnos vivas.
+              No somos solo compañeras de piso… somos amigas que comparten una nueva etapa de vida."
+            </blockquote>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-12">
+            <button
+              onClick={() => navigate('/register')}
+              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-10 py-4 rounded-full text-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform"
+            >
+              Comenzar ahora
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* FAQ */}
       <section id="faq" className="py-20 bg-gray-50">
