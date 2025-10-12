@@ -1,5 +1,17 @@
 import React from 'react';
-import { X, Heart, Users, Home, MessageCircle, CheckCircle, Sparkles, UtensilsCrossed, Spray, Shield, PartyPopper } from 'lucide-react';
+import { X } from 'lucide-react';
+import { 
+  HeartIcon as Heart, 
+  UserGroupIcon as Users, 
+  HomeIcon as Home, 
+  ChatBubbleLeftRightIcon as MessageCircle, 
+  CheckCircleIcon as CheckCircle, 
+  SparklesIcon as Sparkles, 
+  CakeIcon as UtensilsCrossed, 
+  SparklesIcon as Spray, 
+  ShieldCheckIcon as Shield, 
+  GiftIcon as PartyPopper 
+} from '@heroicons/react/24/outline';
 
 interface CompartirInfoModalProps {
   isOpen: boolean;
