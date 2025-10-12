@@ -219,7 +219,10 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowInfoModal(true)}
+                onClick={() => {
+                  console.log('Abriendo modal Compartir Info');
+                  setShowInfoModal(true);
+                }}
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
               >
                 <Info className="w-5 h-5" />

@@ -7,11 +7,19 @@ interface CompartirInfoModalProps {
 }
 
 const CompartirInfoModal: React.FC<CompartirInfoModalProps> = ({ isOpen, onClose }) => {
+  console.log('CompartirInfoModal - isOpen:', isOpen);
+  
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto my-8">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto my-8"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-green-50 to-blue-50 border-b border-gray-200 p-6 flex items-center justify-between z-10">
           <div className="flex items-center">
