@@ -407,14 +407,10 @@ const PropertiesRentalMapView: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
-        {/* Panel de filtros para PC y tablet */}
-        <div className="hidden lg:block lg:w-80 bg-white shadow-lg border-r border-gray-200 overflow-y-auto">
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <FunnelIcon className="w-5 h-5 text-green-500" />
-              Filtros
-            </h3>
+      <div className="flex flex-col h-[calc(100vh-80px)]">
+        {/* Filtros arriba para PC y tablet */}
+        <div className="hidden lg:block bg-white shadow-md border-b border-gray-200">
+          <div className="p-4">
             <UnifiedPropertyFilter
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
@@ -437,32 +433,11 @@ const PropertiesRentalMapView: React.FC = () => {
           </div>
         </div>
 
+        {/* Contenedor de mapa y lista */}
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Mapa */}
         <div className="flex-1 relative">
           <div ref={mapRef} className="w-full h-full" />
-          
-          {/* Controles del mapa - Leyenda */}
-          <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3">
-            <h3 className="text-xs font-semibold text-gray-700 mb-2">Tipos de Propiedad</h3>
-            <div className="space-y-1.5">
-              <div className="flex items-center space-x-2 text-xs text-gray-600">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span>Alquiler</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-600">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>Venta</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-600">
-                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                <span>Coliving</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-600">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span>Habitaciones</span>
-              </div>
-            </div>
-          </div>
           
           {/* Botón flotante arriba en el centro para móvil */}
           <div className="lg:hidden absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
@@ -592,6 +567,7 @@ const PropertiesRentalMapView: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
 

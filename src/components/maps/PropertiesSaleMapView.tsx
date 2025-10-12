@@ -396,14 +396,10 @@ const PropertiesSaleMapView: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)]">
-        {/* Panel de filtros para PC y tablet */}
-        <div className="hidden lg:block lg:w-80 bg-white shadow-lg border-r border-gray-200 overflow-y-auto">
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <FunnelIcon className="w-5 h-5 text-blue-500" />
-              Filtros
-            </h3>
+      <div className="flex flex-col h-[calc(100vh-80px)]">
+        {/* Filtros arriba para PC y tablet */}
+        <div className="hidden lg:block bg-white shadow-md border-b border-gray-200">
+          <div className="p-4">
             <UnifiedPropertyFilter
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
@@ -426,6 +422,8 @@ const PropertiesSaleMapView: React.FC = () => {
           </div>
         </div>
 
+        {/* Contenedor de mapa y lista */}
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Mapa */}
         <div className="flex-1 relative">
           <div ref={mapRef} className="w-full h-full" />
@@ -566,6 +564,7 @@ const PropertiesSaleMapView: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
 
