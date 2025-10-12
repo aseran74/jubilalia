@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
-import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Map } from 'lucide-react';
+import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Map, X } from 'lucide-react';
 import PriceRangeSlider from '../common/PriceRangeSlider';
 
 interface Room {
@@ -42,6 +42,7 @@ const RoomList: React.FC = () => {
   const [genderFilter, setGenderFilter] = useState('male');
   const [petsFilter, setPetsFilter] = useState<boolean | null>(null);
   const [smokingFilter, setSmokingFilter] = useState<boolean | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const navigate = useNavigate();
   const { isAdmin, profile } = useAuth();
@@ -371,16 +372,14 @@ const RoomList: React.FC = () => {
             ))}
           </select>
 
-          {/* Filtro de precio */}
-          <div className="w-64">
-            <PriceRangeSlider
-              min={0}
-              max={2000}
-              value={priceRange}
-              onChange={setPriceRange}
-              step={50}
-            />
-          </div>
+          {/* Botón de filtros avanzados */}
+          <button 
+            onClick={() => setShowAdvancedFilters(true)}
+            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Search className="w-4 h-4 mr-2" />
+            Más filtros
+          </button>
 
           {/* Filtros adicionales */}
           <div className="flex space-x-2">
@@ -560,6 +559,107 @@ const RoomList: React.FC = () => {
           <Bed className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron habitaciones</h3>
           <p className="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+        </div>
+      )}
+
+      {/* Modal de Filtros Avanzados */}
+      {showAdvancedFilters && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header del Modal */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+              <h2 className="text-2xl font-bold text-gray-900">Filtros Avanzados</h2>
+              <button
+                onClick={() => setShowAdvancedFilters(false)}
+                className="p-2 hover:bg-white rounded-full transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-600" />
+              </button>
+            </div>
+            
+            {/* Contenido del Modal */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-8">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-4">
+                  Rango de Precio (€/mes)
+                </label>
+                <PriceRangeSlider
+                  min={0}
+                  max={2000}
+                  value={priceRange}
+                  onChange={setPriceRange}
+                  step={50}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-4">
+                  Género
+                </label>
+                <select
+                  value={genderFilter}
+                  onChange={(e) => setGenderFilter(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="male">Soy un hombre</option>
+                  <option value="female">Soy una mujer</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-4">
+                  Características
+                </label>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">Mascotas</label>
+                    <select
+                      value={petsFilter === null ? '' : petsFilter.toString()}
+                      onChange={(e) => setPetsFilter(e.target.value === '' ? null : e.target.value === 'true')}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">Cualquiera</option>
+                      <option value="true">Permitidas</option>
+                      <option value="false">No permitidas</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-700 mb-2">Fumar</label>
+                    <select
+                      value={smokingFilter === null ? '' : smokingFilter.toString()}
+                      onChange={(e) => setSmokingFilter(e.target.value === '' ? null : e.target.value === 'true')}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">Cualquiera</option>
+                      <option value="true">Permitido</option>
+                      <option value="false">No permitido</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+            {/* Footer del Modal */}
+            <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => {
+                  setPriceRange({ min: 0, max: 2000 });
+                  setGenderFilter('male');
+                  setPetsFilter(null);
+                  setSmokingFilter(null);
+                }}
+                className="flex-1 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Limpiar Filtros
+              </button>
+              <button
+                onClick={() => setShowAdvancedFilters(false)}
+                className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+              >
+                Aplicar Filtros
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
