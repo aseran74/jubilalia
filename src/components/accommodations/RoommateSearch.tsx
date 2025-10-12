@@ -11,20 +11,12 @@ interface PotentialRoommate {
   avatar_url?: string;
   city?: string;
   bio?: string;
-  age?: number;
+  date_of_birth?: string;
+  gender?: string;
   interests?: string[];
-  lifestyle_preferences?: {
-    smoking: boolean;
-    pets: boolean;
-    partying: boolean;
-    cleanliness: 'low' | 'medium' | 'high';
-  };
-  roommate_preferences?: {
-    age_range: { min: number; max: number };
-    gender_preference: 'any' | 'male' | 'female';
-    smoking_allowed: boolean;
-    pets_allowed: boolean;
-  };
+  phone?: string;
+  has_room_to_share?: boolean;
+  wants_to_find_roommate?: boolean;
   created_at: string;
 }
 
@@ -32,9 +24,6 @@ interface RoommateSearchFilters {
   city: string;
   ageRange: { min: number; max: number };
   gender: 'any' | 'male' | 'female';
-  smoking: 'any' | 'yes' | 'no';
-  pets: 'any' | 'yes' | 'no';
-  cleanliness: 'any' | 'low' | 'medium' | 'high';
 }
 
 const RoommateSearch: React.FC = () => {
@@ -46,11 +35,8 @@ const RoommateSearch: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<RoommateSearchFilters>({
     city: '',
-    ageRange: { min: 18, max: 80 },
-    gender: 'any',
-    smoking: 'any',
-    pets: 'any',
-    cleanliness: 'any'
+    ageRange: { min: 60, max: 85 },
+    gender: 'any'
   });
 
   useEffect(() => {
@@ -61,19 +47,19 @@ const RoommateSearch: React.FC = () => {
     try {
       setLoading(true);
       
-      // Buscar usuarios que tengan la preferencia de vivir con alguien
+      // Buscar usuarios que buscan compañero
       const { data: profiles, error } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          lifestyle_preferences,
-          roommate_preferences
-        `)
+        .select('*')
         .eq('wants_to_find_roommate', true)
-        .neq('id', user?.id); // Excluir al usuario actual
+        .neq('id', user?.id || '00000000-0000-0000-0000-000000000000'); // Excluir al usuario actual
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error en query:', error);
+        throw error;
+      }
 
+      console.log('Socios encontrados:', profiles?.length);
       setPotentialRoommates(profiles || []);
     } catch (error) {
       console.error('Error fetching potential roommates:', error);
@@ -84,31 +70,22 @@ const RoommateSearch: React.FC = () => {
 
   const filteredRoommates = potentialRoommates.filter(roommate => {
     const matchesSearch = !searchTerm || 
-      roommate.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      roommate.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       roommate.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       roommate.bio?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCity = !filters.city || roommate.city === filters.city;
 
-    const matchesAge = roommate.age 
-      ? roommate.age >= filters.ageRange.min && roommate.age <= filters.ageRange.max
-      : true;
+    // Calcular edad a partir de date_of_birth
+    const age = roommate.date_of_birth 
+      ? Math.floor((new Date().getTime() - new Date(roommate.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+      : null;
 
-    const matchesGender = filters.gender === 'any' || 
-      roommate.roommate_preferences?.gender_preference === 'any' ||
-      roommate.roommate_preferences?.gender_preference === filters.gender;
+    const matchesAge = !age || (age >= filters.ageRange.min && age <= filters.ageRange.max);
 
-    const matchesSmoking = filters.smoking === 'any' ||
-      roommate.lifestyle_preferences?.smoking === (filters.smoking === 'yes');
+    const matchesGender = filters.gender === 'any' || roommate.gender === filters.gender;
 
-    const matchesPets = filters.pets === 'any' ||
-      roommate.lifestyle_preferences?.pets === (filters.pets === 'yes');
-
-    const matchesCleanliness = filters.cleanliness === 'any' ||
-      roommate.lifestyle_preferences?.cleanliness === filters.cleanliness;
-
-    return matchesSearch && matchesCity && matchesAge && matchesGender && 
-           matchesSmoking && matchesPets && matchesCleanliness;
+    return matchesSearch && matchesCity && matchesAge && matchesGender;
   });
 
   const cities = [...new Set(potentialRoommates.map(r => r.city).filter(Boolean))];
@@ -198,36 +175,34 @@ const RoommateSearch: React.FC = () => {
                   </select>
                 </div>
 
-                {/* Fumar */}
+                {/* Rango de edad */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Fumar
+                    Edad mínima
                   </label>
-                  <select
-                    value={filters.smoking}
-                    onChange={(e) => setFilters(prev => ({ ...prev, smoking: e.target.value as any }))}
+                  <input
+                    type="number"
+                    value={filters.ageRange.min}
+                    onChange={(e) => setFilters(prev => ({ ...prev, ageRange: { ...prev.ageRange, min: parseInt(e.target.value) || 60 } }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="any">Indiferente</option>
-                    <option value="yes">Sí fuma</option>
-                    <option value="no">No fuma</option>
-                  </select>
+                    min="60"
+                    max="85"
+                  />
                 </div>
 
-                {/* Mascotas */}
+                {/* Edad máxima */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mascotas
+                    Edad máxima
                   </label>
-                  <select
-                    value={filters.pets}
-                    onChange={(e) => setFilters(prev => ({ ...prev, pets: e.target.value as any }))}
+                  <input
+                    type="number"
+                    value={filters.ageRange.max}
+                    onChange={(e) => setFilters(prev => ({ ...prev, ageRange: { ...prev.ageRange, max: parseInt(e.target.value) || 85 } }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="any">Indiferente</option>
-                    <option value="yes">Tiene mascotas</option>
-                    <option value="no">Sin mascotas</option>
-                  </select>
+                    min="60"
+                    max="85"
+                  />
                 </div>
               </div>
             </div>
@@ -278,9 +253,10 @@ const RoommateSearch: React.FC = () => {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {roommate.full_name}
                       </h3>
-                      {roommate.age && (
-                        <p className="text-gray-600">{roommate.age} años</p>
-                      )}
+                      {roommate.date_of_birth && (() => {
+                        const age = Math.floor((new Date().getTime() - new Date(roommate.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+                        return <p className="text-gray-600">{age} años</p>;
+                      })()}
                       {roommate.city && (
                         <div className="flex items-center text-gray-500">
                           <MapPin className="w-4 h-4 mr-1" />
@@ -297,33 +273,27 @@ const RoommateSearch: React.FC = () => {
                     </p>
                   )}
 
-                  {/* Preferencias de estilo de vida */}
-                  {roommate.lifestyle_preferences && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">
-                        Estilo de vida
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          roommate.lifestyle_preferences.smoking 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {roommate.lifestyle_preferences.smoking ? 'Fuma' : 'No fuma'}
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          roommate.lifestyle_preferences.pets 
+                  {/* Información adicional */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      {roommate.gender && (
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          roommate.gender === 'male' 
                             ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-gray-100 text-gray-800'
+                            : 'bg-pink-100 text-pink-800'
                         }`}>
-                          {roommate.lifestyle_preferences.pets ? 'Tiene mascotas' : 'Sin mascotas'}
+                          {roommate.gender === 'male' ? 'Hombre' : 'Mujer'}
                         </span>
-                        <span className="px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
-                          Limpieza: {roommate.lifestyle_preferences.cleanliness}
-                        </span>
-                      </div>
+                      )}
+                      {roommate.interests && roommate.interests.length > 0 && (
+                        roommate.interests.slice(0, 3).map(interest => (
+                          <span key={interest} className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {interest}
+                          </span>
+                        ))
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 {/* Botones de acción */}
