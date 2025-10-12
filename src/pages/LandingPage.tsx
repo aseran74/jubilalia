@@ -22,11 +22,13 @@ import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
 import StatsSection from '../components/landing/StatsSection';
 import FeaturesSection from '../components/landing/FeaturesSection';
+import CohousingModal from '../components/landing/CohousingModal';
 
 
 const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isCohousingModalOpen, setIsCohousingModalOpen] = useState(false);
   // const [activeSection, setActiveSection] = useState('home');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -290,6 +292,13 @@ const LandingPage: React.FC = () => {
             >
               <span>Empezar Ahora</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => setIsCohousingModalOpen(true)}
+              className="group bg-green-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-2xl flex items-center space-x-2 hover:scale-105 transform"
+            >
+              <span>¿Qué es Cohousing?</span>
+              <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
             <button
               onClick={() => scrollToSection('how-it-works')}
@@ -938,6 +947,12 @@ const LandingPage: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Cohousing Modal */}
+      <CohousingModal 
+        isOpen={isCohousingModalOpen} 
+        onClose={() => setIsCohousingModalOpen(false)} 
+      />
     </div>
   );
 };

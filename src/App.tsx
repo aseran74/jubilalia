@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { useMobileApp } from './hooks/useMobileApp';
 import { Heart } from 'lucide-react';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { Capacitor } from '@capacitor/core';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
@@ -302,6 +304,28 @@ const DebugAuth: React.FC = () => {
 // Componente principal de la aplicación
 const App: React.FC = () => {
   const { isMobileApp, isLoading } = useMobileApp();
+
+  // Configurar StatusBar para Android - Configuración limpia
+  useEffect(() => {
+    const setupStatusBar = async () => {
+      if (Capacitor.getPlatform() === 'android') {
+        try {
+          // Agregar clase 'android' al body
+          document.body.classList.add('android');
+          
+          // Configuración simple y limpia
+          await StatusBar.setOverlaysWebView({ overlay: true });
+          await StatusBar.setStyle({ style: Style.Light });
+          await StatusBar.setBackgroundColor({ color: '#ffffff' });
+          
+          console.log('✅ StatusBar configurado correctamente');
+        } catch (error) {
+          console.error('Error configurando StatusBar:', error);
+        }
+      }
+    };
+    setupStatusBar();
+  }, []);
 
   if (isLoading) {
     return (

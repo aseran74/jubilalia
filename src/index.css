@@ -1000,3 +1000,19 @@ span.flatpickr-weekday,
 .animate-float-dots {
   animation: float-dots 5s ease-in-out infinite;
 }
+
+/* Configuración limpia para Android - StatusBar */
+.android body {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Para páginas principales */
+.android .min-h-screen {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+}
+
+/* Para elementos fijos */
+.android nav.fixed,
+.android .fixed {
+  top: calc(env(safe-area-inset-top, 0px) + 1rem);
+}
