@@ -441,7 +441,7 @@ const LandingPage: React.FC = () => {
               </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-orange-700 transition-colors">Venta</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Explora propiedades en venta ideales para tu jubilación y futuro
+                  Explora propiedades en venta, que van desde comunidades coliving, chalets en la costa para vivir varias parejas, o un apartamento coqueto.
               </p>
               <button 
                 onClick={() => navigate('/dashboard/properties/sale')}
@@ -462,7 +462,7 @@ const LandingPage: React.FC = () => {
               </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-teal-700 transition-colors">Alquiler</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                Encuentra propiedades en alquiler perfectas para tu estilo de vida
+                  Explora propiedades en alquiler, que van desde comunidades coliving, casas compartidas en la playa, o un piso acogedor en la ciudad.
               </p>
               <button 
                 onClick={() => navigate('/dashboard/properties/rental')}
