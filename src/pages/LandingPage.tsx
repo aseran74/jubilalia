@@ -369,7 +369,8 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+          {/* Primera fila - 3 columnas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             {/* Card Grupos */}
             <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-green-200 hover-lift relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -432,7 +433,10 @@ const LandingPage: React.FC = () => {
               </button>
               </div>
             </div>
+          </div>
 
+          {/* Segunda fila - 3 columnas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Card Venta */}
             <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-orange-200 hover-lift relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -470,6 +474,27 @@ const LandingPage: React.FC = () => {
                   className="inline-flex items-center text-teal-600 hover:text-teal-700 font-semibold transition-all duration-300 group-hover:scale-105"
               >
                 Ver Alquileres
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </button>
+              </div>
+            </div>
+
+            {/* Card Actividades */}
+            <div className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 text-center border border-gray-100 hover:border-pink-200 hover-lift relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-20 h-20 bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:rotate-3">
+                  <Calendar className="w-10 h-10 text-pink-600" />
+              </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-pink-700 transition-colors">Actividades</h3>
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Descubre actividades y eventos diseñados para disfrutar en compañía y crear momentos memorables.
+              </p>
+              <button 
+                onClick={() => navigate('/dashboard/activities')}
+                  className="inline-flex items-center text-pink-600 hover:text-pink-700 font-semibold transition-all duration-300 group-hover:scale-105"
+              >
+                Ver Actividades
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
               </div>
