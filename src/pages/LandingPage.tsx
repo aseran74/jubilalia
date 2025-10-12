@@ -624,9 +624,9 @@ const LandingPage: React.FC = () => {
               <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Users className="w-10 h-10 text-green-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-green-700 transition-colors">Compartir Habitación</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-green-700 transition-colors">Habitaciones</h3>
               <p className="text-gray-600 leading-relaxed">
-                Encuentra compañeros compatibles para compartir vivienda y reducir gastos de forma segura
+                Encuentra habitaciones disponibles para compartir vivienda de forma segura. Si vives solo, encuentra compañeros con nuestro sistema Jubilalia, con los que compartir tu vivienda y compartir gastos y experiencias.
               </p>
               <div className="mt-4">
                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
@@ -1094,9 +1094,9 @@ const LandingPage: React.FC = () => {
             <div>
               <h4 className="font-semibold mb-4">Servicios</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Compartir Habitación</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Alojamientos</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Red Social</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Habitaciones</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Alquiler</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Venta</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Actividades</a></li>
               </ul>
             </div>
