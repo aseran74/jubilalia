@@ -70,7 +70,7 @@ const RoomsMapView: React.FC = () => {
     hasBalcony: false,
     smokingAllowed: false,
     petsAllowed: false,
-    gender: 'any'
+    gender: 'male'
   });
   
   const { isLoaded: mapsLoaded, isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
@@ -256,11 +256,9 @@ const RoomsMapView: React.FC = () => {
     }
     
     // Filtro por género - Mostrar habitaciones que admiten mi género
-    if (filters.gender !== 'any') {
-      filtered = filtered.filter(room => 
-        room.preferred_gender === filters.gender || room.preferred_gender === 'any'
-      );
-    }
+    filtered = filtered.filter(room => 
+      room.preferred_gender === filters.gender || room.preferred_gender === 'any'
+    );
 
     setFilteredRooms(filtered);
   };

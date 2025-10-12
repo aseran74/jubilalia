@@ -46,7 +46,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     hasBalcony: false,
     smokingAllowed: false,
     petsAllowed: false,
-    gender: 'any' as string
+    gender: 'male' as string
   });
 
   // Función para cargar datos reales de Supabase
@@ -184,7 +184,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
                           (!filters.hasBalcony || room.has_balcony) &&
                           (!filters.smokingAllowed || room.smoking_allowed) &&
                           (!filters.petsAllowed || room.pets_allowed) &&
-                          (filters.gender === 'any' || room.preferred_gender === filters.gender || room.preferred_gender === 'any');
+                          (room.preferred_gender === filters.gender || room.preferred_gender === 'any');
 
     return matchesSearch && matchesCity && matchesPrice && matchesFilters;
   });
@@ -321,7 +321,6 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
               onChange={(e) => setFilters(prev => ({ ...prev, gender: e.target.value }))}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
-              <option value="any">Cualquier género</option>
               <option value="male">Soy un hombre</option>
               <option value="female">Soy una mujer</option>
             </select>

@@ -48,7 +48,7 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
       hasBalcony: false,
       smokingAllowed: false,
       petsAllowed: false,
-      gender: 'any'
+      gender: 'male'
     };
     setLocalFilters(defaultFilters);
     onFiltersChange(defaultFilters);
@@ -216,7 +216,6 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
             onChange={(e) => handleFilterChange('gender', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
-            <option value="any">Cualquier género</option>
             <option value="male">Soy un hombre</option>
             <option value="female">Soy una mujer</option>
           </select>

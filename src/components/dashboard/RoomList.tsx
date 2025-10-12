@@ -38,7 +38,7 @@ const RoomList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
-  const [genderFilter, setGenderFilter] = useState('');
+  const [genderFilter, setGenderFilter] = useState('male');
   const [petsFilter, setPetsFilter] = useState<boolean | null>(null);
   const [smokingFilter, setSmokingFilter] = useState<boolean | null>(null);
 
@@ -396,10 +396,8 @@ const RoomList: React.FC = () => {
               onChange={(e) => setGenderFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
-              <option value="">Cualquier género</option>
               <option value="male">Soy un hombre</option>
               <option value="female">Soy una mujer</option>
-              <option value="any">Cualquier género</option>
             </select>
           </div>
         </div>
