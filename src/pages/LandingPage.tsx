@@ -36,6 +36,7 @@ const LandingPage: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCohousingModalOpen, setIsCohousingModalOpen] = useState(false);
   const [showCompartirDetails, setShowCompartirDetails] = useState(false);
+  const [showCompartirIntro, setShowCompartirIntro] = useState(false);
   // const [activeSection, setActiveSection] = useState('home');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -735,56 +736,72 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Nueva forma de vivir */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 mb-12">
-            <div className="flex items-center mb-6">
-              <Sparkles className="w-8 h-8 text-yellow-500 mr-4" />
-              <h3 className="text-3xl font-bold text-gray-900">Una nueva forma de vivir la madurez</h3>
-            </div>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              En Jubilalia creemos que la felicidad no tiene edad.
-              Muchas personas viven solas, no por elección, sino porque la vida ha cambiado sus caminos.
-              Por eso hemos creado un sistema sencillo, humano y seguro que te permite encontrar a alguien compatible para compartir casa, gastos… y experiencias.
-            </p>
+          {/* Botón Saber Más sobre el sistema */}
+          <div className="text-center mb-12">
+            <button
+              onClick={() => setShowCompartirIntro(!showCompartirIntro)}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+            >
+              {showCompartirIntro ? 'Ver menos' : 'Descubre cómo funciona nuestro sistema'}
+              <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${showCompartirIntro ? 'rotate-180' : ''}`} />
+            </button>
           </div>
 
-          {/* Cómo funciona */}
-          <div className="mb-12">
-            <div className="flex items-center justify-center mb-8">
-              <MessageCircle className="w-8 h-8 text-blue-500 mr-4" />
-              <h3 className="text-3xl font-bold text-gray-900">💬 Cómo funciona</h3>
+          {/* Contenido desplegable */}
+          {showCompartirIntro && (
+            <div className="space-y-12 mb-12 animate-fadeIn">
+              {/* Nueva forma de vivir */}
+              <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+                <div className="flex items-center mb-6">
+                  <Sparkles className="w-8 h-8 text-yellow-500 mr-4" />
+                  <h3 className="text-3xl font-bold text-gray-900">Una nueva forma de vivir la madurez</h3>
+                </div>
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  En Jubilalia creemos que la felicidad no tiene edad.
+                  Muchas personas viven solas, no por elección, sino porque la vida ha cambiado sus caminos.
+                  Por eso hemos creado un sistema sencillo, humano y seguro que te permite encontrar a alguien compatible para compartir casa, gastos… y experiencias.
+                </p>
+              </div>
+
+              {/* Cómo funciona */}
+              <div>
+                <div className="flex items-center justify-center mb-8">
+                  <MessageCircle className="w-8 h-8 text-blue-500 mr-4" />
+                  <h3 className="text-3xl font-bold text-gray-900">💬 Cómo funciona</h3>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500 hover:shadow-xl transition-shadow">
+                    <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Te conocemos</h4>
+                    <p className="text-gray-700">
+                      Nos cuentas quién eres, cómo vives, qué te gusta y qué esperas de la convivencia.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500 hover:shadow-xl transition-shadow">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Buscamos por ti</h4>
+                    <p className="text-gray-700">
+                      En Jubilalia buscamos personas afines que también quieran compartir hogar o compañía.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500 hover:shadow-xl transition-shadow">
+                    <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Os conectamos</h4>
+                    <p className="text-gray-700">
+                      Os ponemos en contacto para que os conozcáis sin compromiso. Podéis convivir unos días de prueba.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-yellow-500 hover:shadow-xl transition-shadow">
+                    <div className="w-12 h-12 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">4</div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Nueva etapa</h4>
+                    <p className="text-gray-700">
+                      Si todo encaja, empieza una etapa de compañía, ahorro y vida compartida.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500 hover:shadow-xl transition-shadow">
-                <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">1</div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">Te conocemos</h4>
-                <p className="text-gray-700">
-                  Nos cuentas quién eres, cómo vives, qué te gusta y qué esperas de la convivencia.
-                </p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500 hover:shadow-xl transition-shadow">
-                <div className="w-12 h-12 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">2</div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">Buscamos por ti</h4>
-                <p className="text-gray-700">
-                  En Jubilalia buscamos personas afines que también quieran compartir hogar o compañía.
-                </p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-purple-500 hover:shadow-xl transition-shadow">
-                <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">3</div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">Os conectamos</h4>
-                <p className="text-gray-700">
-                  Os ponemos en contacto para que os conozcáis sin compromiso. Podéis convivir unos días de prueba.
-                </p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-yellow-500 hover:shadow-xl transition-shadow">
-                <div className="w-12 h-12 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center font-bold text-xl mb-4">4</div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">Nueva etapa</h4>
-                <p className="text-gray-700">
-                  Si todo encaja, empieza una etapa de compañía, ahorro y vida compartida.
-                </p>
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* Botón Saber Más */}
           <div className="text-center mb-12">
