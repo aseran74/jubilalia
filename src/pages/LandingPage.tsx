@@ -855,7 +855,7 @@ const LandingPage: React.FC = () => {
                   </p>
                   <p>
                     María alquiló su casa por 1.400 €, y acordaron pagar 700 € cada una.
-                    <strong className="text-blue-700"> Ahora, cada una dispone de 1.800 € netos al mes</strong>, viven acompañadas, comparten risas, comidas y nuevas aventuras.
+                    <strong className="text-blue-700"> Ahora, cada una dispone de 1.800 € netos al mes, el doble que tenían antes</strong> y encima viven acompañadas, comparten risas, comidas y nuevas aventuras y experiencias.
                   </p>
                   <p className="italic text-blue-900 font-medium">
                     Con Jubilalia han encontrado algo más que un techo compartido: una amiga, tranquilidad y una vida activa.
