@@ -344,7 +344,8 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={isMobileApp ? <AppSplash /> : <LandingPage />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/app" element={isMobileApp ? <AppSplash /> : <LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/signin" element={<JubilaliaLogin />} />
           <Route path="/signup" element={<SignUpForm />} />
