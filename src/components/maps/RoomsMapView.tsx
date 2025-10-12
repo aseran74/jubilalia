@@ -255,9 +255,11 @@ const RoomsMapView: React.FC = () => {
       filtered = filtered.filter(room => room.pets_allowed);
     }
     
-    // Filtro por género
+    // Filtro por género - Mostrar habitaciones que admiten mi género
     if (filters.gender !== 'any') {
-      filtered = filtered.filter(room => room.preferred_gender === filters.gender);
+      filtered = filtered.filter(room => 
+        room.preferred_gender === filters.gender || room.preferred_gender === 'any'
+      );
     }
 
     setFilteredRooms(filtered);

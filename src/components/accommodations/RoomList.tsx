@@ -184,7 +184,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
                           (!filters.hasBalcony || room.has_balcony) &&
                           (!filters.smokingAllowed || room.smoking_allowed) &&
                           (!filters.petsAllowed || room.pets_allowed) &&
-                          (filters.gender === 'any' || room.preferred_gender === filters.gender);
+                          (filters.gender === 'any' || room.preferred_gender === filters.gender || room.preferred_gender === 'any');
 
     return matchesSearch && matchesCity && matchesPrice && matchesFilters;
   });
