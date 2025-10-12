@@ -397,8 +397,8 @@ const RoomList: React.FC = () => {
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             >
               <option value="">Cualquier género</option>
-              <option value="male">Solo hombres</option>
-              <option value="female">Solo mujeres</option>
+              <option value="male">Soy un hombre</option>
+              <option value="female">Soy una mujer</option>
               <option value="any">Cualquier género</option>
             </select>
           </div>
