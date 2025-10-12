@@ -31,6 +31,7 @@ import PropertyRentalList from './components/properties/PropertyRentalList';
 import RoomList from './components/accommodations/RoomList';
 import RoomDetail from './components/accommodations/RoomDetail';
 import RoomForm from './components/accommodations/RoomForm';
+import RoommateSearch from './components/accommodations/RoommateSearch';
 
 // Componentes de administración
 import AdminRoomManagement from './components/admin/AdminRoomManagement';
@@ -150,6 +151,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Alquiler de Habitaciones */}
             <Route path="/rooms" element={<RoomList />} />
+            <Route path="/rooms/roommates" element={<RoommateSearch />} />
             <Route path="/rooms/map" element={<RoomsMapView />} />
             <Route path="/rooms/create" element={<RoomForm />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />

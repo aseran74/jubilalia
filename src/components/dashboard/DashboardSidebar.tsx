@@ -18,7 +18,9 @@ import {
   Bars3Icon,
   XMarkIcon,
   ShieldCheckIcon,
-  MapIcon
+  MapIcon,
+  CurrencyDollarIcon,
+  HomeModernIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -77,16 +79,17 @@ const DashboardSidebar: React.FC = () => {
   const navigationGroups: NavigationGroup[] = [
     {
       name: 'Habitaciones',
-      icon: BuildingOfficeIcon,
+      icon: HomeModernIcon,
       items: [
         { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MagnifyingGlassIcon },
+        { name: 'Buscar compañero', href: '/dashboard/rooms/roommates', icon: UsersIcon },
+        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MapIcon },
         { name: 'Publicar habitación', href: '/dashboard/rooms/create', icon: PlusIcon },
       ]
     },
     {
       name: 'Alquiler',
-      icon: BuildingOfficeIcon,
+      icon: CurrencyDollarIcon,
       items: [
         { name: 'Buscar alquiler', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/properties/rental/map', icon: MapIcon },
@@ -120,7 +123,7 @@ const DashboardSidebar: React.FC = () => {
       ]
     },
     {
-      name: 'Usuarios',
+      name: 'Socios',
       icon: UserIcon,
       items: [
         { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
@@ -142,7 +145,7 @@ const DashboardSidebar: React.FC = () => {
     name: 'Administración',
     icon: ShieldCheckIcon,
     items: [
-      { name: 'Gestionar Habitaciones', href: '/dashboard/admin/rooms', icon: BuildingOfficeIcon },
+      { name: 'Gestionar Habitaciones', href: '/dashboard/admin/rooms', icon: HomeModernIcon },
       { name: 'Gestionar Propiedades', href: '/dashboard/admin/properties', icon: BuildingOfficeIcon },
     ]
   };

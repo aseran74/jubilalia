@@ -189,6 +189,7 @@ export interface Database {
           country: string | null
           occupation: string | null
           interests: string[] | null
+          wants_to_live_with_roommate: boolean | null
           created_at: string | null
           updated_at: string | null
         }
@@ -209,6 +210,7 @@ export interface Database {
           country?: string | null
           occupation?: string | null
           interests?: string[] | null
+          wants_to_live_with_roommate?: boolean | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -229,6 +231,7 @@ export interface Database {
           country?: string | null
           occupation?: string | null
           interests?: string[] | null
+          wants_to_live_with_roommate?: boolean | null
           created_at?: string | null
           updated_at?: string | null
         }
