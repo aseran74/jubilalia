@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
 import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Map } from 'lucide-react';
+import PriceRangeSlider from '../common/PriceRangeSlider';
 
 interface Room {
   id: string;
@@ -37,7 +38,7 @@ const RoomList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 2000 });
   const [genderFilter, setGenderFilter] = useState('male');
   const [petsFilter, setPetsFilter] = useState<boolean | null>(null);
   const [smokingFilter, setSmokingFilter] = useState<boolean | null>(null);
@@ -371,21 +372,13 @@ const RoomList: React.FC = () => {
           </select>
 
           {/* Filtro de precio */}
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              placeholder="Min/€"
-              value={priceRange.min || ''}
-              onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
-              className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-            <span className="flex items-center text-gray-500">-</span>
-            <input
-              type="number"
-              placeholder="Max/€"
-              value={priceRange.max || ''}
-              onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
-              className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          <div className="w-64">
+            <PriceRangeSlider
+              min={0}
+              max={2000}
+              value={priceRange}
+              onChange={setPriceRange}
+              step={50}
             />
           </div>
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import PriceRangeSlider from '../common/PriceRangeSlider';
 
 export interface RoomFilters {
   minPrice: number;
@@ -79,37 +80,21 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
 
       <div className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Precio */}
+        {/* Precio con range slider */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
             Rango de Precio (€/mes)
           </label>
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Precio mínimo</label>
-              <input
-                type="number"
-                min="0"
-                max="2000"
-                value={localFilters.minPrice}
-                onChange={(e) => handleFilterChange('minPrice', parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="0"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Precio máximo</label>
-              <input
-                type="number"
-                min="0"
-                max="2000"
-                value={localFilters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', parseInt(e.target.value) || 2000)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="2000"
-              />
-            </div>
-          </div>
+          <PriceRangeSlider
+            min={0}
+            max={2000}
+            value={{ min: localFilters.minPrice, max: localFilters.maxPrice }}
+            onChange={(value) => {
+              handleFilterChange('minPrice', value.min);
+              handleFilterChange('maxPrice', value.max);
+            }}
+            step={50}
+          />
         </div>
 
         {/* Ocupantes máximos */}

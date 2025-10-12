@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, Plus } from 'lucide-react';
 import RoomCard from './RoomCard';
 import { supabase } from '../../lib/supabase';
+import PriceRangeSlider from '../common/PriceRangeSlider';
 
 interface Room {
   id: string;
@@ -40,7 +41,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 2000 });
   const [filters, setFilters] = useState({
     privateBathroom: false,
     hasBalcony: false,
@@ -177,8 +178,8 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     
     const matchesCity = !selectedCity || room.city === selectedCity;
     
-    const matchesPrice = (priceRange[0] === 0 || room.price_per_month >= priceRange[0]) && 
-                        (priceRange[1] === 0 || room.price_per_month <= priceRange[1]);
+    const matchesPrice = (priceRange.min === 0 || room.price_per_month >= priceRange.min) && 
+                        (priceRange.max === 0 || room.price_per_month <= priceRange.max);
     
     const matchesFilters = (!filters.privateBathroom || room.private_bathroom) &&
                           (!filters.hasBalcony || room.has_balcony) &&
@@ -253,21 +254,13 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             </select>
 
             {/* Rango de precio */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="number"
-                placeholder="Min/€"
-                value={priceRange[0] || ''}
-                onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-              <span className="text-gray-500">-</span>
-              <input
-                type="number"
-                placeholder="Max/€"
-                value={priceRange[1] || ''}
-                onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value) || 1000])}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            <div className="w-full">
+              <PriceRangeSlider
+                min={0}
+                max={2000}
+                value={priceRange}
+                onChange={setPriceRange}
+                step={50}
               />
             </div>
 
