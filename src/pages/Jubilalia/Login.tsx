@@ -109,16 +109,16 @@ const JubilaliaLogin: React.FC = () => {
           </Link>
           
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-              <Heart className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+              <Heart className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800">Jubilalia</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Jubilalia</h1>
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
             ¡Bienvenido de vuelta!
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-base text-gray-600">
             Inicia sesión para acceder a tu cuenta
           </p>
         </div>
@@ -140,7 +140,7 @@ const JubilaliaLogin: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   placeholder="tu@email.com"
                 />
               </div>
@@ -160,7 +160,7 @@ const JubilaliaLogin: React.FC = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   required
-                  className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                  className="w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   placeholder="Tu contraseña"
                 />
                 <button
@@ -257,7 +257,7 @@ const JubilaliaLogin: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || loading}
-              className="w-full py-4 bg-gradient-to-r from-green-500 to-blue-500 text-white text-xl font-bold rounded-full hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white text-lg font-bold rounded-full hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading || loading ? (
                 <div className="flex items-center space-x-2">

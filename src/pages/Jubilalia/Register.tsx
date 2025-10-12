@@ -263,16 +263,16 @@ const Register: React.FC = () => {
           </Link>
           
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800">Jubilalia</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Jubilalia</h1>
           </div>
           
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
             Únete a nuestra comunidad
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-base text-gray-600">
             Crea tu perfil y encuentra compañeros perfectos
           </p>
         </div>
@@ -280,8 +280,8 @@ const Register: React.FC = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
-                <User className="w-6 h-6 text-green-500" />
+              <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
+                <User className="w-5 h-5 text-green-500" />
                 <span>Información Personal</span>
               </h3>
               
@@ -328,7 +328,7 @@ const Register: React.FC = () => {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                     placeholder="Tu nombre completo"
                   />
                 </div>
@@ -343,7 +343,7 @@ const Register: React.FC = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                     placeholder="tu@email.com"
                   />
                 </div>
@@ -357,7 +357,7 @@ const Register: React.FC = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                     placeholder="+34 600 000 000"
                   />
                 </div>
@@ -372,7 +372,7 @@ const Register: React.FC = () => {
                     value={formData.dateOfBirth}
                     onChange={handleInputChange}
                     max={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   />
                   <p className="mt-1 text-sm text-gray-500">
                     Si proporcionas tu fecha de nacimiento, debes tener al menos 18 años
@@ -388,7 +388,7 @@ const Register: React.FC = () => {
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                     placeholder="Madrid, Barcelona..."
                   />
                 </div>
@@ -401,7 +401,7 @@ const Register: React.FC = () => {
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   >
                     <option value="">Seleccionar</option>
                     <option value="male">Hombre</option>
@@ -414,7 +414,7 @@ const Register: React.FC = () => {
             </div>
 
             <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-6">
                 Preferencias y Aficiones
               </h3>
               
@@ -427,7 +427,7 @@ const Register: React.FC = () => {
                     name="smoking"
                     value={formData.smoking}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   >
                     <option value="">Seleccionar</option>
                     <option value="no">No fumo</option>
@@ -465,15 +465,15 @@ const Register: React.FC = () => {
                   value={formData.bio}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                   placeholder="Describe tu personalidad, intereses, lo que buscas en un compañero de habitación..."
                 />
               </div>
             </div>
 
             <div className="border-b border-gray-200 pb-6">
-              <h3 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
-                <Lock className="w-6 h-6 text-green-500" />
+              <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center space-x-2">
+                <Lock className="w-5 h-5 text-green-500" />
                 <span>Seguridad</span>
               </h3>
               
@@ -489,7 +489,7 @@ const Register: React.FC = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                      className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                       placeholder="Mínimo 6 caracteres"
                     />
                     <button
@@ -513,7 +513,7 @@ const Register: React.FC = () => {
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+                      className="w-full px-4 py-2.5 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-base"
                       placeholder="Repite tu contraseña"
                     />
                     <button
@@ -541,7 +541,7 @@ const Register: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full md:w-auto px-12 py-4 bg-gradient-to-r from-green-500 to-blue-500 text-white text-xl font-bold rounded-full hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full md:w-auto px-12 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white text-lg font-bold rounded-full hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="flex items-center space-x-2">
@@ -565,7 +565,7 @@ const Register: React.FC = () => {
                 type="button"
                 onClick={handleGoogleSignUp}
                 disabled={loading}
-                className="w-full md:w-auto px-8 py-3 bg-white border-2 border-gray-300 text-gray-700 text-lg font-semibold rounded-full hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+                className="w-full md:w-auto px-8 py-2.5 bg-white border-2 border-gray-300 text-gray-700 text-base font-semibold rounded-full hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
               >
                 <svg className="w-6 h-6" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
