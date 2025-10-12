@@ -39,7 +39,7 @@ const Dashboard: React.FC = () => {
       ]
     },
     {
-      title: 'Habitaciones',
+      title: 'Compartir',
       description: 'Busca y publica habitaciones para alquilar y compartir gastos con un compañero/a',
       icon: BuildingOfficeIcon,
       href: '/dashboard/rooms',

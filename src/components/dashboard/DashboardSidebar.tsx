@@ -78,7 +78,7 @@ const DashboardSidebar: React.FC = () => {
 
   const navigationGroups: NavigationGroup[] = [
     {
-      name: 'Habitaciones',
+      name: 'Compartir',
       icon: HomeModernIcon,
       items: [
         { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
@@ -145,7 +145,7 @@ const DashboardSidebar: React.FC = () => {
     name: 'Administración',
     icon: ShieldCheckIcon,
     items: [
-      { name: 'Gestionar Habitaciones', href: '/dashboard/admin/rooms', icon: HomeModernIcon },
+      { name: 'Gestionar Compartir', href: '/dashboard/admin/rooms', icon: HomeModernIcon },
       { name: 'Gestionar Propiedades', href: '/dashboard/admin/properties', icon: BuildingOfficeIcon },
     ]
   };

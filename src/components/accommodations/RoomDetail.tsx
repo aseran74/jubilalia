@@ -318,7 +318,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
             onClick={() => navigate('/dashboard/rooms')}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
-            Volver a Habitaciones
+            Volver a Compartir
           </button>
         </div>
       </div>
@@ -340,7 +340,7 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
             onClick={() => navigate('/dashboard/rooms')}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
-            Volver a Habitaciones
+            Volver a Compartir
           </button>
         </div>
       </div>

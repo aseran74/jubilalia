@@ -212,7 +212,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Habitaciones Disponibles</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Compartir - Habitaciones Disponibles</h1>
               <p className="text-gray-600 mt-2">Encuentra tu hogar ideal para la jubilación</p>
             </div>
             <button

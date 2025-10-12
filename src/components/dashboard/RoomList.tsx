@@ -311,7 +311,7 @@ const RoomList: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Habitaciones Disponibles</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Compartir - Habitaciones Disponibles</h1>
             <p className="text-gray-600 mt-1">Encuentra tu habitación ideal</p>
           </div>
           <div className="flex space-x-3">
