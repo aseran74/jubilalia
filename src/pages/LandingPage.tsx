@@ -35,6 +35,7 @@ const LandingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCohousingModalOpen, setIsCohousingModalOpen] = useState(false);
+  const [showCompartirDetails, setShowCompartirDetails] = useState(false);
   // const [activeSection, setActiveSection] = useState('home');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -785,82 +786,98 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Ejemplo real */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow-xl p-8 md:p-12 mb-12 border-l-8 border-blue-500">
-            <div className="flex items-center mb-6">
-              <Home className="w-8 h-8 text-blue-600 mr-4" />
-              <h3 className="text-2xl font-bold text-gray-900">🏡 Ejemplo real: María y Pepa, del Barrio del Pilar</h3>
-            </div>
-            <div className="space-y-4 text-gray-800 text-lg">
-              <p>
-                <strong>María Gonzalo Zamorano (68)</strong> y <strong>Pepa Martínez Serra (71)</strong>, ambas viudas con pensiones de 1.400 €, se conocieron gracias a Jubilalia.
-                Al principio dudaban, pero tras unos días conviviendo descubrieron que se entendían a la perfección.
-              </p>
-              <p>
-                María alquiló su casa por 1.400 €, y acordaron pagar 700 € cada una.
-                <strong className="text-blue-700"> Ahora, cada una dispone de 1.800 € netos al mes</strong>, viven acompañadas, comparten risas, comidas y nuevas aventuras.
-              </p>
-              <p className="italic text-blue-900 font-medium">
-                Con Jubilalia han encontrado algo más que un techo compartido: una amiga, tranquilidad y una vida activa.
-              </p>
-            </div>
+          {/* Botón Saber Más */}
+          <div className="text-center mb-12">
+            <button
+              onClick={() => setShowCompartirDetails(!showCompartirDetails)}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+            >
+              {showCompartirDetails ? 'Ver menos' : 'Saber más sobre casos reales y servicios'}
+              <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${showCompartirDetails ? 'rotate-180' : ''}`} />
+            </button>
           </div>
 
-          {/* Servicios */}
-          <div className="mb-12">
-            <div className="text-center mb-10">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">🌸 Servicios que hacen la vida más fácil</h3>
-              <p className="text-lg text-gray-700">
-                Porque vivir bien no es solo compartir casa: es disfrutar cada día con tranquilidad, sabor y bienestar.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-orange-400">
-                <UtensilsCrossed className="w-10 h-10 text-orange-500 mb-4" />
-                <h4 className="text-xl font-bold text-gray-900 mb-2">🍽️ Alimentación</h4>
-                <p className="text-sm text-gray-600 mb-2 font-semibold">TAPPERS</p>
-                <p className="text-gray-700">
-                  Menús caseros, equilibrados y listos para calentar. Sin preocuparse por cocinar.
-                </p>
+          {/* Contenido desplegable */}
+          {showCompartirDetails && (
+            <div className="space-y-12 mb-12 animate-fadeIn">
+              {/* Ejemplo real */}
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl shadow-xl p-8 md:p-12 border-l-8 border-blue-500">
+                <div className="flex items-center mb-6">
+                  <Home className="w-8 h-8 text-blue-600 mr-4" />
+                  <h3 className="text-2xl font-bold text-gray-900">🏡 Ejemplo real: María y Pepa, del Barrio del Pilar</h3>
+                </div>
+                <div className="space-y-4 text-gray-800 text-lg">
+                  <p>
+                    <strong>María Gonzalo Zamorano (68)</strong> y <strong>Pepa Martínez Serra (71)</strong>, ambas viudas con pensiones de 1.400 €, se conocieron gracias a Jubilalia.
+                    Al principio dudaban, pero tras unos días conviviendo descubrieron que se entendían a la perfección.
+                  </p>
+                  <p>
+                    María alquiló su casa por 1.400 €, y acordaron pagar 700 € cada una.
+                    <strong className="text-blue-700"> Ahora, cada una dispone de 1.800 € netos al mes</strong>, viven acompañadas, comparten risas, comidas y nuevas aventuras.
+                  </p>
+                  <p className="italic text-blue-900 font-medium">
+                    Con Jubilalia han encontrado algo más que un techo compartido: una amiga, tranquilidad y una vida activa.
+                  </p>
+                </div>
               </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-blue-400">
-                <Spray className="w-10 h-10 text-blue-500 mb-4" />
-                <h4 className="text-xl font-bold text-gray-900 mb-2">🧹 Limpieza</h4>
-                <p className="text-sm text-gray-600 mb-2 font-semibold">CÉS GOURMET</p>
-                <p className="text-gray-700">
-                  Tu hogar siempre limpio, cuidado y a tu gusto. Más tiempo para ti.
-                </p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-red-400">
-                <Shield className="w-10 h-10 text-red-500 mb-4" />
-                <h4 className="text-xl font-bold text-gray-900 mb-2">💊 Bienestar</h4>
-                <p className="text-sm text-gray-600 mb-2 font-semibold">ADESLAS</p>
-                <p className="text-gray-700">
-                  Seguros de hogar y salud. Vivir acompañado y vivir seguro.
-                </p>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-purple-400">
-                <PartyPopper className="w-10 h-10 text-purple-500 mb-4" />
-                <h4 className="text-xl font-bold text-gray-900 mb-2">🎉 Actividades</h4>
-                <p className="text-sm text-gray-600 mb-2 font-semibold">OCIO Y BIENESTAR</p>
-                <p className="text-gray-700">
-                  Campeonatos, viajes, escapadas. Porque compartir es disfrutar.
-                </p>
-              </div>
-            </div>
-          </div>
 
-          {/* Testimonio */}
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl shadow-xl p-8 md:p-12 border-2 border-green-200">
-            <div className="flex items-center justify-center mb-6">
-              <Users className="w-8 h-8 text-green-600 mr-4" />
-              <h3 className="text-2xl font-bold text-gray-900">💬 En palabras de María y Pepa</h3>
+              {/* Servicios */}
+              <div>
+                <div className="text-center mb-10">
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4">🌸 Servicios que hacen la vida más fácil</h3>
+                  <p className="text-lg text-gray-700">
+                    Porque vivir bien no es solo compartir casa: es disfrutar cada día con tranquilidad, sabor y bienestar.
+                  </p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-orange-400">
+                    <UtensilsCrossed className="w-10 h-10 text-orange-500 mb-4" />
+                    <h4 className="text-xl font-bold text-gray-900 mb-2">🍽️ Alimentación</h4>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">TAPPERS</p>
+                    <p className="text-gray-700">
+                      Menús caseros, equilibrados y listos para calentar. Sin preocuparse por cocinar.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-blue-400">
+                    <Spray className="w-10 h-10 text-blue-500 mb-4" />
+                    <h4 className="text-xl font-bold text-gray-900 mb-2">🧹 Limpieza</h4>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">CÉS GOURMET</p>
+                    <p className="text-gray-700">
+                      Tu hogar siempre limpio, cuidado y a tu gusto. Más tiempo para ti.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-red-400">
+                    <Shield className="w-10 h-10 text-red-500 mb-4" />
+                    <h4 className="text-xl font-bold text-gray-900 mb-2">💊 Bienestar</h4>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">ADESLAS</p>
+                    <p className="text-gray-700">
+                      Seguros de hogar y salud. Vivir acompañado y vivir seguro.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-purple-400">
+                    <PartyPopper className="w-10 h-10 text-purple-500 mb-4" />
+                    <h4 className="text-xl font-bold text-gray-900 mb-2">🎉 Actividades</h4>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">OCIO Y BIENESTAR</p>
+                    <p className="text-gray-700">
+                      Campeonatos, viajes, escapadas. Porque compartir es disfrutar.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Testimonio */}
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl shadow-xl p-8 md:p-12 border-2 border-green-200">
+                <div className="flex items-center justify-center mb-6">
+                  <Users className="w-8 h-8 text-green-600 mr-4" />
+                  <h3 className="text-2xl font-bold text-gray-900">💬 En palabras de María y Pepa</h3>
+                </div>
+                <blockquote className="text-xl italic text-gray-800 text-center border-l-4 border-green-500 pl-6">
+                  "Gracias a Jubilalia hemos vuelto a reír, a viajar, a sentirnos vivas.
+                  No somos solo compañeras de piso… somos amigas que comparten una nueva etapa de vida."
+                </blockquote>
+              </div>
             </div>
-            <blockquote className="text-xl italic text-gray-800 text-center border-l-4 border-green-500 pl-6">
-              "Gracias a Jubilalia hemos vuelto a reír, a viajar, a sentirnos vivas.
-              No somos solo compañeras de piso… somos amigas que comparten una nueva etapa de vida."
-            </blockquote>
-          </div>
+          )}
 
           {/* CTA */}
           <div className="text-center mt-12">

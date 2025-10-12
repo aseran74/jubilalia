@@ -852,6 +852,10 @@ span.flatpickr-weekday,
   animation: fade-in-up 0.8s ease-out;
 }
 
+.animate-fadeIn {
+  animation: fade-in 0.5s ease-out;
+}
+
 .animate-gradient-x {
   animation: gradient-x 3s ease infinite;
 }
