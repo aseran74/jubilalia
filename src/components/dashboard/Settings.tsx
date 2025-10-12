@@ -9,19 +9,25 @@ import {
   EnvelopeIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  HomeIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 
 interface SettingsData {
   is_public: boolean;
   share_contact_info: boolean;
+  has_room_to_share: boolean;
+  wants_to_find_roommate: boolean;
 }
 
 const Settings: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [settings, setSettings] = useState<SettingsData>({
     is_public: true,
-    share_contact_info: false
+    share_contact_info: false,
+    has_room_to_share: false,
+    wants_to_find_roommate: false
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +38,9 @@ const Settings: React.FC = () => {
     if (profile) {
       setSettings({
         is_public: (profile as any).is_public ?? true,
-        share_contact_info: (profile as any).share_contact_info ?? false
+        share_contact_info: (profile as any).share_contact_info ?? false,
+        has_room_to_share: (profile as any).has_room_to_share ?? false,
+        wants_to_find_roommate: (profile as any).wants_to_find_roommate ?? false
       });
     }
   }, [profile]);
@@ -60,6 +68,8 @@ const Settings: React.FC = () => {
         .update({
           is_public: settings.is_public,
           share_contact_info: settings.share_contact_info,
+          has_room_to_share: settings.has_room_to_share,
+          wants_to_find_roommate: settings.wants_to_find_roommate,
           updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id);
@@ -166,6 +176,58 @@ const Settings: React.FC = () => {
                 disabled={loading || !settings.is_public}
               />
               <div className={`w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 ${!settings.is_public ? 'opacity-50' : ''}`}></div>
+            </label>
+          </div>
+
+          {/* Compañero de Habitación - Opción 1 */}
+          <div className="flex items-center justify-between py-4 border-b border-gray-100">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <HomeIcon className="w-5 h-5 text-green-500 mr-2" />
+                <h3 className="text-lg font-medium text-gray-900">Vivo solo y me gustaría compartir mi vivienda</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                {settings.has_room_to_share 
+                  ? 'Tienes una habitación disponible y quieres encontrar un compañero/a para compartir gastos y experiencias'
+                  : 'No tienes una habitación disponible para compartir actualmente'
+                }
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.has_room_to_share}
+                onChange={(e) => handleSettingChange('has_room_to_share', e.target.checked)}
+                className="sr-only peer"
+                disabled={loading}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600 peer-disabled:opacity-50"></div>
+            </label>
+          </div>
+
+          {/* Compañero de Habitación - Opción 2 */}
+          <div className="flex items-center justify-between py-4 border-b border-gray-100">
+            <div className="flex-1">
+              <div className="flex items-center mb-2">
+                <UserPlusIcon className="w-5 h-5 text-blue-500 mr-2" />
+                <h3 className="text-lg font-medium text-gray-900">Me gustaría ir a vivir con un compañero/a</h3>
+              </div>
+              <p className="text-sm text-gray-600">
+                {settings.wants_to_find_roommate 
+                  ? 'Buscas compartir gastos y vivir experiencias con alguien que tenga una habitación disponible'
+                  : 'No estás buscando activamente un compañero de habitación'
+                }
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.wants_to_find_roommate}
+                onChange={(e) => handleSettingChange('wants_to_find_roommate', e.target.checked)}
+                className="sr-only peer"
+                disabled={loading}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50"></div>
             </label>
           </div>
 

@@ -190,6 +190,8 @@ export interface Database {
           occupation: string | null
           interests: string[] | null
           wants_to_live_with_roommate: boolean | null
+        has_room_to_share: boolean | null
+        wants_to_find_roommate: boolean | null
           created_at: string | null
           updated_at: string | null
         }
@@ -211,6 +213,8 @@ export interface Database {
           occupation?: string | null
           interests?: string[] | null
           wants_to_live_with_roommate?: boolean | null
+          has_room_to_share?: boolean | null
+          wants_to_find_roommate?: boolean | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -232,6 +236,8 @@ export interface Database {
           occupation?: string | null
           interests?: string[] | null
           wants_to_live_with_roommate?: boolean | null
+          has_room_to_share?: boolean | null
+          wants_to_find_roommate?: boolean | null
           created_at?: string | null
           updated_at?: string | null
         }

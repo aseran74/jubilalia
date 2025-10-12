@@ -69,7 +69,7 @@ const RoommateSearch: React.FC = () => {
           lifestyle_preferences,
           roommate_preferences
         `)
-        .eq('wants_to_live_with_roommate', true)
+        .eq('wants_to_find_roommate', true)
         .neq('id', user?.id); // Excluir al usuario actual
 
       if (error) throw error;
