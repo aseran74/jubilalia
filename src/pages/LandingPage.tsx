@@ -422,7 +422,7 @@ const LandingPage: React.FC = () => {
               </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-purple-700 transition-colors">Habitaciones</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Encuentra habitaciones disponibles para compartir vivienda de forma segura. Si vives solo, encuentra compañeros con nuestro sistema Jubilalia, con los que compartir tu vivienda y compartir gastos y experiencias únicas.
+                  Encuentra habitaciones disponibles para compartir vivienda de forma segura. O si vives solo, encuentra compañeros , con los que compartir tu vivienda y compartir gastos y experiencias únicas.
               </p>
               <button 
                 onClick={() => navigate('/dashboard/rooms')}
@@ -446,7 +446,7 @@ const LandingPage: React.FC = () => {
               </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4 group-hover:text-orange-700 transition-colors">Venta</h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  Explora propiedades en venta, que van desde comunidades coliving, chalets en la costa para vivir varias parejas, o un apartamento coqueto.
+                  Explora propiedades en venta, que van desde comunidades coliving, chalets en la costa para vivir varias parejas, o un apartamento coqueto al lado de un campo de golf.
               </p>
               <button 
                 onClick={() => navigate('/dashboard/properties/sale')}
@@ -866,9 +866,9 @@ const LandingPage: React.FC = () => {
               {/* Servicios */}
               <div>
                 <div className="text-center mb-10">
-                  <h3 className="text-3xl font-bold text-gray-900 mb-4">🌸 Servicios que hacen la vida más fácil</h3>
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4">🌸 Nuestros Servicios y Partners</h3>
                   <p className="text-lg text-gray-700">
-                    Porque vivir bien no es solo compartir casa: es disfrutar cada día con tranquilidad, sabor y bienestar.
+                    Mira nuestros Servicios y partners que hacen la vida más fácil. Porque vivir bien no es solo compartir casa: es disfrutar cada día con tranquilidad, sabor y bienestar.
                   </p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
