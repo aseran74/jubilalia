@@ -209,7 +209,7 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
         {/* Filtro de género */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Género Preferido
+            Género
           </label>
           <select
             value={localFilters.gender}
@@ -217,8 +217,8 @@ const RoomsMapFilters: React.FC<RoomsMapFiltersProps> = ({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
           >
             <option value="any">Cualquier género</option>
-            <option value="male">Solo hombres</option>
-            <option value="female">Solo mujeres</option>
+            <option value="male">Soy un hombre</option>
+            <option value="female">Soy una mujer</option>
           </select>
         </div>
 
