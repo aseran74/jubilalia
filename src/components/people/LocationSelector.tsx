@@ -40,40 +40,59 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     console.log('initializeAutocomplete - Creando autocomplete...');
 
     try {
-      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ['geocode'],
-        componentRestrictions: { country: 'es' }
-      });
+      // Usar el método recomendado por Google Places
+      // Si la nueva API no está disponible, usar el método antiguo
+      if (window.google.maps.places && window.google.maps.places.PlaceAutocompleteElement) {
+        console.log('initializeAutocomplete - Nueva API disponible, usando PlaceAutocompleteElement...');
 
-      console.log('initializeAutocomplete - Autocomplete creado exitosamente');
+        // Crear el elemento HTML personalizado
+        const autocompleteElement = document.createElement('gmp-place-autocomplete');
+        autocompleteElement.setAttribute('placeholder', placeholder);
 
-      autocomplete.addListener('place_changed', () => {
-        console.log('initializeAutocomplete - place_changed event triggered');
-        const place = autocomplete.getPlace();
-        console.log('initializeAutocomplete - place:', place);
-
-        if (place.geometry && place.geometry.location) {
-          const location: GooglePlacesLocation = {
-            place_id: place.place_id || '',
-            formatted_address: place.formatted_address || '',
-            geometry: {
-              location: {
-                lat: place.geometry.location.lat(),
-                lng: place.geometry.location.lng()
-              }
-            },
-            address_components: place.address_components || [],
-            name: place.name,
-            types: place.types
-          };
-          console.log('initializeAutocomplete - Llamando onLocationSelect con:', location);
-          onLocationSelect(location);
-        } else {
-          console.log('initializeAutocomplete - No hay geometría válida');
+        // Reemplazar el input con el componente de Google
+        if (inputRef.current.parentNode) {
+          inputRef.current.parentNode.replaceChild(autocompleteElement, inputRef.current);
+          // Actualizar la referencia para apuntar al nuevo elemento
+          inputRef.current = autocompleteElement as any;
         }
-      });
 
-      console.log('initializeAutocomplete - Listener agregado correctamente');
+        console.log('initializeAutocomplete - PlaceAutocompleteElement creado exitosamente');
+      } else {
+        console.log('initializeAutocomplete - Nueva API no disponible, usando método alternativo');
+        // Fallback al método antiguo si la nueva API no está disponible
+        const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+          types: ['geocode'],
+          componentRestrictions: { country: 'es' }
+        });
+
+        autocomplete.addListener('place_changed', () => {
+          console.log('initializeAutocomplete - place_changed event triggered (fallback)');
+          const place = autocomplete.getPlace();
+          console.log('initializeAutocomplete - place:', place);
+
+          if (place.geometry && place.geometry.location) {
+            const location: GooglePlacesLocation = {
+              place_id: place.place_id || '',
+              formatted_address: place.formatted_address || '',
+              geometry: {
+                location: {
+                  lat: place.geometry.location.lat(),
+                  lng: place.geometry.location.lng()
+                }
+              },
+              address_components: place.address_components || [],
+              name: place.name,
+              types: place.types
+            };
+            console.log('initializeAutocomplete - Llamando onLocationSelect con:', location);
+            onLocationSelect(location);
+          } else {
+            console.log('initializeAutocomplete - No hay geometría válida');
+          }
+        });
+
+        console.log('initializeAutocomplete - Autocomplete creado exitosamente (fallback)');
+      }
     } catch (error) {
       console.error('initializeAutocomplete - Error:', error);
     }
