@@ -37,23 +37,52 @@ const PeopleSearch: React.FC = () => {
     }
   }, [location.pathname]);
 
-  // Cargar dirección del perfil al inicio
+  // Cargar dirección del perfil al inicio y geocodificarla
   useEffect(() => {
-    if (profile && profile.address && profile.city) {
-      // Construir ubicación desde el perfil
-      const profileLocation = {
-        formatted_address: `${profile.address}, ${profile.city}${profile.state ? ', ' + profile.state : ''}${profile.postal_code ? ' ' + profile.postal_code : ''}`,
-        address_components: [],
-        geometry: {
-          location: {
-            lat: 0, // Se geocodificará después
-            lng: 0
-          }
+    const geocodeProfileAddress = async () => {
+      if (profile && profile.address && profile.city && window.google?.maps) {
+        const fullAddress = `${profile.address}, ${profile.city}${profile.state ? ', ' + profile.state : ''}${profile.postal_code ? ' ' + profile.postal_code : ''}`;
+        
+        console.log('🔍 Geocodificando dirección del perfil:', fullAddress);
+        
+        const geocoder = new window.google.maps.Geocoder();
+        
+        try {
+          const result = await new Promise<any>((resolve, reject) => {
+            geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
+              if (status === 'OK' && results[0]) {
+                resolve(results[0]);
+              } else {
+                reject(status);
+              }
+            });
+          });
+
+          const profileLocation = {
+            formatted_address: result.formatted_address,
+            address_components: result.address_components,
+            geometry: {
+              location: {
+                lat: result.geometry.location.lat(),
+                lng: result.geometry.location.lng()
+              }
+            }
+          };
+
+          console.log('✅ Dirección del perfil geocodificada:', {
+            address: profileLocation.formatted_address,
+            lat: profileLocation.geometry.location.lat,
+            lng: profileLocation.geometry.location.lng
+          });
+
+          setSearchLocation(profileLocation);
+        } catch (error) {
+          console.error('❌ Error geocodificando dirección del perfil:', error);
         }
-      };
-      console.log('PeopleSearch - Cargando dirección del perfil:', profileLocation);
-      setSearchLocation(profileLocation);
-    }
+      }
+    };
+
+    geocodeProfileAddress();
   }, [profile]);
 
   // Cargar usuarios iniciales
@@ -170,44 +199,97 @@ const PeopleSearch: React.FC = () => {
         console.log('✅ Resultados de consulta directa:', data);
         console.log('🔍 Datos de búsqueda con avatares:', data?.map(p => ({ name: p.full_name, avatar: p.avatar_url })));
         
-        // Convertir a formato LocationSearchResult
-        const formattedResults = data?.map(profile => {
-          // Construir dirección completa
-          let fullAddress = '';
-          if (profile.address) fullAddress += profile.address;
-          if (profile.city) fullAddress += (fullAddress ? ', ' : '') + profile.city;
-          if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
-          if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
-          if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
-          
-          return {
-            id: profile.id,
-            full_name: profile.full_name || 'Usuario',
-            email: profile.email || '',
-            avatar_url: profile.avatar_url,
-            bio: profile.bio,
-            formatted_address: fullAddress || 'Ubicación no especificada',
-            location_city: profile.city,
-            location_country: profile.country,
-            occupation: profile.occupation || 'Sin ocupación',
-            interests: profile.interests || [],
-            city: profile.city,
-            address: profile.address,
-            state: profile.state,
-            postal_code: profile.postal_code,
-            date_of_birth: profile.date_of_birth,
-            gender: profile.gender,
-            phone: profile.phone,
-            whatsapp: profile.whatsapp,
-            has_room_to_share: profile.has_room_to_share,
-            wants_to_find_roommate: profile.wants_to_find_roommate,
-            age: null,
-            distance_km: 0
-          };
-        }) || [];
+        // Geocodificar y calcular distancias manualmente
+        const geocoder = new window.google.maps.Geocoder();
+        const searchLat = searchLocation.geometry.location.lat;
+        const searchLng = searchLocation.geometry.location.lng;
 
-        setSearchResults(formattedResults);
-        setFilteredResults(formattedResults);
+        console.log('📍 Ubicación de búsqueda:', { lat: searchLat, lng: searchLng });
+
+        // Función para calcular distancia usando fórmula de Haversine
+        const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+          const R = 6371; // Radio de la Tierra en km
+          const dLat = (lat2 - lat1) * Math.PI / 180;
+          const dLon = (lon2 - lon1) * Math.PI / 180;
+          const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          return R * c;
+        };
+
+        // Procesar perfiles con geocoding
+        const profilesWithDistance = await Promise.all(
+          data.map(async (profile) => {
+            // Construir dirección completa
+            let fullAddress = '';
+            if (profile.address) fullAddress += profile.address;
+            if (profile.city) fullAddress += (fullAddress ? ', ' : '') + profile.city;
+            if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
+            if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
+            if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
+
+            // Intentar geocodificar la dirección del perfil
+            let distance_km = 999999; // Distancia muy alta por defecto
+            
+            if (fullAddress && fullAddress !== 'Ubicación no especificada') {
+              try {
+                const result = await new Promise<any>((resolve, reject) => {
+                  geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
+                    if (status === 'OK' && results[0]) {
+                      resolve(results[0]);
+                    } else {
+                      reject(status);
+                    }
+                  });
+                });
+
+                const profileLat = result.geometry.location.lat();
+                const profileLng = result.geometry.location.lng();
+                distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
+                console.log(`📏 Distancia a ${profile.full_name}: ${distance_km.toFixed(2)} km`);
+              } catch (geocodeError) {
+                console.log(`⚠️ No se pudo geocodificar: ${fullAddress}`);
+              }
+            }
+
+            return {
+              id: profile.id,
+              full_name: profile.full_name || 'Usuario',
+              email: profile.email || '',
+              avatar_url: profile.avatar_url,
+              bio: profile.bio,
+              formatted_address: fullAddress || 'Ubicación no especificada',
+              location_city: profile.city,
+              location_country: profile.country,
+              occupation: profile.occupation || 'Sin ocupación',
+              interests: profile.interests || [],
+              city: profile.city,
+              address: profile.address,
+              state: profile.state,
+              postal_code: profile.postal_code,
+              date_of_birth: profile.date_of_birth,
+              gender: profile.gender,
+              phone: profile.phone,
+              whatsapp: profile.whatsapp,
+              has_room_to_share: profile.has_room_to_share,
+              wants_to_find_roommate: profile.wants_to_find_roommate,
+              age: null,
+              distance_km: distance_km
+            };
+          })
+        );
+
+        // Filtrar por distancia máxima
+        const filteredByDistance = profilesWithDistance.filter(
+          profile => profile.distance_km <= filters.maxDistance
+        );
+
+        console.log(`✅ Perfiles dentro de ${filters.maxDistance} km: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
+
+        setSearchResults(filteredByDistance);
+        setFilteredResults(filteredByDistance);
       }
     } catch (err) {
       console.error('❌ Error searching people:', err);
