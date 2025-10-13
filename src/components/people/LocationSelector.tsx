@@ -21,38 +21,62 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
 
   // Inicializar autocomplete cuando Google Maps esté cargado
   useEffect(() => {
+    console.log('LocationSelector - mapsLoaded:', mapsLoaded, 'mapsError:', mapsError);
     if (mapsLoaded && !mapsError) {
+      console.log('LocationSelector - Inicializando autocomplete...');
       initializeAutocomplete();
     }
   }, [mapsLoaded, mapsError, onLocationSelect]);
 
   const initializeAutocomplete = () => {
-    if (!inputRef.current || !window.google) return;
+    console.log('initializeAutocomplete - inputRef.current:', !!inputRef.current);
+    console.log('initializeAutocomplete - window.google:', !!window.google);
 
-    const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-      types: ['geocode'],
-      componentRestrictions: { country: 'es' }
-    });
+    if (!inputRef.current || !window.google) {
+      console.log('initializeAutocomplete - Saliendo temprano, condiciones no cumplidas');
+      return;
+    }
 
-    autocomplete.addListener('place_changed', () => {
-      const place = autocomplete.getPlace();
-      if (place.geometry && place.geometry.location) {
-        const location: GooglePlacesLocation = {
-          place_id: place.place_id || '',
-          formatted_address: place.formatted_address || '',
-          geometry: {
-            location: {
-              lat: place.geometry.location.lat(),
-              lng: place.geometry.location.lng()
-            }
-          },
-          address_components: place.address_components || [],
-          name: place.name,
-          types: place.types
-        };
-        onLocationSelect(location);
-      }
-    });
+    console.log('initializeAutocomplete - Creando autocomplete...');
+
+    try {
+      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ['geocode'],
+        componentRestrictions: { country: 'es' }
+      });
+
+      console.log('initializeAutocomplete - Autocomplete creado exitosamente');
+
+      autocomplete.addListener('place_changed', () => {
+        console.log('initializeAutocomplete - place_changed event triggered');
+        const place = autocomplete.getPlace();
+        console.log('initializeAutocomplete - place:', place);
+
+        if (place.geometry && place.geometry.location) {
+          const location: GooglePlacesLocation = {
+            place_id: place.place_id || '',
+            formatted_address: place.formatted_address || '',
+            geometry: {
+              location: {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng()
+              }
+            },
+            address_components: place.address_components || [],
+            name: place.name,
+            types: place.types
+          };
+          console.log('initializeAutocomplete - Llamando onLocationSelect con:', location);
+          onLocationSelect(location);
+        } else {
+          console.log('initializeAutocomplete - No hay geometría válida');
+        }
+      });
+
+      console.log('initializeAutocomplete - Listener agregado correctamente');
+    } catch (error) {
+      console.error('initializeAutocomplete - Error:', error);
+    }
   };
 
   const handleInputChange = () => {

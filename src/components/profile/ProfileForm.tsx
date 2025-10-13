@@ -51,6 +51,7 @@ const ProfileForm: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
 
   useEffect(() => {
+    console.log('ProfileForm - useEffect profile:', profile);
     if (profile) {
       setFormData({
         full_name: profile.full_name || '',
@@ -70,6 +71,7 @@ const ProfileForm: React.FC = () => {
       if (profile.avatar_url) {
         setAvatarUrl(profile.avatar_url);
       }
+      console.log('ProfileForm - formData inicializado:', formData);
     }
   }, [profile]);
 
@@ -100,20 +102,24 @@ const ProfileForm: React.FC = () => {
   };
 
   const handleLocationSelect = (location: any) => {
+    console.log('ProfileForm - handleLocationSelect called with:', location);
     setSelectedLocation(location);
     // Actualizar los campos de dirección con los datos de la ubicación seleccionada
     if (location.address_components) {
       const components = location.address_components;
       const getComponent = (type: string) => components.find((c: any) => c.types.includes(type))?.long_name || '';
 
-      setFormData(prev => ({
-        ...prev,
+      const newFormData = {
+        ...formData,
         address: location.formatted_address || '',
         city: getComponent('locality') || getComponent('administrative_area_level_3') || getComponent('administrative_area_level_2') || '',
         state: getComponent('administrative_area_level_1') || '',
         postal_code: getComponent('postal_code') || '',
         country: getComponent('country') || 'España'
-      }));
+      };
+
+      console.log('ProfileForm - Actualizando formData:', newFormData);
+      setFormData(newFormData);
     }
   };
 
