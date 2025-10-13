@@ -50,7 +50,6 @@ import PostEdit from './components/posts/PostEdit';
 
 // Componentes de perfil y usuarios
 import ProfileForm from './components/profile/ProfileForm';
-import UserProfile from './components/users/UserProfile';
 import PeopleSearch from './components/people/PeopleSearch';
 import PersonDetail from './components/people/PersonDetail';
 import Settings from './components/dashboard/Settings';

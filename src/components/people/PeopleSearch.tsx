@@ -12,7 +12,7 @@ import type { LocationSearchResult, SearchFilters } from '../../types/supabase';
 const PeopleSearch: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<LocationSearchResult[]>([]);

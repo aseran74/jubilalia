@@ -27,7 +27,6 @@ interface RoommateSearchFilters {
 }
 
 const RoommateSearch: React.FC = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const [potentialRoommates, setPotentialRoommates] = useState<PotentialRoommate[]>([]);
   const [loading, setLoading] = useState(true);
