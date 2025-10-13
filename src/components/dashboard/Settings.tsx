@@ -48,7 +48,11 @@ const Settings: React.FC = () => {
   const handleSettingChange = (key: keyof SettingsData, value: boolean) => {
     setSettings(prev => ({
       ...prev,
-      [key]: value
+      [key]: value,
+      // Si marca "Vivo solo", desmarca "Me gustaría vivir con compañero"
+      ...(key === 'has_room_to_share' && value ? { wants_to_find_roommate: false } : {}),
+      // Si marca "Me gustaría vivir con compañero", desmarca "Vivo solo"
+      ...(key === 'wants_to_find_roommate' && value ? { has_room_to_share: false } : {})
     }));
   };
 
@@ -187,9 +191,9 @@ const Settings: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900">Vivo solo y me gustaría compartir mi vivienda</h3>
               </div>
               <p className="text-sm text-gray-600">
-                {settings.has_room_to_share 
+                {settings.has_room_to_share
                   ? 'Tienes una habitación disponible y quieres encontrar un compañero/a para compartir gastos y experiencias'
-                  : 'No tienes una habitación disponible para compartir actualmente'
+                  : 'Indica si tienes una habitación disponible para compartir con alguien que busca compañero'
                 }
               </p>
             </div>
@@ -234,9 +238,9 @@ const Settings: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900">Me gustaría ir a vivir con un compañero/a</h3>
               </div>
               <p className="text-sm text-gray-600">
-                {settings.wants_to_find_roommate 
+                {settings.wants_to_find_roommate
                   ? 'Buscas compartir gastos y vivir experiencias con alguien que tenga una habitación disponible'
-                  : 'No estás buscando activamente un compañero de habitación'
+                  : 'Indica si estás buscando activamente un compañero/a con quien compartir vivienda'
                 }
               </p>
             </div>
@@ -258,6 +262,9 @@ const Settings: React.FC = () => {
               <EnvelopeIcon className="w-5 h-5 text-blue-500 mr-2 mt-0.5" />
               <div>
                 <h4 className="text-sm font-medium text-blue-900 mb-1">Información importante</h4>
+                <p className="text-sm text-blue-700 mb-2">
+                  Estas opciones son mutuamente excluyentes. Puedes marcar una sola opción:
+                </p>
                 <ul className="text-sm text-blue-700 space-y-1">
                   <li>• Si tu perfil es privado, otros usuarios no podrán encontrarte en búsquedas ni ver tu información</li>
                   <li>• Los datos de contacto solo se comparten si activas esta opción Y tu perfil es público</li>

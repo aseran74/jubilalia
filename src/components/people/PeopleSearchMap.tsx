@@ -68,33 +68,14 @@ const PeopleSearchMap: React.FC<PeopleSearchMapProps> = ({
           const location = results[0].geometry.location;
           bounds.extend(location);
           
-          // === SOLUCIÓN ALTERNATIVA SIN MAP ID ===
-          // Crear un icono SVG personalizado que funcione con marcadores normales
-          let iconUrl;
-          
-          if (person.avatar_url) {
-            // Para personas con foto, crear un SVG con la imagen
-            iconUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-              <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="avatar-${person.id}" patternUnits="userSpaceOnUse" width="48" height="48">
-                    <image href="${person.avatar_url}" width="48" height="48" preserveAspectRatio="xMidYMid slice"/>
-                  </pattern>
-                </defs>
-                <circle cx="24" cy="24" r="21" fill="url(#avatar-${person.id})" stroke="#3B82F6" stroke-width="3"/>
-                <circle cx="24" cy="24" r="21" fill="none" stroke="#fff" stroke-width="2"/>
-              </svg>
-            `)}`;
-          } else {
-            // Para personas sin foto, crear un SVG con iniciales
-            const initials = (person.full_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-            iconUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-              <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="24" cy="24" r="21" fill="#10B981" stroke="#fff" stroke-width="3"/>
-                <text x="24" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">${initials}</text>
-              </svg>
-            `)}`;
-          }
+          // Crear un icono SVG con iniciales (para TODOS los marcadores)
+          const initials = (person.full_name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+          const iconUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+            <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="21" fill="#10B981" stroke="#fff" stroke-width="3"/>
+              <text x="24" y="30" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">${initials}</text>
+            </svg>
+          `)}`;
           
           // Crear el marcador con el icono personalizado
           const marker = new window.google.maps.Marker({
