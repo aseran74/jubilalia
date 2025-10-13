@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Search, User, MapPin, Heart, MessageCircle, Filter } from 'lucide-react';
+import { Search, User, MapPin, Heart, Filter } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 interface PotentialRoommate {
@@ -90,14 +90,11 @@ const RoommateSearch: React.FC = () => {
 
   const cities = [...new Set(potentialRoommates.map(r => r.city).filter(Boolean))];
 
-  const handleContact = (roommateId: string) => {
-    // Navegar al chat o crear conversación
-    navigate(`/dashboard/messages?user=${roommateId}`);
-  };
-
   const handleLike = async (roommateId: string) => {
     // Implementar sistema de likes/matches
-    console.log('Liked roommate:', roommateId);
+    console.log('Me interesa este compañero:', roommateId);
+    // TODO: Aquí se implementará el sistema de matching
+    // Cuando ambos se dan "me gusta", se crea una conversación
   };
 
   return (
@@ -297,20 +294,13 @@ const RoommateSearch: React.FC = () => {
                 </div>
 
                 {/* Botones de acción */}
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex gap-3">
+                <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                   <button
                     onClick={() => handleLike(roommate.id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                   >
-                    <Heart className="w-4 h-4" />
-                    Me gusta
-                  </button>
-                  <button
-                    onClick={() => handleContact(roommate.id)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Contactar
+                    <Heart className="w-5 h-5" />
+                    Me interesa este compañero
                   </button>
                 </div>
               </div>
