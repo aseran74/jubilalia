@@ -25,6 +25,14 @@ interface PersonCardProps {
 }
 
 const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
+  console.log('PersonCard - person data:', {
+    name: person.full_name,
+    whatsapp: person.whatsapp,
+    phone: person.phone,
+    has_room: person.has_room_to_share,
+    wants_roommate: person.wants_to_find_roommate
+  });
+
   const age = person.date_of_birth 
     ? Math.floor((new Date().getTime() - new Date(person.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null;

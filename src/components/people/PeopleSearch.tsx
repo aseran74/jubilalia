@@ -54,7 +54,8 @@ const PeopleSearch: React.FC = () => {
         return;
       }
 
-      console.log('✅ Usuarios iniciales cargados:', data);
+      console.log('✅ Usuarios iniciales cargados:', data?.length);
+      console.log('📊 Primer usuario:', data?.[0]);
       console.log('🔍 Datos de perfiles con avatares:', data?.map(p => ({ name: p.full_name, avatar: p.avatar_url })));
       
         // Convertir a formato LocationSearchResult
@@ -78,8 +79,17 @@ const PeopleSearch: React.FC = () => {
             location_country: profile.country,
             occupation: profile.occupation || 'Sin ocupación',
             interests: profile.interests || [],
+            city: profile.city,
+            address: profile.address,
+            state: profile.state,
+            postal_code: profile.postal_code,
+            date_of_birth: profile.date_of_birth,
+            gender: profile.gender,
+            phone: profile.phone,
+            whatsapp: profile.whatsapp,
+            has_room_to_share: profile.has_room_to_share,
+            wants_to_find_roommate: profile.wants_to_find_roommate,
             age: null,
-            gender: null,
             distance_km: 0
           };
         }) || [];
@@ -126,8 +136,9 @@ const PeopleSearch: React.FC = () => {
         // Fallback: consulta directa a la tabla profiles
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, full_name, email, avatar_url, bio, address, city, state, postal_code, country, occupation, interests, created_at')
-          .limit(20);
+          .select('*')
+          .eq('is_public', true)
+          .limit(50);
 
         if (error) {
           console.error('❌ Error en consulta directa:', error);
@@ -158,8 +169,17 @@ const PeopleSearch: React.FC = () => {
             location_country: profile.country,
             occupation: profile.occupation || 'Sin ocupación',
             interests: profile.interests || [],
-            age: null, // No tenemos edad en profiles
-            gender: null, // No tenemos género en profiles
+            city: profile.city,
+            address: profile.address,
+            state: profile.state,
+            postal_code: profile.postal_code,
+            date_of_birth: profile.date_of_birth,
+            gender: profile.gender,
+            phone: profile.phone,
+            whatsapp: profile.whatsapp,
+            has_room_to_share: profile.has_room_to_share,
+            wants_to_find_roommate: profile.wants_to_find_roommate,
+            age: null,
             distance_km: 0
           };
         }) || [];

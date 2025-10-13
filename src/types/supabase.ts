@@ -1079,6 +1079,18 @@ export interface LocationSearchResult {
   bio: string | null;
   interests: string[] | null;
   occupation: string | null;
+  email?: string;
+  city?: string;
+  address?: string;
+  state?: string;
+  postal_code?: string;
+  date_of_birth?: string;
+  gender?: string;
+  phone?: string;
+  whatsapp?: string;
+  has_room_to_share?: boolean;
+  wants_to_find_roommate?: boolean;
+  age?: number;
 }
 
 // Interfaz para información de ubicación de Google Places
