@@ -45,8 +45,9 @@ const PeopleSearch: React.FC = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, bio, address, city, state, postal_code, country, occupation, interests, created_at')
-        .limit(10);
+        .select('*')
+        .eq('is_public', true)
+        .limit(50);
 
       if (error) {
         console.error('❌ Error cargando usuarios iniciales:', error);
