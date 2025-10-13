@@ -199,29 +199,11 @@ const PeopleSearch: React.FC = () => {
         console.log('✅ Resultados de consulta directa:', data);
         console.log('🔍 Datos de búsqueda con avatares:', data?.map(p => ({ name: p.full_name, avatar: p.avatar_url })));
         
-        // Geocodificar y calcular distancias manualmente
-        const geocoder = new window.google.maps.Geocoder();
-        const searchLat = searchLocation.geometry.location.lat;
-        const searchLng = searchLocation.geometry.location.lng;
-
-        console.log('📍 Ubicación de búsqueda:', { lat: searchLat, lng: searchLng });
-
-        // Función para calcular distancia usando fórmula de Haversine
-        const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-          const R = 6371; // Radio de la Tierra en km
-          const dLat = (lat2 - lat1) * Math.PI / 180;
-          const dLon = (lon2 - lon1) * Math.PI / 180;
-          const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          return R * c;
-        };
-
-        // Procesar perfiles con geocoding
-        const profilesWithDistance = await Promise.all(
-          data.map(async (profile) => {
+        // Si es "Sin límite", no geocodificar, solo formatear los datos
+        if (filters.maxDistance === 999999) {
+          console.log('🌍 Modo SIN LÍMITE: Mostrando todos los perfiles sin filtrar por distancia');
+          
+          const formattedResults = data.map(profile => {
             // Construir dirección completa
             let fullAddress = '';
             if (profile.address) fullAddress += profile.address;
@@ -229,30 +211,6 @@ const PeopleSearch: React.FC = () => {
             if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
             if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
             if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
-
-            // Intentar geocodificar la dirección del perfil
-            let distance_km = 999999; // Distancia muy alta por defecto
-            
-            if (fullAddress && fullAddress !== 'Ubicación no especificada') {
-              try {
-                const result = await new Promise<any>((resolve, reject) => {
-                  geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
-                    if (status === 'OK' && results[0]) {
-                      resolve(results[0]);
-                    } else {
-                      reject(status);
-                    }
-                  });
-                });
-
-                const profileLat = result.geometry.location.lat();
-                const profileLng = result.geometry.location.lng();
-                distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
-                console.log(`📏 Distancia a ${profile.full_name}: ${distance_km.toFixed(2)} km`);
-              } catch (geocodeError) {
-                console.log(`⚠️ No se pudo geocodificar: ${fullAddress}`);
-              }
-            }
 
             return {
               id: profile.id,
@@ -276,20 +234,106 @@ const PeopleSearch: React.FC = () => {
               has_room_to_share: profile.has_room_to_share,
               wants_to_find_roommate: profile.wants_to_find_roommate,
               age: null,
-              distance_km: distance_km
+              distance_km: 0
             };
-          })
-        );
+          });
 
-        // Filtrar por distancia máxima
-        const filteredByDistance = profilesWithDistance.filter(
-          profile => profile.distance_km <= filters.maxDistance
-        );
+          console.log(`✅ Mostrando TODOS los perfiles: ${formattedResults.length}`);
+          setSearchResults(formattedResults);
+          setFilteredResults(formattedResults);
+        } else {
+          // Geocodificar y calcular distancias manualmente
+          const geocoder = new window.google.maps.Geocoder();
+          const searchLat = searchLocation.geometry.location.lat;
+          const searchLng = searchLocation.geometry.location.lng;
 
-        console.log(`✅ Perfiles dentro de ${filters.maxDistance} km: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
+          console.log('📍 Ubicación de búsqueda:', { lat: searchLat, lng: searchLng });
 
-        setSearchResults(filteredByDistance);
-        setFilteredResults(filteredByDistance);
+          // Función para calcular distancia usando fórmula de Haversine
+          const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+            const R = 6371; // Radio de la Tierra en km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+              Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+          };
+
+          // Procesar perfiles con geocoding
+          const profilesWithDistance = await Promise.all(
+            data.map(async (profile) => {
+              // Construir dirección completa
+              let fullAddress = '';
+              if (profile.address) fullAddress += profile.address;
+              if (profile.city) fullAddress += (fullAddress ? ', ' : '') + profile.city;
+              if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
+              if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
+              if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
+
+              // Intentar geocodificar la dirección del perfil
+              let distance_km = 999999; // Distancia muy alta por defecto
+              
+              if (fullAddress && fullAddress !== 'Ubicación no especificada') {
+                try {
+                  const result = await new Promise<any>((resolve, reject) => {
+                    geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
+                      if (status === 'OK' && results[0]) {
+                        resolve(results[0]);
+                      } else {
+                        reject(status);
+                      }
+                    });
+                  });
+
+                  const profileLat = result.geometry.location.lat();
+                  const profileLng = result.geometry.location.lng();
+                  distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
+                  console.log(`📏 Distancia a ${profile.full_name}: ${distance_km.toFixed(2)} km`);
+                } catch (geocodeError) {
+                  console.log(`⚠️ No se pudo geocodificar: ${fullAddress}`);
+                }
+              }
+
+              return {
+                id: profile.id,
+                full_name: profile.full_name || 'Usuario',
+                email: profile.email || '',
+                avatar_url: profile.avatar_url,
+                bio: profile.bio,
+                formatted_address: fullAddress || 'Ubicación no especificada',
+                location_city: profile.city,
+                location_country: profile.country,
+                occupation: profile.occupation || 'Sin ocupación',
+                interests: profile.interests || [],
+                city: profile.city,
+                address: profile.address,
+                state: profile.state,
+                postal_code: profile.postal_code,
+                date_of_birth: profile.date_of_birth,
+                gender: profile.gender,
+                phone: profile.phone,
+                whatsapp: profile.whatsapp,
+                has_room_to_share: profile.has_room_to_share,
+                wants_to_find_roommate: profile.wants_to_find_roommate,
+                age: null,
+                distance_km: distance_km
+              };
+            })
+          );
+
+          // Filtrar por distancia máxima
+          const filteredByDistance = profilesWithDistance.filter(
+            profile => profile.distance_km <= filters.maxDistance
+          );
+
+          console.log(`✅ Perfiles dentro de ${filters.maxDistance} km: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
+
+          setSearchResults(filteredByDistance);
+          setFilteredResults(filteredByDistance);
+        }
       }
     } catch (err) {
       console.error('❌ Error searching people:', err);
