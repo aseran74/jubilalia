@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Phone, MessageCircle, Home, Users, Mail } from 'lucide-react';
+import { MapPin, Phone, MessageCircle, Home, Users } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 interface PersonCardProps {
@@ -42,11 +42,6 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
     if (person.phone) {
       window.location.href = `tel:${person.phone}`;
     }
-  };
-
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.location.href = `mailto:${person.email}`;
   };
 
   const handleMessageClick = (e: React.MouseEvent) => {
@@ -157,7 +152,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
       {/* Opciones de contacto */}
       <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
         <h4 className="text-xs font-medium text-gray-700 mb-3">Contactar por:</h4>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {person.whatsapp && (
             <button
               onClick={handleWhatsAppClick}
@@ -176,13 +171,6 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
               Teléfono
             </button>
           )}
-          <button
-            onClick={handleEmailClick}
-            className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
-          >
-            <Mail className="w-4 h-4" />
-            Email
-          </button>
           <button
             onClick={handleMessageClick}
             className="flex items-center justify-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"

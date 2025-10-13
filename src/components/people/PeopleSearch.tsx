@@ -204,6 +204,20 @@ const PeopleSearch: React.FC = () => {
       );
     }
 
+    // Filtro por tiene habitación disponible
+    if (filters.has_room_to_share === true) {
+      results = results.filter((result: any) => 
+        result.has_room_to_share === true
+      );
+    }
+
+    // Filtro por busca compañero
+    if (filters.wants_to_find_roommate === true) {
+      results = results.filter((result: any) => 
+        result.wants_to_find_roommate === true
+      );
+    }
+
     setFilteredResults(results);
   };
 

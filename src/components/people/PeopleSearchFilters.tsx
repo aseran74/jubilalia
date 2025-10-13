@@ -6,6 +6,8 @@ interface SearchFilters {
   ageRange: [number, number];
   gender: string | null;
   occupation: string | null;
+  has_room_to_share?: boolean | null;
+  wants_to_find_roommate?: boolean | null;
 }
 
 interface PeopleSearchFiltersProps {
@@ -64,7 +66,9 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
       interests: [],
       ageRange: [55, 100],
       gender: null,
-      occupation: null
+      occupation: null,
+      has_room_to_share: null,
+      wants_to_find_roommate: null
     });
   };
 
@@ -199,6 +203,37 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Preferencias de vivienda */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Preferencias de vivienda
+            </label>
+            <div className="space-y-3">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.has_room_to_share === true}
+                  onChange={(e) => onFiltersChange({ has_room_to_share: e.target.checked ? true : null })}
+                  className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">
+                  🏠 Tiene habitación disponible
+                </span>
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filters.wants_to_find_roommate === true}
+                  onChange={(e) => onFiltersChange({ wants_to_find_roommate: e.target.checked ? true : null })}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">
+                  👥 Busca compañero/a
+                </span>
+              </label>
+            </div>
           </div>
         </>
       )}

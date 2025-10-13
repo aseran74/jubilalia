@@ -1063,6 +1063,8 @@ export interface SearchFilters {
   ageRange: [number, number];
   gender: string | null;
   occupation: string | null;
+  has_room_to_share?: boolean | null;
+  wants_to_find_roommate?: boolean | null;
 }
 
 // Interfaz para resultados de búsqueda por ubicación
