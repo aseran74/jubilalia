@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, ArrowLeft } from 'lucide-react';
 import ActivityMap from './ActivityMap';
 
@@ -28,12 +29,23 @@ interface Activity {
 }
 
 const ActivityList: React.FC = () => {
+  const { profile } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [showSearchInMap, setShowSearchInMap] = useState(false);
+  const [userLocation, setUserLocation] = useState<string>('');
   const navigate = useNavigate();
+
+  // Cargar dirección del perfil al inicio
+  useEffect(() => {
+    if (profile && profile.city) {
+      const location = `${profile.city}${profile.state ? ', ' + profile.state : ''}`;
+      setUserLocation(location);
+      console.log('ActivityList - Dirección del perfil cargada:', location);
+    }
+  }, [profile]);
 
   useEffect(() => {
     fetchActivities();
@@ -136,7 +148,15 @@ const ActivityList: React.FC = () => {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
               <span className="text-gray-600 font-medium">Volver</span>
             </button>
-            <h1 className="text-2xl font-bold text-gray-900">Actividades</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Actividades</h1>
+              {userLocation && (
+                <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  Cerca de: {userLocation} (50 km)
+                </p>
+              )}
+            </div>
           </div>
           <button
             onClick={() => navigate('/dashboard/activities/create')}

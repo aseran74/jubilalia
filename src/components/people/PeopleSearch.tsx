@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import { MapPin } from 'lucide-react';
 import LocationSelector from './LocationSelector';
 import PeopleSearchFilters from './PeopleSearchFilters';
 import PeopleSearchResults from './PeopleSearchResults';
@@ -10,6 +12,7 @@ import type { LocationSearchResult, SearchFilters } from '../../types/supabase';
 const PeopleSearch: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [searchLocation, setSearchLocation] = useState<any>(null);
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<LocationSearchResult[]>([]);
@@ -33,6 +36,25 @@ const PeopleSearch: React.FC = () => {
       setViewMode('list');
     }
   }, [location.pathname]);
+
+  // Cargar dirección del perfil al inicio
+  useEffect(() => {
+    if (profile && profile.address && profile.city) {
+      // Construir ubicación desde el perfil
+      const profileLocation = {
+        formatted_address: `${profile.address}, ${profile.city}${profile.state ? ', ' + profile.state : ''}${profile.postal_code ? ' ' + profile.postal_code : ''}`,
+        address_components: [],
+        geometry: {
+          location: {
+            lat: 0, // Se geocodificará después
+            lng: 0
+          }
+        }
+      };
+      console.log('PeopleSearch - Cargando dirección del perfil:', profileLocation);
+      setSearchLocation(profileLocation);
+    }
+  }, [profile]);
 
   // Cargar usuarios iniciales
   useEffect(() => {
@@ -286,14 +308,29 @@ const PeopleSearch: React.FC = () => {
 
       {/* Selector de ubicación */}
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          ¿Dónde quieres buscar?
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              ¿Dónde quieres buscar?
+            </h2>
+            {searchLocation && (
+              <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                Buscando en: {searchLocation.formatted_address} (50 km)
+              </p>
+            )}
+          </div>
+        </div>
         <LocationSelector
           onLocationSelect={handleLocationSelect}
-          placeholder="Buscar ciudad, dirección o lugar..."
+          placeholder={searchLocation ? "Cambiar ubicación..." : "Buscar ciudad, dirección o lugar..."}
           className="max-w-md"
         />
+        {searchLocation && (
+          <p className="text-xs text-gray-500 mt-2">
+            💡 Puedes cambiar la ubicación si estás de viaje
+          </p>
+        )}
       </div>
 
       {/* Filtros - ocultos en modo mapa móvil, siempre visibles en desktop o modo lista */}

@@ -52,6 +52,7 @@ import PostEdit from './components/posts/PostEdit';
 import ProfileForm from './components/profile/ProfileForm';
 import UserProfile from './components/users/UserProfile';
 import PeopleSearch from './components/people/PeopleSearch';
+import PersonDetail from './components/people/PersonDetail';
 import Settings from './components/dashboard/Settings';
 
 // Componentes de grupos
@@ -173,7 +174,8 @@ const DashboardLayout: React.FC = () => {
             {/* Búsqueda de Usuarios */}
             <Route path="/users" element={<PeopleSearch />} />
             <Route path="/users/map" element={<PeopleSearch />} />
-            <Route path="/users/:id" element={<UserProfile />} />
+            <Route path="/users/:id" element={<PersonDetail />} />
+            <Route path="/dashboard/users/:id" element={<PersonDetail />} />
             
             {/* Grupos */}
             <Route path="/groups" element={<Groups />} />

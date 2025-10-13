@@ -91,9 +91,18 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
     setShowContactOptions(false);
   };
 
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      // Si no hay onClick, navegar a la vista detalle
+      window.location.href = `/dashboard/users/${person.id}`;
+    }
+  };
+
   return (
     <div
-      onClick={onClick}
+      onClick={handleCardClick}
       className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer"
     >
       {/* Header con avatar y nombre */}
