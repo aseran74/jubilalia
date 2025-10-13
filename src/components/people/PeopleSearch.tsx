@@ -14,7 +14,7 @@ const PeopleSearch: React.FC = () => {
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<LocationSearchResult[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({
-    maxDistance: 1500, // Toda la península
+    maxDistance: 50, // 50 km por defecto
     interests: [],
     ageRange: [55, 100],
     gender: null,

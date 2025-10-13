@@ -62,7 +62,7 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
 
   const clearFilters = () => {
     onFiltersChange({
-      maxDistance: 50,
+      maxDistance: 50, // 50 km por defecto
       interests: [],
       ageRange: [55, 100],
       gender: null,
@@ -102,7 +102,7 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
         />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
           <span>5 km</span>
-          <span>100 km</span>
+          <span>50 km</span>
           <span>200 km</span>
         </div>
       </div>

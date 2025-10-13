@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import ImageUpload from '../dashboard/ImageUpload';
+import LocationSelector from '../people/LocationSelector';
 import {
   UserIcon,
   GlobeAltIcon,
@@ -47,6 +48,7 @@ const ProfileForm: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
 
   useEffect(() => {
     if (profile) {
@@ -95,6 +97,24 @@ const ProfileForm: React.FC = () => {
 
   const handleAvatarUpload = (url: string) => {
     setAvatarUrl(url);
+  };
+
+  const handleLocationSelect = (location: any) => {
+    setSelectedLocation(location);
+    // Actualizar los campos de dirección con los datos de la ubicación seleccionada
+    if (location.address_components) {
+      const components = location.address_components;
+      const getComponent = (type: string) => components.find((c: any) => c.types.includes(type))?.long_name || '';
+
+      setFormData(prev => ({
+        ...prev,
+        address: location.formatted_address || '',
+        city: getComponent('locality') || getComponent('administrative_area_level_3') || getComponent('administrative_area_level_2') || '',
+        state: getComponent('administrative_area_level_1') || '',
+        postal_code: getComponent('postal_code') || '',
+        country: getComponent('country') || 'España'
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -176,6 +196,19 @@ const ProfileForm: React.FC = () => {
             maxImages={1}
             className="w-full max-w-xs"
           />
+        </div>
+
+        {/* Ubicación con Google Places */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Ubicación</label>
+          <LocationSelector
+            onLocationSelect={handleLocationSelect}
+            placeholder="Buscar tu dirección..."
+            className="w-full"
+          />
+          <p className="text-sm text-gray-500 mt-1">
+            Usa el selector de ubicación para autocompletar tu dirección
+          </p>
         </div>
 
         {/* Personal Information */}

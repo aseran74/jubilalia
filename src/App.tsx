@@ -190,6 +190,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Perfil y Configuración */}
             <Route path="/profile" element={<ProfileForm />} />
+            <Route path="/dashboard/profile" element={<ProfileForm />} />
             <Route path="/profiles/:id/edit" element={<ProfileForm />} />
             <Route path="/settings" element={<Settings />} />
             
