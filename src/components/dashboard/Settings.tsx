@@ -205,6 +205,27 @@ const Settings: React.FC = () => {
             </label>
           </div>
 
+          {/* Recordatorio para publicar habitación */}
+          {settings.has_room_to_share && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start">
+                <HomeIcon className="w-5 h-5 text-green-600 mr-2 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-medium text-green-900 mb-1">💡 Recuerda publicar tu habitación</h4>
+                  <p className="text-sm text-green-700 mb-3">
+                    Has indicado que tienes una habitación disponible. No olvides publicarla para que otros socios puedan encontrarla.
+                  </p>
+                  <button
+                    onClick={() => window.location.href = '/dashboard/rooms/create'}
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    Publicar mi habitación ahora
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Compañero de Habitación - Opción 2 */}
           <div className="flex items-center justify-between py-4 border-b border-gray-100">
             <div className="flex-1">
