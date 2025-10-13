@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Phone, MessageCircle, Home, Users } from 'lucide-react';
+import { MapPin, MessageCircle, Home, Users } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 interface PersonCardProps {
@@ -25,8 +25,6 @@ interface PersonCardProps {
 }
 
 const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
-  const [showContactOptions, setShowContactOptions] = React.useState(false);
-
   console.log('PersonCard - person data:', {
     name: person.full_name,
     whatsapp: person.whatsapp,
@@ -47,48 +45,9 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
     }
   };
 
-  const handlePhoneClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (person.phone) {
-      window.location.href = `tel:${person.phone}`;
-    }
-  };
-
   const handleMessageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     window.location.href = `/dashboard/messages?user=${person.id}`;
-  };
-
-  const handleContactClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Mostrar opciones de contacto
-    setShowContactOptions(!showContactOptions);
-  };
-
-  const handleContactMethod = (method: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    switch (method) {
-      case 'whatsapp':
-        if (person.whatsapp) {
-          const cleanNumber = person.whatsapp.replace(/\s+/g, '');
-          window.open(`https://wa.me/${cleanNumber}`, '_blank');
-        }
-        break;
-      case 'phone':
-        if (person.phone) {
-          window.location.href = `tel:${person.phone}`;
-        }
-        break;
-      case 'email':
-        window.location.href = `mailto:${person.email}`;
-        break;
-      case 'chat':
-        window.location.href = `/dashboard/messages?user=${person.id}`;
-        break;
-    }
-
-    setShowContactOptions(false);
   };
 
   const handleCardClick = () => {
@@ -202,57 +161,26 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
 
       {/* Opciones de contacto */}
       <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
-        <div className="relative">
+        <div className="grid grid-cols-2 gap-3">
+          {/* WhatsApp */}
+          {person.whatsapp && (
+            <button
+              onClick={handleWhatsAppClick}
+              className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+            >
+              <FaWhatsapp className="w-4 h-4" />
+              WhatsApp
+            </button>
+          )}
+          
+          {/* Chat interno */}
           <button
-            onClick={handleContactClick}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+            onClick={handleMessageClick}
+            className={`flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium ${!person.whatsapp ? 'col-span-2' : ''}`}
           >
             <MessageCircle className="w-4 h-4" />
             Contactar
           </button>
-
-          {/* Menú desplegable */}
-          {showContactOptions && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-              <div className="p-3">
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Elige cómo contactar:</h4>
-                <div className="space-y-2">
-                  {person.whatsapp && (
-                    <button
-                      onClick={(e) => handleContactMethod('whatsapp', e)}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors"
-                    >
-                      <FaWhatsapp className="w-5 h-5 text-green-500" />
-                      <span className="text-sm text-gray-700">WhatsApp</span>
-                    </button>
-                  )}
-                  {person.phone && (
-                    <button
-                      onClick={(e) => handleContactMethod('phone', e)}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors"
-                    >
-                      <Phone className="w-5 h-5 text-blue-500" />
-                      <span className="text-sm text-gray-700">Teléfono</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={(e) => handleContactMethod('chat', e)}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors"
-                  >
-                    <MessageCircle className="w-5 h-5 text-purple-500" />
-                    <span className="text-sm text-gray-700">Chat interno</span>
-                  </button>
-                  <button
-                    onClick={(e) => handleContactMethod('email', e)}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 rounded-md transition-colors"
-                  >
-                    <Mail className="w-5 h-5 text-gray-500" />
-                    <span className="text-sm text-gray-700">Email</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
