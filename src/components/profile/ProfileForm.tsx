@@ -26,6 +26,8 @@ interface ProfileFormData {
   country: string;
   occupation: string;
   interests: string[];
+  latitude?: number;
+  longitude?: number;
 }
 
 const ProfileForm: React.FC = () => {
@@ -102,11 +104,19 @@ const ProfileForm: React.FC = () => {
 
   const handleLocationSelect = (location: any) => {
     console.log('ProfileForm - handleLocationSelect called with:', location);
-    setSelectedLocation(location);
+    
     // Actualizar los campos de dirección con los datos de la ubicación seleccionada
-    if (location.address_components) {
+    if (location.address_components && location.geometry) {
       const components = location.address_components;
       const getComponent = (type: string) => components.find((c: any) => c.types.includes(type))?.long_name || '';
+
+      // Obtener coordenadas
+      const lat = typeof location.geometry.location.lat === 'function' 
+        ? location.geometry.location.lat() 
+        : location.geometry.location.lat;
+      const lng = typeof location.geometry.location.lng === 'function' 
+        ? location.geometry.location.lng() 
+        : location.geometry.location.lng;
 
       const newFormData = {
         ...formData,
@@ -114,10 +124,16 @@ const ProfileForm: React.FC = () => {
         city: getComponent('locality') || getComponent('administrative_area_level_3') || getComponent('administrative_area_level_2') || '',
         state: getComponent('administrative_area_level_1') || '',
         postal_code: getComponent('postal_code') || '',
-        country: getComponent('country') || 'España'
+        country: getComponent('country') || 'España',
+        latitude: lat,
+        longitude: lng
       };
 
-      console.log('ProfileForm - Actualizando formData:', newFormData);
+      console.log('ProfileForm - Actualizando formData con coordenadas:', {
+        ...newFormData,
+        lat,
+        lng
+      });
       setFormData(newFormData);
     }
   };

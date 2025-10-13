@@ -242,8 +242,7 @@ const PeopleSearch: React.FC = () => {
           setSearchResults(formattedResults);
           setFilteredResults(formattedResults);
         } else {
-          // Geocodificar y calcular distancias manualmente
-          const geocoder = new window.google.maps.Geocoder();
+          // Usar coordenadas guardadas en la base de datos
           const searchLat = searchLocation.geometry.location.lat;
           const searchLng = searchLocation.geometry.location.lng;
 
@@ -262,14 +261,12 @@ const PeopleSearch: React.FC = () => {
             return R * c;
           };
 
-          // Procesar perfiles con geocoding (secuencial con delay)
+          // Procesar perfiles usando coordenadas guardadas
           const profilesWithDistance = [];
           let successCount = 0;
           let failCount = 0;
 
-          for (let i = 0; i < data.length; i++) {
-            const profile = data[i];
-            
+          for (const profile of data) {
             // Construir dirección completa
             let fullAddress = '';
             if (profile.address) fullAddress += profile.address;
@@ -278,66 +275,17 @@ const PeopleSearch: React.FC = () => {
             if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
             if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
 
-            let distance_km = 999999; // Distancia muy alta por defecto
+            let distance_km = 999999;
             let geocoded = false;
             
-            // Intentar geocodificar con múltiples estrategias
-            if (fullAddress && fullAddress !== 'Ubicación no especificada') {
-              // Estrategia 1: Dirección completa
-              try {
-                const result = await new Promise<any>((resolve, reject) => {
-                  geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
-                    if (status === 'OK' && results[0]) {
-                      resolve(results[0]);
-                    } else {
-                      reject(status);
-                    }
-                  });
-                });
-
-                const profileLat = result.geometry.location.lat();
-                const profileLng = result.geometry.location.lng();
-                distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
-                console.log(`✅ ${profile.full_name}: ${distance_km.toFixed(2)} km`);
-                geocoded = true;
-                successCount++;
-              } catch (geocodeError) {
-                // Estrategia 2: Solo ciudad y estado
-                if (profile.city) {
-                  try {
-                    const simpleAddress = `${profile.city}${profile.state ? ', ' + profile.state : ''}, España`;
-                    const result = await new Promise<any>((resolve, reject) => {
-                      geocoder.geocode({ address: simpleAddress }, (results: any, status: any) => {
-                        if (status === 'OK' && results[0]) {
-                          resolve(results[0]);
-                        } else {
-                          reject(status);
-                        }
-                      });
-                    });
-
-                    const profileLat = result.geometry.location.lat();
-                    const profileLng = result.geometry.location.lng();
-                    distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
-                    console.log(`✅ ${profile.full_name} (ciudad): ${distance_km.toFixed(2)} km`);
-                    geocoded = true;
-                    successCount++;
-                  } catch (cityError) {
-                    console.log(`⚠️ No se pudo geocodificar: ${profile.full_name} - ${fullAddress}`);
-                    failCount++;
-                  }
-                } else {
-                  console.log(`⚠️ Sin ciudad: ${profile.full_name}`);
-                  failCount++;
-                }
-              }
-
-              // Pequeño delay para evitar límites de la API (solo cada 10 perfiles)
-              if (i % 10 === 0 && i > 0) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-              }
+            // Usar coordenadas guardadas en la base de datos
+            if (profile.latitude && profile.longitude) {
+              distance_km = calculateDistance(searchLat, searchLng, profile.latitude, profile.longitude);
+              geocoded = true;
+              successCount++;
+              console.log(`✅ ${profile.full_name}: ${distance_km.toFixed(2)} km (coordenadas guardadas)`);
             } else {
-              console.log(`⚠️ Sin dirección: ${profile.full_name}`);
+              console.log(`⚠️ ${profile.full_name}: Sin coordenadas guardadas`);
               failCount++;
             }
 
@@ -368,16 +316,16 @@ const PeopleSearch: React.FC = () => {
             });
           }
 
-          console.log(`📊 Geocoding: ${successCount} exitosos, ${failCount} fallidos de ${data.length} total`);
+          console.log(`📊 Perfiles con coordenadas: ${successCount}, sin coordenadas: ${failCount} de ${data.length} total`);
 
-          // Filtrar por distancia máxima Y que hayan sido geocodificados exitosamente
+          // Filtrar por distancia máxima Y que tengan coordenadas
           const filteredByDistance = profilesWithDistance.filter(
             profile => profile.geocoded && profile.distance_km <= filters.maxDistance
           );
 
           console.log(`✅ Perfiles dentro de ${filters.maxDistance} km: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
-          console.log(`📍 Perfiles geocodificados exitosamente: ${successCount}`);
-          console.log(`❌ Perfiles excluidos (sin geocoding o fuera de rango): ${profilesWithDistance.length - filteredByDistance.length}`);
+          console.log(`📍 Perfiles con coordenadas: ${successCount}`);
+          console.log(`❌ Perfiles excluidos (sin coordenadas o fuera de rango): ${profilesWithDistance.length - filteredByDistance.length}`);
 
           setSearchResults(filteredByDistance);
           setFilteredResults(filteredByDistance);
