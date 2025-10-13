@@ -32,7 +32,6 @@ import RoomList from './components/accommodations/RoomList';
 import RoomDetail from './components/accommodations/RoomDetail';
 import RoomForm from './components/accommodations/RoomForm';
 import RoommateSearch from './components/accommodations/RoommateSearch';
-import SociosList from './components/people/SociosList';
 
 // Componentes de administración
 import AdminRoomManagement from './components/admin/AdminRoomManagement';
@@ -156,10 +155,6 @@ const DashboardLayout: React.FC = () => {
             <Route path="/rooms/map" element={<RoomsMapView />} />
             <Route path="/rooms/create" element={<RoomForm />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />
-            
-            {/* Socios */}
-            <Route path="/socios" element={<SociosList />} />
-            <Route path="/dashboard/socios" element={<SociosList />} />
             <Route path="/rooms/:id/edit" element={<RoomForm />} />
             
             {/* Actividades */}

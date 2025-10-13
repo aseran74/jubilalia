@@ -126,7 +126,6 @@ const DashboardSidebar: React.FC = () => {
       name: 'Socios',
       icon: UserIcon,
       items: [
-        { name: 'Ver todos los socios', href: '/dashboard/socios', icon: UsersIcon },
         { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/users/map', icon: MapIcon },
         { name: 'Grupos', href: '/dashboard/groups', icon: UsersIcon },
