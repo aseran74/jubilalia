@@ -171,7 +171,7 @@ const ProfileForm: React.FC = () => {
       <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Editar Perfil</h2>
 
       {successMessage && (
-        <div className="p-4 mb-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2">
+        <div className="p-4 mb-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 animate-fade-in">
           <CheckCircleIcon className="w-5 h-5 text-green-500" />
           <p className="text-green-700">{successMessage}</p>
         </div>
