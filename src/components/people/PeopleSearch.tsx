@@ -398,7 +398,7 @@ const PeopleSearch: React.FC = () => {
             {searchLocation && (
               <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
-                Buscando en: {searchLocation.formatted_address} (50 km)
+                Buscando en: {searchLocation.formatted_address} ({filters.maxDistance === 999999 ? 'Sin límite' : `${filters.maxDistance} km`})
               </p>
             )}
           </div>
