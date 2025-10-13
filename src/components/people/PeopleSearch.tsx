@@ -262,67 +262,113 @@ const PeopleSearch: React.FC = () => {
             return R * c;
           };
 
-          // Procesar perfiles con geocoding
-          const profilesWithDistance = await Promise.all(
-            data.map(async (profile) => {
-              // Construir dirección completa
-              let fullAddress = '';
-              if (profile.address) fullAddress += profile.address;
-              if (profile.city) fullAddress += (fullAddress ? ', ' : '') + profile.city;
-              if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
-              if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
-              if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
+          // Procesar perfiles con geocoding (secuencial con delay)
+          const profilesWithDistance = [];
+          let successCount = 0;
+          let failCount = 0;
 
-              // Intentar geocodificar la dirección del perfil
-              let distance_km = 999999; // Distancia muy alta por defecto
-              
-              if (fullAddress && fullAddress !== 'Ubicación no especificada') {
-                try {
-                  const result = await new Promise<any>((resolve, reject) => {
-                    geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
-                      if (status === 'OK' && results[0]) {
-                        resolve(results[0]);
-                      } else {
-                        reject(status);
-                      }
-                    });
+          for (let i = 0; i < data.length; i++) {
+            const profile = data[i];
+            
+            // Construir dirección completa
+            let fullAddress = '';
+            if (profile.address) fullAddress += profile.address;
+            if (profile.city) fullAddress += (fullAddress ? ', ' : '') + profile.city;
+            if (profile.state) fullAddress += (fullAddress ? ', ' : '') + profile.state;
+            if (profile.postal_code) fullAddress += (fullAddress ? ' ' : '') + profile.postal_code;
+            if (profile.country) fullAddress += (fullAddress ? ', ' : '') + profile.country;
+
+            let distance_km = 999999; // Distancia muy alta por defecto
+            let geocoded = false;
+            
+            // Intentar geocodificar con múltiples estrategias
+            if (fullAddress && fullAddress !== 'Ubicación no especificada') {
+              // Estrategia 1: Dirección completa
+              try {
+                const result = await new Promise<any>((resolve, reject) => {
+                  geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
+                    if (status === 'OK' && results[0]) {
+                      resolve(results[0]);
+                    } else {
+                      reject(status);
+                    }
                   });
+                });
 
-                  const profileLat = result.geometry.location.lat();
-                  const profileLng = result.geometry.location.lng();
-                  distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
-                  console.log(`📏 Distancia a ${profile.full_name}: ${distance_km.toFixed(2)} km`);
-                } catch (geocodeError) {
-                  console.log(`⚠️ No se pudo geocodificar: ${fullAddress}`);
+                const profileLat = result.geometry.location.lat();
+                const profileLng = result.geometry.location.lng();
+                distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
+                console.log(`✅ ${profile.full_name}: ${distance_km.toFixed(2)} km`);
+                geocoded = true;
+                successCount++;
+              } catch (geocodeError) {
+                // Estrategia 2: Solo ciudad y estado
+                if (profile.city) {
+                  try {
+                    const simpleAddress = `${profile.city}${profile.state ? ', ' + profile.state : ''}, España`;
+                    const result = await new Promise<any>((resolve, reject) => {
+                      geocoder.geocode({ address: simpleAddress }, (results: any, status: any) => {
+                        if (status === 'OK' && results[0]) {
+                          resolve(results[0]);
+                        } else {
+                          reject(status);
+                        }
+                      });
+                    });
+
+                    const profileLat = result.geometry.location.lat();
+                    const profileLng = result.geometry.location.lng();
+                    distance_km = calculateDistance(searchLat, searchLng, profileLat, profileLng);
+                    console.log(`✅ ${profile.full_name} (ciudad): ${distance_km.toFixed(2)} km`);
+                    geocoded = true;
+                    successCount++;
+                  } catch (cityError) {
+                    console.log(`⚠️ No se pudo geocodificar: ${profile.full_name} - ${fullAddress}`);
+                    failCount++;
+                  }
+                } else {
+                  console.log(`⚠️ Sin ciudad: ${profile.full_name}`);
+                  failCount++;
                 }
               }
 
-              return {
-                id: profile.id,
-                full_name: profile.full_name || 'Usuario',
-                email: profile.email || '',
-                avatar_url: profile.avatar_url,
-                bio: profile.bio,
-                formatted_address: fullAddress || 'Ubicación no especificada',
-                location_city: profile.city,
-                location_country: profile.country,
-                occupation: profile.occupation || 'Sin ocupación',
-                interests: profile.interests || [],
-                city: profile.city,
-                address: profile.address,
-                state: profile.state,
-                postal_code: profile.postal_code,
-                date_of_birth: profile.date_of_birth,
-                gender: profile.gender,
-                phone: profile.phone,
-                whatsapp: profile.whatsapp,
-                has_room_to_share: profile.has_room_to_share,
-                wants_to_find_roommate: profile.wants_to_find_roommate,
-                age: null,
-                distance_km: distance_km
-              };
-            })
-          );
+              // Pequeño delay para evitar límites de la API (solo cada 10 perfiles)
+              if (i % 10 === 0 && i > 0) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+              }
+            } else {
+              console.log(`⚠️ Sin dirección: ${profile.full_name}`);
+              failCount++;
+            }
+
+            profilesWithDistance.push({
+              id: profile.id,
+              full_name: profile.full_name || 'Usuario',
+              email: profile.email || '',
+              avatar_url: profile.avatar_url,
+              bio: profile.bio,
+              formatted_address: fullAddress || 'Ubicación no especificada',
+              location_city: profile.city,
+              location_country: profile.country,
+              occupation: profile.occupation || 'Sin ocupación',
+              interests: profile.interests || [],
+              city: profile.city,
+              address: profile.address,
+              state: profile.state,
+              postal_code: profile.postal_code,
+              date_of_birth: profile.date_of_birth,
+              gender: profile.gender,
+              phone: profile.phone,
+              whatsapp: profile.whatsapp,
+              has_room_to_share: profile.has_room_to_share,
+              wants_to_find_roommate: profile.wants_to_find_roommate,
+              age: null,
+              distance_km: distance_km,
+              geocoded: geocoded
+            });
+          }
+
+          console.log(`📊 Geocoding: ${successCount} exitosos, ${failCount} fallidos de ${data.length} total`);
 
           // Filtrar por distancia máxima
           const filteredByDistance = profilesWithDistance.filter(
@@ -330,6 +376,7 @@ const PeopleSearch: React.FC = () => {
           );
 
           console.log(`✅ Perfiles dentro de ${filters.maxDistance} km: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
+          console.log(`📍 Perfiles geocodificados: ${filteredByDistance.filter(p => p.geocoded).length}`);
 
           setSearchResults(filteredByDistance);
           setFilteredResults(filteredByDistance);
