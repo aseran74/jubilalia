@@ -14,7 +14,7 @@ const PeopleSearch: React.FC = () => {
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [filteredResults, setFilteredResults] = useState<LocationSearchResult[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({
-    maxDistance: 50,
+    maxDistance: 1500, // Toda la península
     interests: [],
     ageRange: [55, 100],
     gender: null,
@@ -47,7 +47,7 @@ const PeopleSearch: React.FC = () => {
         .from('profiles')
         .select('*')
         .eq('is_public', true)
-        .limit(50);
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('❌ Error cargando usuarios iniciales:', error);
@@ -138,7 +138,7 @@ const PeopleSearch: React.FC = () => {
           .from('profiles')
           .select('*')
           .eq('is_public', true)
-          .limit(50);
+          .order('created_at', { ascending: false });
 
         if (error) {
           console.error('❌ Error en consulta directa:', error);
