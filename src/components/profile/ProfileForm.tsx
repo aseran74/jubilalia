@@ -48,7 +48,6 @@ const ProfileForm: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState<any>(null);
 
   useEffect(() => {
     console.log('ProfileForm - useEffect profile:', profile);

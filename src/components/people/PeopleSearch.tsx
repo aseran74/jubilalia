@@ -140,7 +140,7 @@ const PeopleSearch: React.FC = () => {
             whatsapp: profile.whatsapp,
             has_room_to_share: profile.has_room_to_share,
             wants_to_find_roommate: profile.wants_to_find_roommate,
-            age: null,
+            age: undefined,
             distance_km: 0
           };
         }) || [];
@@ -233,7 +233,7 @@ const PeopleSearch: React.FC = () => {
               whatsapp: profile.whatsapp,
               has_room_to_share: profile.has_room_to_share,
               wants_to_find_roommate: profile.wants_to_find_roommate,
-              age: null,
+              age: undefined,
               distance_km: 0
             };
           });
@@ -362,7 +362,7 @@ const PeopleSearch: React.FC = () => {
               whatsapp: profile.whatsapp,
               has_room_to_share: profile.has_room_to_share,
               wants_to_find_roommate: profile.wants_to_find_roommate,
-              age: null,
+              age: undefined,
               distance_km: distance_km,
               geocoded: geocoded
             });
@@ -370,13 +370,14 @@ const PeopleSearch: React.FC = () => {
 
           console.log(`📊 Geocoding: ${successCount} exitosos, ${failCount} fallidos de ${data.length} total`);
 
-          // Filtrar por distancia máxima
+          // Filtrar por distancia máxima Y que hayan sido geocodificados exitosamente
           const filteredByDistance = profilesWithDistance.filter(
-            profile => profile.distance_km <= filters.maxDistance
+            profile => profile.geocoded && profile.distance_km <= filters.maxDistance
           );
 
           console.log(`✅ Perfiles dentro de ${filters.maxDistance} km: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
-          console.log(`📍 Perfiles geocodificados: ${filteredByDistance.filter(p => p.geocoded).length}`);
+          console.log(`📍 Perfiles geocodificados exitosamente: ${successCount}`);
+          console.log(`❌ Perfiles excluidos (sin geocoding o fuera de rango): ${profilesWithDistance.length - filteredByDistance.length}`);
 
           setSearchResults(filteredByDistance);
           setFilteredResults(filteredByDistance);

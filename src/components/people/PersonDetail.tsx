@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Calendar, Briefcase } from 'lucide-react';
+import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Briefcase } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
 interface Person {

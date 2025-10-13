@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MapPin, MessageCircle, Home, Users } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 
@@ -25,6 +26,8 @@ interface PersonCardProps {
 }
 
 const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
+  const navigate = useNavigate();
+  
   console.log('PersonCard - person data:', {
     name: person.full_name,
     whatsapp: person.whatsapp,
@@ -47,7 +50,14 @@ const PersonCard: React.FC<PersonCardProps> = ({ person, onClick }) => {
 
   const handleMessageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.location.href = `/dashboard/messages?user=${person.id}`;
+    console.log('Iniciando conversación con:', person.full_name, person.id);
+    navigate('/dashboard/messages', {
+      state: {
+        startNewChat: true,
+        otherUserId: person.id,
+        otherUserName: person.full_name
+      }
+    });
   };
 
   const handleCardClick = () => {
