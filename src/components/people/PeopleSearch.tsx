@@ -390,12 +390,12 @@ const PeopleSearch: React.FC = () => {
     applyFilters();
   }, [filters, searchResults]);
 
-  // Buscar cuando cambie la ubicación
+  // Buscar cuando cambie la ubicación O la distancia máxima
   useEffect(() => {
     if (searchLocation) {
       searchPeople();
     }
-  }, [searchLocation]);
+  }, [searchLocation, filters.maxDistance]);
 
   const handleLocationSelect = (location: any) => {
     setSearchLocation(location);
