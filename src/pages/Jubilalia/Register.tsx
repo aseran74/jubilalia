@@ -8,7 +8,9 @@ import {
   ArrowRight,
   CheckCircle,
   XCircle,
-  Upload
+  Upload,
+  Phone,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -37,6 +39,10 @@ const Register: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [formError, setFormError] = useState<string>('');
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [helpPhone, setHelpPhone] = useState('');
+  const [helpName, setHelpName] = useState('');
+  const [helpSubmitted, setHelpSubmitted] = useState(false);
 
   const hobbiesOptions = [
     'Lectura', 'Jardinería', 'Cocina', 'Paseos', 'Música', 'Pintura',
@@ -248,6 +254,44 @@ const Register: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleHelpRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!helpName.trim() || !helpPhone.trim()) {
+      setFormError('Por favor, completa tu nombre y teléfono');
+      return;
+    }
+
+    try {
+      // Aquí podrías enviar la solicitud de ayuda a tu backend
+      // Por ahora, simularemos el envío
+      console.log('Solicitud de ayuda:', { name: helpName, phone: helpPhone });
+      
+      // Simular envío exitoso
+      setHelpSubmitted(true);
+      
+      // Opcional: enviar a Supabase o tu sistema de gestión
+      // await supabase.from('help_requests').insert({
+      //   name: helpName,
+      //   phone: helpPhone,
+      //   type: 'registration_help',
+      //   created_at: new Date().toISOString()
+      // });
+      
+    } catch (error) {
+      console.error('Error enviando solicitud de ayuda:', error);
+      setFormError('Error al enviar la solicitud. Inténtalo de nuevo.');
+    }
+  };
+
+  const resetHelpModal = () => {
+    setShowHelpModal(false);
+    setHelpPhone('');
+    setHelpName('');
+    setHelpSubmitted(false);
+    setFormError('');
   };
 
   return (
@@ -575,6 +619,23 @@ const Register: React.FC = () => {
                 </svg>
                 <span>Registrarse con Google</span>
               </button>
+
+              {/* Divider */}
+              <div className="my-6 flex items-center">
+                <div className="flex-1 border-t border-gray-300"></div>
+                <span className="px-4 text-gray-500 text-sm">o</span>
+                <div className="flex-1 border-t border-gray-300"></div>
+              </div>
+
+              {/* Te Ayudamos Button */}
+              <button
+                type="button"
+                onClick={() => setShowHelpModal(true)}
+                className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white text-base font-semibold rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
+              >
+                <Phone className="w-5 h-5" />
+                <span>Te ayudamos</span>
+              </button>
               
               <p className="mt-4 text-gray-600">
                 ¿Ya tienes cuenta?{' '}
@@ -585,6 +646,114 @@ const Register: React.FC = () => {
             </div>
           </form>
         </div>
+
+        {/* Modal de Ayuda */}
+        {showHelpModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative">
+              <button
+                onClick={resetHelpModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {!helpSubmitted ? (
+                <>
+                  <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Phone className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                      ¿Te ayudamos?
+                    </h3>
+                    <p className="text-gray-600">
+                      Si tienes dificultades para registrarte, déjanos tu teléfono y te llamaremos para ayudarte paso a paso.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleHelpRequest} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tu nombre
+                      </label>
+                      <input
+                        type="text"
+                        value={helpName}
+                        onChange={(e) => setHelpName(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-base"
+                        placeholder="Tu nombre completo"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tu teléfono
+                      </label>
+                      <input
+                        type="tel"
+                        value={helpPhone}
+                        onChange={(e) => setHelpPhone(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-base"
+                        placeholder="+34 600 000 000"
+                      />
+                    </div>
+
+                    {formError && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center space-x-2">
+                        <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                        <p className="text-red-700 text-sm">{formError}</p>
+                      </div>
+                    )}
+
+                    <div className="flex space-x-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={resetHelpModal}
+                        className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 font-semibold"
+                      >
+                        Solicitar ayuda
+                      </button>
+                    </div>
+                  </form>
+                </>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                    ¡Solicitud enviada!
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Gracias {helpName}. Te llamaremos al <strong>{helpPhone}</strong> en las próximas 24 horas para ayudarte con el registro.
+                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p className="text-blue-800 text-sm">
+                      <strong>Horario de llamadas:</strong><br />
+                      Lunes a Viernes: 9:00 - 18:00<br />
+                      Sábados: 10:00 - 14:00
+                    </p>
+                  </div>
+                  <button
+                    onClick={resetHelpModal}
+                    className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all duration-200 font-semibold"
+                  >
+                    Entendido
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

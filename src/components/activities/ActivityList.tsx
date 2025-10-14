@@ -36,6 +36,10 @@ const ActivityList: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [showSearchInMap, setShowSearchInMap] = useState(false);
   const [userLocation, setUserLocation] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>('');
+  const [selectedCity, setSelectedCity] = useState<string>('');
+  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
+  const [maxPrice, setMaxPrice] = useState<number>(100);
   const navigate = useNavigate();
 
   // Cargar dirección del perfil al inicio
@@ -115,11 +119,32 @@ const ActivityList: React.FC = () => {
     }
   };
 
-  const filteredActivities = activities.filter(activity => 
-    activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    activity.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    activity.city.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredActivities = activities.filter(activity => {
+    // Filtro de búsqueda por texto
+    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.city.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro por tipo de actividad
+    const matchesType = !selectedType || activity.activity_type === selectedType;
+    
+    // Filtro por ciudad
+    const matchesCity = !selectedCity || activity.city === selectedCity;
+    
+    // Filtro por precio
+    let matchesPrice = true;
+    if (priceFilter === 'free') {
+      matchesPrice = activity.is_free;
+    } else if (priceFilter === 'paid') {
+      matchesPrice = !activity.is_free && activity.price <= maxPrice;
+    }
+    
+    return matchesSearch && matchesType && matchesCity && matchesPrice;
+  });
+
+  // Obtener listas únicas para los filtros
+  const activityTypes = Array.from(new Set(activities.map(a => a.activity_type))).sort();
+  const cities = Array.from(new Set(activities.map(a => a.city))).sort();
 
   const handleActivitySelect = (activity: Activity) => {
     console.log('🔗 Navegando a detalles de actividad:', activity.title, 'ID:', activity.id);
@@ -178,6 +203,98 @@ const ActivityList: React.FC = () => {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
+
+        {/* Filtros */}
+        <div className={`mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 ${viewMode === 'map' ? 'hidden lg:grid' : 'grid'}`}>
+          {/* Filtro por tipo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tipo de Actividad
+            </label>
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Todos los tipos</option>
+              {activityTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro por ciudad */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Ciudad
+            </label>
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Todas las ciudades</option>
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtro por precio */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Precio
+            </label>
+            <select
+              value={priceFilter}
+              onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">Todos</option>
+              <option value="free">Gratis</option>
+              <option value="paid">De pago</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Slider de precio máximo - solo visible cuando se selecciona "De pago" */}
+        {priceFilter === 'paid' && (
+          <div className={`mt-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Precio máximo: €{maxPrice}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="200"
+              step="5"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(Number(e.target.value))}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>€0</span>
+              <span>€200</span>
+            </div>
+          </div>
+        )}
+
+        {/* Botón para limpiar filtros */}
+        {(selectedType || selectedCity || priceFilter !== 'all') && (
+          <div className={`mt-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
+            <button
+              onClick={() => {
+                setSelectedType('');
+                setSelectedCity('');
+                setPriceFilter('all');
+                setMaxPrice(100);
+              }}
+              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        )}
 
         {/* Botón de recargar */}
         <div className="mt-4">

@@ -868,7 +868,7 @@ const LandingPage: React.FC = () => {
                 <div className="text-center mb-10">
                   <h3 className="text-3xl font-bold text-gray-900 mb-4">🌸 Nuestros Servicios y Partners</h3>
                   <p className="text-lg text-gray-700">
-                    Mira nuestros Servicios y partners que hacen la vida más fácil. Porque vivir bien no es solo compartir casa: es disfrutar cada día con tranquilidad, sabor y bienestar.
+                    Descubre nuestros partners con descuentos exclusivos que hacen la vida más fácil. Porque vivir bien no es solo compartir casa: es disfrutar cada día con tranquilidad, sabor y bienestar.
                   </p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -876,33 +876,45 @@ const LandingPage: React.FC = () => {
                     <UtensilsCrossed className="w-10 h-10 text-orange-500 mb-4" />
                     <h4 className="text-xl font-bold text-gray-900 mb-2">🍽️ Alimentación</h4>
                     <p className="text-sm text-gray-600 mb-2 font-semibold">TAPPERS</p>
-                    <p className="text-gray-700">
+                    <p className="text-gray-700 mb-3">
                       Menús caseros, equilibrados y listos para calentar. Sin preocuparse por cocinar.
                     </p>
+                    <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                      🔥 Descuento Jubilalia
+                    </div>
                   </div>
                   <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-blue-400">
                     <Spray className="w-10 h-10 text-blue-500 mb-4" />
                     <h4 className="text-xl font-bold text-gray-900 mb-2">🧹 Limpieza</h4>
                     <p className="text-sm text-gray-600 mb-2 font-semibold">CÉS GOURMET</p>
-                    <p className="text-gray-700">
+                    <p className="text-gray-700 mb-3">
                       Tu hogar siempre limpio, cuidado y a tu gusto. Más tiempo para ti.
                     </p>
+                    <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                      🔥 Descuento Jubilalia
+                    </div>
                   </div>
                   <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-red-400">
                     <Shield className="w-10 h-10 text-red-500 mb-4" />
                     <h4 className="text-xl font-bold text-gray-900 mb-2">💊 Bienestar</h4>
-                    <p className="text-sm text-gray-600 mb-2 font-semibold">ADESLAS</p>
-                    <p className="text-gray-700">
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">ADESLAS y OCCIDENT</p>
+                    <p className="text-gray-700 mb-3">
                       Seguros de hogar y salud. Vivir acompañado y vivir seguro.
                     </p>
+                    <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                      🔥 Descuento Jubilalia
+                    </div>
                   </div>
                   <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-t-4 border-purple-400">
                     <PartyPopper className="w-10 h-10 text-purple-500 mb-4" />
                     <h4 className="text-xl font-bold text-gray-900 mb-2">🎉 Actividades</h4>
                     <p className="text-sm text-gray-600 mb-2 font-semibold">OCIO Y BIENESTAR</p>
-                    <p className="text-gray-700">
+                    <p className="text-gray-700 mb-3">
                       Campeonatos, viajes, escapadas. Porque compartir es disfrutar.
                     </p>
+                    <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                      🔥 Descuento Jubilalia
+                    </div>
                   </div>
                 </div>
               </div>
