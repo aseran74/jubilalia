@@ -14,9 +14,7 @@ import {
   BellIcon,
   MapPinIcon,
   ClockIcon,
-  UserGroupIcon,
-  HeartIcon,
-  ChatBubbleBottomCenterTextIcon
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 
 interface FeedItem {
@@ -81,16 +79,19 @@ const Dashboard: React.FC = () => {
 
       if (error) throw error;
 
-      const postItems: FeedItem[] = (posts || []).map(post => ({
-        id: post.id,
-        type: 'post' as const,
-        title: post.title,
-        description: post.excerpt || '',
-        author: post.profiles?.full_name || 'Usuario',
-        avatar: post.profiles?.avatar_url,
-        timestamp: post.created_at,
-        link: `/dashboard/posts/${post.id}`
-      }));
+      const postItems: FeedItem[] = (posts || []).map((post: any) => {
+        const profile = Array.isArray(post.profiles) ? post.profiles[0] : post.profiles;
+        return {
+          id: post.id,
+          type: 'post' as const,
+          title: post.title,
+          description: post.excerpt || '',
+          author: profile?.full_name || 'Usuario',
+          avatar: profile?.avatar_url,
+          timestamp: post.created_at,
+          link: `/dashboard/posts/${post.id}`
+        };
+      });
 
       setFeedItems(prev => [...prev, ...postItems]);
     } catch (error) {
@@ -123,17 +124,21 @@ const Dashboard: React.FC = () => {
 
       if (error) throw error;
 
-      const groupItems: FeedItem[] = (groupPosts || []).map(post => ({
-        id: post.id,
-        type: 'group' as const,
-        title: post.title || `Publicación en ${post.groups?.name || 'grupo'}`,
-        description: post.content?.substring(0, 150) + '...' || '',
-        author: post.profiles?.full_name || 'Usuario',
-        avatar: post.profiles?.avatar_url,
-        timestamp: post.created_at,
-        link: `/dashboard/groups/${post.group_id}`,
-        metadata: { groupName: post.groups?.name }
-      }));
+      const groupItems: FeedItem[] = (groupPosts || []).map((post: any) => {
+        const profile = Array.isArray(post.profiles) ? post.profiles[0] : post.profiles;
+        const group = Array.isArray(post.groups) ? post.groups[0] : post.groups;
+        return {
+          id: post.id,
+          type: 'group' as const,
+          title: post.title || `Publicación en ${group?.name || 'grupo'}`,
+          description: post.content?.substring(0, 150) + '...' || '',
+          author: profile?.full_name || 'Usuario',
+          avatar: profile?.avatar_url,
+          timestamp: post.created_at,
+          link: `/dashboard/groups/${post.group_id}`,
+          metadata: { groupName: group?.name }
+        };
+      });
 
       setFeedItems(prev => [...prev, ...groupItems]);
     } catch (error) {
