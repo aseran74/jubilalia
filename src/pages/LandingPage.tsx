@@ -29,6 +29,9 @@ import ProfileCard from '../components/landing/ProfileCard';
 import StatsSection from '../components/landing/StatsSection';
 import FeaturesSection from '../components/landing/FeaturesSection';
 import CohousingModal from '../components/landing/CohousingModal';
+import ActivityCard from '../components/landing/ActivityCard';
+import GroupCard from '../components/landing/GroupCard';
+import { supabase } from '../lib/supabase';
 
 
 const LandingPage: React.FC = () => {
@@ -37,6 +40,10 @@ const LandingPage: React.FC = () => {
   const [isCohousingModalOpen, setIsCohousingModalOpen] = useState(false);
   const [showCompartirDetails, setShowCompartirDetails] = useState(false);
   const [showCompartirIntro, setShowCompartirIntro] = useState(false);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
+  const [loadingGroups, setLoadingGroups] = useState(true);
   // const [activeSection, setActiveSection] = useState('home');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -49,6 +56,93 @@ const LandingPage: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    fetchActivities();
+    fetchGroups();
+  }, []);
+
+  const mapActivityTypeToCategory = (activityType: string): string => {
+    const mapping: { [key: string]: string } = {
+      'ejercicio': 'deportes',
+      'turismo': 'viajes',
+      'educativo': 'educacion',
+      'cultura': 'cultura',
+      'gastronomia': 'gastronomia',
+      'social': 'social',
+      'deportes': 'deportes',
+      'viajes': 'viajes',
+      'tecnologia': 'tecnologia',
+      'musica': 'musica',
+      'arte': 'arte',
+      'naturaleza': 'naturaleza'
+    };
+    return mapping[activityType.toLowerCase()] || activityType.toLowerCase();
+  };
+
+  const fetchActivities = async () => {
+    try {
+      setLoadingActivities(true);
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) {
+        console.error('Error fetching activities:', error);
+        return;
+      }
+
+      // Transformar datos para el componente ActivityCard
+      const formattedActivities = data?.map(activity => ({
+        id: activity.id,
+        title: activity.title,
+        description: activity.description,
+        category: mapActivityTypeToCategory(activity.activity_type),
+        location: activity.location,
+        city: activity.city,
+        date: activity.date,
+        time: activity.time,
+        max_participants: activity.max_participants,
+        current_participants: activity.current_participants || 0,
+        price: parseFloat(activity.price || 0),
+        images: [], // Se pueden agregar imágenes si las hay
+        is_featured: false,
+        created_at: activity.created_at
+      })) || [];
+
+      setActivities(formattedActivities);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setLoadingActivities(false);
+    }
+  };
+
+  const fetchGroups = async () => {
+    try {
+      setLoadingGroups(true);
+      const { data, error } = await supabase
+        .from('groups')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) {
+        console.error('Error fetching groups:', error);
+        return;
+      }
+
+      // Los datos ya están en el formato correcto para GroupCard
+      setGroups(data || []);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -744,6 +838,120 @@ const LandingPage: React.FC = () => {
       {/* Stats Section */}
       <StatsSection />
 
+      {/* Actividades Destacadas */}
+      <section className="py-24 bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 right-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-80 h-80 bg-orange-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-pink-100 text-pink-700 text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-pink-500 rounded-full mr-2"></span>
+              Actividades Destacadas
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+              Actividades para <span className="gradient-text">Disfrutar</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Descubre actividades y eventos diseñados para disfrutar en compañía y crear momentos memorables
+            </p>
+          </div>
+
+          {loadingActivities ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-lg p-8 animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : activities.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {activities.map((activity) => (
+                <ActivityCard key={activity.id} activity={activity} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No hay actividades disponibles en este momento.</p>
+            </div>
+          )}
+
+          {/* CTA */}
+          <div className="text-center mt-12">
+            <button
+              onClick={() => navigate('/dashboard/activities')}
+              className="bg-gradient-to-r from-pink-500 to-orange-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-pink-600 hover:to-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+            >
+              Ver Todas las Actividades
+              <ArrowRight className="w-5 h-5 ml-2 inline" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Grupos Destacados */}
+      <section className="py-24 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-blue-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-purple-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-6">
+              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+              Grupos de Interés
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+              Únete a <span className="gradient-text">Nuestros Grupos</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Conecta con personas que comparten tus mismos intereses y crea comunidades duraderas
+            </p>
+          </div>
+
+          {loadingGroups ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-lg p-8 animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : groups.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {groups.map((group) => (
+                <GroupCard key={group.id} group={group} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No hay grupos disponibles en este momento.</p>
+            </div>
+          )}
+
+          {/* CTA */}
+          <div className="text-center mt-12">
+            <button
+              onClick={() => navigate('/dashboard/groups')}
+              className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+            >
+              Ver Todos los Grupos
+              <ArrowRight className="w-5 h-5 ml-2 inline" />
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Compartir - Vive acompañado */}
       <section id="compartir" className="py-20 bg-gradient-to-b from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -850,11 +1058,13 @@ const LandingPage: React.FC = () => {
                 </div>
                 <div className="space-y-4 text-gray-800 text-lg">
                   <p>
-                    <strong>María Gonzalo Zamorano (68)</strong> y <strong>Pepa Martínez Serra (71)</strong>, ambas viudas con pensiones de 1.400 €, se conocieron gracias a Jubilalia.
-                    Al principio dudaban, pero tras unos días conviviendo descubrieron que se entendían a la perfección.
+                    <strong>María Gonzalo Zamorano (68)</strong> y <strong>Pepa Martínez Serra (71)</strong>, ambas viudas con pensiones de 1.200 €, quitados gastos seguro salud privado, gastos comunes etc, apenas les quedaba 700€.
                   </p>
                   <p>
-                    María alquiló su casa por 1.400 €, y acordaron pagar 700 € cada una.
+                    Nuestras amigas se conocieron gracias a Jubilalia. Al principio dudaban, pero tras unos días conviviendo descubrieron que se entendían a la perfección.
+                  </p>
+                  <p>
+                    María alquiló su casa por 1.600 €, y acordó pagar 600 € a su amiga, y 800€ extra para ella.
                     <strong className="text-blue-700"> Ahora, cada una dispone de 1.800 € netos al mes, el doble que tenían antes</strong> y encima viven acompañadas, comparten risas, comidas y nuevas aventuras y experiencias.
                   </p>
                   <p className="italic text-blue-900 font-medium">
