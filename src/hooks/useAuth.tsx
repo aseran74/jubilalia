@@ -56,11 +56,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('refreshProfile - Iniciando consulta a la base de datos...');
       
       // Buscar perfil por auth_user_id con timeout
+      // Usar maybeSingle() para evitar errores cuando hay múltiples perfiles
+      // y seleccionar el más reciente
       const queryPromise = supabase
         .from('profiles')
         .select('*')
         .eq('auth_user_id', userToRefresh.id)
-        .single();
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Timeout: La consulta tardó demasiado')), 5000)
@@ -102,6 +106,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const createLocalProfile = (userData: any): Partial<UserProfile> => {
+    // Si el email es admin@test.com, crear el perfil como administrador
+    const isAdminEmail = userData.email === 'admin@test.com';
+    
     return {
       auth_user_id: userData.id, // En Supabase, user.id es el identificador único
       email: userData.email || '',
@@ -118,9 +125,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       country: null,
       occupation: null,
       interests: [],
-      // Campos de ubicación con valores por defecto
-      location_public: false,
-      search_radius_km: 50
+      is_admin: isAdminEmail // Establecer como admin si es el email de admin
+      // Nota: location_public y search_radius_km no existen en la tabla actual
     };
   };
 

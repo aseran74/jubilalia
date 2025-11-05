@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { 
@@ -33,15 +33,26 @@ interface ActivityFormData {
   difficulty_level: string;
   tags: string[];
   images: string[];
+  // Campos de recurrencia
+  is_recurring: boolean;
+  recurrence_type: 'weekly' | 'daily' | 'monthly';
+  recurrence_days: number[]; // 0=Domingo, 1=Lunes, ..., 6=Sábado
+  recurrence_start_date: string;
+  recurrence_end_date: string;
 }
 
 const ActivityForm: React.FC = () => {
-  const { ensureProfile } = useAuth();
+  const { id } = useParams<{ id: string }>();
+  const { ensureProfile, profile, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(!!id); // Loading si estamos editando
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [newTag, setNewTag] = useState('');
+  const [isEditMode, setIsEditMode] = useState(!!id);
+  const [canEdit, setCanEdit] = useState(false);
+  const [hasLoadedData, setHasLoadedData] = useState(false);
 
   const [formData, setFormData] = useState<ActivityFormData>({
     title: '',
@@ -63,7 +74,13 @@ const ActivityForm: React.FC = () => {
     age_max: '120',
     difficulty_level: 'Principiante',
     tags: [],
-    images: []
+    images: [],
+    // Campos de recurrencia
+    is_recurring: false,
+    recurrence_type: 'weekly',
+    recurrence_days: [],
+    recurrence_start_date: '',
+    recurrence_end_date: ''
   });
 
   const activityTypes = [
@@ -183,6 +200,66 @@ const ActivityForm: React.FC = () => {
     }));
   };
 
+  // Función para generar actividades recurrentes
+  const generateRecurringActivities = async (
+    parentActivityId: string,
+    activityData: any,
+    formData: ActivityFormData
+  ) => {
+    if (!formData.recurrence_start_date || !formData.recurrence_days.length) {
+      return;
+    }
+
+    const startDate = new Date(formData.recurrence_start_date);
+    const endDate = formData.recurrence_end_date 
+      ? new Date(formData.recurrence_end_date)
+      : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 año por defecto
+
+    const instances: any[] = [];
+    const currentDate = new Date(startDate);
+
+    // Generar instancias hasta la fecha de fin
+    while (currentDate <= endDate) {
+      const dayOfWeek = currentDate.getDay(); // 0=Domingo, 6=Sábado
+      
+      // Si el día de la semana está en los días seleccionados
+      if (formData.recurrence_days.includes(dayOfWeek)) {
+        const instanceDate = currentDate.toISOString().split('T')[0];
+        
+        instances.push({
+          ...activityData,
+          parent_activity_id: parentActivityId,
+          is_recurring: false, // Las instancias no son recurrentes
+          date: instanceDate,
+          recurrence_type: null,
+          recurrence_days: null,
+          recurrence_start_date: null,
+          recurrence_end_date: null
+        });
+      }
+
+      // Avanzar al siguiente día
+      currentDate.setDate(currentDate.getDate() + 1);
+      
+      // Limitar a 100 instancias para evitar sobrecarga
+      if (instances.length >= 100) break;
+    }
+
+    // Insertar todas las instancias de una vez
+    if (instances.length > 0) {
+      const { error } = await supabase
+        .from('activities')
+        .insert(instances);
+
+      if (error) {
+        console.error('Error generando actividades recurrentes:', error);
+        throw error;
+      }
+
+      console.log(`✅ Generadas ${instances.length} instancias de actividad recurrente`);
+    }
+  };
+
   const validateForm = () => {
     let newErrors: Record<string, string> = {};
     
@@ -202,13 +279,168 @@ const ActivityForm: React.FC = () => {
     if (parseInt(formData.age_min) > parseInt(formData.age_max)) {
       newErrors.age_max = 'La edad máxima debe ser mayor que la edad mínima';
     }
-    if (formData.images.length === 0) {
+    
+    // Validación de recurrencia
+    if (formData.is_recurring) {
+      if (!formData.recurrence_start_date) {
+        newErrors.recurrence_start_date = 'La fecha de inicio es obligatoria para actividades recurrentes';
+      }
+      if (formData.recurrence_type === 'weekly' && formData.recurrence_days.length === 0) {
+        newErrors.recurrence_days = 'Debes seleccionar al menos un día de la semana';
+      }
+      if (formData.recurrence_end_date && formData.recurrence_end_date < formData.recurrence_start_date) {
+        newErrors.recurrence_end_date = 'La fecha de fin debe ser posterior a la fecha de inicio';
+      }
+    }
+    
+    // Solo validar imágenes si estamos creando una nueva actividad
+    if (!isEditMode && formData.images.length === 0) {
       newErrors.images = 'Debes subir al menos una imagen';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // Cargar datos de la actividad si estamos en modo edición
+  useEffect(() => {
+    const loadActivityData = async () => {
+      // Si no hay ID, no estamos editando
+      if (!id) {
+        setLoadingData(false);
+        return;
+      }
+
+      // Si ya cargamos los datos, no hacerlo de nuevo
+      if (hasLoadedData) {
+        return;
+      }
+
+      try {
+        setLoadingData(true);
+        setHasLoadedData(true);
+        
+        console.log('🔄 Cargando actividad para editar:', id);
+        
+        // Obtener la actividad (no necesitamos esperar el perfil para cargar los datos)
+        const { data: activity, error: activityError } = await supabase
+          .from('activities')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (activityError) {
+          console.error('❌ Error cargando actividad:', activityError);
+          throw activityError;
+        }
+
+        console.log('✅ Actividad cargada:', activity);
+
+        // Obtener imágenes
+        const { data: imagesData, error: imagesError } = await supabase
+          .from('activity_images')
+          .select('image_url')
+          .eq('activity_id', id)
+          .order('image_order');
+
+        if (imagesError) console.error('Error loading images:', imagesError);
+
+        console.log('🖼️ Imágenes cargadas:', imagesData?.length || 0);
+
+        // Cargar datos en el formulario
+        setFormData({
+          title: activity.title || '',
+          description: activity.description || '',
+          activity_type: activity.activity_type || '',
+          date: activity.date || '',
+          time: activity.time || '',
+          duration: activity.duration?.toString() || '',
+          location: activity.location || '',
+          city: activity.city || '',
+          address: activity.address || '',
+          max_participants: activity.max_participants?.toString() || '',
+          price: activity.price?.toString() || '0',
+          is_free: activity.is_free ?? true,
+          contact_phone: activity.contact_phone || '',
+          contact_email: activity.contact_email || '',
+          website: activity.website || '',
+          age_min: activity.age_min?.toString() || '0',
+          age_max: activity.age_max?.toString() || '120',
+          difficulty_level: activity.difficulty_level || 'Principiante',
+          tags: activity.tags || [],
+          images: imagesData?.map(img => img.image_url) || [],
+          // Campos de recurrencia
+          is_recurring: (activity as any).is_recurring || false,
+          recurrence_type: (activity as any).recurrence_type || 'weekly',
+          recurrence_days: (activity as any).recurrence_days || [],
+          recurrence_start_date: (activity as any).recurrence_start_date || '',
+          recurrence_end_date: (activity as any).recurrence_end_date || ''
+        });
+
+        console.log('✅ Datos cargados en el formulario');
+
+      } catch (error) {
+        console.error('❌ Error loading activity:', error);
+        setErrors({ general: 'Error al cargar la actividad' });
+        setLoadingData(false);
+        setHasLoadedData(false); // Permitir reintentar
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    loadActivityData();
+  }, [id, hasLoadedData]);
+
+  // Verificar permisos cuando el perfil esté disponible y los datos ya estén cargados
+  useEffect(() => {
+    if (!isEditMode || !id || !hasLoadedData) return;
+
+    const checkPermissions = async () => {
+      // Si no hay perfil aún, esperar
+      if (!profile?.id) {
+        console.log('⏳ Esperando perfil para verificar permisos...');
+        return;
+      }
+
+      try {
+        const { data: activity } = await supabase
+          .from('activities')
+          .select('profile_id')
+          .eq('id', id)
+          .single();
+
+        if (!activity) {
+          console.error('❌ No se encontró la actividad para verificar permisos');
+          return;
+        }
+
+        const isOwner = activity.profile_id === profile.id;
+        const canEditActivity = isAdmin || isOwner;
+
+        console.log('🔍 Verificación de permisos:', { 
+          profileId: profile.id, 
+          activityProfileId: activity.profile_id,
+          isOwner, 
+          isAdmin, 
+          canEditActivity 
+        });
+
+        if (!canEditActivity) {
+          setErrors({ general: 'No tienes permisos para editar esta actividad' });
+          setTimeout(() => navigate('/dashboard/activities'), 2000);
+          setCanEdit(false);
+          return;
+        }
+
+        setCanEdit(true);
+      } catch (error) {
+        console.error('❌ Error checking permissions:', error);
+      }
+    };
+
+    checkPermissions();
+  }, [id, profile?.id, isAdmin, isEditMode, hasLoadedData, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,10 +460,75 @@ const ActivityForm: React.FC = () => {
 
       console.log('✅ Usando perfil:', currentProfile);
 
-      // 1. Crear la actividad principal
-      const { data: activity, error: activityError } = await supabase
-        .from('activities')
-        .insert({
+      let activityId = id;
+
+      if (isEditMode && id) {
+        // Verificar permisos antes de actualizar
+        if (currentProfile?.id) {
+          // Obtener la actividad para verificar permisos
+          const { data: activity } = await supabase
+            .from('activities')
+            .select('profile_id')
+            .eq('id', id)
+            .single();
+
+          if (activity) {
+            const isOwner = activity.profile_id === currentProfile.id;
+            const canEditActivity = isAdmin || isOwner;
+
+            if (!canEditActivity) {
+              setErrors({ general: 'No tienes permisos para editar esta actividad' });
+              setLoading(false);
+              return;
+            }
+          }
+        }
+
+        // Modo edición: actualizar actividad existente
+        const updateData: any = {
+          title: formData.title,
+          description: formData.description,
+          activity_type: formData.activity_type,
+          date: formData.date,
+          time: formData.time,
+          duration: parseInt(formData.duration),
+          location: formData.location,
+          city: formData.city,
+          address: formData.address,
+          max_participants: parseInt(formData.max_participants),
+          price: formData.is_free ? 0 : parseFloat(formData.price),
+          is_free: formData.is_free,
+          contact_phone: formData.contact_phone,
+          contact_email: formData.contact_email,
+          website: formData.website,
+          age_min: parseInt(formData.age_min),
+          age_max: parseInt(formData.age_max),
+          difficulty_level: formData.difficulty_level,
+          tags: formData.tags,
+          updated_at: new Date().toISOString()
+        };
+
+        const { error: updateError } = await supabase
+          .from('activities')
+          .update(updateData)
+          .eq('id', id);
+
+        if (updateError) throw updateError;
+
+        // Manejar imágenes: eliminar las antiguas y agregar las nuevas
+        if (formData.images.length > 0) {
+          // Eliminar imágenes antiguas
+          const { error: deleteImagesError } = await supabase
+            .from('activity_images')
+            .delete()
+            .eq('activity_id', id);
+
+          if (deleteImagesError) console.error('Error deleting old images:', deleteImagesError);
+        }
+
+      } else {
+        // Modo creación: crear nueva actividad
+        const activityData: any = {
           profile_id: currentProfile.id,
           title: formData.title,
           description: formData.description,
@@ -251,17 +548,32 @@ const ActivityForm: React.FC = () => {
           age_min: parseInt(formData.age_min),
           age_max: parseInt(formData.age_max),
           difficulty_level: formData.difficulty_level,
-          tags: formData.tags
-        })
-        .select()
-        .single();
+          tags: formData.tags,
+          // Campos de recurrencia
+          is_recurring: formData.is_recurring,
+          recurrence_type: formData.is_recurring ? formData.recurrence_type : null,
+          recurrence_days: formData.is_recurring && formData.recurrence_type === 'weekly' ? formData.recurrence_days : null,
+          recurrence_start_date: formData.is_recurring ? formData.recurrence_start_date : null,
+          recurrence_end_date: formData.is_recurring && formData.recurrence_end_date ? formData.recurrence_end_date : null
+        };
 
-      if (activityError) throw activityError;
+        const { data: activity, error: activityError } = await supabase
+          .from('activities')
+          .insert([activityData])
+          .select()
+          .single();
 
-      const activityId = activity.id;
+        if (activityError) throw activityError;
+        activityId = activity.id;
 
-      // 2. Crear las imágenes
-      if (formData.images.length > 0) {
+        // Si es recurrente, generar las instancias
+        if (formData.is_recurring && formData.recurrence_type === 'weekly' && formData.recurrence_days.length > 0) {
+          await generateRecurringActivities(activity.id, activityData, formData);
+        }
+      }
+
+      // 2. Crear/actualizar las imágenes (solo si hay imágenes nuevas)
+      if (formData.images.length > 0 && activityId) {
         const imagesData = formData.images.map((imageUrl, index) => ({
           activity_id: activityId,
           image_url: imageUrl,
@@ -274,21 +586,88 @@ const ActivityForm: React.FC = () => {
           .insert(imagesData);
 
         if (imagesError) throw imagesError;
+
+        // Si es recurrente, también agregar imágenes a las instancias generadas
+        if (formData.is_recurring && formData.recurrence_type === 'weekly' && formData.recurrence_days.length > 0) {
+          // Obtener todas las instancias generadas
+          const { data: instances } = await supabase
+            .from('activities')
+            .select('id')
+            .eq('parent_activity_id', activityId);
+
+          if (instances && instances.length > 0) {
+            // Crear imágenes para todas las instancias
+            const allImagesData = instances.flatMap(instance =>
+              formData.images.map((imageUrl, index) => ({
+                activity_id: instance.id,
+                image_url: imageUrl,
+                image_order: index + 1,
+                is_primary: index === 0
+              }))
+            );
+
+            if (allImagesData.length > 0) {
+              const { error: instancesImagesError } = await supabase
+                .from('activity_images')
+                .insert(allImagesData);
+
+              if (instancesImagesError) {
+                console.error('Error agregando imágenes a instancias:', instancesImagesError);
+              }
+            }
+          }
+        }
       }
 
-      setSuccessMessage('¡Actividad creada exitosamente! Redirigiendo...');
+      setSuccessMessage(isEditMode 
+        ? '¡Actividad actualizada exitosamente! Redirigiendo...' 
+        : '¡Actividad creada exitosamente! Redirigiendo...');
       
       setTimeout(() => {
-        navigate('/activities');
+        navigate('/dashboard/activities');
       }, 2000);
 
     } catch (error) {
-      console.error('Error creating activity:', error);
-      setErrors({ general: `Error al crear la actividad: ${error instanceof Error ? error.message : 'Error desconocido'}` });
+      console.error('Error saving activity:', error);
+      setErrors({ general: `Error al ${isEditMode ? 'actualizar' : 'crear'} la actividad: ${error instanceof Error ? error.message : 'Error desconocido'}` });
     } finally {
       setLoading(false);
     }
   };
+
+  // Mostrar loading mientras se carga la autenticación o los datos
+  if (authLoading || (isEditMode && loadingData)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">
+            {authLoading ? 'Cargando sesión...' : 'Cargando actividad...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si no puede editar Y hay un error de permisos explícito, mostrar mensaje
+  // Pero si no hay perfil aún, permitir ver el formulario (se verificará en submit)
+  if (isEditMode && !canEdit && !loadingData && profile?.id && errors.general?.includes('permisos')) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8 flex items-center justify-center">
+        <div className="text-center bg-white p-8 rounded-xl shadow-lg">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Sin permisos</h2>
+          <p className="text-gray-600 mb-6">No tienes permisos para editar esta actividad.</p>
+          <button
+            onClick={() => navigate('/dashboard/activities')}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Volver a actividades
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8">
@@ -301,8 +680,14 @@ const ActivityForm: React.FC = () => {
                 <Activity className="w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">Crear Nueva Actividad</h1>
-                <p className="text-blue-100">Comparte tu pasión y conecta con otros jubilados</p>
+                <h1 className="text-3xl font-bold">
+                  {isEditMode ? 'Editar Actividad' : 'Crear Nueva Actividad'}
+                </h1>
+                <p className="text-blue-100">
+                  {isEditMode 
+                    ? 'Actualiza la información de tu actividad' 
+                    : 'Comparte tu pasión y conecta con otros jubilados'}
+                </p>
               </div>
             </div>
           </div>
@@ -417,6 +802,129 @@ const ActivityForm: React.FC = () => {
                   />
                   {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
                 </div>
+              </div>
+
+              {/* Opciones de recurrencia */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <div className="flex items-center space-x-3 mb-4">
+                  <input
+                    type="checkbox"
+                    id="is_recurring"
+                    checked={formData.is_recurring}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        is_recurring: e.target.checked,
+                        recurrence_start_date: e.target.checked ? formData.date : '',
+                        recurrence_end_date: ''
+                      });
+                    }}
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="is_recurring" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    Actividad recurrente (ej: todos los viernes)
+                  </label>
+                </div>
+
+                {formData.is_recurring && (
+                  <div className="space-y-4 mt-4 pl-2 border-l-2 border-blue-300">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tipo de recurrencia
+                      </label>
+                      <select
+                        name="recurrence_type"
+                        value={formData.recurrence_type}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="weekly">Semanal</option>
+                        <option value="daily">Diaria</option>
+                        <option value="monthly">Mensual</option>
+                      </select>
+                    </div>
+
+                    {formData.recurrence_type === 'weekly' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Días de la semana *
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { value: 0, label: 'Dom' },
+                            { value: 1, label: 'Lun' },
+                            { value: 2, label: 'Mar' },
+                            { value: 3, label: 'Mié' },
+                            { value: 4, label: 'Jue' },
+                            { value: 5, label: 'Vie' },
+                            { value: 6, label: 'Sáb' }
+                          ].map((day) => (
+                            <button
+                              key={day.value}
+                              type="button"
+                              onClick={() => {
+                                const newDays = formData.recurrence_days.includes(day.value)
+                                  ? formData.recurrence_days.filter(d => d !== day.value)
+                                  : [...formData.recurrence_days, day.value];
+                                setFormData({ ...formData, recurrence_days: newDays });
+                              }}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                formData.recurrence_days.includes(day.value)
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              {day.label}
+                            </button>
+                          ))}
+                        </div>
+                        {errors.recurrence_days && (
+                          <p className="text-red-500 text-sm mt-1">{errors.recurrence_days}</p>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Fecha de inicio *
+                        </label>
+                        <input
+                          type="date"
+                          name="recurrence_start_date"
+                          value={formData.recurrence_start_date}
+                          onChange={handleInputChange}
+                          min={new Date().toISOString().split('T')[0]}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                        {errors.recurrence_start_date && (
+                          <p className="text-red-500 text-sm mt-1">{errors.recurrence_start_date}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Fecha de fin (opcional)
+                        </label>
+                        <input
+                          type="date"
+                          name="recurrence_end_date"
+                          value={formData.recurrence_end_date}
+                          onChange={handleInputChange}
+                          min={formData.recurrence_start_date || new Date().toISOString().split('T')[0]}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          placeholder="Sin fecha de fin"
+                        />
+                        {errors.recurrence_end_date && (
+                          <p className="text-red-500 text-sm mt-1">{errors.recurrence_end_date}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Dejar vacío para actividad sin fin
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -761,12 +1269,12 @@ const ActivityForm: React.FC = () => {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Creando actividad...
+                    {isEditMode ? 'Actualizando actividad...' : 'Creando actividad...'}
                   </>
                 ) : (
                   <>
                     <Activity className="w-5 h-5" />
-                    Crear Actividad
+                    {isEditMode ? 'Actualizar Actividad' : 'Crear Actividad'}
                   </>
                 )}
               </button>

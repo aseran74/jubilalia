@@ -492,9 +492,23 @@ const ActivityDetail: React.FC = () => {
   const participationPercentage = (activity.current_participants / activity.max_participants) * 100;
   const isFull = activity.current_participants >= activity.max_participants;
   const isAlmostFull = participationPercentage >= 80;
-  const isOwner = profile?.id === activity.owner?.id;
+  // Verificar si es propietario: comparar directamente con profile_id de la actividad
+  const isOwner = profile?.id === activity.profile_id || profile?.id === activity.owner?.id;
   const isParticipating = !!activity.user_participation;
   const canJoin = !isFull && !isParticipating && !isOwner;
+  // Permitir editar si es admin o propietario
+  const canEdit = isAdmin || isOwner;
+  
+  // Debug: Log para verificar permisos
+  console.log('🔍 ActivityDetail - Permisos:', {
+    profileId: profile?.id,
+    profileIsAdmin: profile?.is_admin,
+    isAdmin,
+    activityProfileId: activity?.profile_id,
+    isOwner,
+    canEdit,
+    activityId: activity?.id
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -612,33 +626,25 @@ const ActivityDetail: React.FC = () => {
                   </div>
                 </div>
 
-                {isOwner && (
+                {canEdit && (
                   <div className="flex items-center space-x-2">
                     <button 
                       onClick={() => navigate(`/dashboard/activities/${activity.id}/edit`)}
                       className="p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-                      title="Editar actividad"
+                      title={isAdmin ? "Editar actividad (Administrador)" : "Editar actividad"}
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button 
                       onClick={() => handleDeleteActivity(activity.id)}
                       className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
-                      title="Eliminar actividad"
+                      title={isAdmin ? "Eliminar actividad (Administrador)" : "Eliminar actividad"}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                  </div>
-                )}
-
-                {/* Botones de administrador */}
-                {isAdmin && !isOwner && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <AdminButtons 
-                      itemId={activity.id}
-                      itemType="activity"
-                      onDelete={handleDeleteActivity}
-                    />
+                    {isAdmin && !isOwner && (
+                      <span className="text-xs text-gray-500 ml-2">(Modo Admin)</span>
+                    )}
                   </div>
                 )}
               </div>

@@ -113,12 +113,14 @@ const CompartirInfoModal: React.FC<CompartirInfoModalProps> = ({ isOpen, onClose
             </div>
             <div className="space-y-3 text-gray-700">
               <p>
-                <strong>María Gonzalo Zamorano (68)</strong> y <strong>Pepa Martínez Serra (71)</strong>, ambas viudas con pensiones de 1.400 €, se conocieron gracias a Jubilalia.
-                Al principio dudaban, pero tras unos días conviviendo descubrieron que se entendían a la perfección.
+                <strong>María Gonzalo Zamorano (68)</strong> y <strong>Pepa Martínez Serra (71)</strong>, ambas viudas con pensiones de 1.200 €, quitados gastos seguro salud privado, gastos comunes etc, apenas les quedaba 700€.
               </p>
               <p>
-                María alquiló su casa por 1.400 €, y acordaron pagar 700 € cada una.
-                <strong> Ahora, cada una dispone de 1.800 € netos al mes</strong>, viven acompañadas, comparten risas, comidas y nuevas aventuras.
+                Nuestras amigas se conocieron gracias a Jubilalia. Al principio dudaban, pero tras unos días conviviendo descubrieron que se entendían a la perfección.
+              </p>
+              <p>
+                María alquiló su casa por 1.600 €, y acordó pagar 600 € a su amiga, y 800€ extra para ella.
+                <strong> Ahora, cada una dispone de 1.800 € netos al mes, el doble que tenían antes</strong> y encima viven acompañadas, comparten risas, comidas y nuevas aventuras y experiencias.
               </p>
               <p className="italic">
                 Con Jubilalia han encontrado algo más que un techo compartido: una amiga, tranquilidad y una vida activa.
