@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
-import AdminButtons from '../common/AdminButtons';
 import ActivityParticipants from './ActivityParticipants';
 import { 
   Calendar, 

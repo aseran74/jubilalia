@@ -50,7 +50,7 @@ const ActivityForm: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [newTag, setNewTag] = useState('');
-  const [isEditMode, setIsEditMode] = useState(!!id);
+  const isEditMode = !!id;
   const [canEdit, setCanEdit] = useState(false);
   const [hasLoadedData, setHasLoadedData] = useState(false);
 
