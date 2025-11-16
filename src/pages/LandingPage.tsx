@@ -87,6 +87,7 @@ const LandingPage: React.FC = () => {
         .from('activities')
         .select('*')
         .eq('is_active', true)
+        .eq('show_on_landing', true)
         .order('created_at', { ascending: false })
         .limit(4);
 
@@ -127,6 +128,7 @@ const LandingPage: React.FC = () => {
       const { data, error } = await supabase
         .from('groups')
         .select('*')
+        .eq('show_on_landing', true)
         .order('created_at', { ascending: false })
         .limit(4);
 

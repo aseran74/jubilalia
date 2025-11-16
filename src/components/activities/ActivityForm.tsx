@@ -39,6 +39,8 @@ interface ActivityFormData {
   recurrence_days: number[]; // 0=Domingo, 1=Lunes, ..., 6=Sábado
   recurrence_start_date: string;
   recurrence_end_date: string;
+  // Portada
+  show_on_landing?: boolean;
 }
 
 const ActivityForm: React.FC = () => {
@@ -80,7 +82,9 @@ const ActivityForm: React.FC = () => {
     recurrence_type: 'weekly',
     recurrence_days: [],
     recurrence_start_date: '',
-    recurrence_end_date: ''
+    recurrence_end_date: '',
+    // Portada
+    show_on_landing: false
   });
 
   const activityTypes = [
@@ -374,7 +378,9 @@ const ActivityForm: React.FC = () => {
           recurrence_type: (activity as any).recurrence_type || 'weekly',
           recurrence_days: (activity as any).recurrence_days || [],
           recurrence_start_date: (activity as any).recurrence_start_date || '',
-          recurrence_end_date: (activity as any).recurrence_end_date || ''
+          recurrence_end_date: (activity as any).recurrence_end_date || '',
+          // Portada
+          show_on_landing: (activity as any).show_on_landing || false
         });
 
         console.log('✅ Datos cargados en el formulario');
@@ -507,6 +513,8 @@ const ActivityForm: React.FC = () => {
           tags: formData.tags,
           updated_at: new Date().toISOString()
         };
+        // Añadir portada si existe la columna
+        (updateData as any).show_on_landing = formData.show_on_landing === true;
 
         const { error: updateError } = await supabase
           .from('activities')
@@ -549,6 +557,8 @@ const ActivityForm: React.FC = () => {
           age_max: parseInt(formData.age_max),
           difficulty_level: formData.difficulty_level,
           tags: formData.tags,
+          // Portada
+          show_on_landing: formData.show_on_landing === true,
           // Campos de recurrencia
           is_recurring: formData.is_recurring,
           recurrence_type: formData.is_recurring ? formData.recurrence_type : null,
@@ -1097,6 +1107,21 @@ const ActivityForm: React.FC = () => {
                     ))}
                   </select>
                 </div>
+              </div>
+              
+              {/* Mostrar en portada */}
+              <div className="pt-2">
+                <label className="inline-flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    name="show_on_landing"
+                    checked={!!formData.show_on_landing}
+                    onChange={handleInputChange}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">Mostrar esta actividad en la portada</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1">Aparecerá en la landing (máximo 4 destacadas).</p>
               </div>
             </div>
 

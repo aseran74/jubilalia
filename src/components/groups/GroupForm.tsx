@@ -28,6 +28,8 @@ interface GroupFormData {
   postal_code: string;
   country: string;
   telegram_group_name: string;
+  // Portada
+  show_on_landing?: boolean;
 }
 
 const GroupForm: React.FC = () => {
@@ -51,7 +53,8 @@ const GroupForm: React.FC = () => {
     longitude: null,
     postal_code: '',
     country: 'España',
-    telegram_group_name: ''
+    telegram_group_name: '',
+    show_on_landing: false
   });
 
   const isEditing = !!id;
@@ -82,7 +85,8 @@ const GroupForm: React.FC = () => {
             longitude: data.longitude || null,
             postal_code: data.postal_code || '',
             country: data.country || 'España',
-            telegram_group_name: data.telegram_group_name || ''
+            telegram_group_name: data.telegram_group_name || '',
+            show_on_landing: data.show_on_landing || false
           });
         } catch (error) {
           console.error('Error loading group:', error);
@@ -249,6 +253,7 @@ const GroupForm: React.FC = () => {
             longitude: formData.longitude,
             postal_code: formData.postal_code,
             country: formData.country,
+            show_on_landing: formData.show_on_landing === true,
             updated_at: new Date().toISOString()
           })
           .eq('id', id);
@@ -277,6 +282,7 @@ const GroupForm: React.FC = () => {
             longitude: formData.longitude,
             postal_code: formData.postal_code || null,
             country: formData.country,
+            show_on_landing: formData.show_on_landing === true,
             created_by: profile.id
           })
           .select()
@@ -483,6 +489,21 @@ const GroupForm: React.FC = () => {
                   <p className="text-xs text-gray-500 mt-1">
                     Mínimo: 2, Máximo: 1000
                   </p>
+                </div>
+                
+                {/* Mostrar en portada */}
+                <div className="md:col-span-2">
+                  <label className="inline-flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      name="show_on_landing"
+                      checked={!!formData.show_on_landing}
+                      onChange={handleInputChange}
+                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                    />
+                    <span className="text-sm text-gray-700">Mostrar este grupo en la portada</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">Aparecerá en la landing (máximo 4 destacados).</p>
                 </div>
               </div>
             </div>
