@@ -96,8 +96,29 @@ const LandingPage: React.FC = () => {
         return;
       }
 
-      // Transformar datos para el componente ActivityCard
-      const formattedActivities = data?.map(activity => ({
+      // Cargar imágenes principales de las actividades
+      let imagesByActivity: Record<string, string[]> = {};
+      const ids = (data || []).map(a => a.id);
+      if (ids.length > 0) {
+        const { data: imagesData, error: imagesError } = await supabase
+          .from('activity_images')
+          .select('activity_id,image_url,image_order,is_primary')
+          .in('activity_id', ids)
+          .order('is_primary', { ascending: false })
+          .order('image_order', { ascending: true });
+        if (imagesError) {
+          console.error('Error fetching activity images:', imagesError);
+        } else {
+          imagesByActivity = (imagesData || []).reduce((acc: Record<string, string[]>, img: any) => {
+            if (!acc[img.activity_id]) acc[img.activity_id] = [];
+            acc[img.activity_id].push(img.image_url);
+            return acc;
+          }, {});
+        }
+      }
+
+      // Transformar datos para el componente ActivityCard con imágenes
+      const formattedActivities = (data || []).map(activity => ({
         id: activity.id,
         title: activity.title,
         description: activity.description,
@@ -109,10 +130,10 @@ const LandingPage: React.FC = () => {
         max_participants: activity.max_participants,
         current_participants: activity.current_participants || 0,
         price: parseFloat(activity.price || 0),
-        images: [], // Se pueden agregar imágenes si las hay
+        images: imagesByActivity[activity.id] || [],
         is_featured: false,
         created_at: activity.created_at
-      })) || [];
+      }));
 
       setActivities(formattedActivities);
     } catch (error) {
