@@ -8,12 +8,17 @@ import {
   MessageCircle,
   Bell,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Building2,
+  DollarSign,
+  Search
 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 import PageMeta from "../../components/common/PageMeta";
 
 export default function JubilaliaDashboardHome() {
   const [activeTab, setActiveTab] = useState('overview');
+  const { profile } = useAuth();
 
   return (
     <>
@@ -25,10 +30,10 @@ export default function JubilaliaDashboardHome() {
       {/* Header del Dashboard */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">
-          ¡Bienvenido a Jubilalia! 🏠
+          {profile?.full_name ? `Hola, ${profile.full_name}!` : '¡Bienvenido a Jubilalia! 🏠'}
         </h1>
         <p className="text-lg text-gray-600">
-          Tu plataforma para conectar con otros jubilados, compartir vivienda y disfrutar de actividades juntos
+          ¿Qué te gustaría hacer hoy?
         </p>
       </div>
 
@@ -110,11 +115,11 @@ export default function JubilaliaDashboardHome() {
                 <h3 className="text-2xl font-bold text-gray-800 mb-6">Acciones Rápidas</h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <Link
-                    to="/roommates"
+                    to="/dashboard/users"
                     className="group p-6 bg-gradient-to-br from-green-500 to-blue-500 text-white rounded-xl text-center hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                   >
-                    <Home className="w-8 h-8 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                    <h4 className="font-semibold text-lg">Buscar Compañeros</h4>
+                    <Users className="w-8 h-8 mx-auto mb-3 group-hover:scale-110 transition-transform" />
+                    <h4 className="font-semibold text-lg">Buscar Gente</h4>
                     <p className="text-sm opacity-90 mt-2">Encuentra personas compatibles</p>
                   </Link>
                   
@@ -144,6 +149,92 @@ export default function JubilaliaDashboardHome() {
                     <h4 className="font-semibold text-lg">Actividades</h4>
                     <p className="text-sm opacity-90 mt-2">Participa en eventos</p>
                   </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Venta, Alquiler y Compartir */}
+            <div className="col-span-12 mt-6">
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* Venta */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <div className="flex items-center mb-4">
+                    <Building2 className="w-8 h-8 text-orange-600 mr-3" />
+                    <h3 className="text-xl font-bold text-gray-800">Venta</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-6">
+                    Busca y publica propiedades para comprar y jubilarte tranquilamente
+                  </p>
+                  <div className="flex gap-3">
+                    <Link
+                      to="/dashboard/properties/sale"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium text-sm"
+                    >
+                      <Search className="w-4 h-4" />
+                      Buscar
+                    </Link>
+                    <Link
+                      to="/dashboard/properties/sale/create"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium text-sm"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Publicar
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Alquiler */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <div className="flex items-center mb-4">
+                    <DollarSign className="w-8 h-8 text-blue-600 mr-3" />
+                    <h3 className="text-xl font-bold text-gray-800">Alquiler</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-6">
+                    Busca y publica propiedades para alquilar y jubilarte tranquilamente
+                  </p>
+                  <div className="flex gap-3">
+                    <Link
+                      to="/dashboard/properties/rental"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium text-sm"
+                    >
+                      <Search className="w-4 h-4" />
+                      Buscar
+                    </Link>
+                    <Link
+                      to="/dashboard/properties/rental/create"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Publicar
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Compartir */}
+                <div className="bg-white rounded-xl shadow-md p-6">
+                  <div className="flex items-center mb-4">
+                    <Home className="w-8 h-8 text-green-600 mr-3" />
+                    <h3 className="text-xl font-bold text-gray-800">Compartir</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-6">
+                    Busca y publica habitaciones para alquilar y compartir gastos con un compañero/a
+                  </p>
+                  <div className="flex gap-3">
+                    <Link
+                      to="/dashboard/rooms"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium text-sm"
+                    >
+                      <Search className="w-4 h-4" />
+                      Buscar
+                    </Link>
+                    <Link
+                      to="/dashboard/rooms/create"
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Publicar
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

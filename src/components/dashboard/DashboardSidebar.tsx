@@ -33,6 +33,7 @@ interface NavigationGroup {
   name: string;
   icon: React.ComponentType<{ className?: string }>;
   items: NavigationItem[];
+  description?: string;
 }
 
 const DashboardSidebar: React.FC = () => {
@@ -41,7 +42,7 @@ const DashboardSidebar: React.FC = () => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<string[]>(['habitaciones', 'alquiler', 'venta', 'actividades', 'posts', 'usuarios', 'mensajeria']);
+  const [openGroups, setOpenGroups] = useState<string[]>(['actividades', 'posts', 'socios', 'venta', 'alquiler', 'compartir', 'mensajeria']);
 
   // Detectar si es móvil
   const [isMobile, setIsMobile] = useState(false);
@@ -78,34 +79,6 @@ const DashboardSidebar: React.FC = () => {
 
   const navigationGroups: NavigationGroup[] = [
     {
-      name: 'Compartir',
-      icon: HomeModernIcon,
-      items: [
-        { name: 'Buscar habitaciones', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Buscar compañero', href: '/dashboard/rooms/roommates', icon: UsersIcon },
-        { name: 'Ver en mapa', href: '/dashboard/rooms/map', icon: MapIcon },
-        { name: 'Publicar habitación', href: '/dashboard/rooms/create', icon: PlusIcon },
-      ]
-    },
-    {
-      name: 'Alquiler',
-      icon: CurrencyDollarIcon,
-      items: [
-        { name: 'Buscar alquiler', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/properties/rental/map', icon: MapIcon },
-        { name: 'Publicar alquiler', href: '/dashboard/properties/rental/create', icon: PlusIcon },
-      ]
-    },
-    {
-      name: 'Venta',
-      icon: BuildingOfficeIcon,
-      items: [
-        { name: 'Buscar venta', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/properties/sale/map', icon: MapIcon },
-        { name: 'Publicar venta', href: '/dashboard/properties/sale/create', icon: PlusIcon },
-      ]
-    },
-    {
       name: 'Actividades',
       icon: CalendarIcon,
       items: [
@@ -129,6 +102,32 @@ const DashboardSidebar: React.FC = () => {
         { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/users/map', icon: MapIcon },
         { name: 'Grupos', href: '/dashboard/groups', icon: UsersIcon },
+      ]
+    },
+    {
+      name: 'Venta',
+      icon: BuildingOfficeIcon,
+      description: 'Busca y publica propiedades para comprar y jubilarte tranquilamente',
+      items: [
+        { name: 'Buscar', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
+        { name: 'Publicar', href: '/dashboard/properties/sale/create', icon: PlusIcon },
+      ]
+    },
+    {
+      name: 'Alquiler',
+      icon: CurrencyDollarIcon,
+      description: 'Busca y publica propiedades para alquilar y jubilarte tranquilamente',
+      items: [
+        { name: 'Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
+        { name: 'Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },
+      ]
+    },
+    {
+      name: 'Compartir',
+      icon: HomeModernIcon,
+      description: 'Busca y publica habitaciones para alquilar y compartir gastos con un compañero/a',
+      items: [
+        { name: 'Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
       ]
     },
     {
@@ -321,6 +320,11 @@ const DashboardSidebar: React.FC = () => {
                 
                 {openGroups.includes(group.name) && (
                   <div className="ml-6 space-y-1">
+                    {group.description && (
+                      <p className="px-3 py-2 text-xs text-gray-500 italic">
+                        {group.description}
+                      </p>
+                    )}
                     {group.items.map((item) => (
                       <Link
                         key={item.href}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
 import { 
   Search, MapPin, Users, Calendar, Tag, Map, List, 
-  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home
+  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, LayoutDashboard
 } from 'lucide-react';
 import ActivityMap from '../components/activities/ActivityMap';
 import GroupsMap from '../components/groups/GroupsMap';
@@ -138,6 +139,7 @@ const CardSkeleton = () => (
 
 const PublicSearch: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // --- ESTADOS ---
   const [activeTab, setActiveTab] = useState<TabType>('activities');
@@ -1002,21 +1004,18 @@ const PublicSearch: React.FC = () => {
             <span className="text-xs font-medium">Buscar</span>
           </button>
 
-          {/* Actividades */}
+          {/* Mi Panel / Dashboard */}
           <button
-            onClick={() => {
-              setActiveTab('activities');
-              setViewMode('list');
-            }}
+            onClick={() => navigate(user ? '/dashboard' : '/login')}
             className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
           >
-            <Calendar className="w-6 h-6" />
-            <span className="text-xs font-medium">Actividades</span>
+            <LayoutDashboard className="w-6 h-6" />
+            <span className="text-xs font-medium">Mi Panel</span>
           </button>
 
           {/* Perfil */}
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(user ? '/dashboard/profile' : '/login')}
             className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
           >
             <UserCircle className="w-6 h-6" />

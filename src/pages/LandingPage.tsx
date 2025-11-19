@@ -36,7 +36,9 @@ import {
 
   MagnifyingGlassIcon as Search,
 
-  UserIcon as User
+  UserIcon as User,
+
+  Squares2X2Icon as LayoutDashboard
 
 } from '@heroicons/react/24/outline';
 
@@ -1488,35 +1490,23 @@ const LandingPage: React.FC = () => {
             <span className="text-xs font-medium">Buscar</span>
           </button>
 
-          {/* Actividades */}
+          {/* Mi Panel / Dashboard */}
           <button
-            onClick={() => {
-              scrollToSection('activities');
-            }}
+            onClick={() => navigate(user ? '/dashboard' : '/login')}
             className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
           >
-            <Calendar className="w-6 h-6" />
-            <span className="text-xs font-medium">Actividades</span>
+            <LayoutDashboard className="w-6 h-6" />
+            <span className="text-xs font-medium">Mi Panel</span>
           </button>
 
-          {/* Perfil / Registro */}
-          {user ? (
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
-            >
-              <User className="w-6 h-6" />
-              <span className="text-xs font-medium">Perfil</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => navigate('/register')}
-              className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
-            >
-              <User className="w-6 h-6" />
-              <span className="text-xs font-medium">Registro</span>
-            </button>
-          )}
+          {/* Perfil */}
+          <button
+            onClick={() => navigate(user ? '/dashboard/profile' : '/login')}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <User className="w-6 h-6" />
+            <span className="text-xs font-medium">Perfil</span>
+          </button>
         </div>
       </nav>
 
