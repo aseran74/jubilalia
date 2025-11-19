@@ -28,6 +28,8 @@ import {
 
   Bars3Icon,
 
+  ChevronDownIcon as ChevronDown,
+
   BuildingOfficeIcon as Building,
 
   StarIcon as Star,
@@ -38,7 +40,15 @@ import {
 
   UserIcon as User,
 
-  Squares2X2Icon as LayoutDashboard
+  Squares2X2Icon as LayoutDashboard,
+
+  QuestionMarkCircleIcon as QuestionMark,
+
+  CheckCircleIcon as CheckCircle,
+
+  ShieldCheckIcon as ShieldCheck,
+
+  MagnifyingGlassIcon as SearchIcon
 
 } from '@heroicons/react/24/outline';
 
@@ -69,6 +79,8 @@ const LandingPage: React.FC = () => {
   const [isCohousingModalOpen, setIsCohousingModalOpen] = useState(false);
 
   const [isSuccessCaseModalOpen, setIsSuccessCaseModalOpen] = useState(false);
+
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   
 
@@ -373,19 +385,28 @@ const LandingPage: React.FC = () => {
 
             <div className="hidden lg:flex items-center space-x-8">
 
-              {['Inicio', 'Cómo Funciona', 'Qué Hacemos', 'FAQ'].map((item, idx) => {
-
-                const ids = ['home', 'how-it-works', 'what-we-do', 'faq'];
+              {[
+                { label: 'Inicio', id: 'home', icon: Home },
+                { label: 'Buscar', id: 'search', icon: Search },
+                { label: 'Cómo Funciona', id: 'how-it-works', icon: Sparkles },
+                { label: 'FAQ', id: 'faq', icon: QuestionMark }
+              ].map((item) => {
 
                 return (
 
                   <button 
 
-                    key={item}
+                    key={item.id}
 
-                    onClick={() => scrollToSection(ids[idx])}
+                    onClick={() => {
+                      if (item.id === 'search') {
+                        navigate('/search');
+                      } else {
+                        scrollToSection(item.id);
+                      }
+                    }}
 
-                    className={`text-sm font-semibold tracking-wide transition-colors duration-300 ${
+                    className={`flex items-center gap-2 text-sm font-semibold tracking-wide transition-colors duration-300 ${
 
                       isScrolled ? 'text-gray-600 hover:text-green-600' : 'text-white/90 hover:text-white'
 
@@ -393,7 +414,9 @@ const LandingPage: React.FC = () => {
 
                   >
 
-                    {item}
+                    <item.icon className="w-4 h-4" />
+
+                    <span>{item.label}</span>
 
                   </button>
 
@@ -408,16 +431,6 @@ const LandingPage: React.FC = () => {
             {/* Desktop CTA */}
 
             <div className="hidden lg:flex items-center space-x-4">
-
-              <button onClick={() => navigate('/search')} className={`text-sm font-medium px-4 py-2 rounded-full transition-all ${
-
-                 isScrolled ? 'text-gray-600 hover:bg-gray-100' : 'text-white hover:bg-white/10'
-
-              }`}>
-
-                Buscar
-
-              </button>
 
               
 
@@ -1092,6 +1105,83 @@ const LandingPage: React.FC = () => {
 
 
 
+          {/* --- CÓMO FUNCIONA: ACTIVIDADES, GENTE Y GRUPOS --- */}
+          <section className="py-24 bg-white relative overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">
+                  Busca actividades cercanas,  gente o grupos con el que tener hobbies comunes.
+                </h2>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* Paso 1 */}
+                <div className="group text-center relative p-8 rounded-3xl hover:bg-gray-50 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="relative mb-6">
+                    <div className="w-24 h-24 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-all duration-500 shadow-sm">
+                      <span className="text-4xl font-bold text-green-600">1</span>
+                    </div>
+                    <div className="absolute -top-2 -right-2">
+                      <CheckCircle className="w-8 h-8 text-green-500" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-green-700 transition-colors">
+                    Crea tu Perfil
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed mb-4">
+                    Regístrate y completa tu perfil con tus intereses es completamente gratuito, crea tus preferencias y lo que buscas en nuestra plataforma
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-sm text-green-600 font-medium">
+                    <ShieldCheck className="w-5 h-5" />
+                    <span>Verificación Segura</span>
+                  </div>
+                </div>
+
+                {/* Paso 2 */}
+                <div className="group text-center relative p-8 rounded-3xl hover:bg-gray-50 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="relative mb-6">
+                    <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-all duration-500 shadow-sm">
+                      <span className="text-4xl font-bold text-blue-600">2</span>
+                    </div>
+                    <div className="absolute -top-2 -right-2">
+                      <CheckCircle className="w-8 h-8 text-blue-500" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-700 transition-colors">
+                    Explora Opciones
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed mb-4">
+                    Explora tus pasiones en compañía: Descubre aficiones compartidas, desde emocionantes partidas de <strong>Mus</strong> y <strong>clubes culturales o de lectura</strong>, hasta organizar salidas conjuntas para disfrutar del <strong>arte, el cine y el teatro</strong>.
+                  </p>
+                  <div className="flex items-center justify-center gap-2 text-sm text-blue-600 font-medium">
+                    <SearchIcon className="w-5 h-5" />
+                    <span>Búsqueda Inteligente</span>
+                  </div>
+                </div>
+
+                {/* Paso 3 */}
+                <div className="group text-center relative p-8 rounded-3xl hover:bg-gray-50 hover:shadow-xl transition-all duration-300 border border-gray-100">
+                  <div className="relative mb-6">
+                    <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-all duration-500 shadow-sm">
+                      <span className="text-4xl font-bold text-purple-600">3</span>
+                    </div>
+                    <div className="absolute -top-2 -right-2">
+                      <CheckCircle className="w-8 h-8 text-purple-500" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-purple-700 transition-colors">
+                    Conecta y Disfruta
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed mb-4">
+                    Chatea con otros usuarios, organiza encuentros y actividades y construye amistades duraderas
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+
+
           {/* Cómo Funciona */}
           <section id="how-it-works" className="py-24 bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
 
@@ -1110,8 +1200,8 @@ const LandingPage: React.FC = () => {
                 <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
                   ¿Cómo funciona <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">Jubilalia?</span>
                 </h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Tanto si ofreces una habitación en tu casa como si buscas un retiro soñado en grupo.
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
+                  Si buscas un compañero/a con el que compartir gastos y experiencias, o ver o crear una comunidad de Cohousing en la que retirarte.
                 </p>
               </div>
 
@@ -1166,24 +1256,6 @@ const LandingPage: React.FC = () => {
                   <p className="text-gray-600 text-sm leading-relaxed">
                     Si todo encaja, empieza una vida de <strong>compañía y ahorro</strong>. Ya sea en tu hogar de siempre o bajo una palmera en el paraíso.
                   </p>
-                </div>
-              </div>
-
-              {/* CTA Section */}
-              <div className="text-center mt-16">
-                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 max-w-2xl mx-auto">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Tu compañero o tu grupo te espera
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    No importa si quieres quedarte o irte lejos, lo importante es hacerlo bien acompañado.
-                  </p>
-                  <button
-                    onClick={handleGetStarted}
-                    className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
-                  >
-                    Crear mi perfil ahora
-                  </button>
                 </div>
               </div>
             </div>
@@ -1353,6 +1425,73 @@ const LandingPage: React.FC = () => {
 
         </div>
 
+      </section>
+
+
+
+      {/* --- FAQ SECTION --- */}
+      <section id="faq" className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              Preguntas Frecuentes
+            </h2>
+            <p className="text-xl text-gray-600">
+              Resolvemos tus dudas más comunes sobre nuestra plataforma
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                question: '¿Es seguro usar Jubilalia?',
+                answer: 'Sí, todos nuestros usuarios son verificados y tenemos sistemas de seguridad para proteger tu información personal y garantizar un entorno seguro.'
+              },
+              {
+                question: '¿Cuánto cuesta usar la plataforma?',
+                answer: 'La plataforma es completamente gratuita. Solo pagas por los servicios que decidas contratar (alojamientos, actividades, etc.).'
+              },
+              {
+                question: '¿Puedo cancelar mi cuenta en cualquier momento?',
+                answer: 'Por supuesto, puedes cancelar tu cuenta en cualquier momento desde la configuración de tu perfil sin ningún costo adicional.'
+              },
+              {
+                question: '¿Cómo contacto con el soporte?',
+                answer: 'Puedes contactarnos a través de nuestro formulario de contacto, por email o por teléfono. Estamos disponibles 24/7 para ayudarte.'
+              }
+            ].map((faq, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
+                  className="w-full flex items-center justify-between p-6 sm:p-8 text-left focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset"
+                >
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 pr-4">
+                    {faq.question}
+                  </h3>
+                  <ChevronDown
+                    className={`w-5 h-5 sm:w-6 sm:h-6 text-gray-500 flex-shrink-0 transition-transform duration-300 ${
+                      openFaqIndex === index ? 'transform rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openFaqIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="px-6 sm:px-8 pb-6 sm:pb-8">
+                    <p className="text-gray-600 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
 

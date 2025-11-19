@@ -92,9 +92,18 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
       const defaultCenter = { lat: 40.4168, lng: -3.7038 }; // Madrid
       
       const newMap = new window.google.maps.Map(mapRef.current, {
-        zoom: 6, // Zoom para ver toda España
+        zoom: 7, // Zoom para ver España sin incluir Marruecos
         center: defaultCenter,
         mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+        restriction: {
+          latLngBounds: {
+            north: 44.0,  // Norte de España
+            south: 35.0,  // Sur de España (excluye Marruecos)
+            west: -10.0,  // Oeste de España
+            east: 5.0     // Este de España
+          },
+          strictBounds: false
+        },
         styles: [
           {
             featureType: 'poi',
@@ -312,13 +321,13 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
         if (currentZoom > 10) {
           map.setZoom(10); // Zoom máximo: nivel 10 para ver varias ciudades
         } else if (currentZoom < 5) {
-          map.setZoom(6); // Zoom mínimo: nivel 6 para ver toda España
+          map.setZoom(7); // Zoom mínimo: nivel 7 para ver España sin Marruecos
         }
       }
     } else {
       // Si no hay marcadores, centrar en España
       map.setCenter({ lat: 40.4168, lng: -3.7038 });
-      map.setZoom(6);
+      map.setZoom(7);
     }
   }, [activities, map, infoWindow, onActivitySelect]);
 
