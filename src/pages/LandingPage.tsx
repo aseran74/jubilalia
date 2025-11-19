@@ -32,7 +32,11 @@ import {
 
   StarIcon as Star,
 
-  ChartBarIcon as ChartBar
+  ChartBarIcon as ChartBar,
+
+  MagnifyingGlassIcon as Search,
+
+  UserIcon as User
 
 } from '@heroicons/react/24/outline';
 
@@ -1436,7 +1440,7 @@ const LandingPage: React.FC = () => {
 
       {/* --- FOOTER --- */}
 
-      <footer className="bg-gray-950 text-gray-400 py-12 border-t border-gray-900">
+      <footer className="bg-gray-950 text-gray-400 py-12 pb-28 lg:pb-12 border-t border-gray-900">
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
 
@@ -1459,6 +1463,65 @@ const LandingPage: React.FC = () => {
       </footer>
 
 
+
+      {/* Mobile/Tablet Bottom Navbar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
+        <div className="flex items-center justify-around h-16 px-2">
+          {/* Inicio */}
+          <button
+            onClick={() => {
+              scrollToSection('home');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <Home className="w-6 h-6" />
+            <span className="text-xs font-medium">Inicio</span>
+          </button>
+
+          {/* Buscar */}
+          <button
+            onClick={() => navigate('/search')}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <Search className="w-6 h-6" />
+            <span className="text-xs font-medium">Buscar</span>
+          </button>
+
+          {/* Actividades */}
+          <button
+            onClick={() => {
+              scrollToSection('activities');
+            }}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <Calendar className="w-6 h-6" />
+            <span className="text-xs font-medium">Actividades</span>
+          </button>
+
+          {/* Perfil / Registro */}
+          {user ? (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+            >
+              <User className="w-6 h-6" />
+              <span className="text-xs font-medium">Perfil</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate('/register')}
+              className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+            >
+              <User className="w-6 h-6" />
+              <span className="text-xs font-medium">Registro</span>
+            </button>
+          )}
+        </div>
+      </nav>
+
+      {/* Spacer para evitar que el contenido quede oculto detrás del navbar inferior en móvil */}
+      <div className="h-16 lg:hidden"></div>
 
       {/* Modales */}
 
