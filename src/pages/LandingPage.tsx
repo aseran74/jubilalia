@@ -1092,73 +1092,102 @@ const LandingPage: React.FC = () => {
 
 
 
-          {/* Botón para abrir modal */}
-          <div className="text-center mb-12">
+          {/* Cómo Funciona */}
+          <section id="how-it-works" className="py-24 bg-gradient-to-br from-white to-gray-50 relative overflow-hidden">
 
-            <button
-              onClick={() => setIsSuccessCaseModalOpen(true)}
-              className="bg-gradient-to-r from-green-500 to-green-600 text-white px-10 py-4 rounded-full text-xl font-bold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform"
-            >
-              Descubre cómo funciona Jubilalia
-            </button>
-
-          </div>
-
-
-
-          {/* Cómo funciona (Steps) con números y flechas */}
-
-          <div className="relative">
-
-            <div className="grid md:grid-cols-4 gap-6 relative">
-
-              {/* Líneas con flechas entre pasos (solo desktop) */}
-              <div className="hidden md:block absolute top-20 left-1/4 right-0 h-0.5 bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 transform -translate-y-1/2"></div>
-              <div className="hidden md:block absolute top-20 left-1/2 right-0 h-0.5 bg-gradient-to-r from-blue-200 via-purple-200 to-yellow-200 transform -translate-y-1/2"></div>
-              <div className="hidden md:block absolute top-20 left-3/4 right-0 h-0.5 bg-gradient-to-r from-purple-200 via-yellow-200 to-green-200 transform -translate-y-1/2"></div>
-              
-              {/* Flechas (solo desktop) */}
-              <div className="hidden md:block absolute top-20 left-1/4 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                <ArrowRight className="w-6 h-6 text-blue-500" />
-              </div>
-              <div className="hidden md:block absolute top-20 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                <ArrowRight className="w-6 h-6 text-purple-500" />
-              </div>
-              <div className="hidden md:block absolute top-20 left-3/4 transform -translate-x-1/2 -translate-y-1/2 z-20">
-                <ArrowRight className="w-6 h-6 text-yellow-500" />
-              </div>
-
-              {[
-
-                { num: '1', title: 'Te conocemos', desc: 'Nos cuentas quién eres, cómo vives, qué te gusta y qué esperas de la convivencia.', bgColor: 'bg-green-100', textColor: 'text-green-600' },
-
-                { num: '2', title: 'Buscamos por ti', desc: 'En Jubilalia buscamos personas afines que también quieran compartir hogar o compañía.', bgColor: 'bg-blue-100', textColor: 'text-blue-600' },
-
-                { num: '3', title: 'Os conectamos', desc: 'Os ponemos en contacto para que os conozcáis sin compromiso. Podéis convivir unos días de prueba.', bgColor: 'bg-purple-100', textColor: 'text-purple-600' },
-
-                { num: '4', title: 'Nueva etapa', desc: 'Si todo encaja, empieza una etapa de compañía, ahorro y vida compartida.', bgColor: 'bg-yellow-100', textColor: 'text-yellow-600' }
-
-              ].map((item, idx) => (
-
-                <div key={idx} className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-100 text-center relative z-10 group">
-
-                  <div className={`w-20 h-20 ${item.bgColor} rounded-full flex items-center justify-center mx-auto mb-6 ${item.textColor} font-bold text-3xl`}>
-
-                    {item.num}
-
-                  </div>
-
-                  <h4 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h4>
-
-                  <p className="text-gray-600 leading-relaxed">{item.desc}</p>
-
-                </div>
-
-              ))}
-
+            {/* Background decoration */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute top-10 right-10 w-72 h-72 bg-purple-500 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-10 left-10 w-96 h-96 bg-green-500 rounded-full blur-3xl"></div>
             </div>
 
-          </div>
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-20">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-purple-100 text-purple-700 text-sm font-medium mb-6">
+                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                  Tu eliges tu camino
+                </div>
+                <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+                  ¿Cómo funciona <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">Jubilalia?</span>
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  Tanto si ofreces una habitación en tu casa como si buscas un retiro soñado en grupo.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-4 gap-8">
+                {/* Paso 1 */}
+                <div className="group text-center relative p-6 rounded-3xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-purple-100">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-sm">
+                      <span className="text-3xl font-bold text-green-600">1</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-green-700 transition-colors">Define tu Proyecto</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    ¿Vives solo, tienes una habitación libre y quieres compartir gastos o tener compañía? ¿O sueñas con un <strong>Cohousing en Cádiz</strong> donde retirarte, jugar al golf o pescar con gente afín? ¿Quizás prefieres alquilar o comprar una villa en un paraíso tropical como <strong>Filipinas o República Dominicana</strong> con tu pareja o más gente? Dinos qué buscas y nosotros lo encontramos.
+                  </p>
+                </div>
+
+                {/* Paso 2 */}
+                <div className="group text-center relative p-6 rounded-3xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-blue-100">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-sm">
+                      <span className="text-3xl font-bold text-blue-600">2</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-blue-700 transition-colors">Buscamos por ti</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Encontramos a la persona ideal para tu habitación o al <strong>grupo de compañeros</strong> con el mismo sueño de retiro que tú.
+                  </p>
+                </div>
+
+                {/* Paso 3 */}
+                <div className="group text-center relative p-6 rounded-3xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-purple-100">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-sm">
+                      <span className="text-3xl font-bold text-purple-600">3</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-purple-700 transition-colors">Conectad seguros</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Chatea y conoceos. Podéis convivir unos días de prueba en casa u organizar reuniones para planificar vuestra mudanza .
+                  </p>
+                </div>
+
+                {/* Paso 4 */}
+                <div className="group text-center relative p-6 rounded-3xl hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-orange-100">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-sm">
+                      <span className="text-3xl font-bold text-orange-600">4</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-700 transition-colors">Nueva Etapa</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Si todo encaja, empieza una vida de <strong>compañía y ahorro</strong>. Ya sea en tu hogar de siempre o bajo una palmera en el paraíso.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA Section */}
+              <div className="text-center mt-16">
+                <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 max-w-2xl mx-auto">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                    Tu compañero o tu grupo te espera
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    No importa si quieres quedarte o irte lejos, lo importante es hacerlo bien acompañado.
+                  </p>
+                  <button
+                    onClick={handleGetStarted}
+                    className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-green-600 hover:to-blue-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+                  >
+                    Crear mi perfil ahora
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
 
           
 
