@@ -9,6 +9,7 @@ import { Capacitor } from '@capacitor/core';
 // Landing Page
 import LandingPage from './pages/LandingPage';
 import AppSplash from './pages/AppSplash';
+import PublicSearch from './pages/PublicSearch';
 
 // Componentes de autenticación
 import SignUpForm from './components/auth/SignUpForm';
@@ -356,6 +357,9 @@ const App: React.FC = () => {
           <Route path="/login" element={<JubilaliaLogin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          
+          {/* Página pública de búsqueda */}
+          <Route path="/search" element={<PublicSearch />} />
           
           {/* Rutas accesibles desde landing page */}
           <Route path="/profile" element={<ProfileForm />} />

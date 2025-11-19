@@ -5,6 +5,7 @@ import { Upload, Loader2 } from 'lucide-react';
 interface ImageUploadProps {
   onImagesUploaded: (imageUrls: string[]) => void;
   maxImages?: number;
+  currentImageCount?: number;
   className?: string;
   bucketName: string;
 }
@@ -12,6 +13,7 @@ interface ImageUploadProps {
 const ImageUpload: React.FC<ImageUploadProps> = ({ 
   onImagesUploaded, 
   maxImages = 5,
+  currentImageCount = 0,
   className = '',
   bucketName
 }) => {
@@ -31,8 +33,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       return;
     }
 
-    if (imageFiles.length > maxImages) {
-      alert(`Puedes subir máximo ${maxImages} imágenes`);
+    const remainingSlots = maxImages - currentImageCount;
+    if (remainingSlots <= 0) {
+      alert(`Ya has alcanzado el máximo de ${maxImages} imágenes. Elimina alguna antes de agregar más.`);
+      return;
+    }
+
+    if (imageFiles.length > remainingSlots) {
+      alert(`Solo puedes subir ${remainingSlots} imagen${remainingSlots > 1 ? 'es' : ''} más (máximo ${maxImages} en total)`);
       return;
     }
 
@@ -172,7 +180,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                   o haz clic para seleccionar archivos
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Máximo {maxImages} imágenes • PNG, JPG, GIF hasta 5MB
+                  {currentImageCount > 0 ? (
+                    <>
+                      {currentImageCount} de {maxImages} imágenes subidas • Puedes agregar {maxImages - currentImageCount} más
+                    </>
+                  ) : (
+                    <>
+                      Máximo {maxImages} imágenes • PNG, JPG, GIF hasta 5MB
+                    </>
+                  )}
                 </p>
               </div>
             </>

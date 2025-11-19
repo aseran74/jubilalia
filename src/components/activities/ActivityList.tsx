@@ -39,7 +39,7 @@ const ActivityList: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
-  const [maxPrice, setMaxPrice] = useState<number>(100);
+  const [maxPrice, setMaxPrice] = useState<number>(5000);
   const navigate = useNavigate();
 
   // Cargar dirección del perfil al inicio
@@ -75,40 +75,93 @@ const ActivityList: React.FC = () => {
         console.error('❌ Error verificando conectividad:', connectionError);
       }
       
-      // CONSULTA MUY SIMPLE PARA DEBUG
-      console.log('🔍 Haciendo consulta básica...');
+      // CONSULTA DE ACTIVIDADES
+      console.log('🔍 Haciendo consulta de actividades...');
       const { data: activitiesData, error: activitiesError } = await supabase
         .from('activities')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      console.log('📊 Resultado de consulta básica:', {
+      console.log('📊 Resultado de consulta:', {
         count: activitiesData?.length || 0,
-        data: activitiesData,
         error: activitiesError
       });
 
       if (activitiesError) {
-        console.error('❌ Error en consulta básica:', activitiesError);
+        console.error('❌ Error en consulta de actividades:', activitiesError);
         setActivities([]);
         setLoading(false);
         return;
       }
 
       if (!activitiesData || activitiesData.length === 0) {
-        console.log('⚠️ No se encontraron actividades en consulta básica');
+        console.log('⚠️ No se encontraron actividades');
         setActivities([]);
         setLoading(false);
         return;
       }
 
-      // Usar los datos básicos por ahora
-      const activitiesWithBasicInfo = activitiesData.map(activity => ({
-        ...activity,
-        images: [],
-        owner: { full_name: 'Usuario', avatar_url: undefined }
-      }));
+      console.log(`✅ Se encontraron ${activitiesData.length} actividades`);
+
+      // Obtener imágenes para cada actividad (usando objeto plano en lugar de Map)
+      const imagesByActivity: Record<string, string[]> = {};
+      
+      try {
+        if (activitiesData && activitiesData.length > 0) {
+          const activityIds = activitiesData.map(a => a.id);
+          
+          if (activityIds.length > 0) {
+            const { data: imagesData, error: imagesError } = await supabase
+              .from('activity_images')
+              .select('activity_id, image_url, is_primary, image_order')
+              .in('activity_id', activityIds)
+              .order('image_order', { ascending: true });
+
+            if (imagesError) {
+              console.warn('⚠️ Error obteniendo imágenes (continuando sin imágenes):', imagesError);
+            } else if (imagesData && Array.isArray(imagesData)) {
+              // Agrupar imágenes por actividad
+              imagesData.forEach(img => {
+                if (img && img.activity_id && img.image_url) {
+                  if (!imagesByActivity[img.activity_id]) {
+                    imagesByActivity[img.activity_id] = [];
+                  }
+                  imagesByActivity[img.activity_id].push(img.image_url);
+                }
+              });
+              console.log(`📸 Se obtuvieron imágenes para ${Object.keys(imagesByActivity).length} actividades`);
+            }
+          }
+        }
+      } catch (imagesError) {
+        console.warn('⚠️ Error al procesar imágenes (continuando sin imágenes):', imagesError);
+      }
+
+      // Combinar actividades con sus imágenes
+      const activitiesWithBasicInfo = activitiesData.map(activity => {
+        // Asegurar que todos los campos requeridos existan
+        return {
+          ...activity,
+          title: activity.title || 'Sin título',
+          description: activity.description || '',
+          city: activity.city || 'Sin ciudad',
+          images: imagesByActivity[activity.id] || [],
+          owner: { full_name: 'Usuario', avatar_url: undefined },
+          is_free: activity.is_free ?? false,
+          price: activity.price ?? 0,
+          current_participants: activity.current_participants ?? 0,
+          max_participants: activity.max_participants ?? 50
+        };
+      });
 
       console.log('🎉 Actividades procesadas:', activitiesWithBasicInfo.length);
+      console.log('📋 Primeras 3 actividades:', activitiesWithBasicInfo.slice(0, 3).map(a => ({
+        id: a.id,
+        title: a.title,
+        city: a.city,
+        images: a.images.length
+      })));
+      
       setActivities(activitiesWithBasicInfo);
 
     } catch (error) {
@@ -120,10 +173,17 @@ const ActivityList: React.FC = () => {
   };
 
   const filteredActivities = activities.filter(activity => {
+    // Validar que la actividad tenga datos básicos
+    if (!activity || !activity.title) {
+      return false;
+    }
+
     // Filtro de búsqueda por texto
-    const matchesSearch = activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      activity.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      activity.city.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm || 
+      (activity.title && activity.title.toLowerCase().includes(searchLower)) ||
+      (activity.description && activity.description.toLowerCase().includes(searchLower)) ||
+      (activity.city && activity.city.toLowerCase().includes(searchLower));
     
     // Filtro por tipo de actividad
     const matchesType = !selectedType || activity.activity_type === selectedType;
@@ -134,9 +194,9 @@ const ActivityList: React.FC = () => {
     // Filtro por precio
     let matchesPrice = true;
     if (priceFilter === 'free') {
-      matchesPrice = activity.is_free;
+      matchesPrice = activity.is_free === true;
     } else if (priceFilter === 'paid') {
-      matchesPrice = !activity.is_free && activity.price <= maxPrice;
+      matchesPrice = activity.is_free === false && (activity.price || 0) <= maxPrice;
     }
     
     return matchesSearch && matchesType && matchesCity && matchesPrice;
@@ -350,23 +410,43 @@ const ActivityList: React.FC = () => {
         {filteredActivities.map((activity) => (
           <div key={activity.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
             {/* Imagen */}
-            <div className="h-48 bg-gray-200 relative">
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <Activity className="w-12 h-12" />
-              </div>
-              
-              {/* Badges */}
-              <div className="absolute top-3 left-3 space-y-2">
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {activity.activity_type}
-                </span>
-                {activity.difficulty_level && (
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                    {activity.difficulty_level}
+            {activity.images && activity.images.length > 0 ? (
+              <div className="h-48 bg-gray-200 relative overflow-hidden">
+                <img
+                  src={activity.images[0]}
+                  alt={activity.title}
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Badges */}
+                <div className="absolute top-3 left-3 space-y-2">
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 backdrop-blur-sm bg-opacity-90">
+                    {activity.activity_type}
                   </span>
-                )}
+                  {activity.difficulty_level && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 backdrop-blur-sm bg-opacity-90">
+                      {activity.difficulty_level}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 relative flex items-center justify-center">
+                <Activity className="w-12 h-12 text-white opacity-50" />
+                
+                {/* Badges */}
+                <div className="absolute top-3 left-3 space-y-2">
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {activity.activity_type}
+                  </span>
+                  {activity.difficulty_level && (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                      {activity.difficulty_level}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Contenido */}
             <div className="p-4">

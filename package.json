@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "add-travel-images": "node scripts/add-travel-images.js",
+    "add-group-images": "node scripts/add-group-images.js"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
@@ -28,9 +30,11 @@
     "@types/react-datepicker": "^6.2.0",
     "apexcharts": "^4.1.0",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
     "firebase": "^12.1.0",
     "flatpickr": "^4.6.13",
     "lucide-react": "^0.541.0",
+    "node-fetch": "^3.3.2",
     "node-telegram-bot-api": "^0.66.0",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",

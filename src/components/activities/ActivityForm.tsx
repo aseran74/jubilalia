@@ -191,10 +191,18 @@ const ActivityForm: React.FC = () => {
   };
 
   const handleImagesUploaded = (imageUrls: string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      images: imageUrls
-    }));
+    setFormData(prev => {
+      // Agregar las nuevas imágenes a las existentes, respetando el límite de 10
+      const maxImages = 10;
+      const currentImages = prev.images || [];
+      const newImages = [...currentImages, ...imageUrls];
+      const totalImages = newImages.slice(0, maxImages);
+      
+      return {
+        ...prev,
+        images: totalImages
+      };
+    });
   };
 
   const removeImage = (index: number) => {
@@ -1233,6 +1241,7 @@ const ActivityForm: React.FC = () => {
               <ImageUpload 
                 onImagesUploaded={handleImagesUploaded}
                 maxImages={10}
+                currentImageCount={formData.images.length}
                 bucketName={SUPABASE_BUCKETS.ACTIVITY_PHOTOS}
                 className="mb-4"
               />

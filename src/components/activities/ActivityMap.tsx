@@ -126,25 +126,98 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
     const newMarkers: google.maps.Marker[] = [];
     
     activities.forEach((activity) => {
-      // Usar coordenadas de la actividad o coordenadas por defecto basadas en la ciudad
-      let lat = activity.latitude || 40.4168;
-      let lng = activity.longitude || -3.7038;
+      // Priorizar coordenadas de la base de datos
+      let lat: number | null = activity.latitude;
+      let lng: number | null = activity.longitude;
 
-      // Si no hay coordenadas específicas, usar coordenadas por defecto para la ciudad
-      if (!activity.latitude || !activity.longitude) {
+      // Si no hay coordenadas en la base de datos, usar diccionario de ciudades
+      if (!lat || !lng || lat === 0 || lng === 0) {
         const cityCoords: { [key: string]: { lat: number; lng: number } } = {
+          // Ciudades españolas
           'madrid': { lat: 40.4168, lng: -3.7038 },
           'barcelona': { lat: 41.3851, lng: 2.1734 },
           'valencia': { lat: 39.4699, lng: -0.3763 },
           'sevilla': { lat: 37.3891, lng: -5.9845 },
           'bilbao': { lat: 43.2627, lng: -2.9253 },
-          'zaragoza': { lat: 41.6488, lng: -0.8891 }
+          'zaragoza': { lat: 41.6488, lng: -0.8891 },
+          'santiago de compostela': { lat: 42.8782, lng: -8.5448 },
+          'a coruña': { lat: 43.3623, lng: -8.4115 },
+          'lugo': { lat: 43.0097, lng: -7.5568 },
+          'oviedo': { lat: 43.3619, lng: -5.8494 },
+          'santander': { lat: 43.4623, lng: -3.8099 },
+          'pamplona': { lat: 42.8169, lng: -1.6432 },
+          'girona': { lat: 41.9794, lng: 2.8214 },
+          'tarragona': { lat: 41.1189, lng: 1.2445 },
+          'málaga': { lat: 36.7213, lng: -4.4214 },
+          'cádiz': { lat: 36.5270, lng: -6.2886 },
+          'granada': { lat: 37.1773, lng: -3.5985 },
+          'córdoba': { lat: 37.8881, lng: -4.7794 },
+          'ourense': { lat: 42.3360, lng: -7.8642 },
+          'logroño': { lat: 42.4650, lng: -2.4456 },
+          'burgos': { lat: 42.3439, lng: -3.6969 },
+          'salamanca': { lat: 40.9701, lng: -5.6635 },
+          'cáceres': { lat: 39.4753, lng: -6.3724 },
+          'benidorm': { lat: 38.5411, lng: -0.1225 },
+          'ibiza': { lat: 38.9067, lng: 1.4206 },
+          'palma': { lat: 39.5696, lng: 2.6502 },
+          'mahón': { lat: 39.8885, lng: 4.2614 },
+          'las palmas': { lat: 28.1248, lng: -15.4300 },
+          'santa cruz de tenerife': { lat: 28.4636, lng: -16.2518 },
+          // Destinos internacionales
+          'lisboa': { lat: 38.7223, lng: -9.1393 },
+          'oporto': { lat: 41.1579, lng: -8.6291 },
+          'niza': { lat: 43.7102, lng: 7.2620 },
+          'parís': { lat: 48.8566, lng: 2.3522 },
+          'roma': { lat: 41.9028, lng: 12.4964 },
+          'praga': { lat: 50.0755, lng: 14.4378 },
+          'budapest': { lat: 47.4979, lng: 19.0402 },
+          'estambul': { lat: 41.0082, lng: 28.9784 },
+          'marrakech': { lat: 31.6295, lng: -7.9811 },
+          'el cairo': { lat: 30.0444, lng: 31.2357 },
+          'venecia': { lat: 45.4408, lng: 12.3155 },
+          'florencia': { lat: 43.7696, lng: 11.2558 },
+          'viena': { lat: 48.2082, lng: 16.3738 },
+          'atenas': { lat: 37.9838, lng: 23.7275 },
+          'bergen': { lat: 60.3913, lng: 5.3221 },
+          'bruselas': { lat: 50.8503, lng: 4.3517 },
+          'toronto': { lat: 43.6532, lng: -79.3832 },
+          'buenos aires': { lat: -34.6037, lng: -58.3816 },
+          'lima': { lat: -12.0464, lng: -77.0428 },
+          'cartagena de indias': { lat: 10.3910, lng: -75.4794 },
+          'nueva york': { lat: 40.7128, lng: -74.0060 },
+          'nápoles': { lat: 40.8518, lng: 14.2681 },
+          'san josé': { lat: 9.9281, lng: -84.0907 },
+          'la habana': { lat: 23.1136, lng: -82.3666 },
+          'antigua guatemala': { lat: 14.5586, lng: -90.7333 },
+          'guadalajara': { lat: 40.6286, lng: -3.1618 },
+          'évora': { lat: 38.5667, lng: -7.9000 },
+          'zamora': { lat: 41.5033, lng: -5.7438 },
+          'cartagena': { lat: 37.6000, lng: -0.7167 },
+          'vigo': { lat: 42.2406, lng: -8.7207 },
+          'huesca': { lat: 42.1361, lng: -0.4087 },
+          'almería': { lat: 36.8381, lng: -2.4597 },
+          'vielha': { lat: 42.7017, lng: 0.7956 },
+          'frankfurt': { lat: 50.1109, lng: 8.6821 },
+          'dubái': { lat: 25.2048, lng: 55.2708 },
+          'berlín': { lat: 52.5200, lng: 13.4050 },
+          'espargos': { lat: 16.7550, lng: -22.9490 },
+          'zúrich': { lat: 47.3769, lng: 8.5417 },
+          'estrasburgo': { lat: 48.5734, lng: 7.7521 },
+          'milán': { lat: 45.4642, lng: 9.1900 },
+          'dubrovnik': { lat: 42.6507, lng: 18.0944 },
+          'ammán': { lat: 31.9539, lng: 35.9106 },
+          'bangkok': { lat: 13.7563, lng: 100.5018 },
+          'ciudad del cabo': { lat: -33.9249, lng: 18.4241 }
         };
 
-        const cityKey = activity.city?.toLowerCase();
+        const cityKey = activity.city?.toLowerCase().trim();
         if (cityKey && cityCoords[cityKey]) {
           lat = cityCoords[cityKey].lat;
           lng = cityCoords[cityKey].lng;
+        } else {
+          // Si no se encuentra en el diccionario, usar coordenadas por defecto (Madrid)
+          lat = 40.4168;
+          lng = -3.7038;
         }
       }
       
