@@ -186,12 +186,22 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
 
     // Ajustar la vista del mapa para mostrar todos los marcadores
     if (newMarkers.length > 0) {
+      // Ajustar bounds pero con límites para mantener España visible
       map.fitBounds(bounds);
       
-      // Asegurar zoom mínimo
-      if (map.getZoom() && map.getZoom() > 15) {
-        map.setZoom(15);
+      // Asegurar zoom mínimo (no demasiado cerca) y máximo (no demasiado lejos)
+      const currentZoom = map.getZoom();
+      if (currentZoom) {
+        if (currentZoom > 10) {
+          map.setZoom(10); // Zoom máximo: nivel 10 para ver varias ciudades
+        } else if (currentZoom < 5) {
+          map.setZoom(6); // Zoom mínimo: nivel 6 para ver toda España
+        }
       }
+    } else {
+      // Si no hay marcadores, centrar en España
+      map.setCenter({ lat: 40.4168, lng: -3.7038 });
+      map.setZoom(6);
     }
   }, [groups, map, infoWindow, onGroupSelect]);
 

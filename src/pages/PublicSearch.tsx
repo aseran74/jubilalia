@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
   Search, MapPin, Users, Calendar, Tag, Map, List, 
-  UserCircle, Building2, Filter, ChevronDown, Euro, Heart 
+  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home
 } from 'lucide-react';
 import ActivityMap from '../components/activities/ActivityMap';
+import GroupsMap from '../components/groups/GroupsMap';
+import PeopleMap from '../components/people/PeopleMap';
 
 // --- INTERFACES (Sin cambios) ---
 interface Activity {
@@ -44,6 +46,8 @@ interface Group {
   max_members: number;
   current_members: number;
   created_at: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface Person {
@@ -57,6 +61,8 @@ interface Person {
   gender?: string;
   date_of_birth?: string;
   age?: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 type TabType = 'activities' | 'groups' | 'people';
@@ -78,15 +84,15 @@ const FilterButton = ({
     onClick={onClick}
     type="button" // Importante para prevenir submits accidentales
     className={`
-      flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border whitespace-nowrap
+      flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap
       ${isActive 
         ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
         : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
     `}
   >
-    {Icon && <Icon className={`w-4 h-4 ${isActive ? 'text-green-600' : 'text-gray-500'}`} />}
+    {Icon && <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isActive ? 'text-green-600' : 'text-gray-500'}`} />}
     <span>{label}</span>
-    <ChevronDown className={`w-3 h-3 ml-1 ${isActive ? 'text-green-600' : 'text-gray-400'}`} />
+    <ChevronDown className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ml-0.5 sm:ml-1 ${isActive ? 'text-green-600' : 'text-gray-400'}`} />
   </button>
 );
 
@@ -99,15 +105,15 @@ interface CustomSelectProps {
 }
 
 const CustomSelect = ({ value, onChange, options, placeholder, icon: Icon }: CustomSelectProps) => (
-  <div className="relative min-w-[140px]">
-    {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />}
+  <div className="relative min-w-[100px] sm:min-w-[140px]">
+    {Icon && <Icon className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none" />}
     <select
       value={value}
       onChange={onChange}
       className={`
-        w-full appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 rounded-xl 
-        focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm cursor-pointer
-        ${Icon ? 'pl-10 pr-8' : 'px-4 pr-8'}
+        w-full appearance-none bg-white border border-gray-200 text-gray-700 py-2 sm:py-2.5 rounded-lg sm:rounded-xl 
+        focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all text-xs sm:text-sm cursor-pointer
+        ${Icon ? 'pl-8 sm:pl-10 pr-6 sm:pr-8' : 'px-3 sm:px-4 pr-6 sm:pr-8'}
       `}
     >
       <option value="">{placeholder}</option>
@@ -115,17 +121,17 @@ const CustomSelect = ({ value, onChange, options, placeholder, icon: Icon }: Cus
         <option key={opt.value} value={opt.value}>{opt.label}</option>
       ))}
     </select>
-    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+    <ChevronDown className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 sm:w-4 sm:h-4 pointer-events-none" />
   </div>
 );
 
 const CardSkeleton = () => (
-  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
-    <div className="h-48 bg-gray-200 w-full"></div>
-    <div className="p-5 space-y-3">
-      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-      <div className="h-4 bg-gray-200 rounded w-full"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+  <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
+    <div className="h-40 sm:h-48 bg-gray-200 w-full"></div>
+    <div className="p-4 sm:p-5 space-y-2 sm:space-y-3">
+      <div className="h-5 sm:h-6 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-full"></div>
+      <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/2"></div>
     </div>
   </div>
 );
@@ -161,6 +167,7 @@ const PublicSearch: React.FC = () => {
   const [selectedGender, setSelectedGender] = useState<string>('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [showPeopleFilters, setShowPeopleFilters] = useState(false);
+  const [showMapFilters, setShowMapFilters] = useState(false);
 
   // Refs
   const priceDropdownRef = useRef<HTMLDivElement>(null);
@@ -338,49 +345,56 @@ const PublicSearch: React.FC = () => {
     'Senderismo', 'Yoga', 'Voluntariado', 'Animales', 'Cocina', 'Vino'
   ];
 
+  // Determinar si estamos en modo mapa a pantalla completa (especialmente móvil)
+  const isFullscreenMap = viewMode === 'map' && (activeTab === 'activities' || activeTab === 'groups' || activeTab === 'people');
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      {/* --- HEADER --- */}
-      <div className="bg-white sticky top-0 z-30 shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center">
-              <Search className="w-6 h-6 text-green-600 mr-2" />
-              Explorar
+      {/* --- HEADER (oculto en modo mapa móvil) --- */}
+      {!isFullscreenMap && (
+        <div className="bg-white sticky top-0 z-30 shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center">
+              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mr-2" />
+              <span className="hidden sm:inline">Explorar</span>
+              <span className="sm:hidden">Buscar</span>
             </h1>
-            <button onClick={() => navigate('/')} className="text-sm font-medium text-gray-500 hover:text-green-600 transition-colors">
-              Volver al inicio
+            <button onClick={() => navigate('/')} className="text-xs sm:text-sm font-medium text-gray-500 hover:text-green-600 transition-colors whitespace-nowrap">
+              <span className="hidden sm:inline">Volver al inicio</span>
+              <span className="sm:hidden">Inicio</span>
             </button>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch">
             <div className="relative flex-grow max-w-xl">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
                 placeholder={`Buscar en ${activeTab === 'activities' ? 'actividades' : activeTab === 'groups' ? 'grupos' : 'personas'}...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-xl sm:rounded-2xl bg-gray-50 focus:bg-white focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
               />
             </div>
 
-            <div className="flex p-1 bg-gray-100/80 rounded-xl self-start lg:self-center overflow-x-auto">
+            <div className="flex p-1 bg-gray-100/80 rounded-lg sm:rounded-xl self-start sm:self-center overflow-x-auto no-scrollbar">
               {[
-                { id: 'activities', icon: Calendar, label: 'Actividades' },
-                { id: 'groups', icon: Users, label: 'Grupos' },
-                { id: 'people', icon: UserCircle, label: 'Gente' },
+                { id: 'activities', icon: Calendar, label: 'Actividades', shortLabel: 'Act.' },
+                { id: 'groups', icon: Users, label: 'Grupos', shortLabel: 'Grupos' },
+                { id: 'people', icon: UserCircle, label: 'Gente', shortLabel: 'Gente' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabType)}
                   className={`
-                    flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap
+                    flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap
                     ${activeTab === tab.id ? 'bg-white text-green-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}
                   `}
                 >
-                  <tab.icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
+                  <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.shortLabel}</span>
                 </button>
               ))}
             </div>
@@ -389,18 +403,18 @@ const PublicSearch: React.FC = () => {
 
         {/* --- BARRA DE FILTROS (CORREGIDO) --- */}
         <div className="border-t border-gray-100 bg-white/50 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-3">
+            <div className="flex items-center justify-between gap-2 sm:gap-4">
               
               {/* 
                  CORRECCIÓN CLAVE:
                  - Se agregó 'md:overflow-visible' y 'md:flex-wrap' para que en desktop el popup no se corte.
                  - Se mantiene 'overflow-x-auto' para móvil.
               */}
-              <div className="flex items-center gap-3 overflow-x-auto md:overflow-visible md:flex-wrap pb-2 no-scrollbar mask-linear-fade flex-1">
-                <div className="flex items-center text-gray-400 text-sm font-medium mr-2 shrink-0">
-                  <Filter className="w-4 h-4 mr-1" />
-                  Filtros:
+              <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto md:overflow-visible md:flex-wrap pb-2 no-scrollbar mask-linear-fade flex-1">
+                <div className="flex items-center text-gray-400 text-xs sm:text-sm font-medium mr-1 sm:mr-2 shrink-0">
+                  <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Filtros:</span>
                 </div>
 
                 {activeTab === 'activities' && (
@@ -434,12 +448,12 @@ const PublicSearch: React.FC = () => {
                         />
                         
                         {showPriceRange && (
-                          <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 p-5 z-50 animate-in fade-in zoom-in-95 duration-100">
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="font-semibold text-gray-900">Rango de Precio</h3>
+                          <div className="absolute top-full left-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-4 sm:p-5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                            <div className="flex justify-between items-center mb-3 sm:mb-4">
+                                <h3 className="font-semibold text-sm sm:text-base text-gray-900">Rango de Precio</h3>
                             </div>
-                            <div className="space-y-6">
-                              <div className="space-y-4">
+                            <div className="space-y-4 sm:space-y-6">
+                              <div className="space-y-3 sm:space-y-4">
                                 {/* Sliders */}
                                 <div>
                                   <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -474,13 +488,13 @@ const PublicSearch: React.FC = () => {
                               <div className="flex gap-2 pt-2">
                                 <button 
                                   onClick={() => { setMinPrice(0); setMaxPrice(5000); }}
-                                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                  className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50"
                                 >
                                   Resetear
                                 </button>
                                 <button 
                                   onClick={() => setShowPriceRange(false)}
-                                  className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium text-sm hover:bg-green-700"
+                                  className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium text-xs sm:text-sm hover:bg-green-700"
                                 >
                                   Aplicar
                                 </button>
@@ -529,14 +543,14 @@ const PublicSearch: React.FC = () => {
                       />
                       
                       {showPeopleFilters && (
-                        <div className="absolute top-full left-0 mt-2 w-[300px] sm:w-[400px] bg-white rounded-xl shadow-xl border border-gray-100 p-5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                        <div className="absolute top-full left-0 mt-2 w-[calc(100vw-2rem)] sm:w-[300px] md:w-[400px] max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-4 sm:p-5 z-50 animate-in fade-in zoom-in-95 duration-100">
                           <div className="flex justify-between items-center mb-3">
-                            <h3 className="font-semibold text-gray-900">Intereses</h3>
+                            <h3 className="font-semibold text-sm sm:text-base text-gray-900">Intereses</h3>
                             {selectedInterests.length > 0 && (
                               <button onClick={() => setSelectedInterests([])} className="text-xs text-red-500 hover:text-red-600 font-medium">Borrar todo</button>
                             )}
                           </div>
-                          <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-1 custom-scrollbar">
+                          <div className="flex flex-wrap gap-2 max-h-[250px] sm:max-h-[300px] overflow-y-auto p-1 custom-scrollbar">
                             {interestsList.map(interest => (
                               <button
                                 key={interest}
@@ -548,7 +562,7 @@ const PublicSearch: React.FC = () => {
                                   }
                                 }}
                                 className={`
-                                  px-3 py-1.5 rounded-full text-xs font-medium transition-all border
+                                  px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-medium transition-all border
                                   ${selectedInterests.includes(interest)
                                     ? 'bg-green-100 border-green-200 text-green-800' 
                                     : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}
@@ -564,25 +578,220 @@ const PublicSearch: React.FC = () => {
                   </>
                 )}
               </div>
-
-              {activeTab === 'activities' && (
-                <div className="hidden md:flex items-center bg-gray-100 rounded-lg p-1 shrink-0">
-                  <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500'}`}><List className="w-4 h-4" /></button>
-                  <button onClick={() => setViewMode('map')} className={`p-1.5 rounded-md ${viewMode === 'map' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500'}`}><Map className="w-4 h-4" /></button>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
+      )}
 
-      {/* --- RESULTADOS (Sin cambios visuales) --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* --- VISTA MAPA PANTALLA COMPLETA (móvil) --- */}
+      {isFullscreenMap ? (
+        <div className="fixed inset-0 z-40 bg-white" style={{ marginTop: 0, paddingTop: 0 }}>
+          {/* Botón para volver a lista */}
+          <div className="absolute top-4 left-4 z-50 flex items-center gap-2">
+            <button
+              onClick={() => setViewMode('list')}
+              className="bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-700" />
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-white shadow-lg rounded-full px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <Home className="w-4 h-4 inline mr-1" />
+              Inicio
+            </button>
+          </div>
+
+          {/* Botón flotante de filtros */}
+          <div className="absolute top-4 right-4 z-50">
+            <button
+              onClick={() => setShowMapFilters(!showMapFilters)}
+              className="bg-green-600 text-white shadow-lg rounded-full p-3 hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <Filter className="w-5 h-5" />
+              <span className="hidden sm:inline">Filtros</span>
+            </button>
+          </div>
+
+          {/* Panel de filtros flotante */}
+          {showMapFilters && (
+            <div className="absolute top-20 right-4 z-50 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 max-w-xs w-[calc(100vw-2rem)] max-h-[calc(100vh-120px)] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-gray-900">Filtros</h3>
+                <button
+                  onClick={() => setShowMapFilters(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {activeTab === 'activities' && (
+                <div className="space-y-3">
+                  <CustomSelect 
+                    value={selectedType} onChange={(e) => setSelectedType(e.target.value)}
+                    options={['Viajes', 'Cultura', 'Deporte', 'Gastronomía', 'Naturaleza', 'Social'].map(v => ({value: v, label: v}))}
+                    placeholder="Tipo" icon={Tag}
+                  />
+                  <CustomSelect 
+                    value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}
+                    options={activityCities.map(c => ({value: c, label: c}))}
+                    placeholder="Ciudad" icon={MapPin}
+                  />
+                  <CustomSelect 
+                    value={priceFilter} onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
+                    options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
+                    placeholder="Coste" icon={Euro}
+                  />
+                  {(priceFilter === 'paid' || priceFilter === 'all') && (
+                    <div className="pt-2 border-t border-gray-200">
+                      <p className="text-xs font-medium text-gray-700 mb-2">Rango de Precio</p>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Min: {minPrice}€</span>
+                          </div>
+                          <input 
+                            type="range" min="0" max="5000" step="50" 
+                            value={minPrice} 
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              if(val <= maxPrice) setMinPrice(val);
+                            }} 
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Max: {maxPrice}€</span>
+                          </div>
+                          <input 
+                            type="range" min="0" max="5000" step="50" 
+                            value={maxPrice} 
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              if(val >= minPrice) setMaxPrice(val);
+                            }} 
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => { setMinPrice(0); setMaxPrice(5000); }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          Resetear
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'groups' && (
+                <div className="space-y-3">
+                  <CustomSelect 
+                    value={selectedGroupCategory} onChange={(e) => setSelectedGroupCategory(e.target.value)}
+                    options={['Viajes', 'Cultura', 'Deporte', 'Social'].map(v => ({value: v, label: v}))}
+                    placeholder="Categoría" icon={Tag}
+                  />
+                  <CustomSelect 
+                    value={selectedGroupCity} onChange={(e) => setSelectedGroupCity(e.target.value)}
+                    options={groupCities.map(c => ({value: c, label: c}))}
+                    placeholder="Ciudad" icon={MapPin}
+                  />
+                </div>
+              )}
+
+              {activeTab === 'people' && (
+                <div className="space-y-3">
+                  <CustomSelect 
+                    value={selectedPersonCity} onChange={(e) => setSelectedPersonCity(e.target.value)}
+                    options={personCities.filter((c): c is string => Boolean(c)).map(c => ({value: c, label: c}))}
+                    placeholder="Ciudad" icon={MapPin}
+                  />
+                  <CustomSelect 
+                    value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)}
+                    options={[{value: 'male', label: 'Hombre'}, {value: 'female', label: 'Mujer'}, {value: 'other', label: 'Otro'}]}
+                    placeholder="Género" icon={Users}
+                  />
+                  <div>
+                    <p className="text-xs font-medium text-gray-700 mb-2">Intereses</p>
+                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+                      {interestsList.map(interest => (
+                        <button
+                          key={interest}
+                          onClick={() => {
+                            if (selectedInterests.includes(interest)) {
+                              setSelectedInterests(prev => prev.filter(i => i !== interest));
+                            } else {
+                              setSelectedInterests(prev => [...prev, interest]);
+                            }
+                          }}
+                          className={`
+                            px-2.5 py-1 rounded-full text-xs font-medium transition-all border
+                            ${selectedInterests.includes(interest)
+                              ? 'bg-green-100 border-green-200 text-green-800' 
+                              : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}
+                          `}
+                        >
+                          {interest}
+                        </button>
+                      ))}
+                    </div>
+                    {selectedInterests.length > 0 && (
+                      <button 
+                        onClick={() => setSelectedInterests([])} 
+                        className="mt-2 text-xs text-red-500 hover:text-red-600 font-medium"
+                      >
+                        Borrar todo
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Mapa a pantalla completa */}
+          <div className="w-full h-full">
+            {activeTab === 'activities' && (
+              <ActivityMap 
+                activities={filteredActivities.map(a => ({ ...a, difficulty_level: a.difficulty_level || '', tags: a.tags || [] }))} 
+                onActivitySelect={(activity) => navigate(`/activities/${activity.id}`)}
+                className="w-full h-full"
+              />
+            )}
+            {activeTab === 'groups' && (
+              <GroupsMap 
+                groups={filteredGroups.map(g => ({ 
+                  ...g, 
+                  created_by: '', 
+                  is_public: true 
+                }))} 
+                onGroupSelect={(group) => navigate(`/groups/${group.id}`)}
+                className="w-full h-full"
+              />
+            )}
+            {activeTab === 'people' && (
+              <PeopleMap 
+                people={filteredPeople} 
+                onPersonSelect={(person) => navigate(`/users/${person.id}`)}
+                className="w-full h-full"
+              />
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* --- RESULTADOS (vista normal) --- */}
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
         
         {/* Contador de resultados */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
           <div className="flex items-center space-x-2 text-gray-600">
-            <span className="text-sm font-medium">
+            <span className="text-xs sm:text-sm font-medium">
               {activeTab === 'activities' && (
                 <>
                   {loadingActivities ? (
@@ -631,7 +840,7 @@ const PublicSearch: React.FC = () => {
         {activeTab === 'activities' && (
           <>
             {viewMode === 'map' ? (
-              <div className="h-[calc(100vh-250px)] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+              <div className="h-[calc(100vh-200px)] sm:h-[calc(100vh-250px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-200">
                 <ActivityMap 
                   activities={filteredActivities.map(a => ({ ...a, difficulty_level: a.difficulty_level || '', tags: a.tags || [] }))} 
                   onActivitySelect={(activity) => navigate(`/activities/${activity.id}`)}
@@ -640,11 +849,11 @@ const PublicSearch: React.FC = () => {
             ) : (
               <>
                 {loadingActivities ? (
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1,2,3,4,5,6].map(i => <CardSkeleton key={i} />)}</div>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">{[1,2,3,4,5,6].map(i => <CardSkeleton key={i} />)}</div>
                 ) : filteredActivities.length === 0 ? (
                   <EmptyState icon={Calendar} text="No se encontraron actividades" subtext="Intenta ajustar los filtros." />
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     {filteredActivities.map(activity => (
                       <div key={activity.id} onClick={() => navigate(`/activities/${activity.id}`)} className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all cursor-pointer border border-gray-100 flex flex-col h-full">
                         <div className="relative h-52 overflow-hidden rounded-t-2xl">
@@ -676,12 +885,25 @@ const PublicSearch: React.FC = () => {
 
         {activeTab === 'groups' && (
           <>
-            {loadingGroups ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1,2,3].map(i => <CardSkeleton key={i} />)}</div>
-            ) : filteredGroups.length === 0 ? (
-              <EmptyState icon={Users} text="No se encontraron grupos" />
+            {viewMode === 'map' ? (
+              <div className="h-[calc(100vh-200px)] sm:h-[calc(100vh-250px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                <GroupsMap 
+                  groups={filteredGroups.map(g => ({ 
+                    ...g, 
+                    created_by: '', 
+                    is_public: true 
+                  }))} 
+                  onGroupSelect={(group) => navigate(`/groups/${group.id}`)}
+                />
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <>
+                {loadingGroups ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1,2,3].map(i => <CardSkeleton key={i} />)}</div>
+                ) : filteredGroups.length === 0 ? (
+                  <EmptyState icon={Users} text="No se encontraron grupos" />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {filteredGroups.map(group => (
                   <div key={group.id} onClick={() => navigate(`/groups/${group.id}`)} className="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all cursor-pointer border border-gray-100 overflow-hidden">
                     <div className="relative h-44">
@@ -697,18 +919,29 @@ const PublicSearch: React.FC = () => {
                   </div>
                 ))}
               </div>
+                )}
+              </>
             )}
           </>
         )}
 
         {activeTab === 'people' && (
           <>
-            {loadingPeople ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1,2,3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-2xl animate-pulse" />)}</div>
-            ) : filteredPeople.length === 0 ? (
-              <EmptyState icon={UserCircle} text="No se encontraron personas" />
+            {viewMode === 'map' ? (
+              <div className="h-[calc(100vh-200px)] sm:h-[calc(100vh-250px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                <PeopleMap 
+                  people={filteredPeople} 
+                  onPersonSelect={(person) => navigate(`/users/${person.id}`)}
+                />
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <>
+                {loadingPeople ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">{[1,2,3].map(i => <div key={i} className="h-32 bg-gray-100 rounded-2xl animate-pulse" />)}</div>
+                ) : filteredPeople.length === 0 ? (
+                  <EmptyState icon={UserCircle} text="No se encontraron personas" />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {filteredPeople.map(person => (
                   <div key={person.id} onClick={() => navigate(`/users/${person.id}`)} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all p-5 border border-gray-100 hover:border-green-100 cursor-pointer flex items-start gap-4">
                     <div className="relative shrink-0">
@@ -728,21 +961,134 @@ const PublicSearch: React.FC = () => {
                   </div>
                 ))}
               </div>
+                )}
+              </>
             )}
           </>
         )}
 
-        <div className="mt-12 flex justify-center pb-10">
-           <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-1 shadow-lg max-w-3xl w-full">
-              <div className="bg-white rounded-xl p-8 text-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">¿Quieres unirte a la comunidad?</h2>
-                <button onClick={() => navigate('/login')} className="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition-all shadow-md mt-4">
+        <div className="mt-8 sm:mt-12 flex justify-center pb-6 sm:pb-10">
+           <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl sm:rounded-2xl p-1 shadow-lg max-w-3xl w-full">
+              <div className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-8 text-center">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">¿Quieres unirte a la comunidad?</h2>
+                <button onClick={() => navigate('/login')} className="bg-green-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold hover:bg-green-700 transition-all shadow-md mt-4">
                   Iniciar sesión o Regístrate
                 </button>
               </div>
            </div>
         </div>
       </div>
+        </>
+      )}
+
+      {/* Mobile/Tablet Bottom Navbar */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
+        <div className="flex items-center justify-around h-16 px-2">
+          {/* Inicio */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <Home className="w-6 h-6" />
+            <span className="text-xs font-medium">Inicio</span>
+          </button>
+
+          {/* Buscar */}
+          <button
+            onClick={() => navigate('/search')}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <Search className="w-6 h-6" />
+            <span className="text-xs font-medium">Buscar</span>
+          </button>
+
+          {/* Actividades */}
+          <button
+            onClick={() => {
+              setActiveTab('activities');
+              setViewMode('list');
+            }}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <Calendar className="w-6 h-6" />
+            <span className="text-xs font-medium">Actividades</span>
+          </button>
+
+          {/* Perfil */}
+          <button
+            onClick={() => navigate('/login')}
+            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
+          >
+            <UserCircle className="w-6 h-6" />
+            <span className="text-xs font-medium">Perfil</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Spacer para evitar que el contenido quede oculto detrás del navbar inferior en móvil */}
+      {!isFullscreenMap && <div className="h-16 lg:hidden"></div>}
+
+      {/* Botón flotante de cambio de vista (Lista/Mapa) */}
+      {(activeTab === 'activities' || activeTab === 'groups' || activeTab === 'people') && !isFullscreenMap && (
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-40 lg:hidden">
+          <div className="flex items-center bg-white rounded-full shadow-2xl border-2 border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-6 py-3 flex items-center gap-2 transition-all ${
+                viewMode === 'list' 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <List className="w-6 h-6" />
+              <span className="font-semibold text-sm">Lista</span>
+            </button>
+            <div className="w-px h-8 bg-gray-200"></div>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`px-6 py-3 flex items-center gap-2 transition-all ${
+                viewMode === 'map' 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Map className="w-6 h-6" />
+              <span className="font-semibold text-sm">Mapa</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Botón flotante de cambio de vista para desktop (en la barra de filtros) */}
+      {(activeTab === 'activities' || activeTab === 'groups' || activeTab === 'people') && !isFullscreenMap && (
+        <div className="hidden lg:block fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40">
+          <div className="flex items-center bg-white rounded-full shadow-2xl border-2 border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-6 py-3 flex items-center gap-2 transition-all ${
+                viewMode === 'list' 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <List className="w-5 h-5" />
+              <span className="font-semibold">Lista</span>
+            </button>
+            <div className="w-px h-8 bg-gray-200"></div>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`px-6 py-3 flex items-center gap-2 transition-all ${
+                viewMode === 'map' 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <Map className="w-5 h-5" />
+              <span className="font-semibold">Mapa</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -754,10 +1100,10 @@ interface EmptyStateProps {
 }
 
 const EmptyState = ({ icon: Icon, text, subtext }: EmptyStateProps) => (
-  <div className="text-center py-20 flex flex-col items-center justify-center">
-    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4"><Icon className="w-10 h-10 text-gray-300" /></div>
-    <h3 className="text-lg font-semibold text-gray-900">{text}</h3>
-    {subtext && <p className="text-gray-500 text-sm mt-1 max-w-xs">{subtext}</p>}
+  <div className="text-center py-12 sm:py-20 flex flex-col items-center justify-center">
+    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 rounded-full flex items-center justify-center mb-3 sm:mb-4"><Icon className="w-8 h-8 sm:w-10 sm:h-10 text-gray-300" /></div>
+    <h3 className="text-base sm:text-lg font-semibold text-gray-900">{text}</h3>
+    {subtext && <p className="text-gray-500 text-xs sm:text-sm mt-1 max-w-xs px-4">{subtext}</p>}
   </div>
 );
 

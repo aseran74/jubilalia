@@ -88,10 +88,11 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
     const initializeMap = () => {
       if (!mapRef.current) return;
 
+      // Centro de España (aproximadamente el centro geográfico)
       const defaultCenter = { lat: 40.4168, lng: -3.7038 }; // Madrid
       
       const newMap = new window.google.maps.Map(mapRef.current, {
-        zoom: 10,
+        zoom: 6, // Zoom para ver toda España
         center: defaultCenter,
         mapTypeId: window.google.maps.MapTypeId.ROADMAP,
         styles: [
@@ -301,12 +302,23 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
           bounds.extend(position);
         }
       });
+      
+      // Ajustar bounds pero con límites para mantener España visible
       map.fitBounds(bounds);
       
-      // Asegurar zoom mínimo
-      if (map.getZoom() && map.getZoom() > 15) {
-        map.setZoom(15);
+      // Asegurar zoom mínimo (no demasiado cerca) y máximo (no demasiado lejos)
+      const currentZoom = map.getZoom();
+      if (currentZoom) {
+        if (currentZoom > 10) {
+          map.setZoom(10); // Zoom máximo: nivel 10 para ver varias ciudades
+        } else if (currentZoom < 5) {
+          map.setZoom(6); // Zoom mínimo: nivel 6 para ver toda España
+        }
       }
+    } else {
+      // Si no hay marcadores, centrar en España
+      map.setCenter({ lat: 40.4168, lng: -3.7038 });
+      map.setZoom(6);
     }
   }, [activities, map, infoWindow, onActivitySelect]);
 
