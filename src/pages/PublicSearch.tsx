@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { 
   Search, MapPin, Users, Calendar, Tag, Map, List, 
-  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, LayoutDashboard
+  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, LayoutDashboard, ArrowLeft
 } from 'lucide-react';
 import ActivityMap from '../components/activities/ActivityMap';
 import GroupsMap from '../components/groups/GroupsMap';
@@ -155,6 +155,7 @@ const PublicSearch: React.FC = () => {
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
   const [showPriceRange, setShowPriceRange] = useState(false);
+  const [priceButtonPosition, setPriceButtonPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   
   // Estados Grupos
   const [groups, setGroups] = useState<Group[]>([]);
@@ -173,6 +174,7 @@ const PublicSearch: React.FC = () => {
 
   // Refs
   const priceDropdownRef = useRef<HTMLDivElement>(null);
+  const priceButtonRef = useRef<HTMLButtonElement>(null);
   const interestsDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -357,14 +359,12 @@ const PublicSearch: React.FC = () => {
         <div className="bg-white sticky top-0 z-30 shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight flex items-center">
-              <Search className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mr-2" />
-              <span className="hidden sm:inline">Explorar</span>
-              <span className="sm:hidden">Buscar</span>
-            </h1>
-            <button onClick={() => navigate('/')} className="text-xs sm:text-sm font-medium text-gray-500 hover:text-green-600 transition-colors whitespace-nowrap">
-              <span className="hidden sm:inline">Volver al inicio</span>
-              <span className="sm:hidden">Inicio</span>
+            <button 
+              onClick={() => navigate('/')} 
+              className="flex items-center gap-2 text-sm sm:text-base font-medium text-gray-700 hover:text-green-600 transition-colors whitespace-nowrap"
+            >
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>Inicio</span>
             </button>
           </div>
 
@@ -439,18 +439,42 @@ const PublicSearch: React.FC = () => {
 
                     {/* FILTRO RANGO DE PRECIO */}
                     {(priceFilter === 'paid' || priceFilter === 'all') && (
-                      <div className="relative z-50" ref={priceDropdownRef}>
-                        <FilterButton 
-                          label="Rango Precio" 
-                          isActive={showPriceRange || minPrice > 0 || maxPrice < 5000} 
+                      <div className="relative z-50 shrink-0" ref={priceDropdownRef}>
+                        <button
+                          ref={priceButtonRef}
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (priceButtonRef.current) {
+                              const rect = priceButtonRef.current.getBoundingClientRect();
+                              setPriceButtonPosition({
+                                top: rect.bottom + window.scrollY,
+                                left: rect.left + window.scrollX,
+                                width: rect.width
+                              });
+                            }
                             setShowPriceRange(!showPriceRange);
-                          }} 
-                        />
+                          }}
+                          type="button"
+                          className={`
+                            flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap
+                            ${(showPriceRange || minPrice > 0 || maxPrice < 5000)
+                              ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
+                          `}
+                        >
+                          <Euro className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${(showPriceRange || minPrice > 0 || maxPrice < 5000) ? 'text-green-600' : 'text-gray-500'}`} />
+                          <span>Rango Precio</span>
+                          <ChevronDown className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ml-0.5 sm:ml-1 ${(showPriceRange || minPrice > 0 || maxPrice < 5000) ? 'text-green-600' : 'text-gray-400'}`} />
+                        </button>
                         
                         {showPriceRange && (
-                          <div className="absolute top-full left-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-4 sm:p-5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                          <div 
+                            className="fixed sm:absolute sm:top-full sm:left-0 sm:mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-4 sm:p-5 z-[60] animate-in fade-in zoom-in-95 duration-100"
+                            style={typeof window !== 'undefined' && window.innerWidth < 640 && priceButtonPosition ? {
+                              top: `${Math.min(priceButtonPosition.top + 8, window.innerHeight - 300)}px`,
+                              left: `${Math.max(16, Math.min(priceButtonPosition.left, window.innerWidth - (window.innerWidth * 0.9) - 16))}px`,
+                            } : undefined}
+                          >
                             <div className="flex justify-between items-center mb-3 sm:mb-4">
                                 <h3 className="font-semibold text-sm sm:text-base text-gray-900">Rango de Precio</h3>
                             </div>

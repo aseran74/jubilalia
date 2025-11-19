@@ -620,7 +620,7 @@ const LandingPage: React.FC = () => {
 
           <p className="text-xl md:text-2xl text-green-50 max-w-3xl mx-auto mb-12 font-light leading-relaxed">
 
-            La plataforma segura para encontrar compañeros de vivienda, unirte a grupos locales y disfrutar de actividades con gente como tú.
+          Haz nuevas amistades, conecta con grupos, comparte vivienda y vive experiencias en buena compañía junto a personas de tu generación.
 
           </p>
 
