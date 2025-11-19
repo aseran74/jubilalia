@@ -127,8 +127,8 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
     
     activities.forEach((activity) => {
       // Priorizar coordenadas de la base de datos
-      let lat: number | null = activity.latitude;
-      let lng: number | null = activity.longitude;
+      let lat: number | null = activity.latitude ?? null;
+      let lng: number | null = activity.longitude ?? null;
 
       // Si no hay coordenadas en la base de datos, usar diccionario de ciudades
       if (!lat || !lng || lat === 0 || lng === 0) {

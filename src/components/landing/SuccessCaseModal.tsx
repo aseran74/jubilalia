@@ -4,11 +4,7 @@ import {
   SparklesIcon, 
   ChatBubbleLeftRightIcon as MessageCircleIcon, 
   HomeIcon, 
-  CurrencyEuroIcon, 
-  ShieldCheckIcon, 
-  UserGroupIcon, 
-  GiftIcon, 
-  HeartIcon 
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
