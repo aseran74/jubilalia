@@ -45,7 +45,7 @@ const DashboardLayout: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-screen bg-gray-50 relative">
+      <div className="flex h-screen relative" style={{ background: 'linear-gradient(to bottom, #2672BF, #5571AB)' }}>
         {/* Sidebar */}
         <DashboardSidebar />
         
@@ -54,8 +54,8 @@ const DashboardLayout: React.FC = () => {
           {/* Header */}
           <DashboardHeader onToggleSidebar={toggleSidebar} />
           
-          {/* Área de contenido */}
-          <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-20 lg:pb-6">
+          {/* Área de contenido con fondo degradado visible */}
+          <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-20 lg:pb-6" style={{ background: 'linear-gradient(to bottom, #2672BF, #5571AB)' }}>
             <Outlet />
           </main>
         </div>

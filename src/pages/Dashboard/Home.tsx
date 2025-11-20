@@ -21,7 +21,7 @@ export default function JubilaliaDashboardHome() {
   const { profile } = useAuth();
 
   return (
-    <>
+    <div className="min-h-full" style={{ background: 'transparent' }}>
       <PageMeta
         title="Jubilalia Dashboard | Plataforma para Jubilados"
         description="Dashboard principal de Jubilalia - Conecta, comparte y disfruta de la vida juntos"
@@ -481,6 +481,6 @@ export default function JubilaliaDashboardHome() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
