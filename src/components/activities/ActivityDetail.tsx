@@ -641,7 +641,7 @@ const ActivityDetail: React.FC = () => {
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                    {isAdmin && !isOwner && (
+                {isAdmin && !isOwner && (
                       <span className="text-xs text-gray-500 ml-2">(Modo Admin)</span>
                     )}
                   </div>

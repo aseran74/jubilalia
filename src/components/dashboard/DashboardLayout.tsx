@@ -46,20 +46,20 @@ const DashboardLayout: React.FC = () => {
   return (
     <>
       <div className="flex h-screen relative" style={{ background: 'linear-gradient(to bottom, #2672BF, #5571AB)' }}>
-        {/* Sidebar */}
-        <DashboardSidebar />
+      {/* Sidebar */}
+      <DashboardSidebar />
+      
+      {/* Contenido principal */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* Header */}
+        <DashboardHeader onToggleSidebar={toggleSidebar} />
         
-        {/* Contenido principal */}
-        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          {/* Header */}
-          <DashboardHeader onToggleSidebar={toggleSidebar} />
-          
           {/* Área de contenido con fondo degradado visible */}
           <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 pb-20 lg:pb-6" style={{ background: 'linear-gradient(to bottom, #2672BF, #5571AB)' }}>
-            <Outlet />
-          </main>
-        </div>
+          <Outlet />
+        </main>
       </div>
+    </div>
 
       {/* Mobile/Tablet Bottom Navbar - Fuera del contenedor principal */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-[100] lg:hidden">

@@ -141,7 +141,7 @@ const ActivityList: React.FC = () => {
       const activitiesWithBasicInfo = activitiesData.map(activity => {
         // Asegurar que todos los campos requeridos existan
         return {
-          ...activity,
+        ...activity,
           title: activity.title || 'Sin título',
           description: activity.description || '',
           city: activity.city || 'Sin ciudad',
@@ -433,19 +433,19 @@ const ActivityList: React.FC = () => {
             ) : (
               <div className="h-48 bg-gradient-to-br from-blue-400 to-blue-600 relative flex items-center justify-center">
                 <Activity className="w-12 h-12 text-white opacity-50" />
-                
-                {/* Badges */}
-                <div className="absolute top-3 left-3 space-y-2">
-                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {activity.activity_type}
+              
+              {/* Badges */}
+              <div className="absolute top-3 left-3 space-y-2">
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {activity.activity_type}
+                </span>
+                {activity.difficulty_level && (
+                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                    {activity.difficulty_level}
                   </span>
-                  {activity.difficulty_level && (
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                      {activity.difficulty_level}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
+            </div>
             )}
 
             {/* Contenido */}

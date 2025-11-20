@@ -199,7 +199,7 @@ const ActivityForm: React.FC = () => {
       const totalImages = newImages.slice(0, maxImages);
       
       return {
-        ...prev,
+      ...prev,
         images: totalImages
       };
     });
@@ -481,7 +481,7 @@ const ActivityForm: React.FC = () => {
         if (currentProfile?.id) {
           // Obtener la actividad para verificar permisos
           const { data: activity } = await supabase
-            .from('activities')
+        .from('activities')
             .select('profile_id')
             .eq('id', id)
             .single();
@@ -578,10 +578,10 @@ const ActivityForm: React.FC = () => {
         const { data: activity, error: activityError } = await supabase
           .from('activities')
           .insert([activityData])
-          .select()
-          .single();
+        .select()
+        .single();
 
-        if (activityError) throw activityError;
+      if (activityError) throw activityError;
         activityId = activity.id;
 
         // Si es recurrente, generar las instancias

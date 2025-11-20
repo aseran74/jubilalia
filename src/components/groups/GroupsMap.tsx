@@ -200,7 +200,7 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
           map.setZoom(10); // Zoom máximo: nivel 10 para ver varias ciudades
         } else if (currentZoom < 5) {
           map.setZoom(7); // Zoom mínimo: nivel 7 para ver España sin Marruecos
-        }
+      }
       }
     } else {
       // Si no hay marcadores, centrar en España

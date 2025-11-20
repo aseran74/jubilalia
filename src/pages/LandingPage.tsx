@@ -257,36 +257,67 @@ const LandingPage: React.FC = () => {
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Menu Overlay */}
-        <div className={`fixed inset-0 bg-white z-40 transform transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) lg:hidden pt-28 px-6 ${
-          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}>
-          <div className="flex flex-col space-y-4 text-lg font-medium text-gray-800">
-            <button onClick={() => scrollToSection('home')} className="text-left p-4 hover:bg-gray-50 rounded-xl transition-colors border-b border-gray-50">Inicio</button>
-            <button onClick={() => scrollToSection('how-it-works')} className="text-left p-4 hover:bg-gray-50 rounded-xl transition-colors border-b border-gray-50">Cómo Funciona</button>
-            <button onClick={() => scrollToSection('what-we-do')} className="text-left p-4 hover:bg-gray-50 rounded-xl transition-colors border-b border-gray-50">Qué Hacemos</button>
-            <button onClick={() => { setIsMenuOpen(false); navigate('/search'); }} className="text-left p-4 hover:bg-gray-50 rounded-xl transition-colors text-green-600 font-bold bg-green-50/50">🔍 Buscar Actividades</button>
+      {/* Mobile Menu Overlay - Fuera del nav para mejor control */}
+      <div className={`fixed inset-0 z-[110] transform transition-transform duration-500 ease-in-out lg:hidden ${
+        isMenuOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
+      }`}>
+        {/* Backdrop sólido */}
+        <div className="absolute inset-0 bg-white opacity-100"></div>
+        
+        {/* Contenido del menú */}
+        <div className="relative z-10 pt-20 px-6 h-full overflow-y-auto bg-white">
+          {/* Botón X para cerrar */}
+          <div className="flex justify-end mb-6">
+            <button 
+              onClick={() => setIsMenuOpen(false)}
+              className="p-3 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6 text-gray-900" />
+            </button>
+          </div>
+          
+          <div className="flex flex-col space-y-4 text-lg font-medium">
+            <button onClick={() => scrollToSection('home')} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
+              <Home className="w-6 h-6" />
+              <span>Inicio</span>
+            </button>
+            <button onClick={() => scrollToSection('how-it-works')} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
+              <Sparkles className="w-6 h-6" />
+              <span>Cómo Funciona</span>
+            </button>
+            <button onClick={() => scrollToSection('faq')} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
+              <QuestionMark className="w-6 h-6" />
+              <span>FAQ</span>
+            </button>
+            <button onClick={() => { setIsMenuOpen(false); navigate('/search'); }} className="flex items-center gap-3 text-left p-4 hover:bg-green-200 rounded-xl transition-colors text-green-800 font-bold text-xl bg-green-100 border-b-2 border-green-300">
+              <Search className="w-6 h-6" />
+              <span>Buscar Actividades</span>
+            </button>
             
             <div className="pt-8 flex flex-col space-y-4 mt-4">
               {user ? (
-                <button onClick={() => navigate('/dashboard')} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-center shadow-lg">
-                  Ir a mi Panel
+                <button onClick={() => navigate('/dashboard')} className="flex items-center justify-center gap-3 w-full bg-green-600 text-white py-4 rounded-xl font-bold text-center shadow-lg hover:bg-green-700 transition-colors text-lg">
+                  <LayoutDashboard className="w-6 h-6" />
+                  <span>Ir a mi Panel</span>
                 </button>
               ) : (
                 <>
-                  <button onClick={() => navigate('/login')} className="w-full border-2 border-gray-200 py-4 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-colors">
-                    Iniciar Sesión
+                  <button onClick={() => navigate('/login')} className="flex items-center justify-center gap-3 w-full border-2 border-gray-400 py-4 rounded-xl font-bold text-gray-900 hover:bg-gray-200 transition-colors text-lg">
+                    <User className="w-6 h-6" />
+                    <span>Iniciar Sesión</span>
                   </button>
-                  <button onClick={() => navigate('/register')} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-colors">
-                    Registrarse Gratis
+                  <button onClick={() => navigate('/register')} className="flex items-center justify-center gap-3 w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition-colors text-lg">
+                    <User className="w-6 h-6" />
+                    <span>Registrarse Gratis</span>
                   </button>
                 </>
               )}
             </div>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* --- HERO SECTION (EFECTOS INTACTOS) --- */}
       <section id="home" className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">

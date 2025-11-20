@@ -186,7 +186,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                     </>
                   ) : (
                     <>
-                      Máximo {maxImages} imágenes • PNG, JPG, GIF hasta 5MB
+                  Máximo {maxImages} imágenes • PNG, JPG, GIF hasta 5MB
                     </>
                   )}
                 </p>
