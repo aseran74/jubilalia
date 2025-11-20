@@ -279,6 +279,10 @@ const LandingPage: React.FC = () => {
           </div>
           
           <div className="flex flex-col space-y-4 text-lg font-medium">
+            <button onClick={() => { setIsMenuOpen(false); navigate('/search'); }} className="flex items-center gap-3 text-left p-4 hover:bg-green-200 rounded-xl transition-colors text-green-800 font-bold text-xl bg-green-100 border-b-2 border-green-300">
+              <Search className="w-6 h-6" />
+              <span>Buscar Actividades</span>
+            </button>
             <button onClick={() => scrollToSection('home')} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
               <Home className="w-6 h-6" />
               <span>Inicio</span>
@@ -290,10 +294,6 @@ const LandingPage: React.FC = () => {
             <button onClick={() => scrollToSection('faq')} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
               <QuestionMark className="w-6 h-6" />
               <span>FAQ</span>
-            </button>
-            <button onClick={() => { setIsMenuOpen(false); navigate('/search'); }} className="flex items-center gap-3 text-left p-4 hover:bg-green-200 rounded-xl transition-colors text-green-800 font-bold text-xl bg-green-100 border-b-2 border-green-300">
-              <Search className="w-6 h-6" />
-              <span>Buscar Actividades</span>
             </button>
             
             <div className="pt-8 flex flex-col space-y-4 mt-4">
