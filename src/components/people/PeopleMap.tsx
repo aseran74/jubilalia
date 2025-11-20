@@ -83,7 +83,6 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [infoWindow, setInfoWindow] = useState<google.maps.InfoWindow | null>(null);
   const { isLoading: mapsLoading, error: mapsError } = useGoogleMaps();
 
@@ -218,17 +217,10 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
     });
 
     markersRef.current = newMarkers;
-    setMarkers(newMarkers);
     console.log(`✅ PeopleMap: Se crearon ${newMarkers.length} marcadores`);
 
-    // Función de limpieza
-    return () => {
-      markersRef.current.forEach(marker => marker.setMap(null));
-      markersRef.current = [];
-    };
-
     // Ajustar vista del mapa si hay marcadores
-    if (newMarkers.length > 0) {
+    if (newMarkers.length > 0 && map) {
       const bounds = new window.google.maps.LatLngBounds();
       newMarkers.forEach(marker => {
         const position = marker.getPosition();
@@ -249,11 +241,17 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
           map.setZoom(7); // Zoom mínimo: nivel 7 para ver España sin Marruecos
         }
       }
-    } else {
+    } else if (map) {
       // Si no hay marcadores, centrar en España
       map.setCenter({ lat: 40.4168, lng: -3.7038 });
       map.setZoom(7);
     }
+
+    // Función de limpieza
+    return () => {
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+    };
   }, [people, map, infoWindow, onPersonSelect]);
 
   if (mapsLoading) {
