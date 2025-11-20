@@ -866,11 +866,137 @@ const PublicSearch: React.FC = () => {
         {activeTab === 'activities' && (
           <>
             {viewMode === 'map' ? (
-              <div className="h-[calc(100vh-200px)] sm:h-[calc(100vh-250px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-                <ActivityMap 
-                  activities={filteredActivities.map(a => ({ ...a, difficulty_level: a.difficulty_level || '', tags: a.tags || [] }))} 
-                  onActivitySelect={(activity) => navigate(`/activities/${activity.id}`)}
-                />
+              <div className="space-y-4">
+                {/* Filtros para escritorio en modo mapa */}
+                <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Filter className="w-4 h-4" />
+                      <span>Filtros:</span>
+                    </div>
+                    
+                    <CustomSelect 
+                      value={selectedType} 
+                      onChange={(e) => setSelectedType(e.target.value)}
+                      options={['Viajes', 'Cultura', 'Deporte', 'Gastronomía', 'Naturaleza', 'Social'].map(v => ({value: v, label: v}))}
+                      placeholder="Tipo" 
+                      icon={Tag}
+                    />
+                    
+                    <CustomSelect 
+                      value={selectedCity} 
+                      onChange={(e) => setSelectedCity(e.target.value)}
+                      options={activityCities.map(c => ({value: c, label: c}))}
+                      placeholder="Ciudad" 
+                      icon={MapPin}
+                    />
+                    
+                    <CustomSelect 
+                      value={priceFilter} 
+                      onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
+                      options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
+                      placeholder="Coste" 
+                      icon={Euro}
+                    />
+                    
+                    {(priceFilter === 'paid' || priceFilter === 'all') && (
+                      <div className="relative" ref={priceDropdownRef}>
+                        <button
+                          ref={priceButtonRef}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (priceButtonRef.current) {
+                              const rect = priceButtonRef.current.getBoundingClientRect();
+                              setPriceButtonPosition({
+                                top: rect.bottom + window.scrollY,
+                                left: rect.left + window.scrollX,
+                                width: rect.width
+                              });
+                            }
+                            setShowPriceRange(!showPriceRange);
+                          }}
+                          type="button"
+                          className={`
+                            flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border whitespace-nowrap
+                            ${(showPriceRange || minPrice > 0 || maxPrice < 5000)
+                              ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
+                          `}
+                        >
+                          <Euro className={`w-4 h-4 ${(showPriceRange || minPrice > 0 || maxPrice < 5000) ? 'text-green-600' : 'text-gray-500'}`} />
+                          <span>Rango Precio</span>
+                          <ChevronDown className={`w-3 h-3 ml-1 ${(showPriceRange || minPrice > 0 || maxPrice < 5000) ? 'text-green-600' : 'text-gray-400'}`} />
+                        </button>
+                        
+                        {showPriceRange && (
+                          <div 
+                            className="absolute top-full left-0 mt-2 w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-5 z-50"
+                          >
+                            <p className="text-sm font-medium text-gray-700 mb-3">Rango de Precio</p>
+                            <div className="space-y-4">
+                              <div>
+                                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                  <span>Mínimo: {minPrice}€</span>
+                                </div>
+                                <input 
+                                  type="range" min="0" max="5000" step="50" 
+                                  value={minPrice} 
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if(val <= maxPrice) setMinPrice(val);
+                                  }} 
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                />
+                              </div>
+                              <div>
+                                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                  <span>Máximo: {maxPrice}€</span>
+                                </div>
+                                <input 
+                                  type="range" min="0" max="5000" step="50" 
+                                  value={maxPrice} 
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if(val >= minPrice) setMaxPrice(val);
+                                  }} 
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                />
+                              </div>
+                              <button 
+                                onClick={() => { setMinPrice(0); setMaxPrice(5000); }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                              >
+                                Resetear
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {(selectedType || selectedCity || priceFilter !== 'all' || minPrice > 0 || maxPrice < 5000) && (
+                      <button
+                        onClick={() => {
+                          setSelectedType('');
+                          setSelectedCity('');
+                          setPriceFilter('all');
+                          setMinPrice(0);
+                          setMaxPrice(5000);
+                        }}
+                        className="px-4 py-2 text-sm text-red-600 hover:text-red-700 font-medium hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        Limpiar filtros
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="h-[calc(100vh-200px)] sm:h-[calc(100vh-250px)] lg:h-[calc(100vh-320px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                  <ActivityMap 
+                    activities={filteredActivities.map(a => ({ ...a, difficulty_level: a.difficulty_level || '', tags: a.tags || [] }))} 
+                    onActivitySelect={(activity) => navigate(`/activities/${activity.id}`)}
+                  />
+                </div>
               </div>
             ) : (
               <>
