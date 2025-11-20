@@ -81,6 +81,7 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
   className = ""
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [infoWindow, setInfoWindow] = useState<google.maps.InfoWindow | null>(null);
@@ -98,16 +99,11 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
       const newMap = new window.google.maps.Map(mapRef.current, {
         zoom: 7, // Zoom para ver España sin incluir Marruecos
         center: defaultCenter,
-        restriction: {
-          latLngBounds: {
-            north: 44.0,  // Norte de España
-            south: 35.0,  // Sur de España (excluye Marruecos)
-            west: -10.0,  // Oeste de España
-            east: 5.0     // Este de España
-          },
-          strictBounds: false
-        },
         mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+        draggable: true,
+        scrollwheel: true,
+        disableDoubleClickZoom: false,
+        gestureHandling: 'greedy',
         styles: [
           {
             featureType: 'poi',
@@ -133,7 +129,8 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
     console.log('🗺️ PeopleMap: Actualizando marcadores para', people.length, 'personas');
 
     // Limpiar marcadores existentes
-    markers.forEach(marker => marker.setMap(null));
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
 
     const newMarkers: google.maps.Marker[] = [];
 
@@ -198,11 +195,15 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
         
-        // Manejar clic en el botón "Ver perfil"
-        setTimeout(() => {
+        // Manejar clic en el botón "Ver perfil" usando Google Maps domready event
+        window.google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
           const button = document.getElementById(`details-btn-${person.id}`);
           if (button) {
-            button.addEventListener('click', (e) => {
+            // Remover listener anterior si existe
+            const newButton = button.cloneNode(true);
+            button.parentNode?.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
               console.log('🔗 Navegando a perfil de persona:', person.full_name);
@@ -210,14 +211,21 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
               infoWindow.close();
             });
           }
-        }, 100);
+        });
       });
 
       newMarkers.push(marker);
     });
 
+    markersRef.current = newMarkers;
     setMarkers(newMarkers);
     console.log(`✅ PeopleMap: Se crearon ${newMarkers.length} marcadores`);
+
+    // Función de limpieza
+    return () => {
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+    };
 
     // Ajustar vista del mapa si hay marcadores
     if (newMarkers.length > 0) {
@@ -246,7 +254,7 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
       map.setCenter({ lat: 40.4168, lng: -3.7038 });
       map.setZoom(7);
     }
-  }, [people, map, infoWindow, onPersonSelect, markers]);
+  }, [people, map, infoWindow, onPersonSelect]);
 
   if (mapsLoading) {
     return (
@@ -270,7 +278,7 @@ const PeopleMap: React.FC<PeopleMapProps> = ({
   }
 
   return (
-    <div ref={mapRef} className={`w-full h-full rounded-lg ${className}`} />
+    <div ref={mapRef} className={`w-full h-full rounded-lg ${className}`} style={{ cursor: 'default' }} />
   );
 };
 

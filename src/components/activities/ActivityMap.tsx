@@ -95,15 +95,10 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
         zoom: 7, // Zoom para ver España sin incluir Marruecos
         center: defaultCenter,
         mapTypeId: window.google.maps.MapTypeId.ROADMAP,
-        restriction: {
-          latLngBounds: {
-            north: 44.0,  // Norte de España
-            south: 35.0,  // Sur de España (excluye Marruecos)
-            west: -10.0,  // Oeste de España
-            east: 5.0     // Este de España
-          },
-          strictBounds: false
-        },
+        draggable: true,
+        scrollwheel: true,
+        disableDoubleClickZoom: false,
+        gestureHandling: 'greedy',
         styles: [
           {
             featureType: 'poi',
@@ -367,7 +362,7 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
       <div 
         ref={mapRef} 
         className="w-full"
-        style={{ minHeight: '600px', height: '600px' }}
+        style={{ minHeight: '600px', height: '600px', cursor: 'default' }}
       />
       
       <div className="p-4 bg-gray-50 border-t border-gray-200">

@@ -1020,3 +1020,16 @@ span.flatpickr-weekday,
 .android .fixed {
   top: calc(env(safe-area-inset-top, 0px) + 1rem);
 }
+
+/* Estilos para Google Maps - cursor normal por defecto */
+.gm-style {
+  cursor: default !important;
+}
+
+.gm-style-cc {
+  cursor: default !important;
+}
+
+.gm-style-iw {
+  cursor: default !important;
+}

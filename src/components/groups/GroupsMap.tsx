@@ -76,15 +76,10 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
       const newMap = new window.google.maps.Map(mapRef.current, {
         zoom: 7, // Zoom para ver España sin incluir Marruecos
         center: defaultCenter,
-        restriction: {
-          latLngBounds: {
-            north: 44.0,  // Norte de España
-            south: 35.0,  // Sur de España (excluye Marruecos)
-            west: -10.0,  // Oeste de España
-            east: 5.0     // Este de España
-          },
-          strictBounds: false
-        },
+        draggable: true,
+        scrollwheel: true,
+        disableDoubleClickZoom: false,
+        gestureHandling: 'greedy',
         styles: [
           {
             featureType: 'poi',
@@ -236,7 +231,7 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
   }
 
   return (
-    <div ref={mapRef} className={`w-full h-96 rounded-lg ${className}`} />
+    <div ref={mapRef} className={`w-full h-96 rounded-lg ${className}`} style={{ cursor: 'default' }} />
   );
 };
 
