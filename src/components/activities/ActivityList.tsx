@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, ArrowLeft } from 'lucide-react';
-import ActivityMap from './ActivityMap';
+import ActivityMap, { type ActivityMapActivity } from './ActivityMap';
 
 interface Activity {
   id: string;
@@ -206,7 +206,7 @@ const ActivityList: React.FC = () => {
   const activityTypes = Array.from(new Set(activities.map(a => a.activity_type))).sort();
   const cities = Array.from(new Set(activities.map(a => a.city))).sort();
 
-  const handleActivitySelect = (activity: Activity) => {
+  const handleActivitySelect = (activity: ActivityMapActivity) => {
     console.log('🔗 Navegando a detalles de actividad:', activity.title, 'ID:', activity.id);
     navigate(`/activities/${activity.id}`);
   };

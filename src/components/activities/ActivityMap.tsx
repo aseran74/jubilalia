@@ -1,8 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 
-// ... (Las interfaces y declaraciones se mantienen igual) ...
+export type ActivityMapActivity = {
+  id: string | number;
+  title: string;
+  city?: string;
+  date: string;
+  time?: string;
+  images?: string[];
+  is_free?: boolean;
+  price?: number;
+  activity_type?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+};
+
+export interface ActivityMapProps {
+  activities: ActivityMapActivity[];
+  onActivitySelect: (activity: ActivityMapActivity) => void;
+  className?: string;
+}
 
 // Estilo minimalista
 const MAP_STYLES = [
