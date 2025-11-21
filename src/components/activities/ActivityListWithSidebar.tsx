@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, Menu, X } from 'lucide-react';
-import ActivityMap from './ActivityMap';
+import ActivityMap, { type ActivityMapActivity } from './ActivityMap';
 import { useAuth } from '../../hooks/useAuth';
 import DashboardSidebar from '../dashboard/DashboardSidebar';
 
@@ -121,7 +121,7 @@ const ActivityListWithSidebar: React.FC = () => {
     activity.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleActivitySelect = (activity: Activity) => {
+  const handleActivitySelect = (activity: ActivityMapActivity) => {
     console.log('🔗 Navegando a detalles de actividad:', activity.title, 'ID:', activity.id);
     navigate(`/activities/${activity.id}`);
   };
