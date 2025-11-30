@@ -381,7 +381,7 @@ const LandingPage: React.FC = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-green-50 max-w-3xl mx-auto mb-12 font-medium leading-relaxed drop-shadow-sm">
-          Haz nuevas amistades, conecta con grupos, comparte vivienda y vive experiencias en buena compañía junto a personas de tu generación.
+          Haz nuevas amistades, conecta con grupos, comparte vivienda y vive experiencias en buena compañía junto a personas senior de tu generación.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-5 justify-center items-center animate-fade-in-up delay-200">
