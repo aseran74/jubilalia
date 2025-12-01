@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { 
   Search, MapPin, Users, Calendar, Tag, Map, List, 
-  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, LayoutDashboard, ArrowLeft
+  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, LayoutDashboard, ArrowLeft, Timer
 } from 'lucide-react';
 import ActivityMap from '../components/activities/ActivityMap';
 import GroupsMap from '../components/groups/GroupsMap';
@@ -152,10 +152,14 @@ const PublicSearch: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(5000);
+  const [minPrice, setMinPrice] = useState<number>(50);
+  const [maxPrice, setMaxPrice] = useState<number>(2500);
   const [showPriceRange, setShowPriceRange] = useState(false);
   const [priceButtonPosition, setPriceButtonPosition] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [minDuration, setMinDuration] = useState<number>(1);
+  const [maxDuration, setMaxDuration] = useState<number>(15);
+  const [showDurationRange, setShowDurationRange] = useState(false);
+  const [durationButtonPosition, setDurationButtonPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   
   // Estados Grupos
   const [groups, setGroups] = useState<Group[]>([]);
@@ -176,6 +180,8 @@ const PublicSearch: React.FC = () => {
   const priceDropdownRef = useRef<HTMLDivElement>(null);
   const priceButtonRef = useRef<HTMLButtonElement>(null);
   const interestsDropdownRef = useRef<HTMLDivElement>(null);
+  const durationDropdownRef = useRef<HTMLDivElement>(null);
+  const durationButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -185,6 +191,9 @@ const PublicSearch: React.FC = () => {
       if (interestsDropdownRef.current && !interestsDropdownRef.current.contains(event.target as Node)) {
         setShowPeopleFilters(false);
       }
+      if (durationDropdownRef.current && !durationDropdownRef.current.contains(event.target as Node)) {
+        setShowDurationRange(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -193,7 +202,7 @@ const PublicSearch: React.FC = () => {
   // --- FETCH LOGIC ---
   useEffect(() => {
     if (activeTab === 'activities') fetchActivities();
-  }, [activeTab, selectedType, selectedCity, priceFilter, minPrice, maxPrice]);
+  }, [activeTab, selectedType, selectedCity, priceFilter, minPrice, maxPrice, minDuration, maxDuration]);
 
   useEffect(() => {
     if (activeTab === 'groups') fetchGroups();
@@ -213,16 +222,28 @@ const PublicSearch: React.FC = () => {
       if (selectedType) query = query.eq('activity_type', selectedType);
       if (selectedCity) query = query.eq('city', selectedCity);
 
-      if (priceFilter === 'free') {
-        query = query.eq('is_free', true);
-      } else if (priceFilter === 'paid') {
-        query = query.eq('is_free', false);
-        if (minPrice > 0) query = query.gte('price', minPrice);
-        if (maxPrice > 0 && maxPrice < 5000) query = query.lte('price', maxPrice);
-      } else if (priceFilter === 'all') {
-        // Si el usuario ha tocado el rango, aplicarlo incluso en 'all'
-        if (minPrice > 0 || maxPrice < 5000) {
-             query = query.or(`is_free.eq.true,and(is_free.eq.false,price.gte.${minPrice},price.lte.${maxPrice})`);
+      // Filtro por precio - diferente según si es viajes o no
+      const isTravel = selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje');
+      
+      if (isTravel) {
+        // Para viajes: filtro por rango de precio y duración
+        if (minPrice > 50) query = query.gte('price', minPrice);
+        if (maxPrice > 0 && maxPrice < 2500) query = query.lte('price', maxPrice);
+        if (minDuration > 1) query = query.gte('duration', minDuration);
+        if (maxDuration > 0 && maxDuration < 15) query = query.lte('duration', maxDuration);
+      } else {
+        // Para no-viajes: filtro por gratis/pago y rango de precio
+        if (priceFilter === 'free') {
+          query = query.eq('is_free', true);
+        } else if (priceFilter === 'paid') {
+          query = query.eq('is_free', false);
+          if (minPrice > 50) query = query.gte('price', minPrice);
+          if (maxPrice > 0 && maxPrice < 2500) query = query.lte('price', maxPrice);
+        } else if (priceFilter === 'all') {
+          // Si el usuario ha tocado el rango, aplicarlo incluso en 'all'
+          if (minPrice > 50 || maxPrice < 2500) {
+               query = query.or(`is_free.eq.true,and(is_free.eq.false,price.gte.${minPrice},price.lte.${maxPrice})`);
+          }
         }
       }
 
@@ -335,7 +356,17 @@ const PublicSearch: React.FC = () => {
     finally { setLoadingPeople(false); }
   };
 
-  const filteredActivities = searchTerm ? activities.filter(a => a.title?.toLowerCase().includes(searchTerm.toLowerCase()) || a.city?.toLowerCase().includes(searchTerm.toLowerCase())) : activities;
+  // Filtrar actividades por duración si es viaje
+  let filteredActivities = searchTerm ? activities.filter(a => a.title?.toLowerCase().includes(searchTerm.toLowerCase()) || a.city?.toLowerCase().includes(searchTerm.toLowerCase())) : activities;
+  
+  // Aplicar filtro de duración para viajes (filtrado en cliente ya que la query puede no incluir todas las actividades)
+  const isTravel = selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje');
+  if (isTravel && (minDuration > 1 || maxDuration < 15)) {
+    filteredActivities = filteredActivities.filter(activity => {
+      const duration = activity.duration || 0;
+      return duration >= minDuration && duration <= maxDuration;
+    });
+  }
   const filteredGroups = searchTerm ? groups.filter(g => g.name?.toLowerCase().includes(searchTerm.toLowerCase()) || g.city?.toLowerCase().includes(searchTerm.toLowerCase())) : groups;
   const filteredPeople = searchTerm ? people.filter(p => p.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || p.city?.toLowerCase().includes(searchTerm.toLowerCase())) : people;
 
@@ -431,14 +462,17 @@ const PublicSearch: React.FC = () => {
                       options={activityCities.map(c => ({value: c, label: c}))}
                       placeholder="Ciudad" icon={MapPin}
                     />
-                    <CustomSelect 
-                      value={priceFilter} onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
-                      options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
-                      placeholder="Coste" icon={Euro}
-                    />
+                    {/* Selector de Coste solo para no-viajes */}
+                    {!(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                      <CustomSelect 
+                        value={priceFilter} onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
+                        options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
+                        placeholder="Coste" icon={Euro}
+                      />
+                    )}
 
-                    {/* FILTRO RANGO DE PRECIO */}
-                    {(priceFilter === 'paid' || priceFilter === 'all') && (
+                    {/* FILTRO PRECIO PARA VIAJES */}
+                    {(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
                       <div className="relative z-50 shrink-0" ref={priceDropdownRef}>
                         <button
                           ref={priceButtonRef}
@@ -457,14 +491,14 @@ const PublicSearch: React.FC = () => {
                           type="button"
                           className={`
                             flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap
-                            ${(showPriceRange || minPrice > 0 || maxPrice < 5000)
+                            ${(showPriceRange || minPrice > 0 || maxPrice < 2500)
                               ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
                               : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
                           `}
                         >
-                          <Euro className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${(showPriceRange || minPrice > 0 || maxPrice < 5000) ? 'text-green-600' : 'text-gray-500'}`} />
+                          <Euro className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${(showPriceRange || minPrice > 0 || maxPrice < 2500) ? 'text-green-600' : 'text-gray-500'}`} />
                           <span>Rango Precio</span>
-                          <ChevronDown className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ml-0.5 sm:ml-1 ${(showPriceRange || minPrice > 0 || maxPrice < 5000) ? 'text-green-600' : 'text-gray-400'}`} />
+                          <ChevronDown className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ml-0.5 sm:ml-1 ${(showPriceRange || minPrice > 0 || maxPrice < 2500) ? 'text-green-600' : 'text-gray-400'}`} />
                         </button>
                         
                         {showPriceRange && (
@@ -486,7 +520,7 @@ const PublicSearch: React.FC = () => {
                                      <span>Min: {minPrice}€</span>
                                   </div>
                                   <input 
-                                    type="range" min="0" max="5000" step="50" 
+                                    type="range" min="0" max="2500" step="50" 
                                     value={minPrice} 
                                     onChange={(e) => {
                                       const val = Number(e.target.value);
@@ -500,7 +534,7 @@ const PublicSearch: React.FC = () => {
                                      <span>Max: {maxPrice}€</span>
                                   </div>
                                   <input 
-                                    type="range" min="0" max="5000" step="50" 
+                                    type="range" min="0" max="2500" step="50" 
                                     value={maxPrice} 
                                     onChange={(e) => {
                                       const val = Number(e.target.value);
@@ -513,7 +547,195 @@ const PublicSearch: React.FC = () => {
                               
                               <div className="flex gap-2 pt-2">
                                 <button 
-                                  onClick={() => { setMinPrice(0); setMaxPrice(5000); }}
+                                  onClick={() => { setMinPrice(0); setMaxPrice(2500); }}
+                                  className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                  Resetear
+                                </button>
+                                <button 
+                                  onClick={() => setShowPriceRange(false)}
+                                  className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium text-xs sm:text-sm hover:bg-green-700"
+                                >
+                                  Aplicar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* FILTRO DURACIÓN (solo para Viajes) */}
+                    {(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                      <div className="relative z-50 shrink-0" ref={durationDropdownRef}>
+                        <button
+                          ref={durationButtonRef}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (durationButtonRef.current) {
+                              const rect = durationButtonRef.current.getBoundingClientRect();
+                              setDurationButtonPosition({
+                                top: rect.bottom + window.scrollY,
+                                left: rect.left + window.scrollX,
+                                width: rect.width
+                              });
+                            }
+                            setShowDurationRange(!showDurationRange);
+                          }}
+                          type="button"
+                          className={`
+                            flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap
+                            ${(showDurationRange || minDuration > 1 || maxDuration < 15)
+                              ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
+                          `}
+                        >
+                          <Timer className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${(showDurationRange || minDuration > 1 || maxDuration < 15) ? 'text-green-600' : 'text-gray-500'}`} />
+                          <span>Duración (días)</span>
+                          <ChevronDown className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ml-0.5 sm:ml-1 ${(showDurationRange || minDuration > 1 || maxDuration < 15) ? 'text-green-600' : 'text-gray-400'}`} />
+                        </button>
+                        
+                        {showDurationRange && (
+                          <div 
+                            className="fixed sm:absolute sm:top-full sm:left-0 sm:mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-4 sm:p-5 z-[60] animate-in fade-in zoom-in-95 duration-100"
+                            style={typeof window !== 'undefined' && window.innerWidth < 640 && durationButtonPosition ? {
+                              top: `${Math.min(durationButtonPosition.top + 8, window.innerHeight - 300)}px`,
+                              left: `${Math.max(16, Math.min(durationButtonPosition.left, window.innerWidth - (window.innerWidth * 0.9) - 16))}px`,
+                            } : undefined}
+                          >
+                            <div className="flex justify-between items-center mb-3 sm:mb-4">
+                                <h3 className="font-semibold text-sm sm:text-base text-gray-900">Duración del Viaje (días)</h3>
+                            </div>
+                            <div className="space-y-4 sm:space-y-6">
+                              <div className="space-y-3 sm:space-y-4">
+                                {/* Sliders */}
+                                <div>
+                                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                     <span>Min: {minDuration} días</span>
+                                  </div>
+                                  <input 
+                                    type="range" min="1" max="15" step="1" 
+                                    value={minDuration} 
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value);
+                                      if(val <= maxDuration) setMinDuration(val);
+                                    }} 
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                     <span>Max: {maxDuration} días</span>
+                                  </div>
+                                  <input 
+                                    type="range" min="1" max="15" step="1" 
+                                    value={maxDuration} 
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value);
+                                      if(val >= minDuration) setMaxDuration(val);
+                                    }} 
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="flex gap-2 pt-2">
+                                <button 
+                                  onClick={() => { setMinDuration(1); setMaxDuration(15); }}
+                                  className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                  Resetear
+                                </button>
+                                <button 
+                                  onClick={() => setShowDurationRange(false)}
+                                  className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium text-xs sm:text-sm hover:bg-green-700"
+                                >
+                                  Aplicar
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* FILTRO RANGO DE PRECIO */}
+                    {(priceFilter === 'paid' || priceFilter === 'all') && !(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                      <div className="relative z-50 shrink-0" ref={priceDropdownRef}>
+                        <button
+                          ref={priceButtonRef}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (priceButtonRef.current) {
+                              const rect = priceButtonRef.current.getBoundingClientRect();
+                              setPriceButtonPosition({
+                                top: rect.bottom + window.scrollY,
+                                left: rect.left + window.scrollX,
+                                width: rect.width
+                              });
+                            }
+                            setShowPriceRange(!showPriceRange);
+                          }}
+                          type="button"
+                          className={`
+                            flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 border whitespace-nowrap
+                            ${(showPriceRange || minPrice > 0 || maxPrice < 2500)
+                              ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
+                          `}
+                        >
+                          <Euro className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${(showPriceRange || minPrice > 0 || maxPrice < 2500) ? 'text-green-600' : 'text-gray-500'}`} />
+                          <span>Rango Precio</span>
+                          <ChevronDown className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ml-0.5 sm:ml-1 ${(showPriceRange || minPrice > 0 || maxPrice < 2500) ? 'text-green-600' : 'text-gray-400'}`} />
+                        </button>
+                        
+                        {showPriceRange && (
+                          <div 
+                            className="fixed sm:absolute sm:top-full sm:left-0 sm:mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-4 sm:p-5 z-[60] animate-in fade-in zoom-in-95 duration-100"
+                            style={typeof window !== 'undefined' && window.innerWidth < 640 && priceButtonPosition ? {
+                              top: `${Math.min(priceButtonPosition.top + 8, window.innerHeight - 300)}px`,
+                              left: `${Math.max(16, Math.min(priceButtonPosition.left, window.innerWidth - (window.innerWidth * 0.9) - 16))}px`,
+                            } : undefined}
+                          >
+                            <div className="flex justify-between items-center mb-3 sm:mb-4">
+                                <h3 className="font-semibold text-sm sm:text-base text-gray-900">Rango de Precio</h3>
+                            </div>
+                            <div className="space-y-4 sm:space-y-6">
+                              <div className="space-y-3 sm:space-y-4">
+                                {/* Sliders */}
+                                <div>
+                                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                     <span>Min: {minPrice}€</span>
+                                  </div>
+                                  <input 
+                                    type="range" min="0" max="2500" step="50" 
+                                    value={minPrice} 
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value);
+                                      if(val <= maxPrice) setMinPrice(val);
+                                    }} 
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                  />
+                                </div>
+                                <div>
+                                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                     <span>Max: {maxPrice}€</span>
+                                  </div>
+                                  <input 
+                                    type="range" min="0" max="2500" step="50" 
+                                    value={maxPrice} 
+                                    onChange={(e) => {
+                                      const val = Number(e.target.value);
+                                      if(val >= minPrice) setMaxPrice(val);
+                                    }} 
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                  />
+                                </div>
+                              </div>
+                              
+                              <div className="flex gap-2 pt-2">
+                                <button 
+                                  onClick={() => { setMinPrice(0); setMaxPrice(2500); }}
                                   className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50"
                                 >
                                   Resetear
@@ -666,12 +888,58 @@ const PublicSearch: React.FC = () => {
                     options={activityCities.map(c => ({value: c, label: c}))}
                     placeholder="Ciudad" icon={MapPin}
                   />
-                  <CustomSelect 
-                    value={priceFilter} onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
-                    options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
-                    placeholder="Coste" icon={Euro}
-                  />
-                  {(priceFilter === 'paid' || priceFilter === 'all') && (
+                  {/* Selector de Coste solo para no-viajes */}
+                  {!(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                    <CustomSelect 
+                      value={priceFilter} onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
+                      options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
+                      placeholder="Coste" icon={Euro}
+                    />
+                  )}
+                  {/* Filtro de duración para viajes */}
+                  {(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                    <div className="pt-2 border-t border-gray-200">
+                      <p className="text-xs font-medium text-gray-700 mb-2">Duración del Viaje (días)</p>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Min: {minDuration} días</span>
+                          </div>
+                          <input 
+                            type="range" min="1" max="15" step="1" 
+                            value={minDuration} 
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              if(val <= maxDuration) setMinDuration(val);
+                            }} 
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Max: {maxDuration} días</span>
+                          </div>
+                          <input 
+                            type="range" min="1" max="15" step="1" 
+                            value={maxDuration} 
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              if(val >= minDuration) setMaxDuration(val);
+                            }} 
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => { setMinDuration(1); setMaxDuration(15); }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          Resetear
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {(priceFilter === 'paid' || priceFilter === 'all') && !(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
                     <div className="pt-2 border-t border-gray-200">
                       <p className="text-xs font-medium text-gray-700 mb-2">Rango de Precio</p>
                       <div className="space-y-3">
@@ -680,7 +948,7 @@ const PublicSearch: React.FC = () => {
                             <span>Min: {minPrice}€</span>
                           </div>
                           <input 
-                            type="range" min="0" max="5000" step="50" 
+                            type="range" min="0" max="2500" step="50" 
                             value={minPrice} 
                             onChange={(e) => {
                               const val = Number(e.target.value);
@@ -694,7 +962,7 @@ const PublicSearch: React.FC = () => {
                             <span>Max: {maxPrice}€</span>
                           </div>
                           <input 
-                            type="range" min="0" max="5000" step="50" 
+                            type="range" min="0" max="2500" step="50" 
                             value={maxPrice} 
                             onChange={(e) => {
                               const val = Number(e.target.value);
@@ -704,7 +972,50 @@ const PublicSearch: React.FC = () => {
                           />
                         </div>
                         <button 
-                          onClick={() => { setMinPrice(0); setMaxPrice(5000); }}
+                          onClick={() => { setMinPrice(0); setMaxPrice(2500); }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50"
+                        >
+                          Resetear
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Filtro de precio para viajes */}
+                  {(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                    <div className="pt-2 border-t border-gray-200">
+                      <p className="text-xs font-medium text-gray-700 mb-2">Rango de Precio</p>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Min: {minPrice}€</span>
+                          </div>
+                          <input 
+                            type="range" min="50" max="2500" step="50" 
+                            value={minPrice} 
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              if(val <= maxPrice) setMinPrice(val);
+                            }} 
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Max: {maxPrice}€</span>
+                          </div>
+                          <input 
+                            type="range" min="50" max="2500" step="50" 
+                            value={maxPrice} 
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              if(val >= minPrice) setMaxPrice(val);
+                            }} 
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => { setMinPrice(50); setMaxPrice(2500); }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-50"
                         >
                           Resetear
@@ -891,15 +1202,94 @@ const PublicSearch: React.FC = () => {
                       icon={MapPin}
                     />
                     
-                    <CustomSelect 
-                      value={priceFilter} 
-                      onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
-                      options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
-                      placeholder="Coste" 
-                      icon={Euro}
-                    />
+                    {/* Selector de Coste solo para no-viajes */}
+                    {!(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                      <CustomSelect 
+                        value={priceFilter} 
+                        onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
+                        options={[{value: 'all', label: 'Todos'}, {value: 'free', label: 'Gratis'}, {value: 'paid', label: 'Pago'}]}
+                        placeholder="Coste" 
+                        icon={Euro}
+                      />
+                    )}
                     
-                    {(priceFilter === 'paid' || priceFilter === 'all') && (
+                    {/* Filtro de duración para viajes (modo mapa escritorio) */}
+                    {(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                      <div className="relative" ref={durationDropdownRef}>
+                        <button
+                          ref={durationButtonRef}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (durationButtonRef.current) {
+                              const rect = durationButtonRef.current.getBoundingClientRect();
+                              setDurationButtonPosition({
+                                top: rect.bottom + window.scrollY,
+                                left: rect.left + window.scrollX,
+                                width: rect.width
+                              });
+                            }
+                            setShowDurationRange(!showDurationRange);
+                          }}
+                          type="button"
+                          className={`
+                            flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border whitespace-nowrap
+                            ${(showDurationRange || minDuration > 1 || maxDuration < 15)
+                              ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
+                          `}
+                        >
+                          <Timer className={`w-4 h-4 ${(showDurationRange || minDuration > 1 || maxDuration < 15) ? 'text-green-600' : 'text-gray-500'}`} />
+                          <span>Duración (días)</span>
+                          <ChevronDown className={`w-3 h-3 ml-1 ${(showDurationRange || minDuration > 1 || maxDuration < 15) ? 'text-green-600' : 'text-gray-400'}`} />
+                        </button>
+                        
+                        {showDurationRange && (
+                          <div 
+                            className="absolute top-full left-0 mt-2 w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-5 z-50"
+                          >
+                            <p className="text-sm font-medium text-gray-700 mb-3">Duración del Viaje (días)</p>
+                            <div className="space-y-4">
+                              <div>
+                                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                  <span>Mínimo: {minDuration} días</span>
+                                </div>
+                                <input 
+                                  type="range" min="1" max="15" step="1" 
+                                  value={minDuration} 
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if(val <= maxDuration) setMinDuration(val);
+                                  }} 
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                />
+                              </div>
+                              <div>
+                                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                  <span>Máximo: {maxDuration} días</span>
+                                </div>
+                                <input 
+                                  type="range" min="1" max="15" step="1" 
+                                  value={maxDuration} 
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if(val >= minDuration) setMaxDuration(val);
+                                  }} 
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                />
+                              </div>
+                              <button 
+                                onClick={() => { setMinDuration(1); setMaxDuration(15); }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                              >
+                                Resetear
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {(priceFilter === 'paid' || priceFilter === 'all') && !(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
                       <div className="relative" ref={priceDropdownRef}>
                         <button
                           ref={priceButtonRef}
@@ -974,14 +1364,92 @@ const PublicSearch: React.FC = () => {
                       </div>
                     )}
                     
-                    {(selectedType || selectedCity || priceFilter !== 'all' || minPrice > 0 || maxPrice < 5000) && (
+                    {/* Filtro de precio para viajes (modo mapa escritorio) */}
+                    {(selectedType?.toLowerCase() === 'viajes' || selectedType?.toLowerCase().includes('viaje')) && (
+                      <div className="relative" ref={priceDropdownRef}>
+                        <button
+                          ref={priceButtonRef}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (priceButtonRef.current) {
+                              const rect = priceButtonRef.current.getBoundingClientRect();
+                              setPriceButtonPosition({
+                                top: rect.bottom + window.scrollY,
+                                left: rect.left + window.scrollX,
+                                width: rect.width
+                              });
+                            }
+                            setShowPriceRange(!showPriceRange);
+                          }}
+                          type="button"
+                          className={`
+                            flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border whitespace-nowrap
+                            ${(showPriceRange || minPrice > 50 || maxPrice < 2500)
+                              ? 'bg-green-50 border-green-200 text-green-700 ring-1 ring-green-500/20' 
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300'}
+                          `}
+                        >
+                          <Euro className={`w-4 h-4 ${(showPriceRange || minPrice > 50 || maxPrice < 2500) ? 'text-green-600' : 'text-gray-500'}`} />
+                          <span>Rango Precio</span>
+                          <ChevronDown className={`w-3 h-3 ml-1 ${(showPriceRange || minPrice > 50 || maxPrice < 2500) ? 'text-green-600' : 'text-gray-400'}`} />
+                        </button>
+                        
+                        {showPriceRange && (
+                          <div 
+                            className="absolute top-full left-0 mt-2 w-80 max-w-sm bg-white rounded-xl shadow-xl border border-gray-100 p-5 z-50"
+                          >
+                            <p className="text-sm font-medium text-gray-700 mb-3">Rango de Precio</p>
+                            <div className="space-y-4">
+                              <div>
+                                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                  <span>Mínimo: {minPrice}€</span>
+                                </div>
+                                <input 
+                                  type="range" min="50" max="2500" step="50" 
+                                  value={minPrice} 
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if(val <= maxPrice) setMinPrice(val);
+                                  }} 
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                />
+                              </div>
+                              <div>
+                                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                  <span>Máximo: {maxPrice}€</span>
+                                </div>
+                                <input 
+                                  type="range" min="50" max="2500" step="50" 
+                                  value={maxPrice} 
+                                  onChange={(e) => {
+                                    const val = Number(e.target.value);
+                                    if(val >= minPrice) setMaxPrice(val);
+                                  }} 
+                                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                                />
+                              </div>
+                              <button 
+                                onClick={() => { setMinPrice(50); setMaxPrice(2500); }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                              >
+                                Resetear
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {(selectedType || selectedCity || priceFilter !== 'all' || minPrice > 50 || maxPrice < 2500 || minDuration > 1 || maxDuration < 15) && (
                       <button
                         onClick={() => {
                           setSelectedType('');
                           setSelectedCity('');
                           setPriceFilter('all');
-                          setMinPrice(0);
-                          setMaxPrice(5000);
+                          setMinPrice(50);
+                          setMaxPrice(2500);
+                          setMinDuration(1);
+                          setMaxDuration(15);
                         }}
                         className="px-4 py-2 text-sm text-red-600 hover:text-red-700 font-medium hover:bg-red-50 rounded-lg transition-colors"
                       >
