@@ -1,8 +1,42 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useGoogleMaps } from '../../hooks/useGoogleMaps';
 
-// ... (Las interfaces y declaraciones se mantienen igual) ...
+interface Activity {
+  id: string;
+  title: string;
+  description: string;
+  activity_type: string;
+  date: string;
+  time: string;
+  duration: number;
+  location: string;
+  city: string;
+  max_participants: number;
+  current_participants: number;
+  price: number;
+  is_free: boolean;
+  images: string[];
+  difficulty_level?: string;
+  tags?: string[];
+  latitude?: number;
+  longitude?: number;
+  owner: {
+    full_name: string;
+    avatar_url?: string;
+  };
+}
+
+type ActivityMapActivity = Omit<Activity, 'difficulty_level' | 'tags'> & {
+  difficulty_level?: string;
+  tags?: string[];
+};
+
+interface ActivityMapProps {
+  activities: ActivityMapActivity[];
+  onActivitySelect: (activity: ActivityMapActivity | Activity) => void;
+  className?: string;
+}
 
 // Estilo minimalista
 const MAP_STYLES = [
@@ -65,7 +99,7 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
     markers.forEach(marker => marker.setMap(null));
     const newMarkers: google.maps.Marker[] = [];
     
-    activities.forEach((activity) => {
+    activities.forEach((activity: ActivityMapActivity) => {
         // (Lógica de coordenadas igual que antes...)
         let lat: number | null = activity.latitude ?? null;
         let lng: number | null = activity.longitude ?? null;

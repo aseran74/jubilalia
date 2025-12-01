@@ -9,7 +9,9 @@ import {
   BriefcaseIcon,
   TagIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  XMarkIcon,
+  PhotoIcon
 } from '@heroicons/react/24/outline';
 
 interface ProfileFormData {
@@ -48,6 +50,7 @@ const ProfileForm: React.FC = () => {
     interests: []
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profilePhotos, setProfilePhotos] = useState<Array<{ id: string; image_url: string; image_order: number }>>([]);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -72,9 +75,90 @@ const ProfileForm: React.FC = () => {
       if (profile.avatar_url) {
         setAvatarUrl(profile.avatar_url);
       }
+      fetchProfilePhotos();
       console.log('ProfileForm - formData inicializado:', formData);
     }
   }, [profile]);
+
+  const fetchProfilePhotos = async () => {
+    if (!profile?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profile_photos')
+        .select('*')
+        .eq('profile_id', profile.id)
+        .order('image_order', { ascending: true });
+
+      if (error) throw error;
+      setProfilePhotos(data || []);
+    } catch (error) {
+      console.error('Error fetching profile photos:', error);
+    }
+  };
+
+  const handleProfilePhotosUpload = async (urls: string[]) => {
+    if (!profile?.id || urls.length === 0) return;
+
+    try {
+      const currentCount = profilePhotos.length;
+      const remainingSlots = 20 - currentCount;
+      
+      if (remainingSlots <= 0) {
+        setError('Ya has alcanzado el máximo de 20 fotos. Elimina alguna antes de agregar más.');
+        return;
+      }
+
+      const photosToAdd = urls.slice(0, remainingSlots);
+      const photosData = photosToAdd.map((url, index) => ({
+        profile_id: profile.id,
+        image_url: url,
+        image_order: currentCount + index + 1
+      }));
+
+      const { error } = await supabase
+        .from('profile_photos')
+        .insert(photosData);
+
+      if (error) throw error;
+
+      await fetchProfilePhotos();
+      setSuccessMessage(`${photosToAdd.length} foto(s) agregada(s) exitosamente`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error: any) {
+      console.error('Error uploading profile photos:', error);
+      setError(error.message || 'Error al subir las fotos');
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!profile?.id) return;
+
+    try {
+      const { error } = await supabase
+        .from('profile_photos')
+        .delete()
+        .eq('id', photoId);
+
+      if (error) throw error;
+
+      // Reordenar las fotos restantes
+      const remainingPhotos = profilePhotos.filter(p => p.id !== photoId);
+      for (let i = 0; i < remainingPhotos.length; i++) {
+        await supabase
+          .from('profile_photos')
+          .update({ image_order: i + 1 })
+          .eq('id', remainingPhotos[i].id);
+      }
+
+      await fetchProfilePhotos();
+      setSuccessMessage('Foto eliminada exitosamente');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error: any) {
+      console.error('Error deleting photo:', error);
+      setError(error.message || 'Error al eliminar la foto');
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -401,6 +485,57 @@ const ProfileForm: React.FC = () => {
               />
             </div>
           </div>
+        </div>
+
+        {/* Profile Photos */}
+        <h3 className="text-xl font-semibold text-gray-800 mt-8 mb-4 flex items-center">
+          <PhotoIcon className="w-6 h-6 mr-3 text-blue-500" /> Fotos del Perfil
+        </h3>
+        <div className="mb-6">
+          <p className="text-sm text-gray-600 mb-4">
+            Puedes subir hasta 20 fotos para tu perfil. Estas fotos aparecerán en tu galería de perfil.
+          </p>
+          
+          {/* Fotos existentes */}
+          {profilePhotos.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+              {profilePhotos.map((photo) => (
+                <div key={photo.id} className="relative group">
+                  <img
+                    src={photo.image_url}
+                    alt={`Foto ${photo.image_order}`}
+                    className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleDeletePhoto(photo.id)}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                  >
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Subir nuevas fotos */}
+          {profilePhotos.length < 20 && (
+            <ImageUpload
+              bucketName="avatars"
+              onImagesUploaded={handleProfilePhotosUpload}
+              maxImages={20}
+              currentImageCount={profilePhotos.length}
+              className="w-full"
+            />
+          )}
+
+          {profilePhotos.length >= 20 && (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                Has alcanzado el límite de 20 fotos. Elimina alguna foto para agregar nuevas.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Interests */}

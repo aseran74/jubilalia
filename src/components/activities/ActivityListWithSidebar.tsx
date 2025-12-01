@@ -121,7 +121,7 @@ const ActivityListWithSidebar: React.FC = () => {
     activity.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleActivitySelect = (activity: Activity) => {
+  const handleActivitySelect = (activity: Activity | { id: string; title: string; [key: string]: any }) => {
     console.log('🔗 Navegando a detalles de actividad:', activity.title, 'ID:', activity.id);
     navigate(`/activities/${activity.id}`);
   };

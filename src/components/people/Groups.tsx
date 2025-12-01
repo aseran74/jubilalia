@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import GroupPosts from '../groups/GroupPosts';
@@ -42,6 +42,7 @@ interface Group {
 
 const Groups: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { profile, isAdmin } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
@@ -59,6 +60,15 @@ const Groups: React.FC = () => {
     city: '',
     isPublic: true
   });
+
+  // Detectar si estamos en la ruta del mapa
+  useEffect(() => {
+    if (location.pathname === '/dashboard/groups/map') {
+      setViewMode('map');
+    } else {
+      setViewMode('list');
+    }
+  }, [location.pathname]);
 
   // Aplicar filtros
   const applyFilters = () => {

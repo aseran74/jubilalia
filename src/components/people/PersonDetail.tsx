@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Briefcase } from 'lucide-react';
+import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Briefcase, X, ChevronLeft, ChevronRight, Heart, Music, Camera, BookOpen, Gamepad2, Dumbbell, UtensilsCrossed, Film, Plane, Car, Coffee, Palette, TreePine, Waves, Mountain } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
+import UserContent from '../profile/UserContent';
 
 interface Person {
   id: string;
@@ -30,10 +31,15 @@ const PersonDetail: React.FC = () => {
   const navigate = useNavigate();
   const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [allImages, setAllImages] = useState<string[]>([]);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (id) {
       fetchPerson();
+      fetchInterestsAndGallery();
     }
   }, [id]);
 
@@ -53,6 +59,109 @@ const PersonDetail: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchInterestsAndGallery = async () => {
+    if (!id) return;
+    
+    try {
+      // Obtener intereses
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('interests')
+        .eq('id', id)
+        .single();
+      
+      if (profileData?.interests) {
+        setInterests(profileData.interests);
+      }
+
+      // Obtener todas las imágenes del usuario
+      const images: string[] = [];
+
+      // Imágenes de posts
+      const { data: postsData } = await supabase
+        .from('posts')
+        .select('featured_image_url')
+        .eq('profile_id', id)
+        .eq('is_published', true)
+        .not('featured_image_url', 'is', null);
+      
+      if (postsData) {
+        postsData.forEach(post => {
+          if (post.featured_image_url) images.push(post.featured_image_url);
+        });
+      }
+
+      // Imágenes de actividades
+      const { data: activitiesData } = await supabase
+        .from('activities')
+        .select('id')
+        .eq('profile_id', id)
+        .eq('is_active', true);
+      
+      if (activitiesData && activitiesData.length > 0) {
+        const activityIds = activitiesData.map(a => a.id);
+        const { data: activityImages } = await supabase
+          .from('activity_images')
+          .select('image_url')
+          .in('activity_id', activityIds)
+          .order('image_order', { ascending: true });
+        
+        if (activityImages) {
+          activityImages.forEach(img => images.push(img.image_url));
+        }
+      }
+
+      // Imágenes de propiedades
+      const { data: propertiesData } = await supabase
+        .from('property_listings')
+        .select('id')
+        .eq('profile_id', id)
+        .eq('is_available', true);
+      
+      if (propertiesData && propertiesData.length > 0) {
+        const propertyIds = propertiesData.map(p => p.id);
+        const { data: propertyImages } = await supabase
+          .from('property_images')
+          .select('image_url')
+          .in('listing_id', propertyIds)
+          .order('image_order', { ascending: true });
+        
+        if (propertyImages) {
+          propertyImages.forEach(img => images.push(img.image_url));
+        }
+      }
+
+      // Imágenes del perfil (profile_photos)
+      const { data: profilePhotosData } = await supabase
+        .from('profile_photos')
+        .select('image_url')
+        .eq('profile_id', id)
+        .order('image_order', { ascending: true });
+      
+      if (profilePhotosData) {
+        profilePhotosData.forEach(photo => images.push(photo.image_url));
+      }
+
+      // Limitar a 20 imágenes
+      setAllImages(images.slice(0, 20));
+    } catch (error) {
+      console.error('Error fetching interests and gallery:', error);
+    }
+  };
+
+  const openGallery = (index: number) => {
+    setCurrentImageIndex(index);
+    setGalleryOpen(true);
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
   if (loading) {
@@ -104,6 +213,66 @@ const PersonDetail: React.FC = () => {
     window.location.href = `/dashboard/messages?user=${person.id}`;
   };
 
+  // Función para obtener el icono según el interés
+  const getInterestIcon = (interest: string) => {
+    const interestLower = interest.toLowerCase();
+    
+    // Mapeo de intereses comunes a iconos
+    const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+      'música': Music,
+      'musica': Music,
+      'fotografía': Camera,
+      'fotografia': Camera,
+      'foto': Camera,
+      'lectura': BookOpen,
+      'libros': BookOpen,
+      'leer': BookOpen,
+      'videojuegos': Gamepad2,
+      'gaming': Gamepad2,
+      'juegos': Gamepad2,
+      'deporte': Dumbbell,
+      'deportes': Dumbbell,
+      'ejercicio': Dumbbell,
+      'gimnasio': Dumbbell,
+      'cocina': UtensilsCrossed,
+      'gastronomía': UtensilsCrossed,
+      'gastronomia': UtensilsCrossed,
+      'cine': Film,
+      'películas': Film,
+      'peliculas': Film,
+      'viajes': Plane,
+      'viajar': Plane,
+      'turismo': Plane,
+      'coche': Car,
+      'coches': Car,
+      'automóviles': Car,
+      'automoviles': Car,
+      'café': Coffee,
+      'cafe': Coffee,
+      'arte': Palette,
+      'pintura': Palette,
+      'dibujo': Palette,
+      'naturaleza': TreePine,
+      'senderismo': Mountain,
+      'montaña': Mountain,
+      'montana': Mountain,
+      'playa': Waves,
+      'mar': Waves,
+      'amor': Heart,
+      'amistad': Heart,
+    };
+
+    // Buscar coincidencia exacta o parcial
+    for (const [key, Icon] of Object.entries(iconMap)) {
+      if (interestLower.includes(key) || key.includes(interestLower)) {
+        return Icon;
+      }
+    }
+
+    // Icono por defecto
+    return Heart;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -136,13 +305,59 @@ const PersonDetail: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="text-white">
+              <div className="text-white flex-1">
                 <h1 className="text-3xl font-bold mb-2">{person.full_name}</h1>
                 {age && <p className="text-xl opacity-90">{age} años</p>}
                 {person.gender && (
-                  <span className="inline-block mt-2 px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm">
+                  <span className="inline-block mt-2 px-3 py-1 bg-white bg-opacity-20 rounded-full text-sm text-black font-medium">
                     {person.gender === 'male' ? 'Hombre' : person.gender === 'female' ? 'Mujer' : 'Otro'}
                   </span>
+                )}
+                
+                {/* Intereses */}
+                {interests.length > 0 && (
+                  <div className="mt-4">
+                    <div className="flex flex-wrap gap-3">
+                      {interests.map((interest, index) => {
+                        const InterestIcon = getInterestIcon(interest);
+                        return (
+                          <span
+                            key={index}
+                            className="inline-flex items-center gap-2 text-white text-sm font-medium"
+                          >
+                            <InterestIcon className="w-4 h-4" />
+                            {interest}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Galería */}
+                {allImages.length > 0 && (
+                  <div className="mt-4">
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                      {allImages.slice(0, 6).map((image, index) => (
+                        <div
+                          key={index}
+                          onClick={() => openGallery(index)}
+                          className="relative w-16 h-16 rounded-lg overflow-hidden cursor-pointer group flex-shrink-0 border-2 border-white border-opacity-30 hover:border-opacity-100 transition-all"
+                        >
+                          <img
+                            src={image}
+                            alt={`Imagen ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          {allImages.length > 6 && index === 5 && (
+                            <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center text-white text-xs font-bold">
+                              +{allImages.length - 6}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -226,20 +441,6 @@ const PersonDetail: React.FC = () => {
               </div>
             )}
 
-            {/* Intereses */}
-            {person.interests && person.interests.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Intereses</h3>
-                <div className="flex flex-wrap gap-2">
-                  {person.interests.map(interest => (
-                    <span key={interest} className="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                      {interest}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Opciones de contacto */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Contactar</h3>
@@ -280,7 +481,65 @@ const PersonDetail: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Contenido del usuario: Posts, Actividades, Propiedades */}
+        {id && (
+          <div className="mt-8">
+            <UserContent userId={id} />
+          </div>
+        )}
       </div>
+
+      {/* Modal de Galería */}
+      {galleryOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
+          onClick={() => setGalleryOpen(false)}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setGalleryOpen(false);
+            }}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+          >
+            <X className="w-8 h-8" />
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prevImage();
+            }}
+            className="absolute left-4 text-white hover:text-gray-300 z-10"
+          >
+            <ChevronLeft className="w-10 h-10" />
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              nextImage();
+            }}
+            className="absolute right-4 text-white hover:text-gray-300 z-10"
+          >
+            <ChevronRight className="w-10 h-10" />
+          </button>
+
+          <div className="max-w-7xl mx-auto px-4" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={allImages[currentImageIndex]}
+              alt={`Imagen ${currentImageIndex + 1}`}
+              className="max-h-[90vh] max-w-full object-contain"
+            />
+            <div className="text-center text-white mt-4">
+              <p className="text-sm">
+                {currentImageIndex + 1} / {allImages.length}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

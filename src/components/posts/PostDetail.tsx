@@ -456,10 +456,13 @@ const PostDetail: React.FC = () => {
             {/* Meta información */}
             <div className="flex items-center justify-between text-sm text-gray-500 border-t border-gray-200 pt-4">
               <div className="flex items-center space-x-4">
-                <span className="flex items-center">
+                <button
+                  onClick={() => navigate(`/dashboard/users/${post.author.id}`)}
+                  className="flex items-center hover:text-blue-600 transition-colors cursor-pointer"
+                >
                   <User className="w-4 h-4 mr-2" />
                   {post.author.full_name}
-                </span>
+                </button>
                 <span className="flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   {formatDate(post.published_at)}
@@ -561,7 +564,10 @@ const PostDetail: React.FC = () => {
           {comments.map((comment) => (
             <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0">
               <div className="flex items-start space-x-3">
-                <div className="flex-shrink-0">
+                <button
+                  onClick={() => navigate(`/dashboard/users/${comment.author.id}`)}
+                  className="flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer"
+                >
                   <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                     {comment.author.avatar_url ? (
                       <img
@@ -573,13 +579,16 @@ const PostDetail: React.FC = () => {
                       <User className="w-5 h-5 text-gray-600" />
                     )}
                   </div>
-                </div>
+                </button>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2 mb-2">
-                    <span className="font-medium text-gray-900">
+                    <button
+                      onClick={() => navigate(`/dashboard/users/${comment.author.id}`)}
+                      className="font-medium text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
+                    >
                       {comment.author.full_name}
-                    </span>
+                    </button>
                     <span className="text-sm text-gray-500">
                       {formatDate(comment.created_at)}
                     </span>

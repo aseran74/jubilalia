@@ -806,17 +806,19 @@ const ActivityForm: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Duración (minutos) *
+                    {formData.activity_type?.toLowerCase() === 'viajes' || formData.activity_type?.toLowerCase().includes('viaje')
+                      ? 'Duración (días) *'
+                      : 'Duración (minutos) *'}
                   </label>
                   <input
                     type="number"
                     name="duration"
                     value={formData.duration}
                     onChange={handleInputChange}
-                    min="15"
-                    max="480"
+                    min={formData.activity_type?.toLowerCase() === 'viajes' || formData.activity_type?.toLowerCase().includes('viaje') ? "1" : "15"}
+                    max={formData.activity_type?.toLowerCase() === 'viajes' || formData.activity_type?.toLowerCase().includes('viaje') ? "365" : "480"}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    placeholder="60"
+                    placeholder={formData.activity_type?.toLowerCase() === 'viajes' || formData.activity_type?.toLowerCase().includes('viaje') ? "7" : "60"}
                   />
                   {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
                 </div>

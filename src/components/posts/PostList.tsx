@@ -40,6 +40,7 @@ interface Post {
   updated_at: string;
   category: PostCategory;
   author: {
+    id: string;
     full_name: string;
     avatar_url?: string;
   };
@@ -84,12 +85,21 @@ const PostList: React.FC = () => {
     try {
       setLoading(true);
 
+      // Obtener IDs de categorías de Coliving para excluirlas
+      const { data: colivingCategories } = await supabase
+        .from('post_categories')
+        .select('id')
+        .in('name', ['Busco habitación', 'Coliving alquiler', 'Coliving Venta']);
+
+      const colivingCategoryIds = new Set(colivingCategories?.map(cat => cat.id) || []);
+
       let query = supabase
         .from('posts')
         .select(`
           *,
           category:post_categories(*),
           author:profiles!posts_profile_id_fkey(
+            id,
             full_name,
             avatar_url
           )
@@ -134,9 +144,14 @@ const PostList: React.FC = () => {
 
       if (error) throw error;
 
-      // Procesar posts para agregar información de likes del usuario actual
+      // Filtrar posts de Coliving y procesar para agregar información de likes
+      const filteredData = (data || []).filter(post => {
+        // Excluir posts con categorías de Coliving
+        return !colivingCategoryIds.has(post.category_id);
+      });
+
       const postsWithUserData = await Promise.all(
-        (data || []).map(async (post) => {
+        filteredData.map(async (post) => {
           const { data: { user } } = await supabase.auth.getUser();
           let isLiked = false;
 
@@ -276,6 +291,12 @@ const PostList: React.FC = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Función para determinar la ruta - siempre ir al detalle del post
+  const getPostRoute = (post: Post): string => {
+    // Siempre ir al detalle del post para ver el contenido completo
+    return `/dashboard/posts/${post.id}`;
   };
 
   if (loading) {
@@ -467,7 +488,15 @@ const PostList: React.FC = () => {
               {/* Autor y fecha */}
               <div className="flex items-center text-gray-500 text-sm mb-3">
                 <User className="w-4 h-4 mr-1" />
-                <span className="mr-3">{post.author.full_name}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/dashboard/users/${post.author.id}`);
+                  }}
+                  className="mr-3 hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  {post.author.full_name}
+                </button>
                 <Calendar className="w-4 h-4 mr-1" />
                 <span>{formatDate(post.published_at)}</span>
               </div>
@@ -512,7 +541,10 @@ const PostList: React.FC = () => {
               {/* Botones de acción */}
               <div className="flex space-x-2">
                 <button 
-                  onClick={() => navigate(`/dashboard/posts/${post.id}`)}
+                  onClick={() => {
+                    const route = getPostRoute(post);
+                    navigate(route);
+                  }}
                   className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
                 >
                   <Eye className="w-4 h-4 mr-2" />

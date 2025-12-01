@@ -39,7 +39,10 @@ const ActivityList: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
+  const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
+  const [minDuration, setMinDuration] = useState<number>(0);
+  const [maxDuration, setMaxDuration] = useState<number>(30);
   const navigate = useNavigate();
 
   // Cargar dirección del perfil al inicio
@@ -191,22 +194,53 @@ const ActivityList: React.FC = () => {
     // Filtro por ciudad
     const matchesCity = !selectedCity || activity.city === selectedCity;
     
-    // Filtro por precio
+    // Filtro por precio - diferente según si es viajes o no
     let matchesPrice = true;
-    if (priceFilter === 'free') {
-      matchesPrice = activity.is_free === true;
-    } else if (priceFilter === 'paid') {
-      matchesPrice = activity.is_free === false && (activity.price || 0) <= maxPrice;
+    const selectedTypeLower = selectedType?.toLowerCase() || '';
+    const isTravelSelected = selectedTypeLower.includes('viaje') || selectedTypeLower === 'viajes';
+    const activityTypeLower = activity.activity_type?.toLowerCase() || '';
+    const isTravelActivity = activityTypeLower.includes('viaje') || activityTypeLower === 'viajes';
+    
+    // Solo aplicar filtros de precio si el tipo seleccionado coincide con el tipo de actividad
+    if (isTravelSelected && isTravelActivity) {
+      // Para viajes: solo filtro por rango de precio (solo si se ha modificado el rango)
+      const activityPrice = activity.price || 0;
+      // Si los valores están en el rango por defecto (0-5000), no filtrar por precio
+      if (minPrice > 0 || maxPrice < 5000) {
+        matchesPrice = activityPrice >= minPrice && activityPrice <= maxPrice;
+      }
+    } else if (!isTravelSelected && !isTravelActivity) {
+      // Para no-viajes: filtro por gratis/pago y rango de precio
+      if (priceFilter === 'free') {
+        matchesPrice = activity.is_free === true;
+      } else if (priceFilter === 'paid') {
+        const activityPrice = activity.price || 0;
+        // Solo filtrar por rango si se ha modificado
+        if (minPrice > 0 || maxPrice < 5000) {
+          matchesPrice = activity.is_free === false && activityPrice >= minPrice && activityPrice <= maxPrice;
+        } else {
+          matchesPrice = activity.is_free === false;
+        }
+      }
     }
     
-    return matchesSearch && matchesType && matchesCity && matchesPrice;
+    // Filtro por duración (solo para viajes y solo si se ha modificado el rango)
+    let matchesDuration = true;
+    if (isTravelSelected && isTravelActivity && activity.duration) {
+      // Solo filtrar por duración si se ha modificado el rango (no está en 0-30 por defecto)
+      if (minDuration > 0 || maxDuration < 30) {
+        matchesDuration = activity.duration >= minDuration && activity.duration <= maxDuration;
+      }
+    }
+    
+    return matchesSearch && matchesType && matchesCity && matchesPrice && matchesDuration;
   });
 
   // Obtener listas únicas para los filtros
   const activityTypes = Array.from(new Set(activities.map(a => a.activity_type))).sort();
   const cities = Array.from(new Set(activities.map(a => a.city))).sort();
 
-  const handleActivitySelect = (activity: Activity) => {
+  const handleActivitySelect = (activity: Activity | { id: string; title: string; [key: string]: any }) => {
     console.log('🔗 Navegando a detalles de actividad:', activity.title, 'ID:', activity.id);
     navigate(`/activities/${activity.id}`);
   };
@@ -273,7 +307,15 @@ const ActivityList: React.FC = () => {
             </label>
             <select
               value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value)}
+              onChange={(e) => {
+                setSelectedType(e.target.value);
+                // Resetear filtros cuando cambia el tipo
+                setPriceFilter('all');
+                setMinPrice(0);
+                setMaxPrice(5000);
+                setMinDuration(0);
+                setMaxDuration(30);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Todos los tipos</option>
@@ -300,54 +342,143 @@ const ActivityList: React.FC = () => {
             </select>
           </div>
 
-          {/* Filtro por precio */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Precio
-            </label>
-            <select
-              value={priceFilter}
-              onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Todos</option>
-              <option value="free">Gratis</option>
-              <option value="paid">De pago</option>
-            </select>
-          </div>
+          {/* Filtro por precio - solo para no-viajes */}
+          {selectedType && !selectedType.toLowerCase().includes('viaje') && selectedType.toLowerCase() !== 'viajes' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Precio
+              </label>
+              <select
+                value={priceFilter}
+                onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">Todos</option>
+                <option value="free">Gratis</option>
+                <option value="paid">De pago</option>
+              </select>
+            </div>
+          )}
         </div>
 
-        {/* Slider de precio máximo - solo visible cuando se selecciona "De pago" */}
-        {priceFilter === 'paid' && (
+        {/* Filtros específicos para VIAJES */}
+        {selectedType && (selectedType.toLowerCase().includes('viaje') || selectedType.toLowerCase() === 'viajes') && (
+          <div className={`mt-4 space-y-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
+            {/* Rango de precio para viajes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rango de Precio: €{minPrice} - €{maxPrice}
+              </label>
+              <div className="grid grid-cols-2 gap-4 mb-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Precio mínimo</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="50"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Precio máximo</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="50"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Duración del viaje */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Duración del Viaje: {minDuration} - {maxDuration} días
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Duración mínima (días)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="365"
+                    step="1"
+                    value={minDuration}
+                    onChange={(e) => setMinDuration(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Duración máxima (días)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="365"
+                    step="1"
+                    value={maxDuration}
+                    onChange={(e) => setMaxDuration(Number(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filtros específicos para NO-VIAJES */}
+        {selectedType && !selectedType.toLowerCase().includes('viaje') && selectedType.toLowerCase() !== 'viajes' && priceFilter === 'paid' && (
           <div className={`mt-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Precio máximo: €{maxPrice}
+              Rango de Precio: €{minPrice} - €{maxPrice}
             </label>
-            <input
-              type="range"
-              min="0"
-              max="200"
-              step="5"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>€0</span>
-              <span>€200</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Precio mínimo</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10000"
+                  step="5"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Precio máximo</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10000"
+                  step="5"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
           </div>
         )}
 
         {/* Botón para limpiar filtros */}
-        {(selectedType || selectedCity || priceFilter !== 'all') && (
+        {(selectedType || selectedCity || priceFilter !== 'all' || minPrice > 0 || maxPrice < 5000 || minDuration > 0 || maxDuration < 30) && (
           <div className={`mt-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
             <button
               onClick={() => {
                 setSelectedType('');
                 setSelectedCity('');
                 setPriceFilter('all');
-                setMaxPrice(100);
+                setMinPrice(0);
+                setMaxPrice(5000);
+                setMinDuration(0);
+                setMaxDuration(30);
               }}
               className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
             >

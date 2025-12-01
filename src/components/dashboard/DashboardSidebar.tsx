@@ -19,7 +19,6 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   MapIcon,
-  CurrencyDollarIcon,
   HomeModernIcon
 } from '@heroicons/react/24/outline';
 
@@ -42,7 +41,7 @@ const DashboardSidebar: React.FC = () => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<string[]>(['actividades', 'posts', 'socios', 'venta', 'alquiler', 'compartir', 'mensajeria']);
+  const [openGroups, setOpenGroups] = useState<string[]>(['actividades', 'posts', 'socios', 'grupos', 'coliving', 'mensajeria']);
 
   // Detectar si es móvil
   const [isMobile, setIsMobile] = useState(false);
@@ -101,33 +100,29 @@ const DashboardSidebar: React.FC = () => {
       items: [
         { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
         { name: 'Ver en mapa', href: '/dashboard/users/map', icon: MapIcon },
-        { name: 'Grupos', href: '/dashboard/groups', icon: UsersIcon },
       ]
     },
     {
-      name: 'Venta',
-      icon: BuildingOfficeIcon,
-      description: 'Busca y publica propiedades para comprar y jubilarte tranquilamente',
+      name: 'Grupos',
+      icon: UsersIcon,
       items: [
-        { name: 'Buscar', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
-        { name: 'Publicar', href: '/dashboard/properties/sale/create', icon: PlusIcon },
+        { name: 'Buscar grupos', href: '/dashboard/groups', icon: MagnifyingGlassIcon },
+        { name: 'Ver en mapa', href: '/dashboard/groups/map', icon: MapIcon },
       ]
     },
     {
-      name: 'Alquiler',
-      icon: CurrencyDollarIcon,
-      description: 'Busca y publica propiedades para alquilar y jubilarte tranquilamente',
-      items: [
-        { name: 'Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
-        { name: 'Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },
-      ]
-    },
-    {
-      name: 'Compartir',
+      name: 'Coliving',
       icon: HomeModernIcon,
-      description: 'Busca y publica habitaciones para alquilar y compartir gastos con un compañero/a',
+      description: 'Busca y publica habitaciones, propiedades en alquiler y venta para vivir en comunidad',
       items: [
-        { name: 'Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Post habitaciones', href: '/dashboard/rooms/posts', icon: DocumentTextIcon },
+        { name: 'Alquiler - Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
+        { name: 'Alquiler - Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },
+        { name: 'Post alquiler', href: '/dashboard/properties/rental/posts', icon: DocumentTextIcon },
+        { name: 'Venta - Buscar', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
+        { name: 'Venta - Publicar', href: '/dashboard/properties/sale/create', icon: PlusIcon },
+        { name: 'Post venta', href: '/dashboard/properties/sale/posts', icon: DocumentTextIcon },
       ]
     },
     {

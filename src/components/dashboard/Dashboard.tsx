@@ -68,6 +68,10 @@ const Dashboard: React.FC = () => {
           excerpt,
           created_at,
           profile_id,
+          category_id,
+          post_categories:category_id (
+            name
+          ),
           profiles:profile_id (
             full_name,
             avatar_url
@@ -79,6 +83,12 @@ const Dashboard: React.FC = () => {
 
       if (error) throw error;
 
+      // Función para determinar la ruta - siempre ir al detalle del post
+      const getPostRoute = (post: any): string => {
+        // Siempre ir al detalle del post para ver el contenido completo
+        return `/dashboard/posts/${post.id}`;
+      };
+
       const postItems: FeedItem[] = (posts || []).map((post: any) => {
         const profile = Array.isArray(post.profiles) ? post.profiles[0] : post.profiles;
         return {
@@ -89,7 +99,7 @@ const Dashboard: React.FC = () => {
           author: profile?.full_name || 'Usuario',
           avatar: profile?.avatar_url,
           timestamp: post.created_at,
-          link: `/dashboard/posts/${post.id}`
+          link: getPostRoute(post)
         };
       });
 

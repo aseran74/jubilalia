@@ -785,7 +785,7 @@ const PublicSearch: React.FC = () => {
             {activeTab === 'activities' && (
               <ActivityMap 
                 activities={filteredActivities.map(a => ({ ...a, difficulty_level: a.difficulty_level || '', tags: a.tags || [] }))} 
-                onActivitySelect={(activity) => navigate(`/activities/${activity.id}`)}
+                onActivitySelect={(activity: Activity) => navigate(`/activities/${activity.id}`)}
                 className="w-full h-full"
               />
             )}
@@ -994,7 +994,7 @@ const PublicSearch: React.FC = () => {
                 <div className="h-[calc(100vh-200px)] sm:h-[calc(100vh-250px)] lg:h-[calc(100vh-320px)] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg border border-gray-200">
                   <ActivityMap 
                     activities={filteredActivities.map(a => ({ ...a, difficulty_level: a.difficulty_level || '', tags: a.tags || [] }))} 
-                    onActivitySelect={(activity) => navigate(`/activities/${activity.id}`)}
+                    onActivitySelect={(activity: Activity) => navigate(`/activities/${activity.id}`)}
                   />
                 </div>
               </div>

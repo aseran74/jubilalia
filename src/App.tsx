@@ -49,6 +49,10 @@ import PostList from './components/posts/PostList';
 import PostDetail from './components/posts/PostDetail';
 import PostEdit from './components/posts/PostEdit';
 
+// Componentes de publicaciones Coliving
+import ColivingPostsList from './components/coliving/ColivingPostsList';
+import ColivingPostForm from './components/coliving/ColivingPostForm';
+
 // Componentes de perfil y usuarios
 import ProfileForm from './components/profile/ProfileForm';
 import PeopleSearch from './components/people/PeopleSearch';
@@ -143,12 +147,22 @@ const DashboardLayout: React.FC = () => {
             <Route path="/properties/sale/:id" element={<PropertyDetail />} />
             <Route path="/properties/sale/:id/edit" element={<PropertySaleForm />} />
             
+            {/* Publicaciones de Venta */}
+            <Route path="/properties/sale/posts" element={<ColivingPostsList />} />
+            <Route path="/properties/sale/posts/create" element={<ColivingPostForm />} />
+            <Route path="/properties/sale/posts/:id/edit" element={<ColivingPostForm />} />
+            
             {/* Propiedades - Alquiler */}
             <Route path="/properties/rental" element={<PropertyRentalList />} />
             <Route path="/properties/rental/map" element={<PropertiesRentalMapView />} />
             <Route path="/properties/rental/create" element={<PropertyRentalForm />} />
             <Route path="/properties/rental/:id" element={<PropertyDetail />} />
             <Route path="/properties/rental/:id/edit" element={<PropertyRentalForm />} />
+            
+            {/* Publicaciones de Alquiler */}
+            <Route path="/properties/rental/posts" element={<ColivingPostsList />} />
+            <Route path="/properties/rental/posts/create" element={<ColivingPostForm />} />
+            <Route path="/properties/rental/posts/:id/edit" element={<ColivingPostForm />} />
             
             {/* Alquiler de Habitaciones */}
             <Route path="/rooms" element={<RoomList />} />
@@ -157,6 +171,11 @@ const DashboardLayout: React.FC = () => {
             <Route path="/rooms/create" element={<RoomForm />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />
             <Route path="/rooms/:id/edit" element={<RoomForm />} />
+            
+            {/* Publicaciones de Habitaciones */}
+            <Route path="/rooms/posts" element={<ColivingPostsList />} />
+            <Route path="/rooms/posts/create" element={<ColivingPostForm />} />
+            <Route path="/rooms/posts/:id/edit" element={<ColivingPostForm />} />
             
             {/* Actividades */}
             <Route path="/activities" element={<ActivityList />} />
@@ -179,6 +198,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Grupos */}
             <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/map" element={<Groups />} />
             <Route path="/groups/create" element={<GroupForm />} />
             <Route path="/groups/:id" element={<GroupDetail />} />
             <Route path="/groups/:id/edit" element={<GroupForm />} />
