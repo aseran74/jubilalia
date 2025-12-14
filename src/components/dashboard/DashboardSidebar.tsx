@@ -111,7 +111,7 @@ const DashboardSidebar: React.FC = () => {
       ]
     },
     {
-      name: 'Coliving',
+      name: 'coliving2',
       icon: HomeModernIcon,
       description: 'Busca y publica habitaciones, propiedades en alquiler y venta para vivir en comunidad',
       items: [
