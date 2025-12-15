@@ -47,7 +47,7 @@ const DashboardSidebar: React.FC = () => {
     'Posts',
     'Socios',
     'Grupos',
-    'Coliving normal',
+    'Coliving',
     'Mensajería'
   ]);
 
@@ -119,12 +119,12 @@ const DashboardSidebar: React.FC = () => {
       ]
     },
     {
-      name: 'Coliving normal',
+      name: 'Coliving',
       icon: HomeModernIcon,
       description: 'Tres formas de vivir acompañado: compartir vivienda, alquiler colaborativo y compra compartida',
       items: [
-        { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
         { name: 'Cómo funciona', href: '/dashboard/coliving/como-funciona', icon: QuestionMarkCircleIcon },
+        { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
         { name: 'Habitaciones - Publicar', href: '/dashboard/rooms/create', icon: PlusIcon },
         { name: 'Post habitaciones', href: '/dashboard/rooms/posts', icon: DocumentTextIcon },
         { name: 'Alquiler - Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
