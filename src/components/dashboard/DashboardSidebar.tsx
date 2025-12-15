@@ -19,7 +19,8 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   MapIcon,
-  HomeModernIcon
+  HomeModernIcon,
+  QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -41,7 +42,14 @@ const DashboardSidebar: React.FC = () => {
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<string[]>(['actividades', 'posts', 'socios', 'grupos', 'coliving', 'mensajeria']);
+  const [openGroups, setOpenGroups] = useState<string[]>([
+    'Actividades',
+    'Posts',
+    'Socios',
+    'Grupos',
+    'Coliving',
+    'Mensajería'
+  ]);
 
   // Detectar si es móvil
   const [isMobile, setIsMobile] = useState(false);
@@ -113,9 +121,11 @@ const DashboardSidebar: React.FC = () => {
     {
       name: 'Coliving',
       icon: HomeModernIcon,
-      description: 'Busca y publica habitaciones, propiedades en alquiler y venta para vivir en comunidad',
+      description: 'Tres formas de vivir acompañado: compartir vivienda, alquiler colaborativo y compra compartida',
       items: [
+        { name: 'Cómo funciona', href: '/dashboard/coliving/como-funciona', icon: QuestionMarkCircleIcon },
         { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Habitaciones - Publicar', href: '/dashboard/rooms/create', icon: PlusIcon },
         { name: 'Post habitaciones', href: '/dashboard/rooms/posts', icon: DocumentTextIcon },
         { name: 'Alquiler - Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
         { name: 'Alquiler - Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },

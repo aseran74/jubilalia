@@ -87,6 +87,7 @@ import PropertiesRentalMapView from './components/maps/PropertiesRentalMapView';
 
 // Componentes de demo
 import CalendarDemo from './components/demo/CalendarDemo';
+import ColivingHowItWorks from './pages/Dashboard/ColivingHowItWorks';
 
 // Componente principal del dashboard
 const DashboardLayout: React.FC = () => {
@@ -139,6 +140,9 @@ const DashboardLayout: React.FC = () => {
         <main className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+
+            {/* Coliving normal - Cómo funciona */}
+            <Route path="/coliving/como-funciona" element={<ColivingHowItWorks />} />
             
             {/* Propiedades - Venta */}
             <Route path="/properties/sale" element={<PropertySaleList />} />

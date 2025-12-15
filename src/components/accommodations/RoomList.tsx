@@ -4,7 +4,6 @@ import { Search, Plus, X, Info } from 'lucide-react';
 import RoomCard from './RoomCard';
 import { supabase } from '../../lib/supabase';
 import PriceRangeSlider from '../common/PriceRangeSlider';
-import CompartirInfoModal from './CompartirInfoModal';
 
 interface Room {
   id: string;
@@ -51,7 +50,6 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     gender: 'male' as string
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
 
   // Función para cargar datos reales de Supabase
   const fetchRooms = async () => {
@@ -219,10 +217,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  console.log('Abriendo modal Compartir Info');
-                  setShowInfoModal(true);
-                }}
+                onClick={() => navigate('/dashboard/coliving/como-funciona')}
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
               >
                 <Info className="w-5 h-5" />
@@ -476,8 +471,6 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
         </div>
       )}
 
-      {/* Modal de información */}
-      <CompartirInfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
     </div>
   );
 };
