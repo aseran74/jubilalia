@@ -14,7 +14,9 @@ import {
   BellIcon,
   MapPinIcon,
   ClockIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  HomeModernIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface FeedItem {
@@ -238,6 +240,19 @@ const Dashboard: React.FC = () => {
   };
 
   const dashboardCards = [
+    {
+      title: 'Coliving',
+      description: 'Descubre las diferentes formas de compartir vivienda y crear comunidad',
+      icon: HomeModernIcon,
+      href: '/coliving',
+      color: 'bg-emerald-500',
+      actions: [
+        { name: 'Ver explicación', href: '/coliving', icon: InformationCircleIcon },
+        { name: 'Habitaciones', href: '/dashboard/rooms', icon: BuildingOfficeIcon },
+        { name: 'Alquiler', href: '/dashboard/properties/rental', icon: BuildingOfficeIcon },
+        { name: 'Venta', href: '/dashboard/properties/sale', icon: BuildingOfficeIcon }
+      ]
+    },
     {
       title: 'Venta',
       description: 'Busca y publica propiedades para comprar y jubilarte tranquilamente',

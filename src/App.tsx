@@ -8,6 +8,8 @@ import { Capacitor } from '@capacitor/core';
 
 // Landing Page
 import LandingPage from './pages/LandingPage';
+import MobileLandingPage from './pages/MobileLandingPage';
+import ColivingExplanation from './pages/ColivingExplanation';
 import AppSplash from './pages/AppSplash';
 import PublicSearch from './pages/PublicSearch';
 
@@ -372,6 +374,8 @@ const App: React.FC = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/app" element={isMobileApp ? <AppSplash /> : <LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
+          <Route path="/mobile" element={<MobileLandingPage />} />
+          <Route path="/coliving" element={<ColivingExplanation />} />
           <Route path="/signin" element={<JubilaliaLogin />} />
           <Route path="/signup" element={<SignUpForm />} />
           <Route path="/login" element={<JubilaliaLogin />} />

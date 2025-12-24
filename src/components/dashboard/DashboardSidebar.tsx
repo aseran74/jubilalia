@@ -19,7 +19,8 @@ import {
   XMarkIcon,
   ShieldCheckIcon,
   MapIcon,
-  HomeModernIcon
+  HomeModernIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -115,6 +116,7 @@ const DashboardSidebar: React.FC = () => {
       icon: HomeModernIcon,
       description: 'Busca y publica habitaciones, propiedades en alquiler y venta para vivir en comunidad',
       items: [
+        { name: '¿Qué es Coliving?', href: '/coliving', icon: InformationCircleIcon },
         { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
         { name: 'Post habitaciones', href: '/dashboard/rooms/posts', icon: DocumentTextIcon },
         { name: 'Alquiler - Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
