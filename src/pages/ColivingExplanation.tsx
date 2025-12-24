@@ -1,12 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  HomeIcon, 
   MagnifyingGlassIcon as SearchIcon, 
   PlusIcon, 
   DocumentTextIcon, 
-  BuildingOfficeIcon as BuildingIcon, 
-  BanknotesIcon as CurrencyDollarIcon, 
   ArrowRightIcon, 
   ShieldCheckIcon,
   UserGroupIcon as UsersIcon,
