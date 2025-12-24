@@ -383,46 +383,71 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {dashboardCards.map((card) => {
-            const Icon = card.icon;
-            return (
-              <div key={card.title} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className={`p-3 rounded-lg ${card.color}`}>
-                      <Icon className="w-6 h-6 text-white" />
+        {/* Dashboard Cards con diseño solapado mejorado */}
+        <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
+            {dashboardCards.map((card, index) => {
+              const Icon = card.icon;
+              // Efecto de solapamiento más pronunciado en escritorio
+              const overlapOffset = index * 4; // Offset en píxeles para el solapamiento
+              const zIndex = dashboardCards.length - index; // Z-index inverso
+              
+              return (
+                <div
+                  key={card.title}
+                  className="relative group"
+                  style={{
+                    transform: `translateY(${overlapOffset}px)`,
+                    zIndex: zIndex
+                  }}
+                >
+                  <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 group-hover:-translate-y-3 group-hover:scale-[1.03] group-hover:z-50">
+                    {/* Header con color y efecto de profundidad */}
+                    <div className={`${card.color} p-6 text-white relative overflow-hidden`}>
+                      {/* Decoración de fondo */}
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
+                      
+                      <div className="relative z-10">
+                        <div className="flex items-start gap-4 mb-3">
+                          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl shadow-lg">
+                            <Icon className="w-7 h-7 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold mb-1">
+                              {card.title}
+                            </h3>
+                            <p className="text-white/90 text-sm leading-relaxed">
+                              {card.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {card.title}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {card.description}
-                      </p>
+                    
+                    {/* Acciones con mejor diseño */}
+                    <div className="p-5 bg-white">
+                      <div className="grid grid-cols-2 gap-2">
+                        {card.actions.map((action) => {
+                          const ActionIcon = action.icon;
+                          return (
+                            <Link
+                              key={action.name}
+                              to={action.href}
+                              className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 text-xs font-semibold text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-md group/action"
+                            >
+                              <ActionIcon className="w-5 h-5 group-hover/action:scale-110 transition-transform" />
+                              <span className="text-center leading-tight">{action.name}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    {card.actions.map((action) => {
-                      const ActionIcon = action.icon;
-                      return (
-                        <Link
-                          key={action.name}
-                          to={action.href}
-                          className="flex-1 flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                        >
-                          <ActionIcon className="w-4 h-4 mr-2" />
-                          {action.name}
-                        </Link>
-                      );
-                    })}
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {/* Feed de Noticias y Actividades Cercanas */}

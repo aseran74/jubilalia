@@ -1,3 +1,4 @@
+// Backup de la versión actual antes de cambiar
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
