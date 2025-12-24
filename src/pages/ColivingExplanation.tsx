@@ -130,88 +130,89 @@ const ColivingExplanation: React.FC = () => {
         </div>
       </section>
 
-      {/* Contenido principal */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        {colivingOptions.map((option, index) => (
-          <section key={option.id} className={`mb-16 lg:mb-24 ${index > 0 ? 'mt-20' : ''}`}>
-            {/* Tarjeta con diseño mejorado */}
-            <div className={`bg-white rounded-3xl shadow-xl overflow-hidden border-2 ${option.borderColor} transition-all hover:shadow-2xl hover:scale-[1.01]`}>
-              {/* Header con número destacado */}
-              <div className={`bg-gradient-to-r ${option.bgGradient} px-6 sm:px-8 lg:px-12 py-8 relative overflow-hidden`}>
-                {/* Decoración de fondo */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
-                
-                <div className="relative z-10 flex items-start gap-6">
-                  {/* Número destacado con color único */}
-                  <div className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30`}>
-                    <span className={`text-4xl sm:text-5xl font-extrabold text-white`}>
-                      {option.number}
-                    </span>
-                  </div>
+      {/* Contenido principal - Layout horizontal en escritorio */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        {/* Grid horizontal en escritorio, vertical en móvil */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {colivingOptions.map((option, index) => (
+            <section key={option.id} className="h-full">
+              {/* Tarjeta con diseño mejorado */}
+              <div className={`bg-white rounded-3xl shadow-xl overflow-hidden border-2 ${option.borderColor} transition-all hover:shadow-2xl hover:scale-[1.02] h-full flex flex-col`}>
+                {/* Header con número destacado */}
+                <div className={`bg-gradient-to-r ${option.bgGradient} px-6 sm:px-8 py-8 relative overflow-hidden`}>
+                  {/* Decoración de fondo */}
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24"></div>
+                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
                   
-                  <div className="flex-1 pt-2">
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 leading-tight">
+                  <div className="relative z-10 flex flex-col items-center text-center">
+                    {/* Número destacado con color único */}
+                    <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30 mb-4`}>
+                      <span className={`text-4xl sm:text-5xl font-extrabold text-white`}>
+                        {option.number}
+                      </span>
+                    </div>
+                    
+                    <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">
                       {option.title}
                     </h2>
                   </div>
                 </div>
-              </div>
 
-              {/* Contenido */}
-              <div className="p-6 sm:p-8 lg:p-12">
-                <div className="prose prose-lg max-w-none mb-6">
-                  <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                    {option.description}
-                  </p>
-                  
-                  {option.description2 && (
-                    <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                      {option.description2}
+                {/* Contenido - con flex-1 para que ocupe el espacio disponible */}
+                <div className="p-6 sm:p-8 flex-1 flex flex-col">
+                  <div className="prose prose-lg max-w-none mb-6 flex-1">
+                    <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
+                      {option.description}
                     </p>
-                  )}
-
-                  {option.options && (
-                    <ul className="space-y-4 mb-6">
-                      {option.options.map((opt, idx) => (
-                        <li key={idx} className={`text-gray-700 text-lg leading-relaxed flex items-start gap-4 p-3 rounded-lg ${option.bgLight} border-l-4 ${option.borderColor}`}>
-                          <span className={`${option.textColor} font-bold mt-1 text-xl`}>•</span>
-                          <span className="flex-1">{opt}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {option.highlight && (
-                    <div className={`${option.bgLight} border-l-4 ${option.borderColor} p-6 my-6 rounded-r-xl shadow-sm`}>
-                      <p className={`${option.textColor} text-lg font-semibold italic leading-relaxed`}>
-                        {option.highlight}
+                    
+                    {option.description2 && (
+                      <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
+                        {option.description2}
                       </p>
-                    </div>
-                  )}
-                </div>
+                    )}
 
-                {/* Acciones con colores únicos */}
-                <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-200">
-                  {option.actions.map((action, idx) => {
-                    const ActionIcon = action.icon;
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => navigate(action.path)}
-                        className={`flex items-center justify-center gap-3 px-6 py-4 ${option.buttonColor} text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group flex-1`}
-                      >
-                        <ActionIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        <span>{action.label}</span>
-                        <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      </button>
-                    );
-                  })}
+                    {option.options && (
+                      <ul className="space-y-3 mb-6">
+                        {option.options.map((opt, idx) => (
+                          <li key={idx} className={`text-gray-700 text-sm sm:text-base leading-relaxed flex items-start gap-3 p-3 rounded-lg ${option.bgLight} border-l-4 ${option.borderColor}`}>
+                            <span className={`${option.textColor} font-bold mt-1 text-lg flex-shrink-0`}>•</span>
+                            <span className="flex-1">{opt}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {option.highlight && (
+                      <div className={`${option.bgLight} border-l-4 ${option.borderColor} p-4 my-4 rounded-r-xl shadow-sm`}>
+                        <p className={`${option.textColor} text-base sm:text-lg font-semibold italic leading-relaxed`}>
+                          {option.highlight}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Acciones con colores únicos - en la parte inferior */}
+                  <div className="flex flex-col gap-3 mt-auto pt-6 border-t border-gray-200">
+                    {option.actions.map((action, idx) => {
+                      const ActionIcon = action.icon;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => navigate(action.path)}
+                          className={`flex items-center justify-center gap-2 px-4 py-3 ${option.buttonColor} text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group text-sm sm:text-base`}
+                        >
+                          <ActionIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                          <span className="flex-1 text-center">{action.label}</span>
+                          <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
-        ))}
+            </section>
+          ))}
+        </div>
 
         {/* Sección final */}
         <section className="mt-16 lg:mt-24 bg-gradient-to-r from-green-50 to-emerald-50 rounded-3xl p-8 lg:p-12 border border-green-100">
