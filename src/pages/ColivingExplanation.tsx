@@ -18,8 +18,14 @@ const ColivingExplanation: React.FC = () => {
   const colivingOptions = [
     {
       id: 'habitaciones',
-      number: '1)',
+      number: '1',
       title: 'Compartir vivienda: una habitación, una compañía',
+      color: 'emerald',
+      bgGradient: 'from-emerald-500 to-green-600',
+      bgLight: 'bg-emerald-50',
+      borderColor: 'border-emerald-500',
+      textColor: 'text-emerald-700',
+      buttonColor: 'bg-emerald-600 hover:bg-emerald-700',
       description: 'Si tienes una habitación libre o un espacio habitable y te gustaría compartir tu hogar con otra persona compatible, Jubilalia se encarga de buscarte el compañero o compañera ideal.',
       description2: 'Y al revés: si buscas una habitación en un hogar tranquilo, con personas afines a ti, la aplicación te ayuda a encontrarla.',
       highlight: 'Compartir no es solo ahorrar gastos: es ganar compañía, seguridad y bienestar.',
@@ -30,8 +36,14 @@ const ColivingExplanation: React.FC = () => {
     },
     {
       id: 'alquiler',
-      number: '2)',
+      number: '2',
       title: 'Alquiler colaborativo: vivir mejor, sin comprar',
+      color: 'blue',
+      bgGradient: 'from-blue-500 to-cyan-600',
+      bgLight: 'bg-blue-50',
+      borderColor: 'border-blue-500',
+      textColor: 'text-blue-700',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700',
       description: 'Aquí entran distintas opciones de alquiler adaptadas a cada necesidad:',
       options: [
         'Coliving ya existente: por ejemplo, una plaza en un coliving con 40 o 50 personas, con gastos incluidos y servicios comunes.',
@@ -46,8 +58,14 @@ const ColivingExplanation: React.FC = () => {
     },
     {
       id: 'venta',
-      number: '3)',
+      number: '3',
       title: 'Compra compartida: invertir juntos para vivir juntos',
+      color: 'purple',
+      bgGradient: 'from-purple-500 to-indigo-600',
+      bgLight: 'bg-purple-50',
+      borderColor: 'border-purple-500',
+      textColor: 'text-purple-700',
+      buttonColor: 'bg-purple-600 hover:bg-purple-700',
       description: 'Para quienes quieren ir un paso más allá, Jubilalia también facilita la compra colaborativa:',
       options: [
         'Comprar un terreno y construir un proyecto de coliving.',
@@ -115,61 +133,82 @@ const ColivingExplanation: React.FC = () => {
       {/* Contenido principal */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         {colivingOptions.map((option, index) => (
-          <section key={option.id} className={`mb-16 lg:mb-24 ${index > 0 ? 'pt-8 border-t border-gray-200' : ''}`}>
-            <div className="mb-6">
-              <span className="text-2xl font-bold text-green-600 mb-2 block">{option.number}</span>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                {option.title}
-              </h2>
-            </div>
-
-            <div className="prose prose-lg max-w-none mb-6">
-              <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                {option.description}
-              </p>
-              
-              {option.description2 && (
-                <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                  {option.description2}
-                </p>
-              )}
-
-              {option.options && (
-                <ul className="space-y-3 mb-4">
-                  {option.options.map((opt, idx) => (
-                    <li key={idx} className="text-gray-700 text-lg leading-relaxed flex items-start gap-3">
-                      <span className="text-green-600 font-bold mt-1">•</span>
-                      <span>{opt}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {option.highlight && (
-                <div className="bg-green-50 border-l-4 border-green-600 p-4 my-6 rounded-r-lg">
-                  <p className="text-gray-800 text-lg font-semibold italic">
-                    {option.highlight}
-                  </p>
+          <section key={option.id} className={`mb-16 lg:mb-24 ${index > 0 ? 'mt-20' : ''}`}>
+            {/* Tarjeta con diseño mejorado */}
+            <div className={`bg-white rounded-3xl shadow-xl overflow-hidden border-2 ${option.borderColor} transition-all hover:shadow-2xl hover:scale-[1.01]`}>
+              {/* Header con número destacado */}
+              <div className={`bg-gradient-to-r ${option.bgGradient} px-6 sm:px-8 lg:px-12 py-8 relative overflow-hidden`}>
+                {/* Decoración de fondo */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>
+                
+                <div className="relative z-10 flex items-start gap-6">
+                  {/* Número destacado con color único */}
+                  <div className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30`}>
+                    <span className={`text-4xl sm:text-5xl font-extrabold text-white`}>
+                      {option.number}
+                    </span>
+                  </div>
+                  
+                  <div className="flex-1 pt-2">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 leading-tight">
+                      {option.title}
+                    </h2>
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Acciones */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              {option.actions.map((action, idx) => {
-                const ActionIcon = action.icon;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => navigate(action.path)}
-                    className="flex items-center justify-center gap-3 px-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group"
-                  >
-                    <ActionIcon className="w-5 h-5" />
-                    <span>{action.label}</span>
-                    <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                );
-              })}
+              {/* Contenido */}
+              <div className="p-6 sm:p-8 lg:p-12">
+                <div className="prose prose-lg max-w-none mb-6">
+                  <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                    {option.description}
+                  </p>
+                  
+                  {option.description2 && (
+                    <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                      {option.description2}
+                    </p>
+                  )}
+
+                  {option.options && (
+                    <ul className="space-y-4 mb-6">
+                      {option.options.map((opt, idx) => (
+                        <li key={idx} className={`text-gray-700 text-lg leading-relaxed flex items-start gap-4 p-3 rounded-lg ${option.bgLight} border-l-4 ${option.borderColor}`}>
+                          <span className={`${option.textColor} font-bold mt-1 text-xl`}>•</span>
+                          <span className="flex-1">{opt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {option.highlight && (
+                    <div className={`${option.bgLight} border-l-4 ${option.borderColor} p-6 my-6 rounded-r-xl shadow-sm`}>
+                      <p className={`${option.textColor} text-lg font-semibold italic leading-relaxed`}>
+                        {option.highlight}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Acciones con colores únicos */}
+                <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-gray-200">
+                  {option.actions.map((action, idx) => {
+                    const ActionIcon = action.icon;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => navigate(action.path)}
+                        className={`flex items-center justify-center gap-3 px-6 py-4 ${option.buttonColor} text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group flex-1`}
+                      >
+                        <ActionIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        <span>{action.label}</span>
+                        <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </section>
         ))}
