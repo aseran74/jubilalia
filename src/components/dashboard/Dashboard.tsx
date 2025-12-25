@@ -16,7 +16,8 @@ import {
   ClockIcon,
   UserGroupIcon,
   HomeModernIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
 interface FeedItem {
@@ -239,7 +240,8 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const dashboardCards = [
+  // Bloque 1: Coliving
+  const colivingCards = [
     {
       title: 'Coliving',
       description: 'Descubre las diferentes formas de compartir vivienda y crear comunidad',
@@ -247,21 +249,19 @@ const Dashboard: React.FC = () => {
       href: '/coliving',
       color: 'bg-emerald-500',
       actions: [
-        { name: 'Ver explicación', href: '/coliving', icon: InformationCircleIcon },
-        { name: 'Habitaciones', href: '/dashboard/rooms', icon: BuildingOfficeIcon },
-        { name: 'Alquiler', href: '/dashboard/properties/rental', icon: BuildingOfficeIcon },
-        { name: 'Venta', href: '/dashboard/properties/sale', icon: BuildingOfficeIcon }
+        { name: 'Ver explicación', href: '/coliving', icon: InformationCircleIcon }
       ]
     },
     {
-      title: 'Venta',
-      description: 'Busca y publica propiedades para comprar y jubilarte tranquilamente',
+      title: 'Habitaciones',
+      description: 'Busca y publica habitaciones para alquilar y compartir gastos con un compañero/a',
       icon: BuildingOfficeIcon,
-      href: '/dashboard/properties/sale',
-      color: 'bg-blue-500',
+      href: '/dashboard/rooms',
+      color: 'bg-yellow-500',
       actions: [
-        { name: 'Buscar', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
-        { name: 'Publicar', href: '/dashboard/properties/sale/create', icon: PlusIcon }
+        { name: 'Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Publicar', href: '/dashboard/rooms/create', icon: PlusIcon },
+        { name: 'Ver post', href: '/dashboard/rooms/posts', icon: DocumentTextIcon }
       ]
     },
     {
@@ -272,18 +272,44 @@ const Dashboard: React.FC = () => {
       color: 'bg-green-500',
       actions: [
         { name: 'Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
-        { name: 'Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon }
+        { name: 'Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },
+        { name: 'Ver post', href: '/dashboard/properties/rental/posts', icon: DocumentTextIcon }
       ]
     },
     {
-      title: 'Compartir',
-      description: 'Busca y publica habitaciones para alquilar y compartir gastos con un compañero/a',
+      title: 'Venta',
+      description: 'Busca y publica propiedades para comprar y jubilarte tranquilamente',
       icon: BuildingOfficeIcon,
-      href: '/dashboard/rooms',
-      color: 'bg-yellow-500',
+      href: '/dashboard/properties/sale',
+      color: 'bg-blue-500',
       actions: [
-        { name: 'Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Publicar', href: '/dashboard/rooms/create', icon: PlusIcon }
+        { name: 'Buscar', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
+        { name: 'Publicar', href: '/dashboard/properties/sale/create', icon: PlusIcon },
+        { name: 'Ver post', href: '/dashboard/properties/sale/posts', icon: DocumentTextIcon }
+      ]
+    }
+  ];
+
+  // Bloque 2: Planes (Gente, Grupos, Actividades)
+  const planesCards = [
+    {
+      title: 'Buscar Gente',
+      description: 'Conecta con personas afines en tu área',
+      icon: UserIcon,
+      href: '/dashboard/users',
+      color: 'bg-pink-500',
+      actions: [
+        { name: 'Buscar', href: '/dashboard/users', icon: MagnifyingGlassIcon }
+      ]
+    },
+    {
+      title: 'Buscar Grupos',
+      description: 'Encuentra grupos de personas con intereses similares para proyectos colaborativos',
+      icon: UserGroupIcon,
+      href: '/dashboard/groups',
+      color: 'bg-cyan-500',
+      actions: [
+        { name: 'Ver grupos', href: '/dashboard/groups', icon: MagnifyingGlassIcon }
       ]
     },
     {
@@ -296,27 +322,19 @@ const Dashboard: React.FC = () => {
         { name: 'Buscar', href: '/dashboard/activities', icon: MagnifyingGlassIcon },
         { name: 'Crear', href: '/dashboard/activities/create', icon: PlusIcon }
       ]
-    },
+    }
+  ];
+
+  // Bloque 3: Mi Panel (Notificaciones, Mensajes, Perfil)
+  const miPanelCards = [
     {
-      title: 'Posts',
-      description: 'Comparte tus pensamientos con la comunidad',
-      icon: DocumentTextIcon,
-      href: '/dashboard/posts',
-      color: 'bg-indigo-500',
+      title: 'Notificaciones',
+      description: 'Gestiona tus notificaciones y alertas',
+      icon: BellIcon,
+      href: '/dashboard/notifications',
+      color: 'bg-amber-500',
       actions: [
-        { name: 'Ver todos', href: '/dashboard/posts', icon: MagnifyingGlassIcon },
-        { name: 'Crear', href: '/dashboard/posts/create', icon: PlusIcon }
-      ]
-    },
-    {
-      title: 'Buscar Gente',
-      description: 'Conecta con personas afines en tu área',
-      icon: UserIcon,
-      href: '/dashboard/users',
-      color: 'bg-pink-500',
-      actions: [
-        { name: 'Buscar', href: '/dashboard/users', icon: MagnifyingGlassIcon },
-        { name: 'Mensajes', href: '/dashboard/messages', icon: ChatBubbleLeftRightIcon }
+        { name: 'Ver todas', href: '/dashboard/notifications', icon: BellIcon }
       ]
     },
     {
@@ -383,65 +401,139 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Dashboard Cards con diseño solapado mejorado */}
-        <div className="relative">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
-            {dashboardCards.map((card, index) => {
+        {/* Bloque 1: Planes */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Planes</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {planesCards.map((card) => {
               const Icon = card.icon;
-              // Efecto de solapamiento más pronunciado en escritorio
-              const overlapOffset = index * 4; // Offset en píxeles para el solapamiento
-              const zIndex = dashboardCards.length - index; // Z-index inverso
-              
               return (
                 <div
                   key={card.title}
-                  className="relative group"
-                  style={{
-                    transform: `translateY(${overlapOffset}px)`,
-                    zIndex: zIndex
-                  }}
+                  className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-gray-200 hover:-translate-y-1"
                 >
-                  <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200 group-hover:-translate-y-3 group-hover:scale-[1.03] group-hover:z-50">
-                    {/* Header con color y efecto de profundidad */}
-                    <div className={`${card.color} p-6 text-white relative overflow-hidden`}>
-                      {/* Decoración de fondo */}
-                      <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
-                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
-                      
-                      <div className="relative z-10">
-                        <div className="flex items-start gap-4 mb-3">
-                          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl shadow-lg">
-                            <Icon className="w-7 h-7 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-xl font-bold mb-1">
-                              {card.title}
-                            </h3>
-                            <p className="text-white/90 text-sm leading-relaxed">
-                              {card.description}
-                            </p>
-                          </div>
-                        </div>
+                  <div className={`${card.color} p-6 text-white relative overflow-hidden`}>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl flex-shrink-0">
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold mb-1 truncate">{card.title}</h3>
+                        <p className="text-white/90 text-xs leading-snug line-clamp-2">{card.description}</p>
                       </div>
                     </div>
-                    
-                    {/* Acciones con mejor diseño */}
-                    <div className="p-5 bg-white">
-                      <div className="grid grid-cols-2 gap-2">
-                        {card.actions.map((action) => {
-                          const ActionIcon = action.icon;
-                          return (
-                            <Link
-                              key={action.name}
-                              to={action.href}
-                              className="flex flex-col items-center justify-center gap-1.5 px-3 py-3 text-xs font-semibold text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-md group/action"
-                            >
-                              <ActionIcon className="w-5 h-5 group-hover/action:scale-110 transition-transform" />
-                              <span className="text-center leading-tight">{action.name}</span>
-                            </Link>
-                          );
-                        })}
+                  </div>
+                  <div className="p-5 bg-white">
+                    <div className="space-y-2">
+                      {card.actions.map((action) => {
+                        const ActionIcon = action.icon;
+                        return (
+                          <Link
+                            key={action.name}
+                            to={action.href}
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm group/action"
+                          >
+                            <ActionIcon className="w-5 h-5 text-gray-500 group-hover/action:text-gray-700 group-hover/action:scale-110 transition-transform flex-shrink-0" />
+                            <span className="flex-1 text-left">{action.name}</span>
+                            <ArrowRightIcon className="w-4 h-4 text-gray-400 group-hover/action:text-gray-600 group-hover/action:translate-x-1 transition-transform" />
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bloque 2: Coliving */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Coliving</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {colivingCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.title}
+                  className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-gray-200 hover:-translate-y-1"
+                >
+                  <div className={`${card.color} p-6 text-white relative overflow-hidden`}>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl flex-shrink-0">
+                        <Icon className="w-6 h-6 text-white" />
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold mb-1 truncate">{card.title}</h3>
+                        <p className="text-white/90 text-xs leading-snug line-clamp-2">{card.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5 bg-white">
+                    <div className="space-y-2">
+                      {card.actions.map((action) => {
+                        const ActionIcon = action.icon;
+                        return (
+                          <Link
+                            key={action.name}
+                            to={action.href}
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm group/action"
+                          >
+                            <ActionIcon className="w-5 h-5 text-gray-500 group-hover/action:text-gray-700 group-hover/action:scale-110 transition-transform flex-shrink-0" />
+                            <span className="flex-1 text-left">{action.name}</span>
+                            <ArrowRightIcon className="w-4 h-4 text-gray-400 group-hover/action:text-gray-600 group-hover/action:translate-x-1 transition-transform" />
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bloque 3: Mi Panel */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Mi Panel</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {miPanelCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.title}
+                  className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-gray-200 hover:-translate-y-1"
+                >
+                  <div className={`${card.color} p-6 text-white relative overflow-hidden`}>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                    <div className="relative z-10 flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl flex-shrink-0">
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold mb-1 truncate">{card.title}</h3>
+                        <p className="text-white/90 text-xs leading-snug line-clamp-2">{card.description}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5 bg-white">
+                    <div className="space-y-2">
+                      {card.actions.map((action) => {
+                        const ActionIcon = action.icon;
+                        return (
+                          <Link
+                            key={action.name}
+                            to={action.href}
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 rounded-xl hover:bg-gray-100 hover:text-gray-900 transition-all border border-gray-200 hover:border-gray-300 hover:shadow-sm group/action"
+                          >
+                            <ActionIcon className="w-5 h-5 text-gray-500 group-hover/action:text-gray-700 group-hover/action:scale-110 transition-transform flex-shrink-0" />
+                            <span className="flex-1 text-left">{action.name}</span>
+                            <ArrowRightIcon className="w-4 h-4 text-gray-400 group-hover/action:text-gray-600 group-hover/action:translate-x-1 transition-transform" />
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
