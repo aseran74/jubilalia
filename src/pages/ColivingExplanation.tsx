@@ -1,239 +1,240 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  MagnifyingGlassIcon as SearchIcon, 
+  HomeIcon, 
+  MagnifyingGlassIcon, 
   PlusIcon, 
-  DocumentTextIcon, 
+  UserGroupIcon, 
+  BuildingOfficeIcon, 
+  CurrencyDollarIcon, 
   ArrowRightIcon, 
-  ShieldCheckIcon,
-  UserGroupIcon as UsersIcon,
-  HeartIcon
-} from '@heroicons/react/24/outline';
-import { useAuth } from '../hooks/useAuth';
+  ChatBubbleLeftRightIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  ClockIcon
+} from '@heroicons/react/24/solid'; // Iconos sólidos para mejor legibilidad
 
 const ColivingExplanation: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'habitaciones' | 'alquiler' | 'venta'>('habitaciones');
 
-  const colivingOptions = [
-    {
+  // Datos estructurados para renderizado dinámico
+  const content = {
+    habitaciones: {
       id: 'habitaciones',
-      number: '1',
-      title: 'Compartir vivienda: una habitación, una compañía',
-      color: 'emerald',
-      bgGradient: 'from-emerald-500 to-green-600',
-      bgLight: 'bg-emerald-50',
-      borderColor: 'border-emerald-500',
-      textColor: 'text-emerald-700',
-      buttonColor: 'bg-emerald-600 hover:bg-emerald-700',
-      description: 'Si tienes una habitación libre o un espacio habitable y te gustaría compartir tu hogar con otra persona compatible, Jubilalia se encarga de buscarte el compañero o compañera ideal.',
-      description2: 'Y al revés: si buscas una habitación en un hogar tranquilo, con personas afines a ti, la aplicación te ayuda a encontrarla.',
-      highlight: 'Compartir no es solo ahorrar gastos: es ganar compañía, seguridad y bienestar.',
+      title: 'Compartir Habitación',
+      subtitle: 'Tu casa, tu refugio... ahora con compañía.',
+      color: 'bg-emerald-600',
+      lightColor: 'bg-emerald-50',
+      textColor: 'text-emerald-800',
+      icon: HomeIcon,
+      intro: 'Ideal si tienes una vivienda propia y te sobra una habitación y quieres combatir la soledad y generar ingresos extra sin mudarte. Tenemos un buscador que filtra para que encuentres el compañero/a ideal.',
+      features: [
+        { icon: '💶', text: 'Ingresos extra mensuales', useEmoji: true },
+        { icon: '🤝', text: 'Compañía y seguridad diaria', useEmoji: true },
+        { icon: '🏠', text: 'Tú pones las normas de tu casa', useEmoji: true },
+        { icon: CalendarDaysIcon, text: 'Flex Rent: Alquiler de temporada 11 meses para probar la convivencia si quieres alquilar tu inmueble y vivir con un compañero/a', useEmoji: false },
+        { icon: ClockIcon, text: 'Flex Week: Prueba unas semanas de convivencia antes de tomar el paso definitivo. La convivencia es muy importante.', useEmoji: false }
+      ],
       actions: [
-        { label: 'Ver habitaciones', path: '/dashboard/rooms', icon: SearchIcon },
-        { label: 'Publicar habitación', path: '/dashboard/rooms/create', icon: PlusIcon }
+        { label: 'Buscar Habitaciones', path: '/dashboard/rooms', icon: MagnifyingGlassIcon, primary: true },
+        { label: 'Publicar Habitación', path: '/dashboard/rooms/create', icon: PlusIcon, primary: false },
+        { label: 'Publicar Post', path: '/dashboard/rooms/posts', icon: DocumentTextIcon, primary: false }
       ]
     },
-    {
+    alquiler: {
       id: 'alquiler',
-      number: '2',
-      title: 'Alquiler colaborativo: vivir mejor, sin comprar',
-      color: 'blue',
-      bgGradient: 'from-blue-500 to-cyan-600',
-      bgLight: 'bg-blue-50',
-      borderColor: 'border-blue-500',
-      textColor: 'text-blue-700',
-      buttonColor: 'bg-blue-600 hover:bg-blue-700',
-      description: 'Aquí entran distintas opciones de alquiler adaptadas a cada necesidad:',
-      options: [
-        'Coliving ya existente: por ejemplo, una plaza en un coliving con 40 o 50 personas, con gastos incluidos y servicios comunes.',
-        'Residencias o viviendas compartidas con precio mensual claro y sin complicaciones.',
-        'Alquiler en grupo: como alquilar entre varias personas una casa grande o un chalet (por ejemplo, una vivienda de 7 habitaciones durante varios años), reduciendo costes y creando una pequeña comunidad estable.'
+      title: 'Alquiler Colaborativo',
+      subtitle: 'Vivir mejor gastando la mitad.',
+      color: 'bg-blue-600',
+      lightColor: 'bg-blue-50',
+      textColor: 'text-blue-800',
+      icon: BuildingOfficeIcon,
+      intro: 'Únete a otras personas para alquilar chalets o pisos grandes que, por separado, serían imposibles de pagar. Tenemos desde gente que se quieren alquilar un edificio entero en plena Ciudad de Vigo, y buscan socios en el proyecto, a grupos de 10 personas que quieren alquilarse un chalet enorme en Filipinas, Tailandia o Indonesia, a proyectos de coliving con alojamiento independiente en Málaga o Cádiz cerca de campos de Golf, a determinado precio mensual. También tenemos residencias normales para personas no dependientes.',
+      features: [
+        { icon: '🏰', text: 'Acceso a viviendas de lujo', useEmoji: true },
+        { icon: '📉', text: 'División de gastos y facturas', useEmoji: true },
+        { icon: '🧩', text: 'Comunidad activa y dinámica', useEmoji: true }
       ],
-      highlight: 'Todo con transparencia, acompañamiento y pensando en el largo plazo.',
       actions: [
-        { label: 'Ver alquileres', path: '/dashboard/properties/rental', icon: SearchIcon },
-        { label: 'Publicar alquiler', path: '/dashboard/properties/rental/create', icon: PlusIcon }
+        { label: 'Buscar Alquileres', path: '/dashboard/properties/rental', icon: MagnifyingGlassIcon, primary: true },
+        { label: 'Publicar Alquiler', path: '/dashboard/properties/rental/create', icon: PlusIcon, primary: false },
+        { label: 'Publicar Post', path: '/dashboard/properties/rental/posts', icon: DocumentTextIcon, primary: false }
       ]
     },
-    {
+    venta: {
       id: 'venta',
-      number: '3',
-      title: 'Compra compartida: invertir juntos para vivir juntos',
-      color: 'purple',
-      bgGradient: 'from-purple-500 to-indigo-600',
-      bgLight: 'bg-purple-50',
-      borderColor: 'border-purple-500',
-      textColor: 'text-purple-700',
-      buttonColor: 'bg-purple-600 hover:bg-purple-700',
-      description: 'Para quienes quieren ir un paso más allá, Jubilalia también facilita la compra colaborativa:',
-      options: [
-        'Comprar un terreno y construir un proyecto de coliving.',
-        'Comprar un edificio entero entre varios socios.',
-        'Crear una comunidad estable donde cada persona es copropietaria.'
+      title: 'Compra e Inversión',
+      subtitle: 'Construye tu futuro (literalmente).',
+      color: 'bg-violet-600',
+      lightColor: 'bg-violet-50',
+      textColor: 'text-violet-800',
+      icon: CurrencyDollarIcon,
+      intro: 'La opción para visionarios: comprar terrenos o edificios entre varios para crear un Cohousing senior en propiedad. Tenemos desde gente que está buscando terrenos y socios para hacer un coliving en Málaga, a grupos que deciden comprarse una Mansión del siglo XVIII en plena Italia, o Chalets en el paraíso de Indonesia o Tailandia, o pequeños grupos de 3 parejas (6 personas) que compran y hacen reformas buenas de inmuebles en la Costa de Cádiz donde vivir todo el año.',
+      features: [
+        { icon: '🏗️', text: 'Diseño a medida para seniors', useEmoji: true },
+        { icon: '🔐', text: 'Propiedad y patrimonio real', useEmoji: true },
+        { icon: '🌟', text: 'Comunidad estable de por vida', useEmoji: true }
       ],
-      highlight: 'Una forma de invertir con sentido, pensando en el futuro, la convivencia y la tranquilidad.',
       actions: [
-        { label: 'Ver oportunidades de compra', path: '/dashboard/properties/sale', icon: SearchIcon },
-        { label: 'Publicar venta', path: '/dashboard/properties/sale/create', icon: PlusIcon }
+        { label: 'Buscar Venta', path: '/dashboard/properties/sale', icon: MagnifyingGlassIcon, primary: true },
+        { label: 'Publicar Venta', path: '/dashboard/properties/sale/create', icon: PlusIcon, primary: false },
+        { label: 'Publicar Post', path: '/dashboard/properties/sale/posts', icon: DocumentTextIcon, primary: false }
       ]
     }
-  ];
+  };
+
+  const activeContent = content[activeTab];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header Minimalista */}
-      <header className="bg-white px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between border-b border-gray-100 sticky top-0 z-50 shadow-sm">
-        <img 
-          src="/images/jubilogo.svg" 
-          alt="Jubilalia" 
-          className="h-8 w-auto cursor-pointer" 
-          onClick={() => navigate('/')} 
-        />
-        <div className="flex gap-4">
-          <button 
-            onClick={() => navigate('/dashboard')} 
-            className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <DocumentTextIcon className="w-6 h-6" />
-          </button>
-        </div>
+    <div className="min-h-screen bg-[#FAFAF9] font-sans text-slate-900 pb-20 selection:bg-emerald-100">
+      
+      {/* 1. Header "Glassmorphism" sutil */}
+      <header className="sticky top-0 z-40 backdrop-blur-md bg-white/70 border-b border-stone-200 px-6 py-4 flex items-center justify-between">
+         <img 
+           src="/images/jubilogo.svg" 
+           alt="Jubilalia" 
+           className="h-8 w-auto cursor-pointer" 
+           onClick={() => navigate('/')} 
+         />
+         <button onClick={() => navigate('/dashboard')} className="p-2 rounded-full hover:bg-stone-100 transition-colors">
+            <UserGroupIcon className="w-6 h-6 text-stone-500" />
+         </button>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700 text-white px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Tres formas de vivir acompañado, con tranquilidad y libertad
+      <main className="max-w-3xl mx-auto px-6 mt-8">
+        
+        {/* 2. Hero Emocional */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-stone-800 mb-3 leading-tight">
+            Diseña tu forma de vivir
           </h1>
-          <p className="text-lg sm:text-xl text-green-50 max-w-3xl mx-auto leading-relaxed mb-8">
-            En Jubilalia creemos que jubilarse no significa estar solo, sino elegir cómo y con quién vivir. 
-            Por eso hemos creado una plataforma pensada para personas mayores que quieren compartir, 
-            alquilar o invertir juntas en nuevas formas de vivienda, con seguridad y acompañamiento.
+          <p className="text-stone-500 text-lg">
+            No hay una sola forma de jubilarse. Elige la que mejor se adapte a tu momento actual.
           </p>
-          
-          {/* Valores principales */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12">
-            <div className="flex flex-col items-center">
-              <ShieldCheckIcon className="w-10 h-10 mb-3 text-green-200" />
-              <h3 className="font-bold text-lg mb-2">Seguridad</h3>
-            </div>
-            <div className="flex flex-col items-center">
-              <UsersIcon className="w-10 h-10 mb-3 text-green-200" />
-              <h3 className="font-bold text-lg mb-2">Comunidad</h3>
-            </div>
-            <div className="flex flex-col items-center">
-              <HeartIcon className="w-10 h-10 mb-3 text-green-200" />
-              <h3 className="font-bold text-lg mb-2">Acompañamiento</h3>
-            </div>
-          </div>
         </div>
-      </section>
 
-      {/* Contenido principal - Layout horizontal en escritorio */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        {/* Grid horizontal en escritorio, vertical en móvil */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {colivingOptions.map((option, index) => (
-            <section key={option.id} className="h-full">
-              {/* Tarjeta con diseño mejorado */}
-              <div className={`bg-white rounded-3xl shadow-xl overflow-hidden border-2 ${option.borderColor} transition-all hover:shadow-2xl hover:scale-[1.02] h-full flex flex-col`}>
-                {/* Header con número destacado */}
-                <div className={`bg-gradient-to-r ${option.bgGradient} px-6 sm:px-8 py-8 relative overflow-hidden`}>
-                  {/* Decoración de fondo */}
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24"></div>
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
-                  
-                  <div className="relative z-10 flex flex-col items-center text-center">
-                    {/* Número destacado con color único */}
-                    <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/30 mb-4`}>
-                      <span className={`text-4xl sm:text-5xl font-extrabold text-white`}>
-                        {option.number}
-                      </span>
-                    </div>
-                    
-                    <h2 className="text-xl sm:text-2xl font-bold text-white leading-tight">
-                      {option.title}
-                    </h2>
-                  </div>
-                </div>
+        {/* 3. Selector de Pestañas (Bento Navigation) */}
+        <div className="grid grid-cols-3 gap-2 p-1.5 bg-white border border-stone-200 rounded-2xl shadow-sm mb-8">
+          {(Object.keys(content) as Array<keyof typeof content>).map((key) => {
+            const item = content[key];
+            const isActive = activeTab === key;
+            const Icon = item.icon;
+            
+            return (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={`flex flex-col items-center gap-1 py-3 px-2 rounded-xl transition-all duration-300 ${
+                  isActive 
+                    ? `${item.lightColor} ${item.textColor} font-bold shadow-sm ring-1 ring-inset ring-black/5` 
+                    : 'text-stone-400 hover:bg-stone-50 hover:text-stone-600'
+                }`}
+              >
+                <Icon className={`w-6 h-6 ${isActive ? 'scale-110' : 'scale-100'} transition-transform`} />
+                <span className="text-[10px] md:text-xs uppercase tracking-wide">{item.title.split(' ')[0]}</span>
+              </button>
+            );
+          })}
+        </div>
 
-                {/* Contenido - con flex-1 para que ocupe el espacio disponible */}
-                <div className="p-6 sm:p-8 flex-1 flex flex-col">
-                  <div className="prose prose-lg max-w-none mb-6 flex-1">
-                    <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
-                      {option.description}
-                    </p>
-                    
-                    {option.description2 && (
-                      <p className="text-gray-700 text-base sm:text-lg leading-relaxed mb-4">
-                        {option.description2}
-                      </p>
-                    )}
-
-                    {option.options && (
-                      <ul className="space-y-3 mb-6">
-                        {option.options.map((opt, idx) => (
-                          <li key={idx} className={`text-gray-700 text-sm sm:text-base leading-relaxed flex items-start gap-3 p-3 rounded-lg ${option.bgLight} border-l-4 ${option.borderColor}`}>
-                            <span className={`${option.textColor} font-bold mt-1 text-lg flex-shrink-0`}>•</span>
-                            <span className="flex-1">{opt}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {option.highlight && (
-                      <div className={`${option.bgLight} border-l-4 ${option.borderColor} p-4 my-4 rounded-r-xl shadow-sm`}>
-                        <p className={`${option.textColor} text-base sm:text-lg font-semibold italic leading-relaxed`}>
-                          {option.highlight}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Acciones con colores únicos - en la parte inferior */}
-                  <div className="flex flex-col gap-3 mt-auto pt-6 border-t border-gray-200">
-                    {option.actions.map((action, idx) => {
-                      const ActionIcon = action.icon;
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => navigate(action.path)}
-                          className={`flex items-center justify-center gap-2 px-4 py-3 ${option.buttonColor} text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all group text-sm sm:text-base`}
-                        >
-                          <ActionIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
-                          <span className="flex-1 text-center">{action.label}</span>
-                          <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                      );
-                    })}
-                  </div>
+        {/* 4. Tarjeta de Contenido Dinámico (Morphing Card) */}
+        <div className="relative overflow-hidden bg-white rounded-[2rem] border border-stone-100 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]">
+            
+            {/* Banner superior de color */}
+            <div className={`h-2 w-full ${activeContent.color}`} />
+            
+            <div className="p-8">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                   <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-3 ${activeContent.lightColor} ${activeContent.textColor} uppercase tracking-wider`}>
+                      Opción Seleccionada
+                   </span>
+                   <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-2">
+                     {activeContent.title}
+                   </h2>
+                   <p className="text-lg text-stone-500 font-medium leading-relaxed">
+                     {activeContent.subtitle}
+                   </p>
                 </div>
               </div>
-            </section>
-          ))}
+
+              {/* Descripción Principal */}
+              <p className="text-stone-600 mb-8 leading-relaxed text-lg">
+                {activeContent.intro}
+              </p>
+
+              {/* Bento Grid de Beneficios */}
+              <div className="grid gap-4 mb-8">
+                {activeContent.features.map((feature, idx) => {
+                  if (feature.useEmoji && typeof feature.icon === 'string') {
+                    return (
+                      <div key={idx} className="flex items-center gap-4 p-4 rounded-2xl bg-stone-50 border border-stone-100">
+                        <span className="text-2xl flex-shrink-0">{feature.icon}</span>
+                        <span className="font-semibold text-stone-700">{feature.text}</span>
+                      </div>
+                    );
+                  } else if (!feature.useEmoji && typeof feature.icon !== 'string') {
+                    const IconComponent = feature.icon;
+                    return (
+                      <div key={idx} className="flex items-center gap-4 p-4 rounded-2xl bg-stone-50 border border-stone-100">
+                        <div className={`p-2 rounded-xl ${activeContent.lightColor} flex-shrink-0`}>
+                          <IconComponent className={`w-6 h-6 ${activeContent.textColor}`} />
+                        </div>
+                        <span className="font-semibold text-stone-700">{feature.text}</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              {/* Botones de Acción (Hierarchical) */}
+              <div className="space-y-3">
+                {activeContent.actions.map((action, idx) => {
+                  const ActionIcon = action.icon;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => navigate(action.path)}
+                      className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all active:scale-[0.98] ${
+                        action.primary 
+                          ? `${activeContent.color} text-white shadow-lg shadow-${activeContent.color}/20 hover:brightness-110` 
+                          : 'bg-white border-2 border-stone-100 text-stone-600 hover:border-stone-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <ActionIcon className={`w-5 h-5 ${action.primary ? 'text-white' : 'text-stone-400'}`} />
+                        <span className="font-bold">{action.label}</span>
+                      </div>
+                      <ArrowRightIcon className={`w-5 h-5 ${action.primary ? 'opacity-100' : 'opacity-30'}`} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
         </div>
 
-        {/* Sección final */}
-        <section className="mt-16 lg:mt-24 bg-gradient-to-r from-green-50 to-emerald-50 rounded-3xl p-8 lg:p-12 border border-green-100">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-              Jubilalia no es solo vivienda
-            </h2>
-            <p className="text-xl text-gray-700 leading-relaxed mb-8">
-              Es comunidad, acompañamiento y una nueva forma de vivir la jubilación: 
-              más humana, más justa y más compartida.
-            </p>
-            <button
-              onClick={() => navigate(user ? '/dashboard' : '/register')}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all group"
-            >
-              <span>¿Empezamos?</span>
-              <ArrowRightIcon className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-            </button>
+        {/* 5. Footer "Trust" */}
+        <div className="mt-12 text-center pb-8">
+          <p className="text-stone-400 text-sm mb-4">Más de 500 personas mayores confían en nosotros</p>
+          <div className="flex justify-center -space-x-3">
+             {[1,2,3,4].map((i) => (
+               <img key={i} src={`https://i.pravatar.cc/100?u=${i + 20}`} alt="User" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
+             ))}
+             <button className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-xs font-bold text-stone-500 border-2 border-white">
+               +99
+             </button>
           </div>
-        </section>
+        </div>
+
       </main>
+      
+      {/* Floating Action Button (Asistente IA - Tendencia 2026) */}
+      <button className="fixed bottom-6 right-6 bg-stone-900 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-50">
+        <ChatBubbleLeftRightIcon className="w-6 h-6" />
+      </button>
+
     </div>
   );
 };
