@@ -52,12 +52,6 @@ interface GroupMemberResponse {
   groups: Group | Group[] | null;
 }
 
-interface FriendshipData {
-  id: string;
-  friend_id: string;
-  user_id: string;
-}
-
 interface MainCardProps {
   title: string;
   subtitle: string;

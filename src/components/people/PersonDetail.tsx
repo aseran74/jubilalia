@@ -30,7 +30,7 @@ interface Person {
 const PersonDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user: currentUser, profile: currentProfile } = useAuth();
+  const { profile: currentProfile } = useAuth();
   const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
   const [interests, setInterests] = useState<string[]>([]);
