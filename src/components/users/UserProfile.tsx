@@ -10,7 +10,10 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   HeartIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  UserPlusIcon,
+  CheckIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface UserProfile {
@@ -41,13 +44,16 @@ const UserProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [friendshipStatus, setFriendshipStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'blocked' | null>(null);
+  const [loadingFriendship, setLoadingFriendship] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchProfile();
       checkIfFavorite();
+      checkFriendshipStatus();
     }
-  }, [id]);
+  }, [id, currentUser]);
 
   const fetchProfile = async () => {
     try {
@@ -112,6 +118,187 @@ const UserProfile: React.FC = () => {
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+    }
+  };
+
+  const checkFriendshipStatus = async () => {
+    if (!currentUser || !id || currentUser.id === id) {
+      setFriendshipStatus(null);
+      return;
+    }
+
+    try {
+      // Buscar si existe una amistad entre estos usuarios
+      // Primero buscamos donde el usuario actual es el que envía
+      const { data: friendship1 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('friend_id', id)
+        .maybeSingle();
+
+      // Si no encontramos, buscamos donde el usuario actual es el receptor
+      const { data: friendship2 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', id)
+        .eq('friend_id', currentUser.id)
+        .maybeSingle();
+
+      const friendship = friendship1 || friendship2;
+
+      if (!friendship) {
+        setFriendshipStatus('none');
+        return;
+      }
+
+      if (friendship.status === 'accepted') {
+        setFriendshipStatus('accepted');
+      } else if (friendship.status === 'blocked') {
+        setFriendshipStatus('blocked');
+      } else if (friendship.status === 'pending') {
+        // Verificar quién envió la solicitud
+        if (friendship.user_id === currentUser.id) {
+          setFriendshipStatus('pending_sent');
+        } else {
+          setFriendshipStatus('pending_received');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking friendship status:', error);
+    }
+  };
+
+  const sendFriendRequest = async () => {
+    if (!currentUser || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Verificar que no exista ya una solicitud
+      const { data: existing1 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('friend_id', id)
+        .maybeSingle();
+
+      const { data: existing2 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', id)
+        .eq('friend_id', currentUser.id)
+        .maybeSingle();
+
+      if (existing1 || existing2) {
+        console.error('Ya existe una solicitud de amistad');
+        await checkFriendshipStatus(); // Actualizar estado
+        return;
+      }
+
+      const { error } = await supabase
+        .from('friendships')
+        .insert({
+          user_id: currentUser.id,
+          friend_id: id,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+      
+      setFriendshipStatus('pending_sent');
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      alert('Error al enviar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
+    }
+  };
+
+  const acceptFriendRequest = async () => {
+    if (!currentUser || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Buscar la solicitud pendiente donde el usuario actual es el receptor
+      const { data: friendship, error: findError } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', id)
+        .eq('friend_id', currentUser.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (findError || !friendship) {
+        console.error('No se encontró la solicitud de amistad');
+        return;
+      }
+
+      // Actualizar el estado a 'accepted'
+      const { error: updateError } = await supabase
+        .from('friendships')
+        .update({ status: 'accepted', updated_at: new Date().toISOString() })
+        .eq('id', friendship.id);
+
+      if (updateError) throw updateError;
+      
+      setFriendshipStatus('accepted');
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+      alert('Error al aceptar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
+    }
+  };
+
+  const rejectFriendRequest = async () => {
+    if (!currentUser || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Buscar y eliminar la solicitud pendiente
+      const { error } = await supabase
+        .from('friendships')
+        .delete()
+        .eq('user_id', id)
+        .eq('friend_id', currentUser.id)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+      
+      setFriendshipStatus('none');
+    } catch (error) {
+      console.error('Error rejecting friend request:', error);
+      alert('Error al rechazar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
+    }
+  };
+
+  const cancelFriendRequest = async () => {
+    if (!currentUser || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Eliminar la solicitud enviada
+      const { error } = await supabase
+        .from('friendships')
+        .delete()
+        .eq('user_id', currentUser.id)
+        .eq('friend_id', id)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+      
+      setFriendshipStatus('none');
+    } catch (error) {
+      console.error('Error canceling friend request:', error);
+      alert('Error al cancelar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
     }
   };
 
@@ -340,6 +527,61 @@ const UserProfile: React.FC = () => {
                 Acciones
               </h3>
               <div className="space-y-3">
+                {/* Botón de Amistad */}
+                {currentUser && currentUser.id !== id && friendshipStatus !== null && (
+                  <>
+                    {friendshipStatus === 'none' && (
+                      <button
+                        onClick={sendFriendRequest}
+                        disabled={loadingFriendship}
+                        className="w-full flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <UserPlusIcon className="w-4 h-4 mr-2" />
+                        {loadingFriendship ? 'Enviando...' : 'Enviar solicitud de amistad'}
+                      </button>
+                    )}
+                    
+                    {friendshipStatus === 'pending_sent' && (
+                      <button
+                        onClick={cancelFriendRequest}
+                        disabled={loadingFriendship}
+                        className="w-full flex items-center justify-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <XMarkIcon className="w-4 h-4 mr-2" />
+                        {loadingFriendship ? 'Cancelando...' : 'Solicitud enviada - Cancelar'}
+                      </button>
+                    )}
+                    
+                    {friendshipStatus === 'pending_received' && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={acceptFriendRequest}
+                          disabled={loadingFriendship}
+                          className="w-full flex items-center justify-center px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <CheckIcon className="w-4 h-4 mr-2" />
+                          {loadingFriendship ? 'Aceptando...' : 'Aceptar solicitud'}
+                        </button>
+                        <button
+                          onClick={rejectFriendRequest}
+                          disabled={loadingFriendship}
+                          className="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <XMarkIcon className="w-4 h-4 mr-2" />
+                          {loadingFriendship ? 'Rechazando...' : 'Rechazar solicitud'}
+                        </button>
+                      </div>
+                    )}
+                    
+                    {friendshipStatus === 'accepted' && (
+                      <div className="w-full flex items-center justify-center px-4 py-2 bg-emerald-100 text-emerald-700 rounded-md border border-emerald-300">
+                        <CheckIcon className="w-4 h-4 mr-2" />
+                        Son amigos
+                      </div>
+                    )}
+                  </>
+                )}
+
                 <button
                   onClick={toggleFavorite}
                   className={`w-full flex items-center justify-center px-4 py-2 rounded-md transition-colors ${

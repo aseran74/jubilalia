@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Briefcase, X, ChevronLeft, ChevronRight, Heart, Music, Camera, BookOpen, Gamepad2, Dumbbell, UtensilsCrossed, Film, Plane, Car, Coffee, Palette, TreePine, Waves, Mountain } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Briefcase, X, ChevronLeft, ChevronRight, Heart, Music, Camera, BookOpen, Gamepad2, Dumbbell, UtensilsCrossed, Film, Plane, Car, Coffee, Palette, TreePine, Waves, Mountain, UserPlus, Check, XCircle } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import UserContent from '../profile/UserContent';
 
@@ -29,12 +30,15 @@ interface Person {
 const PersonDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user: currentUser, profile: currentProfile } = useAuth();
   const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
   const [interests, setInterests] = useState<string[]>([]);
   const [allImages, setAllImages] = useState<string[]>([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [friendshipStatus, setFriendshipStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'blocked' | null>(null);
+  const [loadingFriendship, setLoadingFriendship] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -42,6 +46,60 @@ const PersonDetail: React.FC = () => {
       fetchInterestsAndGallery();
     }
   }, [id]);
+
+  const checkFriendshipStatus = useCallback(async () => {
+    if (!currentProfile || !id || currentProfile.id === id) {
+      setFriendshipStatus(null);
+      return;
+    }
+
+    try {
+      // Buscar si existe una amistad entre estos usuarios
+      // Primero buscamos donde el usuario actual es el que envía
+      const { data: friendship1 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', currentProfile.id)
+        .eq('friend_id', id)
+        .maybeSingle();
+
+      // Si no encontramos, buscamos donde el usuario actual es el receptor
+      const { data: friendship2 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', id)
+        .eq('friend_id', currentProfile.id)
+        .maybeSingle();
+
+      const friendship = friendship1 || friendship2;
+
+      if (!friendship) {
+        setFriendshipStatus('none');
+        return;
+      }
+
+      if (friendship.status === 'accepted') {
+        setFriendshipStatus('accepted');
+      } else if (friendship.status === 'blocked') {
+        setFriendshipStatus('blocked');
+      } else if (friendship.status === 'pending') {
+        // Verificar quién envió la solicitud
+        if (friendship.user_id === currentProfile.id) {
+          setFriendshipStatus('pending_sent');
+        } else {
+          setFriendshipStatus('pending_received');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking friendship status:', error);
+    }
+  }, [currentProfile, id]);
+
+  useEffect(() => {
+    if (id && currentProfile) {
+      checkFriendshipStatus();
+    }
+  }, [id, currentProfile, checkFriendshipStatus]);
 
   const fetchPerson = async () => {
     try {
@@ -211,6 +269,139 @@ const PersonDetail: React.FC = () => {
 
   const handleMessageClick = () => {
     window.location.href = `/dashboard/messages?user=${person.id}`;
+  };
+
+  const sendFriendRequest = async () => {
+    if (!currentProfile || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Verificar que no exista ya una solicitud
+      const { data: existing1 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', currentProfile.id)
+        .eq('friend_id', id)
+        .maybeSingle();
+
+      const { data: existing2 } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', id)
+        .eq('friend_id', currentProfile.id)
+        .maybeSingle();
+
+      if (existing1 || existing2) {
+        console.error('Ya existe una solicitud de amistad');
+        await checkFriendshipStatus(); // Actualizar estado
+        return;
+      }
+
+      const { error } = await supabase
+        .from('friendships')
+        .insert({
+          user_id: currentProfile.id,
+          friend_id: id,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+      
+      setFriendshipStatus('pending_sent');
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      alert('Error al enviar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
+    }
+  };
+
+  const acceptFriendRequest = async () => {
+    if (!currentProfile || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Buscar la solicitud pendiente donde el usuario actual es el receptor
+      const { data: friendship, error: findError } = await supabase
+        .from('friendships')
+        .select('*')
+        .eq('user_id', id)
+        .eq('friend_id', currentProfile.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (findError || !friendship) {
+        console.error('No se encontró la solicitud de amistad');
+        return;
+      }
+
+      // Actualizar el estado a 'accepted'
+      const { error: updateError } = await supabase
+        .from('friendships')
+        .update({ status: 'accepted', updated_at: new Date().toISOString() })
+        .eq('id', friendship.id);
+
+      if (updateError) throw updateError;
+      
+      setFriendshipStatus('accepted');
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+      alert('Error al aceptar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
+    }
+  };
+
+  const rejectFriendRequest = async () => {
+    if (!currentProfile || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Buscar y eliminar la solicitud pendiente
+      const { error } = await supabase
+        .from('friendships')
+        .delete()
+        .eq('user_id', id)
+        .eq('friend_id', currentProfile.id)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+      
+      setFriendshipStatus('none');
+    } catch (error) {
+      console.error('Error rejecting friend request:', error);
+      alert('Error al rechazar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
+    }
+  };
+
+  const cancelFriendRequest = async () => {
+    if (!currentProfile || !id || loadingFriendship) return;
+
+    try {
+      setLoadingFriendship(true);
+      
+      // Eliminar la solicitud enviada
+      const { error } = await supabase
+        .from('friendships')
+        .delete()
+        .eq('user_id', currentProfile.id)
+        .eq('friend_id', id)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+      
+      setFriendshipStatus('none');
+    } catch (error) {
+      console.error('Error canceling friend request:', error);
+      alert('Error al cancelar la solicitud de amistad');
+    } finally {
+      setLoadingFriendship(false);
+    }
   };
 
   // Función para obtener el icono según el interés
@@ -437,6 +628,71 @@ const PersonDetail: React.FC = () => {
                 <div className="flex items-center text-gray-700">
                   <Briefcase className="w-5 h-5 mr-3 text-gray-400" />
                   {person.occupation}
+                </div>
+              </div>
+            )}
+
+            {/* Solicitud de Amistad */}
+            {currentProfile && currentProfile.id !== id && (
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Amistad</h3>
+                <div className="space-y-3">
+                  {friendshipStatus === null && (
+                    <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-600 rounded-lg">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                      <span>Cargando estado...</span>
+                    </div>
+                  )}
+                  
+                  {friendshipStatus === 'none' && (
+                    <button
+                      onClick={sendFriendRequest}
+                      disabled={loadingFriendship}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      <UserPlus className="w-5 h-5" />
+                      {loadingFriendship ? 'Enviando...' : 'Enviar solicitud de amistad'}
+                    </button>
+                  )}
+                  
+                  {friendshipStatus === 'pending_sent' && (
+                    <button
+                      onClick={cancelFriendRequest}
+                      disabled={loadingFriendship}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      <XCircle className="w-5 h-5" />
+                      {loadingFriendship ? 'Cancelando...' : 'Solicitud enviada - Cancelar'}
+                    </button>
+                  )}
+                  
+                  {friendshipStatus === 'pending_received' && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={acceptFriendRequest}
+                        disabled={loadingFriendship}
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      >
+                        <Check className="w-5 h-5" />
+                        {loadingFriendship ? 'Aceptando...' : 'Aceptar'}
+                      </button>
+                      <button
+                        onClick={rejectFriendRequest}
+                        disabled={loadingFriendship}
+                        className="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      >
+                        <XCircle className="w-5 h-5" />
+                        {loadingFriendship ? 'Rechazando...' : 'Rechazar'}
+                      </button>
+                    </div>
+                  )}
+                  
+                  {friendshipStatus === 'accepted' && (
+                    <div className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-300 font-medium">
+                      <Check className="w-5 h-5" />
+                      Son amigos
+                    </div>
+                  )}
                 </div>
               </div>
             )}
