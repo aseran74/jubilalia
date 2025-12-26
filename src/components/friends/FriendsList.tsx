@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import { 
-  ArrowLeftIcon, 
   HeartIcon, 
   UserGroupIcon, 
   MapPinIcon,
@@ -12,8 +11,6 @@ import {
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 interface Friend {
   id: string;
