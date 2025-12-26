@@ -126,73 +126,76 @@ const Groups: React.FC = () => {
     });
   };
 
-  // Cargar grupos
+  // Cargar grupos - Solo los grupos en los que el usuario está integrado
   const fetchGroups = async () => {
+    if (!profile?.id) {
+      setLoading(false);
+      setGroups([]);
+      return;
+    }
+
     try {
       setLoading(true);
-      console.log('🔍 Cargando grupos para usuario:', profile?.id);
+      console.log('🔍 Cargando grupos del usuario:', profile.id);
       
-      // Obtener grupos públicos
-      const { data: publicGroups, error: publicError } = await supabase
-        .from('groups')
-        .select('*')
-        .eq('is_public', true);
-
-      console.log('📊 Grupos públicos:', { data: publicGroups, error: publicError });
-
-      if (publicError) {
-        console.error('❌ Error al cargar grupos públicos:', publicError);
-        throw publicError;
-      }
-
-      // Obtener grupos de los que es miembro
-      const { data: memberGroups, error: memberError } = await supabase
-        .from('groups')
+      // Obtener solo los grupos de los que es miembro
+      const { data: groupMembersData, error: memberError } = await supabase
+        .from('group_members')
         .select(`
-          *,
-          group_members!inner(profile_id, role)
+          group_id,
+          role,
+          groups (
+            id,
+            name,
+            description,
+            image_url,
+            created_by,
+            is_public,
+            max_members,
+            category,
+            city,
+            address,
+            latitude,
+            longitude,
+            postal_code,
+            country,
+            created_at
+          )
         `)
-        .eq('group_members.profile_id', profile?.id || '');
+        .eq('profile_id', profile.id);
 
-      console.log('👥 Grupos como miembro:', { data: memberGroups, error: memberError });
+      console.log('👥 Grupos como miembro:', { data: groupMembersData, error: memberError });
 
       if (memberError) {
         console.error('❌ Error al cargar grupos como miembro:', memberError);
-        console.error('❌ Error completo:', JSON.stringify(memberError, null, 2));
         throw memberError;
       }
 
-      // Combinar los grupos y eliminar duplicados
-      const allGroups = [...(publicGroups || [])];
-      (memberGroups || []).forEach(group => {
-        if (!allGroups.find(g => g.id === group.id)) {
-          allGroups.push(group);
-        }
-      });
+      if (groupMembersData && groupMembersData.length > 0) {
+        // Procesar los datos para extraer los grupos
+        const processedGroups: Group[] = groupMembersData
+          .map((gm: any) => {
+            const group = Array.isArray(gm.groups) ? gm.groups[0] : gm.groups;
+            if (!group) return null;
+            
+            return {
+              ...group,
+              is_member: true,
+              role: gm.role || null,
+              current_members: 0 // Se puede calcular después si es necesario
+            };
+          })
+          .filter((g): g is Group => g !== null);
 
-      const groupsData = allGroups;
-
-      // Procesar los datos para marcar si el usuario es miembro
-      const processedGroups = groupsData.map(group => {
-        const memberData = memberGroups.find(mg => mg.id === group.id);
-        return {
-          ...group,
-          is_member: memberData ? true : false,
-          role: memberData?.group_members?.[0]?.role || null
-        };
-      });
-
-      setGroups(processedGroups);
-      console.log('✅ Grupos cargados exitosamente:', processedGroups.length);
+        setGroups(processedGroups);
+        console.log('✅ Grupos cargados exitosamente:', processedGroups.length);
+      } else {
+        setGroups([]);
+        console.log('ℹ️ Usuario no está en ningún grupo');
+      }
     } catch (error: any) {
       console.error('❌ Error fetching groups:', error);
-      console.error('❌ Error completo:', JSON.stringify(error, null, 2));
-      console.error('❌ Detalles del error:', {
-        message: error instanceof Error ? error.message : 'Error desconocido',
-        details: error?.details,
-        hint: error?.hint,
-        code: error?.code
-      });
+      setGroups([]);
     } finally {
       setLoading(false);
     }

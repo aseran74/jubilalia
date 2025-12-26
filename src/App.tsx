@@ -60,6 +60,8 @@ import ProfileForm from './components/profile/ProfileForm';
 import PeopleSearch from './components/people/PeopleSearch';
 import PersonDetail from './components/people/PersonDetail';
 import Settings from './components/dashboard/Settings';
+import FriendsList from './components/friends/FriendsList';
+import NotificationsPage from './components/dashboard/NotificationsPage';
 
 // Componentes de grupos
 import Groups from './components/people/Groups';
@@ -197,6 +199,11 @@ const DashboardLayout: React.FC = () => {
             <Route path="/users/map" element={<PeopleSearch />} />
             <Route path="/users/:id" element={<PersonDetail />} />
             <Route path="/dashboard/users/:id" element={<PersonDetail />} />
+            <Route path="friends" element={<FriendsList />} />
+            
+            {/* Notificaciones */}
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             
             {/* Grupos */}
             <Route path="/groups" element={<Groups />} />

@@ -85,8 +85,8 @@ const Dashboard: React.FC = () => {
       // 1. Cargar Mensajes Reales (Donde soy el receptor)
       const { data: msgs, error: msgError } = await supabase
         .from('messages')
-        .select('id, content, created_at, is_read, sender_id')
-        .eq('receiver_id', user.id)
+        .select('id, message_text, created_at, is_read, sender_id')
+        .eq('recipient_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -103,7 +103,7 @@ const Dashboard: React.FC = () => {
           const senderProfile = profiles?.find((p) => p.id === msg.sender_id);
           return {
             id: msg.id,
-            content: msg.content,
+            content: msg.message_text || '',
             created_at: msg.created_at,
             sender_id: msg.sender_id,
             sender: {
@@ -344,10 +344,10 @@ const Dashboard: React.FC = () => {
                         <h3 className="font-bold">Habitaciones</h3>
                     </div>
                     <div className="space-y-2">
-                        <ActionRow label="Buscar" to="/rooms" icon={MagnifyingGlassIcon} type="primary" />
+                        <ActionRow label="Buscar" to="/dashboard/rooms" icon={MagnifyingGlassIcon} type="primary" />
                         <div className="flex gap-2">
-                             <Link to="/rooms/create" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-emerald-50 hover:border-emerald-200 transition"><PlusIcon className="w-4 h-4 text-stone-500"/></Link>
-                             <Link to="/rooms/posts" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-emerald-50 hover:border-emerald-200 transition"><DocumentTextIcon className="w-4 h-4 text-stone-500"/></Link>
+                             <Link to="/dashboard/rooms/create" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-emerald-50 hover:border-emerald-200 transition"><PlusIcon className="w-4 h-4 text-stone-500"/></Link>
+                             <Link to="/dashboard/rooms/posts" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-emerald-50 hover:border-emerald-200 transition"><DocumentTextIcon className="w-4 h-4 text-stone-500"/></Link>
                         </div>
                     </div>
                 </div>
@@ -359,10 +359,10 @@ const Dashboard: React.FC = () => {
                         <h3 className="font-bold">Alquiler</h3>
                     </div>
                     <div className="space-y-2">
-                        <ActionRow label="Buscar" to="/rentals" icon={MagnifyingGlassIcon} type="primary" />
+                        <ActionRow label="Buscar" to="/dashboard/properties/rental" icon={MagnifyingGlassIcon} type="primary" />
                          <div className="flex gap-2">
-                             <Link to="/rentals/create" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-blue-50 hover:border-blue-200 transition"><PlusIcon className="w-4 h-4 text-stone-500"/></Link>
-                             <Link to="/rentals/posts" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-blue-50 hover:border-blue-200 transition"><DocumentTextIcon className="w-4 h-4 text-stone-500"/></Link>
+                             <Link to="/dashboard/properties/rental/create" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-blue-50 hover:border-blue-200 transition"><PlusIcon className="w-4 h-4 text-stone-500"/></Link>
+                             <Link to="/dashboard/properties/rental/posts" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-blue-50 hover:border-blue-200 transition"><DocumentTextIcon className="w-4 h-4 text-stone-500"/></Link>
                         </div>
                     </div>
                 </div>
@@ -374,10 +374,10 @@ const Dashboard: React.FC = () => {
                         <h3 className="font-bold">Venta</h3>
                     </div>
                     <div className="space-y-2">
-                        <ActionRow label="Buscar" to="/sales" icon={MagnifyingGlassIcon} type="primary" />
+                        <ActionRow label="Buscar" to="/dashboard/properties/sale" icon={MagnifyingGlassIcon} type="primary" />
                          <div className="flex gap-2">
-                             <Link to="/sales/create" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-purple-50 hover:border-purple-200 transition"><PlusIcon className="w-4 h-4 text-stone-500"/></Link>
-                             <Link to="/sales/posts" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-purple-50 hover:border-purple-200 transition"><DocumentTextIcon className="w-4 h-4 text-stone-500"/></Link>
+                             <Link to="/dashboard/properties/sale/create" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-purple-50 hover:border-purple-200 transition"><PlusIcon className="w-4 h-4 text-stone-500"/></Link>
+                             <Link to="/dashboard/properties/sale/posts" className="flex-1 bg-stone-50 border border-stone-200 rounded-lg p-2 flex justify-center hover:bg-purple-50 hover:border-purple-200 transition"><DocumentTextIcon className="w-4 h-4 text-stone-500"/></Link>
                         </div>
                     </div>
                 </div>
@@ -423,41 +423,77 @@ const Dashboard: React.FC = () => {
                 </div>
             </Link>
 
-            {/* Mis Amigos */}
-            <Link to="/dashboard/friends" className="group bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="flex items-center gap-4 mb-3">
-                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-                        <HeartIcon className="w-6 h-6" />
+            {/* Mis Amigos - Mejorado */}
+            <Link to="/dashboard/friends" className="group bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 relative overflow-hidden">
+                {/* Efecto de brillo animado */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                
+                <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl shadow-lg">
+                            <HeartIcon className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-lg font-bold mb-1">Mis Amigos</h3>
+                            {userFriends.length > 0 ? (
+                                <span className="text-xs text-white/90 font-semibold">
+                                    {userFriends.length} {userFriends.length === 1 ? 'amigo' : 'amigos'}
+                                </span>
+                            ) : (
+                                <span className="text-xs text-white/70">Aún no tienes amigos</span>
+                            )}
+                        </div>
                     </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-bold">Mis Amigos</h3>
-                        {userFriends.length > 0 && (
-                            <span className="text-xs text-white/80">{userFriends.length} {userFriends.length === 1 ? 'amigo' : 'amigos'}</span>
-                        )}
-                    </div>
-                </div>
-                {userFriends.length > 0 ? (
-                    <div className="flex -space-x-2 mb-4">
-                        {userFriends.slice(0, 4).map((friend) => (
-                            <img
-                                key={friend.id}
-                                src={friend.avatar_url || 'https://via.placeholder.com/40'}
-                                alt={friend.full_name}
-                                className="w-10 h-10 rounded-full border-2 border-white/50 object-cover"
-                            />
-                        ))}
-                        {userFriends.length > 4 && (
-                            <div className="w-10 h-10 rounded-full border-2 border-white/50 bg-white/20 flex items-center justify-center text-xs font-bold">
-                                +{userFriends.length - 4}
+                    
+                    {userFriends.length > 0 ? (
+                        <div className="mb-4">
+                            <div className="flex -space-x-3 mb-3">
+                                {userFriends.slice(0, 5).map((friend) => (
+                                    <div key={friend.id} className="relative group/friend">
+                                        <img
+                                            src={friend.avatar_url || 'https://via.placeholder.com/40'}
+                                            alt={friend.full_name}
+                                            className="w-12 h-12 rounded-full border-4 border-white shadow-md object-cover hover:scale-110 transition-transform"
+                                            title={friend.full_name}
+                                        />
+                                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                                    </div>
+                                ))}
+                                {userFriends.length > 5 && (
+                                    <div className="w-12 h-12 rounded-full border-4 border-white bg-white/20 backdrop-blur-sm flex items-center justify-center text-xs font-bold shadow-md">
+                                        +{userFriends.length - 5}
+                                    </div>
+                                )}
                             </div>
-                        )}
+                            {userFriends.length <= 5 && userFriends.length > 0 && (
+                                <div className="flex flex-wrap gap-2">
+                                    {userFriends.slice(0, 3).map((friend) => (
+                                        <span key={friend.id} className="text-xs text-white/90 bg-white/10 px-2 py-1 rounded-full backdrop-blur-sm">
+                                            {friend.full_name.split(' ')[0]}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="mb-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                            <p className="text-white/90 text-sm text-center mb-2">
+                                Conecta con personas y construye tu red de amistades
+                            </p>
+                            <div className="flex justify-center">
+                                <div className="flex -space-x-2 opacity-50">
+                                    {[1, 2, 3].map((i) => (
+                                        <div key={i} className="w-8 h-8 rounded-full bg-white/20 border-2 border-white/30"></div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between text-sm font-semibold pt-3 border-t border-white/20">
+                        <span>{userFriends.length > 0 ? 'Ver todos mis amigos' : 'Buscar amigos'}</span>
+                        <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </div>
-                ) : (
-                    <p className="text-white/90 text-sm mb-4">Las personas con las que ya he conectado</p>
-                )}
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                    <span>Ver mis amigos</span>
-                    <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
             </Link>
 
@@ -478,19 +514,18 @@ const Dashboard: React.FC = () => {
         </div>
 
 
-        {/* --- BLOQUE 4: MENSAJES REALES & AGENDA --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+        {/* --- BLOQUE 4: MENSAJES Y ACTIVIDADES CERCANAS (Lado a lado en escritorio) --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
             
-            {/* 4.1 MIS MENSAJES Y ACTIVIDADES CERCANAS (Columna Ancha - Izquierda) */}
-            <div className="lg:col-span-2 space-y-6">
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-stone-800 flex items-center gap-2">
-                            <ChatBubbleLeftRightIcon className="w-6 h-6 text-blue-600" />
-                            Mis Mensajes
-                        </h2>
-                        <Link to="/messages" className="text-sm font-bold text-blue-600 hover:underline">Ver todos</Link>
-                    </div>
+            {/* MIS MENSAJES */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-stone-800 flex items-center gap-2">
+                        <ChatBubbleLeftRightIcon className="w-6 h-6 text-blue-600" />
+                        Mis Mensajes
+                    </h2>
+                    <Link to="/messages" className="text-sm font-bold text-blue-600 hover:underline">Ver todos</Link>
+                </div>
 
                 <div className="bg-white rounded-[2rem] p-2 shadow-sm border border-stone-100 min-h-[300px]">
                     {loading ? (
@@ -500,7 +535,7 @@ const Dashboard: React.FC = () => {
                             {messages.map((msg) => (
                                 <Link 
                                     key={msg.id} 
-                                    to={`/messages/${msg.sender_id}`} // O a la conversación específica
+                                    to={`/messages/${msg.sender_id}`}
                                     className={`flex items-center gap-4 p-4 rounded-3xl transition-all hover:bg-blue-50 group ${!msg.is_read ? 'bg-blue-50/50' : 'bg-transparent'}`}
                                 >
                                     <div className="relative">
@@ -534,53 +569,48 @@ const Dashboard: React.FC = () => {
                         </div>
                     )}
                 </div>
-                </div>
+            </div>
 
-                {/* Actividades Cercanas al lado de Mensajes */}
-                <div>
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-stone-800 flex items-center gap-2">
-                            <MapPinIcon className="w-6 h-6 text-orange-500" />
-                            Actividades cercanas
-                        </h2>
-                    </div>
-                    
-                    <div className="bg-white rounded-[2rem] p-4 shadow-sm border border-stone-100">
-                        {nearbyActivities.length > 0 ? (
-                            <div className="space-y-3">
-                                {nearbyActivities.map((act) => (
-                                    <Link key={act.id} to={`/activities/${act.id}`} className="flex gap-3 items-start p-3 rounded-2xl hover:bg-orange-50 transition-colors group">
-                                        <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex flex-col items-center justify-center flex-shrink-0">
-                                            <span className="text-xs font-bold uppercase">{format(new Date(act.date), 'MMM', { locale: es })}</span>
-                                            <span className="text-lg font-bold leading-none">{format(new Date(act.date), 'd')}</span>
+            {/* ACTIVIDADES CERCANAS */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-stone-800 flex items-center gap-2">
+                        <MapPinIcon className="w-6 h-6 text-orange-500" />
+                        Actividades cercanas
+                    </h2>
+                    <Link to="/activities" className="text-sm font-bold text-orange-600 hover:underline">Ver todas</Link>
+                </div>
+                
+                <div className="bg-white rounded-[2rem] p-4 shadow-sm border border-stone-100 min-h-[300px]">
+                    {nearbyActivities.length > 0 ? (
+                        <div className="space-y-3">
+                            {nearbyActivities.map((act) => (
+                                <Link key={act.id} to={`/activities/${act.id}`} className="flex gap-3 items-start p-3 rounded-2xl hover:bg-orange-50 transition-colors group">
+                                    <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex flex-col items-center justify-center flex-shrink-0">
+                                        <span className="text-xs font-bold uppercase">{format(new Date(act.date), 'MMM', { locale: es })}</span>
+                                        <span className="text-lg font-bold leading-none">{format(new Date(act.date), 'd')}</span>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="text-sm font-bold text-stone-800 leading-snug group-hover:text-orange-700 transition-colors line-clamp-2">
+                                            {act.title}
+                                        </h4>
+                                        <div className="flex items-center gap-1 mt-1 text-xs text-stone-500">
+                                            <ClockIcon className="w-3 h-3" />
+                                            {format(new Date(act.date), 'HH:mm')}h
                                         </div>
-                                        <div>
-                                            <h4 className="text-sm font-bold text-stone-800 leading-snug group-hover:text-orange-700 transition-colors line-clamp-2">
-                                                {act.title}
-                                            </h4>
-                                            <div className="flex items-center gap-1 mt-1 text-xs text-stone-500">
-                                                <ClockIcon className="w-3 h-3" />
-                                                {format(new Date(act.date), 'HH:mm')}h
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                                <Link to="/activities" className="block text-center py-2 text-xs font-bold text-stone-400 hover:text-orange-500 uppercase tracking-wide">
-                                    Ver Calendario Completo
+                                    </div>
                                 </Link>
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 px-4">
-                                <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                                    <CalendarIcon className="w-8 h-8 text-stone-300" />
-                                </div>
-                                <p className="text-sm text-stone-500 font-medium">No hay actividades cerca hoy.</p>
-                                <Link to="/activities/create" className="text-orange-600 text-sm font-bold mt-2 block">
-                                    ¡Crea la primera!
-                                </Link>
-                            </div>
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full py-10 text-stone-400">
+                            <CalendarIcon className="w-12 h-12 mb-2 opacity-20" />
+                            <p className="text-sm">No hay actividades cerca hoy.</p>
+                            <Link to="/activities/create" className="text-orange-600 text-sm font-bold mt-2">
+                                ¡Crea la primera!
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
