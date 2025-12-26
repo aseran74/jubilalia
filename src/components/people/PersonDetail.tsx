@@ -268,7 +268,15 @@ const PersonDetail: React.FC = () => {
   };
 
   const handleMessageClick = () => {
-    window.location.href = `/dashboard/messages?user=${person.id}`;
+    if (!person) return;
+    navigate('/dashboard/messages', { 
+      state: { 
+        startNewChat: true, 
+        otherUserId: person.id, 
+        otherUserName: person.full_name || 'Usuario',
+        otherUserAvatar: person.avatar_url || undefined
+      } 
+    });
   };
 
   const sendFriendRequest = async () => {

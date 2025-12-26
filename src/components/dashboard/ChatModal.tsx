@@ -48,14 +48,17 @@ const ChatModal: React.FC<ChatModalProps> = ({
     try {
       setLoading(true);
       
-      // Obtener el perfil del usuario actual
-      const { data: profile } = await supabase
+      // Obtener el perfil del usuario actual usando auth_user_id
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('id', user.id)
+        .eq('auth_user_id', user.id)
         .single();
 
-      if (!profile) return;
+      if (profileError || !profile) {
+        console.error('Error fetching profile in fetchMessages:', profileError);
+        return;
+      }
 
       // Obtener mensajes entre los dos usuarios
       const { data: messagesData, error } = await supabase
@@ -117,14 +120,17 @@ const ChatModal: React.FC<ChatModalProps> = ({
     try {
       setSending(true);
       
-      // Obtener el perfil del usuario actual
-      const { data: profile } = await supabase
+      // Obtener el perfil del usuario actual usando auth_user_id
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('id', user.id)
+        .eq('auth_user_id', user.id)
         .single();
 
-      if (!profile) return;
+      if (profileError || !profile) {
+        console.error('Error fetching profile:', profileError);
+        return;
+      }
 
       // Enviar el mensaje
       const { error } = await supabase
@@ -132,7 +138,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
         .insert({
           sender_id: profile.id,
           recipient_id: recipientId,
-          listing_id: listingId,
+          listing_id: listingId || null,
           subject: listingTitle ? `Consulta sobre: ${listingTitle}` : 'Consulta general',
           message_text: messageText.trim()
         });

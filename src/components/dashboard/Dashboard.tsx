@@ -82,37 +82,47 @@ const Dashboard: React.FC = () => {
     try {
       setLoading(true);
 
-      // 1. Cargar Mensajes Reales (Donde soy el receptor)
+      // 1. Cargar los últimos 10 mensajes (donde soy receptor o emisor)
       const { data: msgs, error: msgError } = await supabase
         .from('messages')
-        .select('id, message_text, created_at, is_read, sender_id')
-        .eq('recipient_id', user.id)
+        .select('id, message_text, created_at, is_read, sender_id, recipient_id')
+        .or(`recipient_id.eq.${profile.id},sender_id.eq.${profile.id}`)
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(10);
 
       if (msgs && msgs.length > 0) {
-        // Cargar los perfiles de los remitentes por separado
-        const senderIds = [...new Set(msgs.map((msg) => msg.sender_id))];
+        // Obtener todos los IDs de usuarios únicos (remitentes y destinatarios)
+        const userIds = [...new Set([
+          ...msgs.map((msg) => msg.sender_id),
+          ...msgs.map((msg) => msg.recipient_id)
+        ])];
+        
         const { data: profiles } = await supabase
           .from('profiles')
           .select('id, full_name, avatar_url')
-          .in('id', senderIds);
+          .in('id', userIds);
 
-        // Combinar mensajes con perfiles
-        const transformedMessages: Message[] = msgs.map((msg) => {
-          const senderProfile = profiles?.find((p) => p.id === msg.sender_id);
-          return {
-            id: msg.id,
-            content: msg.message_text || '',
-            created_at: msg.created_at,
-            sender_id: msg.sender_id,
-            sender: {
-              full_name: senderProfile?.full_name || 'Usuario',
-              avatar_url: senderProfile?.avatar_url || null
-            },
-            is_read: msg.is_read
-          };
-        });
+        // Transformar mensajes para incluir información del otro usuario (no el actual)
+        const transformedMessages: Message[] = msgs
+          .map((msg) => {
+            // Determinar quién es el otro usuario (no el actual)
+            const otherUserId = msg.sender_id === profile.id ? msg.recipient_id : msg.sender_id;
+            const otherUserProfile = profiles?.find((p) => p.id === otherUserId);
+            
+            return {
+              id: msg.id,
+              content: msg.message_text || '',
+              created_at: msg.created_at,
+              sender_id: otherUserId, // ID del otro usuario para el link
+              sender: {
+                full_name: otherUserProfile?.full_name || 'Usuario',
+                avatar_url: otherUserProfile?.avatar_url || null
+              },
+              is_read: msg.is_read || false
+            };
+          })
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        
         setMessages(transformedMessages);
       }
       if (msgError) console.error("Error mensajes:", msgError);
@@ -155,17 +165,17 @@ const Dashboard: React.FC = () => {
       if (groupsError) console.error("Error grupos:", groupsError);
 
       // 4. Cargar Amigos del Usuario (amistades aceptadas)
-      // Primero obtenemos las friendships
+      // Primero obtenemos las friendships usando profile.id (no user.id)
       const { data: friendshipsData, error: friendshipsError } = await supabase
         .from('friendships')
         .select('id, friend_id, user_id')
-        .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
+        .or(`user_id.eq.${profile.id},friend_id.eq.${profile.id}`)
         .eq('status', 'accepted');
 
       if (friendshipsData && friendshipsData.length > 0) {
         // Extraer los IDs de los amigos (puede ser user_id o friend_id dependiendo de quién inició)
         const friendIds = friendshipsData.map((friendship: { user_id: string; friend_id: string }) => {
-          return friendship.user_id === user.id 
+          return friendship.user_id === profile.id 
             ? friendship.friend_id 
             : friendship.user_id;
         });
@@ -531,14 +541,20 @@ const Dashboard: React.FC = () => {
                     {loading ? (
                         <div className="p-8 text-center text-stone-400">Cargando conversaciones...</div>
                     ) : messages.length > 0 ? (
-                        <div className="space-y-1">
+                        <div className="space-y-1 max-h-[500px] overflow-y-auto">
                             {messages.map((msg) => (
                                 <Link 
                                     key={msg.id} 
-                                    to={`/messages/${msg.sender_id}`}
+                                    to={`/dashboard/messages`}
+                                    state={{ 
+                                      startNewChat: true, 
+                                      otherUserId: msg.sender_id, 
+                                      otherUserName: msg.sender?.full_name || 'Usuario',
+                                      otherUserAvatar: msg.sender?.avatar_url || undefined
+                                    }}
                                     className={`flex items-center gap-4 p-4 rounded-3xl transition-all hover:bg-blue-50 group ${!msg.is_read ? 'bg-blue-50/50' : 'bg-transparent'}`}
                                 >
-                                    <div className="relative">
+                                    <div className="relative flex-shrink-0">
                                         <img 
                                             src={msg.sender?.avatar_url || 'https://via.placeholder.com/40'} 
                                             className="w-12 h-12 rounded-full object-cover border border-stone-200" 
@@ -557,7 +573,7 @@ const Dashboard: React.FC = () => {
                                             {msg.content}
                                         </p>
                                     </div>
-                                    <ArrowRightIcon className="w-4 h-4 text-stone-300 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all" />
+                                    <ArrowRightIcon className="w-4 h-4 text-stone-300 group-hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0" />
                                 </Link>
                             ))}
                         </div>

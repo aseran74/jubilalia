@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { ChatMessage, UserConversation, CreateChatMessage } from '../../types/supabase';
 import ChatSidebar from './ChatSidebar';
@@ -40,6 +40,30 @@ const ChatApp: React.FC = () => {
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
+  // Función para iniciar nueva conversación (definida antes de los useEffects)
+  const startNewConversation = useCallback((otherUserId: string, otherUserName: string, otherUserAvatar?: string) => {
+    console.log('ChatApp - startNewConversation llamado con:', { otherUserId, otherUserName, otherUserAvatar });
+    
+    const newConversation: UserConversation = {
+      conversation_id: `temp-${Date.now()}`,
+      other_user_id: otherUserId,
+      other_user_name: otherUserName,
+      other_user_avatar: otherUserAvatar || null,
+      last_message_content: null,
+      last_message_at: new Date().toISOString(),
+      unread_count: 0
+    };
+
+    console.log('ChatApp - Nueva conversación creada:', newConversation);
+    setSelectedConversation(newConversation);
+    setMessages([]);
+    
+    // En móvil, ocultar sidebar cuando se selecciona una conversación
+    if (isMobile) {
+      setShowSidebar(false);
+    }
+  }, [isMobile]);
+
   // Cargar conversaciones del usuario
   useEffect(() => {
     if (profile?.id) {
@@ -47,17 +71,51 @@ const ChatApp: React.FC = () => {
     }
   }, [profile?.id]);
 
-  // Manejar nueva conversación desde la búsqueda de usuarios
+  // Manejar nueva conversación desde la búsqueda de usuarios o query params
+  const [searchParams] = useSearchParams();
+  
   useEffect(() => {
-    console.log('ChatApp - location.state:', location.state);
-    if (location.state?.startNewChat && profile?.id) {
-      const { otherUserId, otherUserName } = location.state;
-      console.log('ChatApp - Iniciando nueva conversación:', { otherUserId, otherUserName });
-      startNewConversation(otherUserId, otherUserName);
-      // Limpiar el estado de navegación
-      window.history.replaceState({}, document.title);
+    if (!profile?.id) return;
+    
+    // Verificar si hay un user ID en los query params
+    const userIdFromQuery = searchParams.get('user');
+    
+    if (userIdFromQuery) {
+      console.log('ChatApp - Iniciando conversación desde query param:', userIdFromQuery);
+      // Obtener el nombre del usuario
+      supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .eq('id', userIdFromQuery)
+        .single()
+        .then(({ data: userProfile, error }) => {
+          if (error) {
+            console.error('Error fetching user profile:', error);
+            return;
+          }
+          if (userProfile && userProfile.id !== selectedConversation?.other_user_id) {
+            startNewConversation(userProfile.id, userProfile.full_name || 'Usuario', userProfile.avatar_url || undefined);
+            // Limpiar el query param
+            window.history.replaceState({}, '', '/dashboard/messages');
+          }
+        });
+      return;
     }
-  }, [location.state, profile?.id]);
+    
+    // Verificar si hay estado de navegación
+    console.log('ChatApp - location.state:', location.state);
+    if (location.state?.startNewChat) {
+      const { otherUserId, otherUserName, otherUserAvatar } = location.state;
+      console.log('ChatApp - Iniciando nueva conversación desde state:', { otherUserId, otherUserName });
+      
+      // Solo iniciar si no es la conversación actual
+      if (otherUserId !== selectedConversation?.other_user_id) {
+        startNewConversation(otherUserId, otherUserName, otherUserAvatar);
+        // Limpiar el estado de navegación
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [searchParams, location.state, profile?.id, startNewConversation, selectedConversation]);
 
   // Cargar mensajes cuando se selecciona una conversación
   useEffect(() => {
@@ -103,8 +161,13 @@ const ChatApp: React.FC = () => {
 
       if (error) throw error;
 
-      // Ordenar mensajes por fecha (más recientes primero)
-      const sortedMessages = (data || []).sort((a: ChatMessage, b: ChatMessage) => 
+      // Mapear los datos de la función RPC a ChatMessage
+      // La función retorna recipient_id, pero necesitamos asegurarnos de que se mapee correctamente
+      const sortedMessages = (data || []).map((msg: any) => ({
+        ...msg,
+        recipient_id: msg.recipient_id || msg.receiver_id, // Compatibilidad con ambos nombres
+        content: msg.content || msg.message_text
+      })).sort((a: ChatMessage, b: ChatMessage) => 
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       );
 
@@ -129,7 +192,7 @@ const ChatApp: React.FC = () => {
       // Llamar a la función RPC para enviar mensaje
       const { error } = await supabase.rpc('send_message', {
         sender_id: profile.id,
-        receiver_id: messageData.receiver_id,
+        receiver_id: messageData.recipient_id,
         message_content: messageData.content,
         message_type: messageData.message_type || 'text'
       });
@@ -137,7 +200,7 @@ const ChatApp: React.FC = () => {
       if (error) throw error;
 
       // Recargar mensajes y conversaciones
-      await loadMessages(messageData.receiver_id);
+      await loadMessages(messageData.recipient_id);
       await loadConversations();
     } catch (err: any) {
       console.error('Error sending message:', err);
@@ -158,28 +221,6 @@ const ChatApp: React.FC = () => {
     }
   };
 
-  const startNewConversation = (otherUserId: string, otherUserName: string, otherUserAvatar?: string) => {
-    console.log('ChatApp - startNewConversation llamado con:', { otherUserId, otherUserName, otherUserAvatar });
-    
-    const newConversation: UserConversation = {
-      conversation_id: `temp-${Date.now()}`,
-      other_user_id: otherUserId,
-      other_user_name: otherUserName,
-      other_user_avatar: otherUserAvatar || null,
-      last_message_content: null,
-      last_message_at: new Date().toISOString(),
-      unread_count: 0
-    };
-
-    console.log('ChatApp - Nueva conversación creada:', newConversation);
-    setSelectedConversation(newConversation);
-    setMessages([]);
-    
-    // En móvil, ocultar sidebar cuando se selecciona una conversación
-    if (isMobile) {
-      setShowSidebar(false);
-    }
-  };
 
   const handleSelectConversation = (conversation: UserConversation) => {
     setSelectedConversation(conversation);

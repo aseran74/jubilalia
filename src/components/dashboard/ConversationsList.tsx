@@ -46,12 +46,17 @@ const ConversationsList: React.FC = () => {
     try {
       setLoading(true);
       
-      // Obtener el perfil del usuario actual
-      const { data: profile } = await supabase
+      // Obtener el perfil del usuario actual usando auth_user_id
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('id', user.id)
+        .eq('auth_user_id', user.id)
         .single();
+      
+      if (profileError || !profile) {
+        console.error('Error fetching profile:', profileError);
+        return;
+      }
 
       if (!profile) return;
 

@@ -44,7 +44,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       setSending(true);
       
       const messageData: CreateChatMessage = {
-        receiver_id: conversation.other_user_id,
+        recipient_id: conversation.other_user_id,
         content: newMessage.trim(),
         message_type: 'text'
       };

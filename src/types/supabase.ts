@@ -1127,7 +1127,7 @@ export interface UserLocationSettings {
 export interface ChatMessage {
   id: string;
   sender_id: string;
-  receiver_id: string;
+  recipient_id: string;
   content: string;
   message_type: 'text' | 'image' | 'file';
   is_read: boolean;
@@ -1155,7 +1155,7 @@ export interface ChatConversation {
 
 // Interfaz para crear un nuevo mensaje
 export interface CreateChatMessage {
-  receiver_id: string;
+  recipient_id: string;
   content: string;
   message_type?: 'text' | 'image' | 'file';
 }
