@@ -198,6 +198,8 @@ const DashboardLayout: React.FC = () => {
             <Route path="/users" element={<PeopleSearch />} />
             <Route path="/users/map" element={<PeopleSearch />} />
             <Route path="/users/:id" element={<PersonDetail />} />
+            <Route path="/dashboard/users" element={<PeopleSearch />} />
+            <Route path="/dashboard/users/map" element={<PeopleSearch />} />
             <Route path="/dashboard/users/:id" element={<PersonDetail />} />
             <Route path="friends" element={<FriendsList />} />
             
@@ -211,6 +213,11 @@ const DashboardLayout: React.FC = () => {
             <Route path="/groups/create" element={<GroupForm />} />
             <Route path="/groups/:id" element={<GroupDetail />} />
             <Route path="/groups/:id/edit" element={<GroupForm />} />
+            <Route path="/dashboard/groups" element={<Groups />} />
+            <Route path="/dashboard/groups/map" element={<Groups />} />
+            <Route path="/dashboard/groups/create" element={<GroupForm />} />
+            <Route path="/dashboard/groups/:id" element={<GroupDetail />} />
+            <Route path="/dashboard/groups/:id/edit" element={<GroupForm />} />
             
             {/* Mensajería */}
             <Route path="/messages" element={<ChatApp />} />

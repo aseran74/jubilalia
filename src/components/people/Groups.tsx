@@ -58,10 +58,10 @@ const Groups: React.FC = () => {
     search: '',
     category: '',
     city: '',
-    isPublic: true
+    isPublic: null as boolean | null  // null = mostrar todos, true = solo públicos, false = solo privados
   });
 
-  // Detectar si estamos en la ruta del mapa
+  // Detectar el modo de visualización
   useEffect(() => {
     if (location.pathname === '/dashboard/groups/map') {
       setViewMode('map');
@@ -95,13 +95,17 @@ const Groups: React.FC = () => {
       );
     }
 
-    // Filtro por visibilidad
-    if (filters.isPublic !== null) {
-      filtered = filtered.filter(group => group.is_public === filters.isPublic);
-    }
+    // Filtro por visibilidad - solo aplicar si se ha cambiado explícitamente
+    // Por defecto, mostrar todos los grupos (no filtrar por isPublic)
+    // Este filtro solo se aplica si el usuario lo cambia manualmente
 
     setFilteredGroups(filtered);
   };
+
+  // Cargar grupos cuando cambie el modo o el perfil
+  useEffect(() => {
+    fetchGroups();
+  }, [profile?.id, location.search, location.pathname]);
 
   // Aplicar filtros cuando cambien
   useEffect(() => {
@@ -126,7 +130,7 @@ const Groups: React.FC = () => {
     });
   };
 
-  // Cargar grupos - Solo los grupos en los que el usuario está integrado
+  // Cargar grupos - Diferencia entre "Mis Grupos" y "Explorar"
   const fetchGroups = async () => {
     if (!profile?.id) {
       setLoading(false);
@@ -136,62 +140,112 @@ const Groups: React.FC = () => {
 
     try {
       setLoading(true);
-      console.log('🔍 Cargando grupos del usuario:', profile.id);
       
-      // Obtener solo los grupos de los que es miembro
-      const { data: groupMembersData, error: memberError } = await supabase
-        .from('group_members')
-        .select(`
-          group_id,
-          role,
-          groups (
-            id,
-            name,
-            description,
-            image_url,
-            created_by,
-            is_public,
-            max_members,
-            category,
-            city,
-            address,
-            latitude,
-            longitude,
-            postal_code,
-            country,
-            created_at
-          )
-        `)
-        .eq('profile_id', profile.id);
+      // Detectar si es exploración o mis grupos
+      const isExplore = location.search.includes('explore');
+      console.log('📍 Modo detectado:', { 
+        pathname: location.pathname, 
+        search: location.search, 
+        isExplore,
+        profileId: profile.id 
+      });
+      
+      // Si es "Mis Grupos" (no tiene ?explore), cargar solo los grupos donde el usuario es miembro
+      if (!isExplore) {
+        console.log('🔍 Cargando MIS grupos del usuario:', profile.id);
+        
+        const { data: groupMembersData, error: memberError } = await supabase
+          .from('group_members')
+          .select(`
+            group_id,
+            role,
+            groups (
+              id,
+              name,
+              description,
+              image_url,
+              created_by,
+              is_public,
+              max_members,
+              category,
+              city,
+              address,
+              latitude,
+              longitude,
+              postal_code,
+              country,
+              created_at
+            )
+          `)
+          .eq('profile_id', profile.id);
 
-      console.log('👥 Grupos como miembro:', { data: groupMembersData, error: memberError });
+        if (memberError) {
+          console.error('❌ Error al cargar grupos como miembro:', memberError);
+          throw memberError;
+        }
 
-      if (memberError) {
-        console.error('❌ Error al cargar grupos como miembro:', memberError);
-        throw memberError;
-      }
+        if (groupMembersData && groupMembersData.length > 0) {
+          const processedGroups: Group[] = groupMembersData
+            .map((gm: any) => {
+              const group = Array.isArray(gm.groups) ? gm.groups[0] : gm.groups;
+              if (!group) return null;
+              
+              return {
+                ...group,
+                is_member: true,
+                role: gm.role || null,
+                current_members: 0
+              };
+            })
+            .filter((g): g is Group => g !== null);
 
-      if (groupMembersData && groupMembersData.length > 0) {
-        // Procesar los datos para extraer los grupos
-        const processedGroups: Group[] = groupMembersData
-          .map((gm: any) => {
-            const group = Array.isArray(gm.groups) ? gm.groups[0] : gm.groups;
-            if (!group) return null;
-            
-            return {
-              ...group,
-              is_member: true,
-              role: gm.role || null,
-              current_members: 0 // Se puede calcular después si es necesario
-            };
-          })
-          .filter((g): g is Group => g !== null);
-
-        setGroups(processedGroups);
-        console.log('✅ Grupos cargados exitosamente:', processedGroups.length);
+          setGroups(processedGroups);
+          console.log('✅ Mis grupos cargados exitosamente:', processedGroups.length);
+        } else {
+          setGroups([]);
+          console.log('ℹ️ Usuario no está en ningún grupo');
+        }
       } else {
-        setGroups([]);
-        console.log('ℹ️ Usuario no está en ningún grupo');
+        // Si es exploración, cargar TODOS los grupos públicos
+        console.log('🔍 Cargando TODOS los grupos públicos para explorar');
+        
+        const { data: allGroupsData, error: groupsError } = await supabase
+          .from('groups')
+          .select('*')
+          .eq('is_public', true)
+          .order('created_at', { ascending: false });
+        
+        console.log('📊 Grupos públicos encontrados:', allGroupsData?.length || 0);
+
+        if (groupsError) {
+          console.error('❌ Error al cargar todos los grupos:', groupsError);
+          throw groupsError;
+        }
+
+        if (allGroupsData && allGroupsData.length > 0) {
+          // Verificar cuáles son los grupos donde el usuario es miembro
+          const { data: userMemberships } = await supabase
+            .from('group_members')
+            .select('group_id, role')
+            .eq('profile_id', profile.id);
+
+          const membershipMap = new Map(
+            (userMemberships || []).map((m: any) => [m.group_id, m.role])
+          );
+
+          const processedGroups: Group[] = allGroupsData.map((group: any) => ({
+            ...group,
+            is_member: membershipMap.has(group.id),
+            role: membershipMap.get(group.id) || null,
+            current_members: 0
+          }));
+
+          setGroups(processedGroups);
+          console.log('✅ Todos los grupos cargados exitosamente:', processedGroups.length);
+        } else {
+          setGroups([]);
+          console.log('ℹ️ No hay grupos públicos disponibles');
+        }
       }
     } catch (error: any) {
       console.error('❌ Error fetching groups:', error);

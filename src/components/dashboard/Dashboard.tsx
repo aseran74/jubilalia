@@ -293,7 +293,7 @@ const Dashboard: React.FC = () => {
                 >
                     <div className="grid grid-cols-2 gap-2">
                         <Link to="/dashboard/groups" className="bg-white/20 backdrop-blur text-white text-sm font-bold p-2 rounded-lg text-center hover:bg-white/30 transition">Mis Grupos</Link>
-                        <Link to="/dashboard/groups/explore" className="bg-white text-indigo-600 text-sm font-bold p-2 rounded-lg text-center shadow-sm hover:shadow-md transition">Explorar</Link>
+                        <Link to="/dashboard/groups?explore" className="bg-white text-indigo-600 text-sm font-bold p-2 rounded-lg text-center shadow-sm hover:shadow-md transition">Explorar</Link>
                     </div>
                 </MainCard>
 
@@ -315,7 +315,7 @@ const Dashboard: React.FC = () => {
                     icon={MagnifyingGlassIcon} 
                     gradient="from-blue-500 to-cyan-500"
                 >
-                     <Link to="/users" className="block w-full text-center bg-white text-cyan-700 font-bold py-2.5 rounded-xl shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 transition-all">
+                     <Link to="/dashboard/users" className="block w-full text-center bg-white text-cyan-700 font-bold py-2.5 rounded-xl shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 transition-all">
                         Buscar Compañeros
                      </Link>
                 </MainCard>
