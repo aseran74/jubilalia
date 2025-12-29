@@ -29,6 +29,8 @@ const AdminPropertyManagement: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'sale' | 'rental'>('all');
+  const [selectedProperties, setSelectedProperties] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
@@ -156,6 +158,88 @@ const AdminPropertyManagement: React.FC = () => {
     }
   };
 
+  const handleDeleteMultiple = async () => {
+    if (selectedProperties.size === 0) {
+      alert('Por favor, selecciona al menos una propiedad para eliminar');
+      return;
+    }
+
+    const count = selectedProperties.size;
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar ${count} ${count === 1 ? 'propiedad' : 'propiedades'}?`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const propertyIds = Array.from(selectedProperties);
+      
+      // Eliminar imágenes primero
+      const { error: imagesError } = await supabase
+        .from('property_images')
+        .delete()
+        .in('listing_id', propertyIds);
+
+      if (imagesError) {
+        console.error('Error deleting images:', imagesError);
+      }
+
+      // Eliminar amenidades
+      const { error: amenitiesError } = await supabase
+        .from('property_amenities')
+        .delete()
+        .in('listing_id', propertyIds);
+
+      if (amenitiesError) {
+        console.error('Error deleting amenities:', amenitiesError);
+      }
+
+      // Eliminar las propiedades
+      const { error: propertyError } = await supabase
+        .from('property_listings')
+        .delete()
+        .in('id', propertyIds);
+
+      if (propertyError) {
+        console.error('Error deleting properties:', propertyError);
+        alert('Error al eliminar las propiedades');
+        return;
+      }
+
+      // Actualizar la lista y limpiar selección
+      setProperties(prev => prev.filter(property => !selectedProperties.has(property.id)));
+      setSelectedProperties(new Set());
+      alert(`${count} ${count === 1 ? 'propiedad eliminada' : 'propiedades eliminadas'} exitosamente`);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al eliminar las propiedades');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProperties(new Set(filteredProperties.map(p => p.id)));
+    } else {
+      setSelectedProperties(new Set());
+    }
+  };
+
+  const handleSelectProperty = (propertyId: string, checked: boolean) => {
+    const newSelected = new Set(selectedProperties);
+    if (checked) {
+      newSelected.add(propertyId);
+    } else {
+      newSelected.delete(propertyId);
+    }
+    setSelectedProperties(newSelected);
+  };
+
+  // Resetear selección cuando cambia el filtro
+  useEffect(() => {
+    setSelectedProperties(new Set());
+  }, [filter]);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
@@ -221,6 +305,11 @@ const AdminPropertyManagement: React.FC = () => {
      : properties.filter(p => 
          filter === 'sale' ? p.listing_type === 'property_purchase' : p.listing_type === 'property_rental'
        );
+
+  const isAllSelected = filteredProperties.length > 0 && 
+    filteredProperties.every(p => selectedProperties.has(p.id));
+  const isIndeterminate = selectedProperties.size > 0 && 
+    selectedProperties.size < filteredProperties.length;
 
   return (
     <div className="space-y-6">
@@ -329,10 +418,20 @@ const AdminPropertyManagement: React.FC = () => {
 
       {/* Lista de propiedades */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-lg font-semibold text-gray-900">
             Propiedades ({filteredProperties.length})
           </h2>
+          {selectedProperties.size > 0 && (
+            <button
+              onClick={handleDeleteMultiple}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <TrashIcon className="w-4 h-4" />
+              {isDeleting ? 'Eliminando...' : `Eliminar ${selectedProperties.size} ${selectedProperties.size === 1 ? 'seleccionada' : 'seleccionadas'}`}
+            </button>
+          )}
         </div>
         
         {filteredProperties.length === 0 ? (
@@ -346,6 +445,20 @@ const AdminPropertyManagement: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      ref={(input) => {
+                        if (input) {
+                          input.indeterminate = isIndeterminate;
+                        }
+                      }}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      title={isAllSelected ? 'Deseleccionar todas' : 'Seleccionar todas'}
+                    />
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Propiedad
                   </th>
@@ -371,7 +484,18 @@ const AdminPropertyManagement: React.FC = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredProperties.map((property) => (
-                  <tr key={property.id} className="hover:bg-gray-50">
+                  <tr 
+                    key={property.id} 
+                    className={`hover:bg-gray-50 ${selectedProperties.has(property.id) ? 'bg-blue-50' : ''}`}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedProperties.has(property.id)}
+                        onChange={(e) => handleSelectProperty(property.id, e.target.checked)}
+                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900 line-clamp-1">

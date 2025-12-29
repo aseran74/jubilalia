@@ -11,6 +11,7 @@ import {
 import ImageUpload from '../dashboard/ImageUpload';
 import { SUPABASE_BUCKETS } from '../../config/supabase';
 import TailAdminDatePicker from '../common/TailAdminDatePicker';
+import LocationSelector from '../common/LocationSelector';
 
 interface PropertyRentalFormData {
   title: string;
@@ -141,6 +142,8 @@ const PropertyRentalForm: React.FC = () => {
     }
   }, [id, isEditing]);
 
+  const [locationCoordinates, setLocationCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+
   const [formData, setFormData] = useState<PropertyRentalFormData>({
     title: '',
     description: '',
@@ -213,6 +216,7 @@ const PropertyRentalForm: React.FC = () => {
   ];
 
   const propertyTypes = [
+    'Residencias',
     'Comunidad Coliving',
     'Apartamento',
     'Casa',
@@ -223,6 +227,25 @@ const PropertyRentalForm: React.FC = () => {
     'Chalet',
     'Finca'
   ];
+
+  const handleLocationSelect = (location: {
+    address: string;
+    city: string;
+    postal_code: string;
+    country: string;
+    coordinates?: { lat: number; lng: number };
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      address: location.address,
+      city: location.city,
+      country: location.country || 'España'
+    }));
+    
+    if (location.coordinates) {
+      setLocationCoordinates(location.coordinates);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -317,6 +340,8 @@ const PropertyRentalForm: React.FC = () => {
             address: formData.address,
             city: formData.city,
             country: formData.country,
+            latitude: locationCoordinates?.lat || null,
+            longitude: locationCoordinates?.lng || null,
             available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : null,
             available_until: formData.available_until ? formData.available_until.toISOString().split('T')[0] : null,
             bedrooms: parseInt(formData.bedrooms),
@@ -341,6 +366,8 @@ const PropertyRentalForm: React.FC = () => {
             address: formData.address,
             city: formData.city,
             country: formData.country,
+            latitude: locationCoordinates?.lat || null,
+            longitude: locationCoordinates?.lng || null,
             available_from: formData.available_from ? formData.available_from.toISOString().split('T')[0] : null,
             available_until: formData.available_until ? formData.available_until.toISOString().split('T')[0] : null,
             is_available: true,
@@ -777,48 +804,62 @@ const PropertyRentalForm: React.FC = () => {
                 2. Ubicación
               </h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Calle y número"
-                  />
-                  {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-                </div>
+              <div className="space-y-4">
+                <LocationSelector
+                  onLocationSelect={handleLocationSelect}
+                  placeholder="Buscar dirección, ciudad o barrio..."
+                  label="Buscar ubicación"
+                  required={true}
+                  error={errors.address || errors.city}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Dirección
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50"
+                      placeholder="Se completará automáticamente"
+                      readOnly
+                    />
+                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ciudad
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Madrid, Barcelona..."
-                  />
-                  {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Ciudad
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50"
+                      placeholder="Se completará automáticamente"
+                      readOnly
+                    />
+                    {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    País
-                  </label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      País
+                    </label>
+                    <input
+                      type="text"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50"
+                      placeholder="España"
+                      readOnly
+                    />
+                  </div>
                 </div>
               </div>
             </div>

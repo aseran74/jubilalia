@@ -284,8 +284,38 @@ const PeopleSearch: React.FC = () => {
               geocoded = true;
               successCount++;
               console.log(`✅ ${profile.full_name}: ${distance_km.toFixed(2)} km (coordenadas guardadas)`);
+            } else if (profile.city) {
+              // Si no hay coordenadas pero hay ciudad, intentar geocodificar la ciudad
+              try {
+                const geocoder = new window.google.maps.Geocoder();
+                const cityAddress = `${profile.city}, ${profile.country || 'España'}`;
+                
+                const result = await new Promise<any>((resolve, reject) => {
+                  geocoder.geocode({ address: cityAddress }, (results: any, status: any) => {
+                    if (status === 'OK' && results[0]) {
+                      resolve(results[0]);
+                    } else {
+                      reject(status);
+                    }
+                  });
+                });
+
+                if (result) {
+                  const cityLat = result.geometry.location.lat();
+                  const cityLng = result.geometry.location.lng();
+                  distance_km = calculateDistance(searchLat, searchLng, cityLat, cityLng);
+                  geocoded = true;
+                  successCount++;
+                  console.log(`✅ ${profile.full_name}: ${distance_km.toFixed(2)} km (geocodificado desde ciudad: ${profile.city})`);
+                }
+              } catch (geocodeError) {
+                console.log(`⚠️ ${profile.full_name}: No se pudo geocodificar ciudad ${profile.city}`);
+                // Incluir de todas formas, pero sin distancia calculada
+                geocoded = false;
+                failCount++;
+              }
             } else {
-              console.log(`⚠️ ${profile.full_name}: Sin coordenadas guardadas`);
+              console.log(`⚠️ ${profile.full_name}: Sin coordenadas ni ciudad`);
               failCount++;
             }
 
@@ -318,14 +348,22 @@ const PeopleSearch: React.FC = () => {
 
           console.log(`📊 Perfiles con coordenadas: ${successCount}, sin coordenadas: ${failCount} de ${data.length} total`);
 
-          // Filtrar por distancia máxima Y que tengan coordenadas
+          // Filtrar por distancia máxima
+          // Incluir usuarios con coordenadas dentro del rango Y usuarios sin coordenadas (para que no se pierdan)
           const filteredByDistance = profilesWithDistance.filter(
-            profile => profile.geocoded && profile.distance_km <= filters.maxDistance
+            profile => {
+              // Si tiene coordenadas, verificar que esté dentro del rango
+              if (profile.geocoded) {
+                return profile.distance_km <= filters.maxDistance;
+              }
+              // Si no tiene coordenadas, incluirlo de todas formas (no excluir por falta de datos)
+              return true;
+            }
           );
 
-          console.log(`✅ Perfiles dentro de ${filters.maxDistance} km: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
-          console.log(`📍 Perfiles con coordenadas: ${successCount}`);
-          console.log(`❌ Perfiles excluidos (sin coordenadas o fuera de rango): ${profilesWithDistance.length - filteredByDistance.length}`);
+          console.log(`✅ Perfiles dentro de ${filters.maxDistance} km o sin coordenadas: ${filteredByDistance.length} de ${profilesWithDistance.length}`);
+          console.log(`📍 Perfiles con coordenadas dentro del rango: ${filteredByDistance.filter(p => p.geocoded).length}`);
+          console.log(`📍 Perfiles sin coordenadas (incluidos): ${filteredByDistance.filter(p => !p.geocoded).length}`);
 
           setSearchResults(filteredByDistance);
           setFilteredResults(filteredByDistance);

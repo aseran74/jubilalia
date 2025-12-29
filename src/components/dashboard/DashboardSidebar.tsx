@@ -118,6 +118,7 @@ const DashboardSidebar: React.FC = () => {
       items: [
         { name: '¿Qué es Coliving?', href: '/coliving', icon: InformationCircleIcon },
         { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+        { name: 'Habitaciones - Publicar', href: '/dashboard/rooms/create', icon: PlusIcon },
         { name: 'Post habitaciones', href: '/dashboard/rooms/posts', icon: DocumentTextIcon },
         { name: 'Alquiler - Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
         { name: 'Alquiler - Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },

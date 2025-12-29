@@ -46,8 +46,19 @@ export const useGoogleMaps = () => {
       setError(null);
       window.googleMapsLoaded = true;
 
+      const apiKey = import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+      console.log('🔑 Google Places API Key:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NO ENCONTRADA');
+      
+      if (!apiKey) {
+        setError('VITE_GOOGLE_PLACES_API_KEY no está configurada en el archivo .env');
+        setIsLoading(false);
+        window.googleMapsLoaded = false;
+        console.error('❌ VITE_GOOGLE_PLACES_API_KEY no está configurada');
+        return;
+      }
+
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_PLACES_API_KEY}&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       script.async = true;
       script.defer = true;
       
@@ -59,15 +70,17 @@ export const useGoogleMaps = () => {
           hasGoogle: !!window.google,
           hasMaps: !!(window.google && window.google.maps),
           hasPlaces: !!(window.google && window.google.maps && window.google.maps.places),
-          hasPlacesService: !!(window.google && window.google.maps && window.google.maps.places && window.google.maps.places.PlacesService)
+          hasPlacesService: !!(window.google && window.google.maps && window.google.maps.places && window.google.maps.places.PlacesService),
+          hasAutocomplete: !!(window.google && window.google.maps && window.google.maps.places && window.google.maps.places.Autocomplete)
         });
       };
 
-      script.onerror = () => {
-        setError('Error cargando Google Maps API');
+      script.onerror = (error) => {
+        setError('Error cargando Google Maps API. Verifica que la API key sea válida y tenga habilitado Places API.');
         setIsLoading(false);
         window.googleMapsLoaded = false;
-        console.error('❌ Error cargando Google Maps API');
+        console.error('❌ Error cargando Google Maps API:', error);
+        console.error('🔑 API Key usada:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NO ENCONTRADA');
       };
 
       document.head.appendChild(script);
