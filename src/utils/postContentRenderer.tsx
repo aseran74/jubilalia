@@ -1,8 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 
 // Función para renderizar el contenido del post y hacer clickable las propiedades relacionadas
-export const renderPostContent = (content: string, navigate: (path: string) => void): (string | JSX.Element)[] => {
+export const renderPostContent = (content: string, navigate: (path: string) => void): (string | React.ReactElement)[] => {
   if (!content) return [content];
   
   // Patrón para detectar: [Propiedad relacionada: Título - Ubicación | ID:xxx | TYPE:rental/sale]
@@ -11,7 +10,7 @@ export const renderPostContent = (content: string, navigate: (path: string) => v
   // Patrón para formato antiguo sin ID: [Propiedad relacionada: Título - Ubicación]
   const propertyPatternOld = /\[Propiedad relacionada: ([^\]]+)\]/g;
   
-  const parts: (string | JSX.Element)[] = [];
+  const parts: (string | React.ReactElement)[] = [];
   let lastIndex = 0;
   let match;
   let keyCounter = 0;

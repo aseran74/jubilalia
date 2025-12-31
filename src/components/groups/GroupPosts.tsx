@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import { renderPostContent } from '../../utils/postContentRenderer';
 import { 
   HeartIcon,
   ChatBubbleLeftRightIcon,
@@ -366,7 +368,7 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h3>
             )}
             <p className="text-gray-700 mb-4">
-              {renderPostContent(post.content, navigate).map((part, index) => 
+              {renderPostContent(post.content, navigate).map((part: string | React.ReactElement, index: number) => 
                 typeof part === 'string' ? <span key={index}>{part}</span> : part
               )}
             </p>

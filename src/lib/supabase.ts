@@ -147,13 +147,8 @@ export const updateUserProfile = async (id: string, updates: Partial<UserProfile
 const getRedirectUrl = () => {
   const origin = window.location.origin;
   
-  // En desarrollo local, usar localhost
-  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-    return `${origin}/auth/callback`;
-  }
-  
-  // En producción, usar la URL de Vercel
-  return 'https://jubilalia.vercel.app/auth/callback';
+  // Siempre usar el dominio actual (jubilalia.com o jubilalia.vercel.app)
+  return `${origin}/auth/callback`;
 };
 
 // Función para iniciar sesión con Google

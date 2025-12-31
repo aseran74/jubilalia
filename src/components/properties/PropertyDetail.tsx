@@ -15,7 +15,7 @@ import {
   ArrowTopRightOnSquareIcon,
   PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
-import { CheckCircle, X } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import RoomDetailMap from '../maps/RoomDetailMap';
 import ImageGallery from '../ImageGallery';
 import NearbyPlaces from '../common/NearbyPlaces';
@@ -422,10 +422,7 @@ const PropertyDetail: React.FC = () => {
       await fetchRelatedPosts();
       
       // Mostrar mensaje de éxito
-      setShowSuccessMessage(true);
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 4000);
+      alert('Post publicado exitosamente');
     } catch (error: any) {
       console.error('Error creating post:', error);
       alert('Error al publicar el post: ' + (error.message || 'Error desconocido'));
