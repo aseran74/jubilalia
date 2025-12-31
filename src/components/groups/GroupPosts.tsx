@@ -43,6 +43,7 @@ interface GroupPostsProps {
 }
 
 const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const [posts, setPosts] = useState<GroupPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -364,7 +365,11 @@ const GroupPosts: React.FC<GroupPostsProps> = ({ groupId }) => {
             {post.title && (
               <h3 className="text-lg font-semibold text-gray-900 mb-2">{post.title}</h3>
             )}
-            <p className="text-gray-700 mb-4">{post.content}</p>
+            <p className="text-gray-700 mb-4">
+              {renderPostContent(post.content, navigate).map((part, index) => 
+                typeof part === 'string' ? <span key={index}>{part}</span> : part
+              )}
+            </p>
 
             {/* Imagen del post */}
             {post.image_url && (

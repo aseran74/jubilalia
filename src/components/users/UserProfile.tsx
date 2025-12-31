@@ -13,7 +13,10 @@ import {
   ChatBubbleLeftRightIcon,
   UserPlusIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  ShareIcon,
+  LinkIcon,
+  ClipboardDocumentCheckIcon
 } from '@heroicons/react/24/outline';
 
 interface UserProfile {
@@ -46,6 +49,7 @@ const UserProfile: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [friendshipStatus, setFriendshipStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'blocked' | null>(null);
   const [loadingFriendship, setLoadingFriendship] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -337,6 +341,50 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  const getProfileUrl = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/dashboard/users/${id}`;
+  };
+
+  const copyProfileLink = async () => {
+    if (!id || !profile) return;
+
+    const profileUrl = getProfileUrl();
+    // Crear texto personalizado para compartir
+    let shareText = '';
+    
+    if (profile.bio) {
+      // Si hay bio, usar el bio y agregar la URL al final
+      shareText = `${profile.bio} Contacta conmigo aquí: ${profileUrl}`;
+    } else {
+      // Si no hay bio, crear un texto genérico con el nombre
+      shareText = `Hola, soy ${profile.full_name}${profile.city ? ` de ${profile.city}` : ''}. Contacta conmigo aquí: ${profileUrl}`;
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      // Fallback para navegadores que no soportan clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -430,6 +478,20 @@ const UserProfile: React.FC = () => {
                       )}
                       <div className="text-sm text-gray-500 mt-1">
                         Miembro desde {formatDate(profile.created_at)}
+                      </div>
+                      {/* URL del perfil clickable */}
+                      <div className="mt-3">
+                        <a
+                          href={getProfileUrl()}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            window.open(getProfileUrl(), '_blank');
+                          }}
+                          className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors break-all"
+                        >
+                          <LinkIcon className="w-4 h-4 mr-1 flex-shrink-0" />
+                          <span className="underline">{getProfileUrl()}</span>
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -600,6 +662,27 @@ const UserProfile: React.FC = () => {
                 >
                   <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2" />
                   Enviar mensaje
+                </button>
+
+                <button
+                  onClick={copyProfileLink}
+                  className={`w-full flex items-center justify-center px-4 py-2 rounded-md transition-colors ${
+                    copied
+                      ? 'bg-green-600 text-white hover:bg-green-700'
+                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <ClipboardDocumentCheckIcon className="w-4 h-4 mr-2" />
+                      ¡Copiado!
+                    </>
+                  ) : (
+                    <>
+                      <ShareIcon className="w-4 h-4 mr-2" />
+                      Compartir perfil
+                    </>
+                  )}
                 </button>
               </div>
             </div>

@@ -28,6 +28,8 @@ interface PropertySaleFormData {
   construction_year: string;
   property_condition: string;
   parking_spaces: string;
+  recommended_occupants: string;
+  price_per_person: string;
   amenities: string[];
   images: string[];
   available_from: Date | null;
@@ -123,6 +125,8 @@ const PropertySaleForm: React.FC = () => {
             construction_year: propertyData.construction_year?.toString() || '',
             property_condition: propertyData.property_condition || '',
             parking_spaces: propertyData.parking_spaces?.toString() || '',
+            recommended_occupants: propertyData.recommended_occupants?.toString() || '',
+            price_per_person: propertyData.price_per_person?.toString() || '',
             amenities: [], // Las amenities se manejan por separado
             images: imagesData?.map(img => img.image_url) || [],
             available_from: propertyData.available_from ? new Date(propertyData.available_from) : null,
@@ -173,6 +177,8 @@ const PropertySaleForm: React.FC = () => {
     construction_year: '',
     property_condition: '',
     parking_spaces: '',
+    recommended_occupants: '',
+    price_per_person: '',
     amenities: [],
     images: [],
     available_from: null,
@@ -383,7 +389,9 @@ const PropertySaleForm: React.FC = () => {
             land_area: formData.land_area ? parseFloat(formData.land_area) : null,
             construction_year: parseInt(formData.construction_year),
             property_condition: formData.property_condition,
-            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0
+            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
+            recommended_occupants: formData.recommended_occupants ? parseInt(formData.recommended_occupants) : null,
+            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null
           })
           .eq('id', id);
 
@@ -413,7 +421,9 @@ const PropertySaleForm: React.FC = () => {
             land_area: formData.land_area ? parseFloat(formData.land_area) : null,
             construction_year: parseInt(formData.construction_year),
             property_condition: formData.property_condition,
-            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0
+            parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
+            recommended_occupants: formData.recommended_occupants ? parseInt(formData.recommended_occupants) : null,
+            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null
           })
           .select()
           .single();
@@ -1077,6 +1087,38 @@ const PropertySaleForm: React.FC = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="1"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nº de personas recomendado
+                  </label>
+                  <input
+                    type="number"
+                    name="recommended_occupants"
+                    value={formData.recommended_occupants}
+                    onChange={handleInputChange}
+                    min="1"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Ej: 8"
+                  />
+                  {errors.recommended_occupants && <p className="text-red-500 text-sm mt-1">{errors.recommended_occupants}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Precio por persona (€/persona)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="price_per_person"
+                    value={formData.price_per_person}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Ej: 130"
+                  />
+                  {errors.price_per_person && <p className="text-red-500 text-sm mt-1">{errors.price_per_person}</p>}
                 </div>
               </div>
             </div>

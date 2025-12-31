@@ -85,13 +85,17 @@ const PostList: React.FC = () => {
     try {
       setLoading(true);
 
-      // Obtener IDs de categorías de Coliving para excluirlas
+      // Obtener ID de categoría "Busco habitación" para excluirla (pero incluir Coliving alquiler y Venta)
       const { data: colivingCategories } = await supabase
         .from('post_categories')
-        .select('id')
+        .select('id, name')
         .in('name', ['Busco habitación', 'Coliving alquiler', 'Coliving Venta']);
 
-      const colivingCategoryIds = new Set(colivingCategories?.map(cat => cat.id) || []);
+      const excludeCategoryIds = new Set(
+        colivingCategories
+          ?.filter(cat => cat.name === 'Busco habitación')
+          .map(cat => cat.id) || []
+      );
 
       let query = supabase
         .from('posts')
@@ -144,10 +148,10 @@ const PostList: React.FC = () => {
 
       if (error) throw error;
 
-      // Filtrar posts de Coliving y procesar para agregar información de likes
+      // Filtrar solo "Busco habitación" pero incluir "Coliving alquiler" y "Coliving Venta"
       const filteredData = (data || []).filter(post => {
-        // Excluir posts con categorías de Coliving
-        return !colivingCategoryIds.has(post.category_id);
+        // Excluir solo posts de "Busco habitación", pero incluir los de Coliving alquiler y Venta
+        return !excludeCategoryIds.has(post.category_id);
       });
 
       const postsWithUserData = await Promise.all(

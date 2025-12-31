@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Briefcase, X, ChevronLeft, ChevronRight, Heart, Music, Camera, BookOpen, Gamepad2, Dumbbell, UtensilsCrossed, Film, Plane, Car, Coffee, Palette, TreePine, Waves, Mountain, UserPlus, Check, XCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, Home, Users, ArrowLeft, Briefcase, X, ChevronLeft, ChevronRight, Heart, Music, Camera, BookOpen, Gamepad2, Dumbbell, UtensilsCrossed, Film, Plane, Car, Coffee, Palette, TreePine, Waves, Mountain, UserPlus, Check, XCircle, Share2, Link as LinkIcon, ClipboardCheck, Trash2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import UserContent from '../profile/UserContent';
 
@@ -30,7 +30,7 @@ interface Person {
 const PersonDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { profile: currentProfile } = useAuth();
+  const { profile: currentProfile, isAdmin } = useAuth();
   const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(true);
   const [interests, setInterests] = useState<string[]>([]);
@@ -39,6 +39,9 @@ const PersonDetail: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [friendshipStatus, setFriendshipStatus] = useState<'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'blocked' | null>(null);
   const [loadingFriendship, setLoadingFriendship] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -279,6 +282,110 @@ const PersonDetail: React.FC = () => {
     });
   };
 
+  const getProfileUrl = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/dashboard/users/${id}`;
+  };
+
+  const copyProfileLink = async () => {
+    if (!id || !person) return;
+
+    const profileUrl = getProfileUrl();
+    // Crear texto personalizado para compartir
+    let shareText = '';
+    
+    if (person.bio) {
+      // Si hay bio, usar el bio y agregar la URL al final
+      shareText = `${person.bio} Contacta conmigo aquí: ${profileUrl}`;
+    } else {
+      // Si no hay bio, crear un texto genérico con el nombre
+      shareText = `Hola, soy ${person.full_name}${person.city ? ` de ${person.city}` : ''}. Contacta conmigo aquí: ${profileUrl}`;
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      // Fallback para navegadores que no soportan clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!id || !isAdmin) return;
+    
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar el perfil de ${person?.full_name}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      
+      // Eliminar relaciones primero (amistades, mensajes, etc.)
+      // Eliminar amistades
+      await supabase
+        .from('friendships')
+        .delete()
+        .or(`user_id.eq.${id},friend_id.eq.${id}`);
+      
+      // Eliminar favoritos
+      await supabase
+        .from('user_favorites')
+        .delete()
+        .or(`user_id.eq.${id},favorite_user_id.eq.${id}`);
+      
+      // Eliminar posts del usuario
+      await supabase
+        .from('posts')
+        .delete()
+        .eq('profile_id', id);
+      
+      // Eliminar comentarios del usuario
+      await supabase
+        .from('post_comments')
+        .delete()
+        .eq('profile_id', id);
+      
+      // Eliminar likes del usuario
+      await supabase
+        .from('post_likes')
+        .delete()
+        .eq('profile_id', id);
+      
+      // Eliminar el perfil
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      alert('Usuario eliminado correctamente');
+      navigate('/dashboard/users');
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Error al eliminar el usuario');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   const sendFriendRequest = async () => {
     if (!currentProfile || !id || loadingFriendship) return;
 
@@ -477,13 +584,25 @@ const PersonDetail: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <button
-            onClick={() => navigate('/dashboard/users')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Volver a buscar gente
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate('/dashboard/users')}
+              className="flex items-center text-gray-600 hover:text-gray-900"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Volver a buscar gente
+            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting}
+                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {isDeleting ? 'Eliminando...' : 'Eliminar Usuario (Admin)'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Perfil */}
@@ -512,6 +631,21 @@ const PersonDetail: React.FC = () => {
                     {person.gender === 'male' ? 'Hombre' : person.gender === 'female' ? 'Mujer' : 'Otro'}
                   </span>
                 )}
+                
+                {/* URL del perfil clickable */}
+                <div className="mt-3">
+                  <a
+                    href={getProfileUrl()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.open(getProfileUrl(), '_blank');
+                    }}
+                    className="inline-flex items-center text-sm text-white hover:text-gray-200 transition-colors break-all bg-white bg-opacity-10 px-3 py-1 rounded-lg"
+                  >
+                    <LinkIcon className="w-4 h-4 mr-1 flex-shrink-0" />
+                    <span className="underline">{getProfileUrl()}</span>
+                  </a>
+                </div>
                 
                 {/* Intereses */}
                 {interests.length > 0 && (
@@ -708,7 +842,7 @@ const PersonDetail: React.FC = () => {
             {/* Opciones de contacto */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Contactar</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {person.whatsapp && (
                   <button
                     onClick={handleWhatsAppClick}
@@ -741,6 +875,30 @@ const PersonDetail: React.FC = () => {
                   <Mail className="w-6 h-6" />
                   <span className="text-sm font-medium">Chat</span>
                 </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    copyProfileLink();
+                  }}
+                  className={`flex flex-col items-center justify-center gap-2 px-4 py-4 text-white rounded-lg transition-colors cursor-pointer ${
+                    copied
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : 'bg-orange-600 hover:bg-orange-700'
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <ClipboardCheck className="w-6 h-6" />
+                      <span className="text-sm font-medium">¡Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-6 h-6" />
+                      <span className="text-sm font-medium">Compartir</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -753,6 +911,36 @@ const PersonDetail: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirmar eliminación
+            </h3>
+            <p className="text-gray-700 mb-6">
+              ¿Estás seguro de que quieres eliminar el perfil de <strong>{person?.full_name}</strong>? 
+              Esta acción eliminará todos los datos asociados y no se puede deshacer.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Galería */}
       {galleryOpen && (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { renderPostContent } from '../../utils/postContentRenderer';
 import { supabase } from '../../lib/supabase';
 import { 
   FileText, 
@@ -346,7 +347,11 @@ const UserContent: React.FC<UserContentProps> = ({ userId }) => {
                     <p className="text-gray-600 mb-4">{post.excerpt}</p>
                   )}
                   <div className="prose max-w-none mb-4">
-                    <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
+                    <p className="text-gray-700 whitespace-pre-wrap">
+                      {renderPostContent(post.content, navigate).map((part, index) => 
+                        typeof part === 'string' ? <span key={index}>{part}</span> : part
+                      )}
+                    </p>
                   </div>
                   {post.featured_image_url && (
                     <img

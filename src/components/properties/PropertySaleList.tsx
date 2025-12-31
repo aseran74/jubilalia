@@ -14,6 +14,8 @@ interface PropertySale {
   city: string;
   price: number;
   available_from: string;
+  recommended_occupants?: number;
+  price_per_person?: number;
   purchase_requirements: {
     bedrooms: number;
     bathrooms: number;
@@ -72,7 +74,9 @@ const PropertySaleList: React.FC = () => {
           land_area,
           construction_year,
           property_condition,
-          parking_spaces
+          parking_spaces,
+          recommended_occupants,
+          price_per_person
         `)
         .eq('listing_type', 'property_purchase')
         .eq('is_available', true);
@@ -137,6 +141,8 @@ const PropertySaleList: React.FC = () => {
           city: property.city,
           price: property.price,
           available_from: property.available_from,
+          recommended_occupants: property.recommended_occupants,
+          price_per_person: property.price_per_person,
           purchase_requirements: {
             ...requirements,
             bedrooms: property.bedrooms || requirements.bedrooms || 0,
@@ -394,6 +400,11 @@ const PropertySaleList: React.FC = () => {
                 <div>
                   <div className="text-2xl font-bold text-green-600">{formatPrice(property.price)}</div>
                   <div className="text-xs text-gray-500 mt-0.5">Precio de venta</div>
+                  {property.price_per_person && (
+                    <div className="text-xs font-medium text-blue-600 mt-1">
+                      {property.price_per_person.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€/persona
+                    </div>
+                  )}
                 </div>
                 <div className="text-right text-xs text-gray-500">
                   <div className="flex items-center gap-1 justify-end">

@@ -14,6 +14,8 @@ interface PropertyRental {
   city: string;
   price: number;
   available_from: string;
+  recommended_occupants?: number;
+  price_per_person?: number;
   rental_requirements: {
     bedrooms: number;
     bathrooms: number;
@@ -34,7 +36,7 @@ const PropertyRentalList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 10000 });
   const [bedrooms, setBedrooms] = useState(0);
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -70,7 +72,9 @@ const PropertyRentalList: React.FC = () => {
           bedrooms,
           bathrooms,
           total_area,
-          max_occupants
+          max_occupants,
+          recommended_occupants,
+          price_per_person
         `)
         .eq('listing_type', 'property_rental')
         .eq('is_available', true);
@@ -175,6 +179,8 @@ const PropertyRentalList: React.FC = () => {
           city: property.city,
           price: property.price,
           available_from: property.available_from,
+          recommended_occupants: property.recommended_occupants,
+          price_per_person: property.price_per_person,
           rental_requirements: {
             ...requirements,
             bedrooms: property.bedrooms || requirements.bedrooms || 0,
@@ -398,6 +404,11 @@ const PropertyRentalList: React.FC = () => {
                     {formatPrice(property.price)}
                   </div>
                   <div className="text-sm text-gray-500">por mes</div>
+                  {property.price_per_person && (
+                    <div className="text-sm font-medium text-blue-600 mt-1">
+                      {property.price_per_person.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€/mes por persona
+                    </div>
+                  )}
                 </div>
                 <div className="text-right text-sm text-gray-500">
                   <div>Disponible desde</div>
@@ -454,7 +465,7 @@ const PropertyRentalList: React.FC = () => {
                 setSelectedAmenities([]);
                 setBedrooms(0);
                 setBathrooms(0);
-                setPriceRange({ min: 0, max: 5000 });
+                setPriceRange({ min: 0, max: 10000 });
               }}
               className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
             >

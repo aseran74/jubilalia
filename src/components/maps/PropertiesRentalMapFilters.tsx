@@ -156,7 +156,7 @@ const PropertiesRentalMapFilters: React.FC<PropertiesRentalMapFiltersProps> = ({
               <input
                 type="range"
                 min="0"
-                max="5000"
+                max="10000"
                 step="100"
                 value={localFilters.maxPrice}
                 onChange={(e) => {

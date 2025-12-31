@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
+import { renderPostContent } from '../../utils/postContentRenderer';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -65,6 +67,7 @@ interface Comment {
 const PostDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -395,24 +398,26 @@ const PostDetail: React.FC = () => {
           Volver a Posts
         </button>
 
-        {currentUser && currentUser.id === post.author.id && (
+        {(currentUser && currentUser.id === post.author.id) || isAdmin ? (
           <div className="flex items-center space-x-2">
-            <button
-              onClick={() => navigate(`/dashboard/posts/${id}/edit`)}
-              className="px-4 py-2 text-blue-600 hover:text-blue-700 transition-colors flex items-center"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Editar
-            </button>
+            {currentUser && currentUser.id === post.author.id && (
+              <button
+                onClick={() => navigate(`/dashboard/posts/${id}/edit`)}
+                className="px-4 py-2 text-blue-600 hover:text-blue-700 transition-colors flex items-center"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Editar
+              </button>
+            )}
             <button
               onClick={() => setShowDeleteConfirm(true)}
               className="px-4 py-2 text-red-600 hover:text-red-700 transition-colors flex items-center"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              Eliminar
+              {isAdmin && currentUser?.id !== post.author.id ? 'Eliminar (Admin)' : 'Eliminar'}
             </button>
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* Contenido del post */}
@@ -517,7 +522,9 @@ const PostDetail: React.FC = () => {
           {/* Contenido del post */}
           <div className="prose prose-lg max-w-none mb-8">
             <div className="whitespace-pre-wrap font-mono text-gray-800 leading-relaxed">
-              {post.content}
+              {renderPostContent(post.content, navigate).map((part, index) => 
+                typeof part === 'string' ? <span key={index}>{part}</span> : part
+              )}
             </div>
           </div>
         </div>

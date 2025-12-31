@@ -27,6 +27,8 @@ interface PropertyRentalFormData {
   bathrooms: string;
   total_area: string;
   max_occupants: string;
+  recommended_occupants: string;
+  price_per_person: string;
   amenities: string[];
   images: string[];
   // Campos específicos para Coliving
@@ -119,6 +121,8 @@ const PropertyRentalForm: React.FC = () => {
             bathrooms: propertyData.bathrooms?.toString() || '',
             total_area: propertyData.total_area?.toString() || '',
             max_occupants: propertyData.max_occupants?.toString() || '',
+            recommended_occupants: propertyData.recommended_occupants?.toString() || '',
+            price_per_person: propertyData.price_per_person?.toString() || '',
             amenities: [], // Las amenities se manejan por separado
             images: imagesData?.map(img => img.image_url) || [],
             // Datos de coliving
@@ -158,6 +162,8 @@ const PropertyRentalForm: React.FC = () => {
     bathrooms: '',
     total_area: '',
     max_occupants: '',
+    recommended_occupants: '',
+    price_per_person: '',
     amenities: [],
     images: [],
     // Campos específicos para Coliving
@@ -347,7 +353,9 @@ const PropertyRentalForm: React.FC = () => {
             bedrooms: parseInt(formData.bedrooms),
             bathrooms: parseInt(formData.bathrooms),
             total_area: parseFloat(formData.total_area),
-            property_type: formData.property_type
+            property_type: formData.property_type,
+            recommended_occupants: formData.recommended_occupants ? parseInt(formData.recommended_occupants) : null,
+            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null
           })
           .eq('id', id);
 
@@ -374,7 +382,9 @@ const PropertyRentalForm: React.FC = () => {
             bedrooms: parseInt(formData.bedrooms),
             bathrooms: parseInt(formData.bathrooms),
             total_area: parseFloat(formData.total_area),
-            property_type: formData.property_type
+            property_type: formData.property_type,
+            recommended_occupants: formData.recommended_occupants ? parseInt(formData.recommended_occupants) : null,
+            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null
           })
           .select()
           .single();
@@ -934,6 +944,38 @@ const PropertyRentalForm: React.FC = () => {
                     placeholder="4"
                   />
                   {errors.max_occupants && <p className="text-red-500 text-sm mt-1">{errors.max_occupants}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Personas/recomendas
+                  </label>
+                  <input
+                    type="number"
+                    name="recommended_occupants"
+                    value={formData.recommended_occupants}
+                    onChange={handleInputChange}
+                    min="1"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Ej: 8"
+                  />
+                  {errors.recommended_occupants && <p className="text-red-500 text-sm mt-1">{errors.recommended_occupants}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Precio por persona (€/mes)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="price_per_person"
+                    value={formData.price_per_person}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Ej: 130"
+                  />
+                  {errors.price_per_person && <p className="text-red-500 text-sm mt-1">{errors.price_per_person}</p>}
                 </div>
               </div>
             </div>

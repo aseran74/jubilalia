@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 import { 
   ArrowLeftIcon,
   MapPinIcon,
@@ -11,9 +12,10 @@ import {
   CalendarIcon,
   PhoneIcon,
   EnvelopeIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 import RoomDetailMap from '../maps/RoomDetailMap';
 import ImageGallery from '../ImageGallery';
 import NearbyPlaces from '../common/NearbyPlaces';
@@ -36,6 +38,8 @@ interface Property {
   status: string;
   author_id: string;
   url?: string;
+  recommended_occupants?: number;
+  price_per_person?: number;
   coliving_data?: {
     total_spots: number;
     available_spots: number;
@@ -63,16 +67,134 @@ interface Author {
 const PropertyDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [author, setAuthor] = useState<Author | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [postText, setPostText] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+  const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+  const fetchRelatedPosts = async () => {
+    if (!property) return;
+
+    setLoadingPosts(true);
+    try {
+      // Determinar categorías según el tipo de propiedad
+      const isRental = window.location.pathname.includes('/rental');
+      const categoryNames = isRental ? ['Coliving alquiler'] : ['Coliving Venta'];
+      
+      // Obtener IDs de categorías
+      const { data: categories } = await supabase
+        .from('post_categories')
+        .select('id')
+        .in('name', categoryNames);
+
+      if (!categories || categories.length === 0) {
+        setRelatedPosts([]);
+        return;
+      }
+
+      const categoryIds = categories.map(cat => cat.id);
+
+      // Buscar posts relacionados:
+      // 1. Que tengan el título de la propiedad en el título del post
+      // 2. O que tengan el título de la propiedad en el contenido del post
+      // 3. Y que sean de las categorías de Coliving
+      const titlePattern = `%${property.title}%`;
+      
+      // Hacer dos consultas separadas y combinar resultados
+      const [titlePosts, contentPosts] = await Promise.all([
+        supabase
+          .from('posts')
+          .select(`
+            id,
+            title,
+            content,
+            excerpt,
+            published_at,
+            created_at,
+            tags,
+            category:post_categories(id, name, color, icon),
+            author:profiles!posts_profile_id_fkey(
+              id,
+              full_name,
+              avatar_url
+            )
+          `)
+          .in('category_id', categoryIds)
+          .eq('is_published', true)
+          .ilike('title', titlePattern)
+          .order('published_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('posts')
+          .select(`
+            id,
+            title,
+            content,
+            excerpt,
+            published_at,
+            created_at,
+            tags,
+            category:post_categories(id, name, color, icon),
+            author:profiles!posts_profile_id_fkey(
+              id,
+              full_name,
+              avatar_url
+            )
+          `)
+          .in('category_id', categoryIds)
+          .eq('is_published', true)
+          .ilike('content', titlePattern)
+          .order('published_at', { ascending: false })
+          .limit(10)
+      ]);
+
+      // Combinar resultados y eliminar duplicados
+      const allPosts = [...(titlePosts.data || []), ...(contentPosts.data || [])];
+      const uniquePosts = Array.from(
+        new Map(allPosts.map(post => [post.id, post])).values()
+      )
+        .sort((a, b) => {
+          const dateA = new Date(a.published_at || a.created_at).getTime();
+          const dateB = new Date(b.published_at || b.created_at).getTime();
+          return dateB - dateA;
+        })
+        .slice(0, 10);
+
+      const error = titlePosts.error || contentPosts.error;
+      const posts = uniquePosts;
+
+      if (error) {
+        console.error('Error fetching related posts:', error);
+        setRelatedPosts([]);
+        return;
+      }
+
+      setRelatedPosts(posts || []);
+    } catch (error) {
+      console.error('Error fetching related posts:', error);
+      setRelatedPosts([]);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
       fetchProperty();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (property) {
+      fetchRelatedPosts();
+    }
+  }, [property]);
 
   const fetchProperty = async () => {
     try {
@@ -231,6 +353,85 @@ const PropertyDetail: React.FC = () => {
       'studio': 'Estudio'
     };
     return types[type] || type;
+  };
+
+  const handleCreatePost = async () => {
+    if (!postText.trim() || !profile || !property) return;
+
+    setIsPosting(true);
+    try {
+      // Usar una categoría existente según el tipo de propiedad
+      // Determinar el tipo de listing desde la URL o propiedad
+      const isRental = window.location.pathname.includes('/rental');
+      const isSale = window.location.pathname.includes('/sale');
+      
+      let categoryName = 'Misceláneo'; // Categoría por defecto
+      if (isRental) {
+        categoryName = 'Coliving alquiler';
+      } else if (isSale) {
+        categoryName = 'Coliving Venta';
+      }
+
+      // Buscar la categoría existente
+      let categoryId: string | null = null;
+      const { data: category, error: categoryError } = await supabase
+        .from('post_categories')
+        .select('id')
+        .eq('name', categoryName)
+        .single();
+
+      if (categoryError || !category) {
+        // Si no encontramos la categoría específica, usar Misceláneo
+        const { data: miscCategory } = await supabase
+          .from('post_categories')
+          .select('id')
+          .eq('name', 'Misceláneo')
+          .single();
+        
+        if (!miscCategory) {
+          throw new Error('No se pudo encontrar una categoría válida para el post');
+        }
+        
+        categoryId = miscCategory.id;
+      } else {
+        categoryId = category.id;
+      }
+
+      // Crear el post en la tabla de posts
+      // Incluir información de la propiedad en el contenido del post con el ID para poder hacerlo clickable
+      const propertyType = isRental ? 'rental' : 'sale';
+      const postContent = `${postText.trim()}\n\n[Propiedad relacionada: ${property.title} - ${property.location} | ID:${property.id} | TYPE:${propertyType}]`;
+      
+      const { error: postError } = await supabase
+        .from('posts')
+        .insert({
+          profile_id: profile.id,
+          title: `Post sobre ${property.title}`,
+          content: postContent,
+          excerpt: postText.trim().substring(0, 200) + '...',
+          category_id: categoryId,
+          tags: ['propiedad', 'coliving', property.property_type.toLowerCase()],
+          is_published: true,
+          published_at: new Date().toISOString()
+        });
+
+      if (postError) throw postError;
+
+      // Limpiar el formulario y recargar posts relacionados
+      setPostText('');
+      await fetchRelatedPosts();
+      
+      // Mostrar mensaje de éxito
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 4000);
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      alert('Error al publicar el post: ' + (error.message || 'Error desconocido'));
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   return (
@@ -457,6 +658,18 @@ const PropertyDetail: React.FC = () => {
                   <CalendarIcon className="w-5 h-5 text-gray-400" />
                   <span className="text-gray-700">Publicado: {formatDate(property.created_at)}</span>
                 </div>
+                {property.recommended_occupants && (
+                  <div className="flex items-center space-x-3">
+                    <UserIcon className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-700">Personas recomendadas: {property.recommended_occupants}</span>
+                  </div>
+                )}
+                {property.price_per_person && (
+                  <div className="flex items-center space-x-3">
+                    <CurrencyEuroIcon className="w-5 h-5 text-gray-400" />
+                    <span className="text-gray-700">Precio por persona: {property.price_per_person.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€/mes</span>
+                  </div>
+                )}
                 <div className="flex items-center space-x-3">
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                     property.status === 'active' 
@@ -508,6 +721,117 @@ const PropertyDetail: React.FC = () => {
               radius={1000}
               className="mb-6"
             />
+
+            {/* Posts Relacionados */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Posts relacionados con esta vivienda
+              </h2>
+              
+              {/* Información de la propiedad para contexto */}
+              {property.recommended_occupants && property.price_per_person && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-blue-900">
+                    <strong>Información de la propiedad:</strong> Esta vivienda es apta para {property.recommended_occupants} personas. 
+                    El precio por persona es de {property.price_per_person.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€/mes.
+                  </p>
+                </div>
+              )}
+
+              {/* Formulario para crear post */}
+              {profile && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Escribe un post relacionado con esta vivienda
+                  </label>
+                  <textarea
+                    value={postText}
+                    onChange={(e) => setPostText(e.target.value)}
+                    placeholder="Ejemplo: Somos 6, 3 parejas de Bilbao y este palacio señorial del siglo es apto para 8, solo faltan 2 personas o 1 pareja. El precio se quedaría en 130€/mes persona"
+                    rows={4}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                  />
+                  <button
+                    onClick={handleCreatePost}
+                    disabled={!postText.trim() || isPosting}
+                    className="mt-3 w-full sm:w-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <PaperAirplaneIcon className="w-4 h-4" />
+                    {isPosting ? 'Publicando...' : 'Publicar Post'}
+                  </button>
+                </div>
+              )}
+
+              {/* Lista de posts relacionados */}
+              <div className="space-y-4">
+                {loadingPosts ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                    <p className="text-sm text-gray-500 mt-2">Cargando posts...</p>
+                  </div>
+                ) : relatedPosts.length > 0 ? (
+                  relatedPosts.map((post) => (
+                    <div key={post.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start space-x-3">
+                        {post.author?.avatar_url ? (
+                          <img
+                            src={post.author.avatar_url}
+                            alt={post.author.full_name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                            <UserIcon className="w-6 h-6 text-white" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-gray-900">
+                              {post.author?.full_name || 'Usuario'}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              • {new Date(post.published_at || post.created_at).toLocaleDateString('es-ES', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-2">{post.title}</h4>
+                          <p className="text-gray-700 whitespace-pre-wrap line-clamp-3">
+                            {post.content}
+                          </p>
+                          {post.tags && post.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {post.tags.map((tag: string, index: number) => (
+                                <span
+                                  key={index}
+                                  className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full"
+                                >
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <button
+                            onClick={() => navigate(`/dashboard/posts/${post.id}`)}
+                            className="mt-3 text-sm text-green-600 hover:text-green-700 font-medium"
+                          >
+                            Leer más →
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-500 italic">
+                      Aún no hay posts relacionados con esta vivienda. Sé el primero en publicar uno.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Sidebar */}
