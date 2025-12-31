@@ -76,7 +76,6 @@ const PropertyDetail: React.FC = () => {
   const [isPosting, setIsPosting] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   const fetchRelatedPosts = async () => {
     if (!property) return;
