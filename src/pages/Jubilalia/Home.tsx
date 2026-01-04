@@ -83,12 +83,12 @@ const JubilaliaHome: React.FC = () => {
           </h3>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Compartir Habitación */}
+            {/* Comparte tu vivienda */}
             <div className="bg-gradient-to-br from-green-50 to-blue-50 p-8 rounded-2xl border border-green-100 hover:shadow-xl transition-all duration-300">
               <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mb-6">
                 <Users className="w-8 h-8 text-white" />
               </div>
-              <h4 className="text-2xl font-bold text-gray-800 mb-4">Compartir Habitación</h4>
+              <h4 className="text-2xl font-bold text-gray-800 mb-4">Comparte tu vivienda</h4>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Encuentra compañeros de habitación compatibles con tus gustos y preferencias
               </p>
@@ -226,7 +226,7 @@ const JubilaliaHome: React.FC = () => {
             <div>
               <h5 className="font-semibold mb-4">Servicios</h5>
               <ul className="space-y-2 text-gray-300">
-                <li>Compartir habitación</li>
+                <li>Comparte tu vivienda</li>
                 <li>Alojamientos grandes</li>
                 <li>Red social</li>
                 <li>Actividades</li>

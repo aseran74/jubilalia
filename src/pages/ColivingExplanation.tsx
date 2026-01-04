@@ -22,7 +22,7 @@ const ColivingExplanation: React.FC = () => {
   const content = {
     habitaciones: {
       id: 'habitaciones',
-      title: 'Compartir Habitación',
+      title: 'Comparte tu vivienda',
       subtitle: 'Tu casa, tu refugio... ahora con compañía.',
       color: 'bg-emerald-600',
       lightColor: 'bg-emerald-50',

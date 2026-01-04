@@ -18,7 +18,7 @@ const JubilaliaRoommates: React.FC = () => {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-3">
               <Users className="w-8 h-8 text-green-600" />
-              <h1 className="text-3xl font-bold text-gray-800">Compartir Habitación</h1>
+              <h1 className="text-3xl font-bold text-gray-800">Comparte tu vivienda</h1>
             </div>
             <button className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-full font-semibold hover:from-green-600 hover:to-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl">
               <Search className="w-5 h-5" />
@@ -85,7 +85,7 @@ const JubilaliaRoommates: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                  ¿Por qué compartir habitación en Jubilalia?
+                  ¿Por qué compartir tu vivienda en Jubilalia?
                 </h3>
                 <ul className="space-y-3 text-gray-600">
                   <li className="flex items-start space-x-3">
@@ -153,7 +153,7 @@ const JubilaliaRoommates: React.FC = () => {
             <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Lista de Compañeros</h3>
             <p className="text-gray-600 mb-6">
-              Aquí se mostrarán los perfiles de personas disponibles para compartir habitación
+              Aquí se mostrarán los perfiles de personas disponibles para compartir vivienda
             </p>
             <div className="flex justify-center space-x-4">
               <button className="px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors">

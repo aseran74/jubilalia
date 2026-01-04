@@ -141,10 +141,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signInWithGoogle = async () => {
     try {
+      // Si estamos en jubilalia.com, forzar ese dominio
+      // Si estamos en vercel.app, también usar el dominio actual
+      let redirectUrl = `${window.location.origin}/auth/callback`;
+      if (window.location.hostname.includes('jubilalia.com')) {
+        redirectUrl = 'https://jubilalia.com/auth/callback';
+      }
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',

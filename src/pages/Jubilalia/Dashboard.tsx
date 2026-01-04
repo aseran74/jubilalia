@@ -75,7 +75,7 @@ const JubilaliaDashboard: React.FC = () => {
           <div className="flex space-x-8">
             {[
               { id: 'home', label: 'Inicio', icon: Home },
-              { id: 'roommates', label: 'Compartir Habitación', icon: Users },
+              { id: 'roommates', label: 'Comparte tu vivienda', icon: Users },
               { id: 'housing', label: 'Alojamientos', icon: Building },
               { id: 'social', label: 'Red Social', icon: MessageCircle },
               { id: 'activities', label: 'Actividades', icon: Calendar }
@@ -214,7 +214,7 @@ const JubilaliaDashboard: React.FC = () => {
 
         {activeTab === 'roommates' && (
           <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Compartir Habitación</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">Comparte tu vivienda</h2>
             <p className="text-gray-600 mb-8">Esta funcionalidad estará disponible próximamente</p>
           </div>
         )}

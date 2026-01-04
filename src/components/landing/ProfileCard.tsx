@@ -158,7 +158,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isTransparent = false }) => {
               className="flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <Users className="w-4 h-4" />
-              <span>Compartir Habitación</span>
+              <span>Comparte tu vivienda</span>
             </Link>
             
             <Link

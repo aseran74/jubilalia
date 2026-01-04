@@ -58,6 +58,14 @@ const AuthCallback: React.FC = () => {
           // Limpiar la URL antes de navegar
           window.history.replaceState({}, document.title, window.location.pathname);
           
+          // Si estamos en vercel.app pero queremos usar jubilalia.com, redirigir
+          if (window.location.hostname.includes('vercel.app') && !window.location.hostname.includes('jubilalia.com')) {
+            // Redirigir a jubilalia.com manteniendo la ruta
+            const path = window.location.pathname;
+            window.location.href = `https://jubilalia.com${path === '/auth/callback' ? '/dashboard' : path}`;
+            return;
+          }
+          
           // Navegar a la página principal
           setTimeout(() => navigate('/dashboard'), 1000);
         } else {

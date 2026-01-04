@@ -147,7 +147,14 @@ export const updateUserProfile = async (id: string, updates: Partial<UserProfile
 const getRedirectUrl = () => {
   const origin = window.location.origin;
   
-  // Siempre usar el dominio actual (jubilalia.com o jubilalia.vercel.app)
+  // Si estamos en jubilalia.com, forzar ese dominio
+  // Si estamos en vercel.app, también usar el dominio actual
+  // Esto asegura que siempre usemos el dominio desde el que se inició el login
+  if (origin.includes('jubilalia.com')) {
+    return 'https://jubilalia.com/auth/callback';
+  }
+  
+  // Para desarrollo local o vercel.app, usar el dominio actual
   return `${origin}/auth/callback`;
 };
 

@@ -42,7 +42,7 @@ export default function JubilaliaDashboardHome() {
         <div className="flex flex-wrap gap-2 border-b border-gray-200">
           {[
             { id: 'overview', label: 'Vista General', icon: Home },
-            { id: 'roommates', label: 'Compartir Habitación', icon: Users },
+            { id: 'roommates', label: 'Comparte tu vivienda', icon: Users },
             { id: 'accommodations', label: 'Alojamientos', icon: Home },
             { id: 'social', label: 'Red Social', icon: MessageCircle },
             { id: 'activities', label: 'Actividades', icon: Calendar }
@@ -305,12 +305,12 @@ export default function JubilaliaDashboardHome() {
           </div>
         )}
 
-        {/* Compartir Habitación */}
+        {/* Comparte tu vivienda */}
         {activeTab === 'roommates' && (
           <div className="bg-white rounded-xl shadow-md p-8">
             <div className="text-center mb-8">
               <Users className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Compartir Habitación</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Comparte tu vivienda</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 Encuentra compañeros de habitación compatibles con tus gustos, horarios y estilo de vida. 
                 Una forma económica y social de vivir.

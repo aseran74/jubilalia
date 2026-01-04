@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <UserCircleIcon />,
-    name: "Compartir Habitación",
+    name: "Comparte tu vivienda",
             path: "/roommates",
   },
   {
