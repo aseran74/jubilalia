@@ -11,10 +11,10 @@ import {
   FunnelIcon,
   XMarkIcon,
   MapIcon,
-  ListBulletIcon
+  ListBulletIcon,
+  HeartIcon
 } from '@heroicons/react/24/outline';
-import PropertyCard from '../components/landing/PropertyCard';
-import RoomCard from '../components/landing/RoomCard';
+import { Link } from 'react-router-dom';
 import UnifiedPropertyFilter from '../components/common/UnifiedPropertyFilter';
 import AmenitiesFilter from '../components/common/AmenitiesFilter';
 
@@ -573,25 +573,85 @@ const PropertySearch: React.FC = () => {
               <>
                 <div ref={mapRef} className="h-[600px] w-full rounded-lg border border-gray-200" />
                 {selectedProperty && (
-                  <div className="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow-lg p-4 border border-gray-200 max-w-md z-10">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{selectedProperty.title}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{selectedProperty.address}, {selectedProperty.city}</p>
-                        <p className="text-lg font-bold text-green-600">
-                          {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(selectedProperty.price)}
-                        </p>
+                  <div className="absolute bottom-4 left-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 max-w-md z-10 overflow-hidden">
+                    {/* Imagen */}
+                    <div className="h-40 bg-gray-200 relative">
+                      {selectedProperty.images && selectedProperty.images.length > 0 ? (
+                        <img
+                          src={selectedProperty.images[0]}
+                          alt={selectedProperty.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <HomeIcon className="w-12 h-12" />
+                        </div>
+                      )}
+                      {/* Badge de tipo */}
+                      <div className="absolute top-3 left-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          selectedProperty.listing_type === 'room_rental' 
+                            ? 'bg-purple-100 text-purple-800'
+                            : selectedProperty.listing_type === 'property_rental'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-green-100 text-green-800'
+                        } shadow-sm`}>
+                          {selectedProperty.listing_type === 'room_rental' 
+                            ? 'Habitación'
+                            : selectedProperty.listing_type === 'property_rental'
+                            ? 'Alquiler'
+                            : 'Venta'}
+                        </span>
                       </div>
-                      <div className="flex gap-2 ml-4">
-                        <button
-                          onClick={() => setSelectedProperty(null)}
-                          className="px-2 py-1 text-gray-500 hover:text-gray-700"
-                        >
-                          <XMarkIcon className="w-5 h-5" />
-                        </button>
+                      {/* Botón cerrar */}
+                      <button
+                        onClick={() => setSelectedProperty(null)}
+                        className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-sm"
+                      >
+                        <XMarkIcon className="w-5 h-5 text-gray-600" />
+                      </button>
+                    </div>
+                    
+                    {/* Contenido */}
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{selectedProperty.title}</h3>
+                      <p className="text-sm text-gray-600 mb-2 flex items-center">
+                        <MapPinIcon className="w-4 h-4 mr-1 text-green-600" />
+                        {selectedProperty.city}
+                      </p>
+                      {(selectedProperty.bedrooms || selectedProperty.bathrooms) && (
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                          {selectedProperty.bedrooms && (
+                            <div className="flex items-center gap-1">
+                              <HomeIcon className="w-4 h-4 text-gray-400" />
+                              <span>{selectedProperty.bedrooms} hab.</span>
+                            </div>
+                          )}
+                          {selectedProperty.bathrooms && (
+                            <div className="flex items-center gap-1">
+                              <Squares2X2Icon className="w-4 h-4 text-gray-400" />
+                              <span>{selectedProperty.bathrooms} baños</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-lg font-bold text-green-600">
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(selectedProperty.price)}
+                          </p>
+                          {selectedProperty.listing_type === 'property_rental' && selectedProperty.price_per_person && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(selectedProperty.price_per_person)}/mes por persona
+                            </p>
+                          )}
+                          {selectedProperty.listing_type === 'room_rental' && (
+                            <p className="text-xs text-gray-500 mt-1">/mes</p>
+                          )}
+                        </div>
                         <button
                           onClick={() => navigate(getPropertyPath(selectedProperty))}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
                         >
                           Ver detalles
                         </button>
@@ -611,42 +671,130 @@ const PropertySearch: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProperties.map((property) => {
-                if (property.listing_type === 'room_rental') {
-                  return (
-                    <RoomCard
-                      key={property.id}
-                      room={{
-                        id: property.id,
-                        title: property.title,
-                        description: property.description,
-                        address: property.address,
-                        city: property.city,
-                        price: property.price,
-                        images: property.images
-                      }}
-                    />
-                  );
-                } else {
-                  return (
-                    <PropertyCard
-                      key={property.id}
-                      property={{
-                        id: property.id,
-                        title: property.title,
-                        description: property.description,
-                        property_type: property.property_type,
-                        address: property.address,
-                        city: property.city,
-                        price: property.price,
-                        bedrooms: property.bedrooms,
-                        bathrooms: property.bathrooms,
-                        listing_type: property.listing_type as 'property_rental' | 'property_purchase',
-                        images: property.images,
-                        price_per_person: property.price_per_person
-                      }}
-                    />
-                  );
-                }
+                const formatPrice = (price: number) => {
+                  return new Intl.NumberFormat('es-ES', {
+                    style: 'currency',
+                    currency: 'EUR',
+                    minimumFractionDigits: 0,
+                  }).format(price);
+                };
+
+                const getListingTypeLabel = () => {
+                  if (property.listing_type === 'room_rental') return 'Habitación';
+                  return property.listing_type === 'property_rental' ? 'Alquiler' : 'Venta';
+                };
+
+                const getListingTypeColor = () => {
+                  if (property.listing_type === 'room_rental') return 'bg-purple-100 text-purple-800';
+                  return property.listing_type === 'property_rental' 
+                    ? 'bg-blue-100 text-blue-800' 
+                    : 'bg-green-100 text-green-800';
+                };
+
+                return (
+                  <Link
+                    key={property.id}
+                    to={getPropertyPath(property)}
+                    className="group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300"
+                  >
+                    {/* Imagen */}
+                    <div className="h-48 bg-gray-200 relative overflow-hidden">
+                      {property.images && property.images.length > 0 ? (
+                        <img
+                          src={property.images[0]}
+                          alt={property.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <HomeIcon className="w-12 h-12" />
+                        </div>
+                      )}
+                      
+                      {/* Badge de tipo */}
+                      <div className="absolute top-3 left-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getListingTypeColor()} shadow-sm`}>
+                          {getListingTypeLabel()}
+                        </span>
+                      </div>
+
+                      {/* Badge de tipo de propiedad */}
+                      {property.property_type && (
+                        <div className="absolute top-3 left-3 mt-10">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/95 text-gray-800 shadow-sm backdrop-blur-sm">
+                            {property.property_type}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Botón de favorito (placeholder) */}
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-sm hover:scale-110"
+                      >
+                        <HeartIcon className="w-4 h-4 text-gray-600 hover:text-red-500 transition-colors" />
+                      </button>
+                    </div>
+
+                    {/* Contenido */}
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
+                        {property.title}
+                      </h3>
+                      
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                        {property.description}
+                      </p>
+
+                      {/* Ubicación */}
+                      <div className="flex items-center text-gray-500 text-sm mb-3">
+                        <MapPinIcon className="w-4 h-4 mr-1.5 text-green-600" />
+                        <span className="font-medium">{property.city}</span>
+                      </div>
+
+                      {/* Características */}
+                      <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4 pb-4 border-b border-gray-100">
+                        {property.bedrooms && (
+                          <div className="flex items-center gap-1">
+                            <HomeIcon className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium">{property.bedrooms}</span>
+                          </div>
+                        )}
+                        {property.bathrooms && (
+                          <div className="flex items-center gap-1">
+                            <Squares2X2Icon className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium">{property.bathrooms}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Precio y botón */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-xl font-bold text-gray-900">
+                            {formatPrice(property.price)}
+                          </div>
+                          {property.listing_type === 'property_rental' && property.price_per_person && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {formatPrice(property.price_per_person)}/mes por persona
+                            </div>
+                          )}
+                          {property.listing_type === 'room_rental' && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              /mes
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center text-green-600">
+                          <CurrencyEuroIcon className="w-6 h-6" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
               })}
             </div>
           </>
