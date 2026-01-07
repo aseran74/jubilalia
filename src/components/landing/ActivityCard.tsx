@@ -71,6 +71,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity }) => {
           <img
             src={activity.images[0]}
             alt={activity.title}
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         ) : (

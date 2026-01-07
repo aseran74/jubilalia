@@ -93,9 +93,10 @@ const PropertySearch: React.FC = () => {
   const cities = [...new Set(properties.map(p => p.city).filter(Boolean))].sort();
   const propertyTypes = [...new Set(properties.map(p => p.property_type).filter(Boolean))].sort();
 
+  // Cargar propiedades solo cuando cambia el tipo de búsqueda
   useEffect(() => {
     fetchProperties();
-  }, [searchType]);
+  }, [searchType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     // Aplicar filtros
@@ -574,6 +575,7 @@ const PropertySearch: React.FC = () => {
                         <img
                           src={selectedProperty.images[0]}
                           alt={selectedProperty.title}
+                          loading="lazy"
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -697,6 +699,7 @@ const PropertySearch: React.FC = () => {
                         <img
                           src={property.images[0]}
                           alt={property.title}
+                          loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (

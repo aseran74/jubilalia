@@ -334,6 +334,8 @@ const LandingPage: React.FC = () => {
               <img 
                 src="/images/jubilogo.svg" 
                 alt="Jubilalia" 
+                loading="eager"
+                fetchPriority="high"
                 className={`h-10 w-auto transition-all duration-300 ${
                   isScrolled || isMenuOpen ? 'brightness-100' : 'brightness-0 invert drop-shadow-md'
                 }`}
@@ -1084,7 +1086,7 @@ const LandingPage: React.FC = () => {
       {/* --- FOOTER --- */}
       <footer className="bg-white pt-20 pb-32 lg:pb-12 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <img src="/images/jubilogo.svg" alt="Jubilalia" className="h-10 mx-auto mb-8 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500" />
+          <img src="/images/jubilogo.svg" alt="Jubilalia" loading="lazy" className="h-10 mx-auto mb-8 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500" />
           <div className="flex flex-wrap justify-center gap-8 mb-8 text-sm font-bold text-gray-600">
             <a href="#" className="hover:text-green-600 transition-colors">Privacidad</a>
             <a href="#" className="hover:text-green-600 transition-colors">Términos</a>

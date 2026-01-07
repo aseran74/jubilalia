@@ -6,13 +6,16 @@ import { Heart } from 'lucide-react';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
 
-// Landing Page
+// Landing Page - Lazy loading para mejorar PageSpeed
 import LandingPage from './pages/LandingPage';
 import MobileLandingPage from './pages/MobileLandingPage';
 import ColivingExplanation from './pages/ColivingExplanation';
 import AppSplash from './pages/AppSplash';
 import PublicSearch from './pages/PublicSearch';
-import PropertySearch from './pages/PropertySearch';
+import { lazy, Suspense } from 'react';
+
+// Lazy load de componentes pesados
+const PropertySearch = lazy(() => import('./pages/PropertySearch'));
 
 // Componentes de autenticación
 import SignUpForm from './components/auth/SignUpForm';
@@ -403,7 +406,18 @@ const App: React.FC = () => {
           
           {/* Página pública de búsqueda */}
           <Route path="/search" element={<PublicSearch />} />
-          <Route path="/properties/search" element={<PropertySearch />} />
+          <Route path="/properties/search" element={
+            <Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Cargando búsqueda...</p>
+                </div>
+              </div>
+            }>
+              <PropertySearch />
+            </Suspense>
+          } />
           
           {/* Rutas públicas de propiedades y habitaciones */}
           <Route path="/properties/rental/:id" element={<PropertyDetail />} />

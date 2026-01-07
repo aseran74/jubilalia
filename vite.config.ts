@@ -19,12 +19,26 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['lucide-react', '@heroicons/react'],
-          charts: ['apexcharts', 'react-apexcharts'],
-          supabase: ['@supabase/supabase-js']
+        manualChunks: (id) => {
+          // Separar vendor chunks para mejor caching y menor tamaño inicial
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('react-router')) {
+              return 'vendor-router';
+            }
+            if (id.includes('@heroicons') || id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('google') || id.includes('maps')) {
+              return 'vendor-maps';
+            }
+            return 'vendor';
+          }
         }
       }
     }

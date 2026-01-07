@@ -58,6 +58,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           <img
             src={property.images[0]}
             alt={property.title}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           />
         ) : (

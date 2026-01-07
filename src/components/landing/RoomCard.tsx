@@ -38,6 +38,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
           <img
             src={room.images[0]}
             alt={room.title}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
           />
         ) : (

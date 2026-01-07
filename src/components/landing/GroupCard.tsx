@@ -55,6 +55,7 @@ const GroupCard: React.FC<GroupCardProps> = ({ group }) => {
           <img
             src={group.image_url}
             alt={group.name}
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         ) : (
