@@ -12,6 +12,7 @@ import MobileLandingPage from './pages/MobileLandingPage';
 import ColivingExplanation from './pages/ColivingExplanation';
 import AppSplash from './pages/AppSplash';
 import PublicSearch from './pages/PublicSearch';
+import PropertySearch from './pages/PropertySearch';
 
 // Componentes de autenticación
 import SignUpForm from './components/auth/SignUpForm';
@@ -402,6 +403,12 @@ const App: React.FC = () => {
           
           {/* Página pública de búsqueda */}
           <Route path="/search" element={<PublicSearch />} />
+          <Route path="/properties/search" element={<PropertySearch />} />
+          
+          {/* Rutas públicas de propiedades y habitaciones */}
+          <Route path="/properties/rental/:id" element={<PropertyDetail />} />
+          <Route path="/properties/sale/:id" element={<PropertyDetail />} />
+          <Route path="/rooms/:id" element={<RoomDetail />} />
           
           {/* Rutas accesibles desde landing page */}
           <Route path="/profile" element={<ProfileForm />} />

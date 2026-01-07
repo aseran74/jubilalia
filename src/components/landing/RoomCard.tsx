@@ -29,7 +29,7 @@ const RoomCard: React.FC<RoomCardProps> = ({ room }) => {
 
   return (
     <Link 
-      to={`/dashboard/rooms/${room.id}`}
+      to={`/rooms/${room.id}`}
       className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-green-400"
     >
       {/* Imagen */}

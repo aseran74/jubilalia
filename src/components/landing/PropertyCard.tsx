@@ -50,7 +50,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
   return (
     <Link 
-      to={`/dashboard/properties/${getListingTypePath()}/${property.id}`}
+      to={`/properties/${getListingTypePath()}/${property.id}`}
       className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-green-400"
     >
       {/* Imagen */}

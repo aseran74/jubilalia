@@ -223,21 +223,21 @@ const FeaturedContent: React.FC = () => {
           </h3>
           <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
             <Link
-              to="/dashboard/rooms"
+              to="/properties/search?type=rooms"
               className="group flex items-center bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <HomeIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
               Ver todas las habitaciones
             </Link>
             <Link
-              to="/dashboard/properties/sale"
+              to="/properties/search?type=sale"
               className="group flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <BuildingOfficeIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
               Ver propiedades en venta
             </Link>
             <Link
-              to="/dashboard/properties/rental"
+              to="/properties/search?type=rental"
               className="group flex items-center bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               <BuildingOfficeIcon className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />

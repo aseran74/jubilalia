@@ -216,9 +216,23 @@ const DashboardSidebar: React.FC = () => {
           <div className={`flex items-center justify-between border-b border-gray-200 ${
             isCollapsed && !isMobile ? 'p-3' : 'p-4'
           }`}>
-            {(!isCollapsed || isMobile) && (
-              <h1 className="text-xl font-bold text-gray-900">Jubilalia</h1>
-            )}
+            <Link 
+              to="/" 
+              className="flex items-center flex-shrink-0"
+              onClick={() => isMobile && setIsMobileOpen(false)}
+            >
+              {(!isCollapsed || isMobile) ? (
+                <img 
+                  src="/images/jubilogo.svg" 
+                  alt="Jubilalia" 
+                  className="h-8 w-auto"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">J</span>
+                </div>
+              )}
+            </Link>
             {!isMobile && (
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}

@@ -34,10 +34,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSidebar }) =>
           </button>
 
           {/* Breadcrumb */}
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs lg:text-sm">J</span>
-            </div>
+          <div className="flex items-center space-x-3">
+            <Link to="/" className="flex-shrink-0">
+              <img 
+                src="/images/jubilogo.svg" 
+                alt="Jubilalia" 
+                className="h-6 lg:h-8 w-auto"
+              />
+            </Link>
             <div className="hidden sm:block">
               <h2 className="text-base lg:text-lg font-semibold text-gray-900">Dashboard Jubilalia</h2>
               <p className="text-xs lg:text-sm text-gray-500">Bienvenido de vuelta</p>

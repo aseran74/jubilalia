@@ -113,7 +113,7 @@ const PropertyRentalCard: React.FC<PropertyRentalCardProps> = ({ property }) => 
             Publicado {formatDate(property.created_at)}
           </span>
                      <Link
-             to={`/dashboard/properties/rental/${property.id}`}
+             to={`/properties/rental/${property.id}`}
              className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-300 shadow-md hover:shadow-lg"
            >
              Ver detalles

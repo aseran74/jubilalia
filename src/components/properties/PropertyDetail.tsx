@@ -26,7 +26,11 @@ interface Property {
   description: string;
   price: number;
   property_type: string;
-  location: string;
+  location?: string;
+  address: string;
+  city: string;
+  country?: string;
+  postal_code?: string;
   bedrooms: number;
   bathrooms: number;
   area: number;
@@ -244,42 +248,50 @@ const PropertyDetail: React.FC = () => {
         if (!colivingError && coliving) {
           colivingData = coliving;
 
-          // Cargar miembros si show_members_publicly es true
-          if (coliving.show_members_publicly) {
-            const { data: membersData, error: membersError } = await supabase
-              .from('coliving_members')
-              .select('id, profile_id, joined_at')
-              .eq('listing_id', id)
-              .eq('status', 'active');
+          // Cargar miembros siempre (independientemente de show_members_publicly)
+          const { data: membersData, error: membersError } = await supabase
+            .from('coliving_members')
+            .select('id, profile_id, joined_at')
+            .eq('listing_id', id)
+            .eq('status', 'active');
 
-            if (!membersError && membersData && membersData.length > 0) {
-              // Obtener los perfiles de los miembros
-              const profileIds = membersData.map(m => m.profile_id);
-              const { data: profilesData, error: profilesError } = await supabase
-                .from('profiles')
-                .select('id, full_name, avatar_url')
-                .in('id', profileIds);
+          if (!membersError && membersData && membersData.length > 0) {
+            // Obtener los perfiles de los miembros
+            const profileIds = membersData.map(m => m.profile_id);
+            const { data: profilesData, error: profilesError } = await supabase
+              .from('profiles')
+              .select('id, full_name, avatar_url')
+              .in('id', profileIds);
 
-              if (!profilesError && profilesData) {
-                const profilesMap = new Map(profilesData.map(p => [p.id, p]));
-                colivingData.members = membersData.map(m => {
-                  const profile = profilesMap.get(m.profile_id);
-                  return {
-                    id: m.profile_id,
-                    full_name: profile?.full_name || 'Usuario',
-                    avatar_url: profile?.avatar_url,
-                    joined_at: m.joined_at
-                  };
-                });
-              }
+            if (!profilesError && profilesData) {
+              const profilesMap = new Map(profilesData.map(p => [p.id, p]));
+              colivingData.members = membersData.map(m => {
+                const profile = profilesMap.get(m.profile_id);
+                return {
+                  id: m.profile_id,
+                  full_name: profile?.full_name || 'Usuario',
+                  avatar_url: profile?.avatar_url,
+                  joined_at: m.joined_at
+                };
+              });
             }
           }
         }
       }
 
+      // Construir la ubicación completa desde address, city, postal_code y country
+      const locationParts = [
+        propertyData.address,
+        propertyData.postal_code,
+        propertyData.city,
+        propertyData.country
+      ].filter(part => part && part.trim() !== '');
+      const fullLocation = locationParts.join(', ');
+
       // Add images, amenities and coliving data to property data
       const propertyWithImages = {
         ...propertyData,
+        location: fullLocation || propertyData.address || propertyData.city || 'Ubicación no especificada',
         images: imagesData?.map(img => img.image_url) || [],
         amenities: amenitiesData?.map(amenity => amenity.amenity_name) || [],
         coliving_data: colivingData
@@ -583,7 +595,7 @@ const PropertyDetail: React.FC = () => {
                   </div>
 
                   {/* Miembros de la comunidad / Miembros apuntados */}
-                  {property.coliving_data.show_members_publicly && property.coliving_data.members && property.coliving_data.members.length > 0 && (
+                  {property.coliving_data.members && property.coliving_data.members.length > 0 && (
                     <div className="bg-white rounded-lg p-4 border border-purple-200">
                       <div className="text-sm font-medium text-gray-700 mb-4 flex items-center gap-2">
                         <span>👥</span>

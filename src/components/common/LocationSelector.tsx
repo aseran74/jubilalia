@@ -66,7 +66,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     try {
       const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
         types: ['geocode'],
-        componentRestrictions: { country: 'es' }, // Restringir a España
+        // Sin restricción de país para permitir direcciones internacionales
         fields: ['address_components', 'formatted_address', 'geometry']
       });
 
@@ -145,8 +145,8 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       const service = new window.google.maps.places.AutocompleteService();
       const request = {
         input: query,
-        types: ['geocode'],
-        componentRestrictions: { country: 'es' }
+        types: ['geocode']
+        // Sin restricción de país para permitir direcciones internacionales
       };
 
       service.getPlacePredictions(request, (predictions: any, status: any) => {

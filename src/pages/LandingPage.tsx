@@ -345,13 +345,22 @@ const LandingPage: React.FC = () => {
                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full transition-all duration-500 ${isScrolled ? 'bg-gray-100/50' : 'bg-black/10 backdrop-blur-sm border border-white/10'}`}>
                 {[
                     { label: 'Inicio', id: 'home', icon: Home },
+                    { label: 'Coliving', id: 'coliving', icon: Building, action: () => navigate('/properties/search') },
                     { label: 'Buscar', id: 'search', icon: Search },
                     { label: 'Cómo Funciona', id: 'how-it-works', icon: Sparkles },
                     { label: 'FAQ', id: 'faq', icon: QuestionMark }
                 ].map((item) => (
                     <button 
                         key={item.id}
-                        onClick={() => item.id === 'search' ? navigate('/search') : scrollToSection(item.id)}
+                        onClick={() => {
+                          if (item.action) {
+                            item.action();
+                          } else if (item.id === 'search') {
+                            navigate('/search');
+                          } else {
+                            scrollToSection(item.id);
+                          }
+                        }}
                         className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                         isScrolled 
                             ? 'text-gray-600 hover:bg-white hover:text-green-600 hover:shadow-sm' 
@@ -416,7 +425,11 @@ const LandingPage: React.FC = () => {
           </div>
           
           <div className="flex flex-col space-y-4 text-lg font-medium">
-            <button onClick={() => { setIsMenuOpen(false); navigate('/search'); }} className="flex items-center gap-3 text-left p-4 hover:bg-green-200 rounded-xl transition-colors text-green-800 font-bold text-xl bg-green-100 border-b-2 border-green-300">
+            <button onClick={() => { setIsMenuOpen(false); navigate('/properties/search'); }} className="flex items-center gap-3 text-left p-4 hover:bg-green-200 rounded-xl transition-colors text-green-800 font-bold text-xl bg-green-100 border-b-2 border-green-300">
+              <Building className="w-6 h-6" />
+              <span>Coliving</span>
+            </button>
+            <button onClick={() => { setIsMenuOpen(false); navigate('/search'); }} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
               <Search className="w-6 h-6" />
               <span>Buscar Actividades</span>
             </button>
@@ -856,7 +869,7 @@ const LandingPage: React.FC = () => {
               <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold tracking-wider uppercase text-xs">Vivienda</span>
               <h2 className="text-4xl font-bold text-gray-900 mt-3">Propiedades y Habitaciones Destacadas</h2>
             </div>
-            <button onClick={() => navigate('/dashboard/properties/rental')} className="group text-blue-600 font-bold flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+            <button onClick={() => navigate('/properties/search')} className="group text-blue-600 font-bold flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-blue-600 hover:text-white transition-all shadow-sm">
               Ver todo <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform"/>
             </button>
           </div>
@@ -1086,6 +1099,7 @@ const LandingPage: React.FC = () => {
         <div className="flex items-center justify-around h-16 px-2">
           {[
             { label: 'Inicio', icon: Home, action: () => { scrollToSection('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+            { label: 'Coliving', icon: Building, action: () => navigate('/properties/search') },
             { label: 'Buscar', icon: Search, action: () => navigate('/search') },
             { label: 'Mi Panel', icon: LayoutDashboard, action: () => navigate(user ? '/dashboard' : '/login') },
             { label: 'Perfil', icon: User, action: () => navigate(user ? '/dashboard/profile' : '/login') }

@@ -38,6 +38,7 @@ interface PropertySaleFormData {
   show_on_landing: boolean;
   // Campos específicos para Coliving
   coliving_total_spots?: string;
+  coliving_available_spots?: string;
   coliving_community_description?: string;
   coliving_housing_type?: 'individual_apartments' | 'shared_house' | '';
   coliving_price_per_apartment?: string;
@@ -138,6 +139,7 @@ const PropertySaleForm: React.FC = () => {
             show_on_landing: propertyData.show_on_landing || false,
             // Datos de coliving
             coliving_total_spots: colivingData?.total_spots?.toString() || '',
+            coliving_available_spots: colivingData?.available_spots?.toString() || '',
             coliving_community_description: colivingData?.community_description || '',
             coliving_housing_type: colivingData?.housing_type || '',
             coliving_price_per_apartment: colivingData?.price_per_apartment?.toString() || '',
@@ -193,6 +195,7 @@ const PropertySaleForm: React.FC = () => {
     show_on_landing: false,
     // Campos específicos para Coliving
     coliving_total_spots: '',
+    coliving_available_spots: '',
     coliving_community_description: '',
     coliving_housing_type: '',
     coliving_price_per_apartment: '',
@@ -301,6 +304,15 @@ const PropertySaleForm: React.FC = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Limpiar error general si cambia el tipo de propiedad
+    if (name === 'property_type') {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.general;
+        return newErrors;
+      });
+    }
   };
 
   const handleAmenityChange = (amenity: string) => {
@@ -315,7 +327,7 @@ const PropertySaleForm: React.FC = () => {
   const handleImagesUploaded = (imageUrls: string[]) => {
     setFormData(prev => ({
       ...prev,
-      images: imageUrls
+      images: [...prev.images, ...imageUrls] // Agregar nuevas imágenes a las existentes
     }));
   };
 
@@ -327,12 +339,29 @@ const PropertySaleForm: React.FC = () => {
   };
 
   const handleMemberToggle = (memberId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      coliving_selected_members: prev.coliving_selected_members?.includes(memberId)
-        ? prev.coliving_selected_members.filter(id => id !== memberId)
-        : [...(prev.coliving_selected_members || []), memberId]
-    }));
+    setFormData(prev => {
+      const currentMembers = prev.coliving_selected_members || [];
+      const maxMembers = parseInt(prev.coliving_available_spots || '0') || 0;
+      
+      // Si ya está seleccionado, deseleccionarlo
+      if (currentMembers.includes(memberId)) {
+        return {
+          ...prev,
+          coliving_selected_members: currentMembers.filter(id => id !== memberId)
+        };
+      }
+      
+      // Si no está seleccionado y no se ha alcanzado el límite, agregarlo
+      if (currentMembers.length < maxMembers) {
+        return {
+          ...prev,
+          coliving_selected_members: [...currentMembers, memberId]
+        };
+      }
+      
+      // Si se alcanzó el límite, no hacer nada
+      return prev;
+    });
   };
 
   const validateForm = () => {
@@ -448,7 +477,18 @@ const PropertySaleForm: React.FC = () => {
       }
 
       // 2. Guardar datos específicos de Coliving si aplica (sin available_spots para venta)
-      if (formData.property_type === 'Comunidad Coliving' && formData.coliving_total_spots && formData.coliving_community_description && formData.coliving_housing_type) {
+      // Solo validar si el tipo de propiedad es explícitamente 'Comunidad Coliving'
+      // Verificar que property_type existe y es exactamente 'Comunidad Coliving'
+      if (formData.property_type && formData.property_type.trim() === 'Comunidad Coliving') {
+        // Validar campos mínimos requeridos
+        const totalSpots = (formData.coliving_total_spots || '').toString().trim();
+        const communityDesc = (formData.coliving_community_description || '').toString().trim();
+        const housingType = (formData.coliving_housing_type || '').toString().trim();
+        
+        if (!totalSpots || !communityDesc || !housingType) {
+          throw new Error('Para Comunidad Coliving, debes completar: número total de plazas, descripción de la comunidad y tipo de vivienda');
+        }
+
         if (isEditing) {
           // Eliminar requisitos existentes y crear nuevos
           await supabase
@@ -457,18 +497,22 @@ const PropertySaleForm: React.FC = () => {
             .eq('listing_id', listingId);
         }
 
-        // Calcular plazas disponibles: total - miembros apuntados
-        const membersCount = formData.coliving_selected_members?.length || 0;
-        const availableSpots = parseInt(formData.coliving_total_spots) - membersCount;
+        // Usar plazas asignadas directamente (si no se especifica, usar 0)
+        const totalSpotsNum = parseInt(totalSpots);
+        const assignedSpots = formData.coliving_available_spots 
+          ? parseInt(formData.coliving_available_spots)
+          : 0;
+        // Calcular plazas disponibles: total - asignadas
+        const availableSpots = Math.max(0, totalSpotsNum - assignedSpots);
 
         const { error: colivingError } = await supabase
           .from('coliving_requirements')
           .insert({
             listing_id: listingId,
-            total_spots: parseInt(formData.coliving_total_spots),
+            total_spots: totalSpotsNum,
             available_spots: availableSpots, // Total - miembros apuntados
-            community_description: formData.coliving_community_description,
-            housing_type: formData.coliving_housing_type,
+            community_description: communityDesc,
+            housing_type: housingType,
             price_per_apartment: formData.coliving_price_per_apartment ? parseFloat(formData.coliving_price_per_apartment) : null,
             price_per_unit: formData.coliving_price_per_unit ? parseFloat(formData.coliving_price_per_unit) : null,
             show_members_publicly: formData.coliving_show_members_publicly || false
@@ -476,8 +520,8 @@ const PropertySaleForm: React.FC = () => {
 
         if (colivingError) throw colivingError;
 
-        // Guardar miembros apuntados si están seleccionados
-        if (formData.coliving_show_members_publicly && formData.coliving_selected_members && formData.coliving_selected_members.length > 0) {
+        // Guardar miembros siempre que estén seleccionados, independientemente de show_members_publicly
+        if (formData.coliving_selected_members && formData.coliving_selected_members.length > 0) {
           // Eliminar miembros existentes si estamos editando
           if (isEditing) {
             await supabase
@@ -498,6 +542,12 @@ const PropertySaleForm: React.FC = () => {
             .insert(membersData);
 
           if (membersError) throw membersError;
+        } else if (isEditing) {
+          // Si no hay miembros seleccionados y estamos editando, eliminar los existentes
+          await supabase
+            .from('coliving_members')
+            .delete()
+            .eq('listing_id', listingId);
         }
       }
 
@@ -648,21 +698,40 @@ const PropertySaleForm: React.FC = () => {
                   </h3>
                   
                   <div className="space-y-6">
-                    {/* Número total de plazas (sin disponibles para venta) */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Número total de plazas
-                      </label>
-                      <input
-                        type="number"
-                        name="coliving_total_spots"
-                        value={formData.coliving_total_spots}
-                        onChange={handleInputChange}
-                        min="1"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="Ej: 10"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Total de personas que podrán vivir en la comunidad una vez comprada</p>
+                    {/* Número total de plazas y plazas asignadas */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Número total de plazas
+                        </label>
+                        <input
+                          type="number"
+                          name="coliving_total_spots"
+                          value={formData.coliving_total_spots}
+                          onChange={handleInputChange}
+                          min="1"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          placeholder="Ej: 10"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Total de personas que podrán vivir en la comunidad una vez comprada</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Plazas ya asignadas
+                        </label>
+                        <input
+                          type="number"
+                          name="coliving_available_spots"
+                          value={formData.coliving_available_spots || ''}
+                          onChange={handleInputChange}
+                          min="0"
+                          max={formData.coliving_total_spots || undefined}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                          placeholder="Ej: 6"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Número de plazas que ya están asignadas (opcional)</p>
+                      </div>
                     </div>
 
                     {/* Descripción de la comunidad */}
@@ -823,8 +892,13 @@ const PropertySaleForm: React.FC = () => {
                       {formData.coliving_show_members_publicly && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-3">
-                            Seleccionar miembros apuntados
+                            Seleccionar miembros apuntados (opcional)
                           </label>
+                          {formData.coliving_available_spots && parseInt(formData.coliving_available_spots) > 0 && (
+                            <p className="text-xs text-gray-500 mb-3">
+                              Puedes seleccionar hasta {formData.coliving_available_spots} miembro{parseInt(formData.coliving_available_spots) > 1 ? 's' : ''} (según las plazas ya asignadas)
+                            </p>
+                          )}
                           
                           {/* Filtro de búsqueda */}
                           <div className="mb-3">
@@ -857,16 +931,29 @@ const PropertySaleForm: React.FC = () => {
                                     );
                                   }
 
-                                  return filteredUsers.map(user => (
+                                  const maxMembers = parseInt(formData.coliving_available_spots || '0') || 0;
+                                  const currentCount = formData.coliving_selected_members?.length || 0;
+                                  const isAtLimit = currentCount >= maxMembers;
+                                  
+                                  return filteredUsers.map(user => {
+                                    const isSelected = formData.coliving_selected_members?.includes(user.id) || false;
+                                    return (
                                     <label 
                                       key={user.id} 
-                                      className="flex items-center space-x-3 p-2 hover:bg-purple-50 rounded-lg cursor-pointer transition-colors"
+                                      className={`flex items-center space-x-3 p-2 rounded-lg transition-colors ${
+                                        isSelected 
+                                          ? 'bg-purple-100 hover:bg-purple-150' 
+                                          : isAtLimit 
+                                            ? 'opacity-50 cursor-not-allowed' 
+                                            : 'hover:bg-purple-50 cursor-pointer'
+                                      }`}
                                     >
                                       <input
                                         type="checkbox"
-                                        checked={formData.coliving_selected_members?.includes(user.id) || false}
+                                        checked={isSelected}
                                         onChange={() => handleMemberToggle(user.id)}
-                                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 rounded"
+                                        disabled={!isSelected && isAtLimit}
+                                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                                       />
                                       <div className="flex items-center space-x-3 flex-1">
                                         {user.avatar_url ? (
@@ -885,18 +972,27 @@ const PropertySaleForm: React.FC = () => {
                                         <span className="text-sm text-gray-900">{user.full_name}</span>
                                       </div>
                                     </label>
-                                  ));
+                                    );
+                                  });
                                 })()}
                               </div>
                             )}
                           </div>
                           <div className="flex items-center justify-between mt-2">
                             <p className="text-xs text-gray-500">
-                              Seleccionados: {formData.coliving_selected_members?.length || 0} miembros apuntados
+                              {formData.coliving_available_spots && parseInt(formData.coliving_available_spots) > 0 && (
+                                <p className="text-xs text-gray-500">
+                                  Seleccionados: {formData.coliving_selected_members?.length || 0} de {formData.coliving_available_spots} miembros (opcional)
+                                </p>
+                              )}
                             </p>
                             {formData.coliving_total_spots && (
                               <p className="text-xs font-medium text-purple-600">
-                                Plazas disponibles: {parseInt(formData.coliving_total_spots) - (formData.coliving_selected_members?.length || 0)}
+                                Plazas disponibles: {(() => {
+                                  const total = parseInt(formData.coliving_total_spots) || 0;
+                                  const assigned = parseInt(formData.coliving_available_spots || '0') || 0;
+                                  return total - assigned;
+                                })()}
                               </p>
                             )}
                           </div>
@@ -1271,6 +1367,7 @@ const PropertySaleForm: React.FC = () => {
               <ImageUpload 
                 onImagesUploaded={handleImagesUploaded}
                 maxImages={15}
+                currentImageCount={formData.images.length}
                 bucketName={SUPABASE_BUCKETS.PROPERTY_IMAGES}
                 className="mb-4"
               />
