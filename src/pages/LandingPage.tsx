@@ -30,6 +30,8 @@ import CohousingModal from '../components/landing/CohousingModal';
 import SuccessCaseModal from '../components/landing/SuccessCaseModal';
 import ActivityCard from '../components/landing/ActivityCard';
 import GroupCard from '../components/landing/GroupCard';
+import PropertyCard from '../components/landing/PropertyCard';
+import RoomCard from '../components/landing/RoomCard';
 import { supabase } from '../lib/supabase';
 
 const LandingPage: React.FC = () => {
@@ -78,6 +80,37 @@ const LandingPage: React.FC = () => {
 
   const [groups, setGroups] = useState<Group[]>([]);
   const [loadingGroups, setLoadingGroups] = useState(true);
+
+  interface Property {
+    id: string;
+    title: string;
+    description: string;
+    property_type: string;
+    address: string;
+    city: string;
+    price: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    listing_type: 'property_rental' | 'property_purchase';
+    images: string[];
+    price_per_person?: number;
+  }
+
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(true);
+
+  interface Room {
+    id: string;
+    title: string;
+    description: string;
+    address: string;
+    city: string;
+    price: number;
+    images: string[];
+  }
+
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
   
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -176,6 +209,110 @@ const LandingPage: React.FC = () => {
     }
     setIsMenuOpen(false);
   };
+
+  const fetchProperties = useCallback(async () => {
+    try {
+      setLoadingProperties(true);
+      const { data, error } = await supabase
+        .from('property_listings')
+        .select('*')
+        .eq('show_on_landing', true)
+        .eq('is_available', true)
+        .in('listing_type', ['property_rental', 'property_purchase'])
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) throw error;
+
+      // Obtener imágenes
+      let imagesByProperty: Record<string, string[]> = {};
+      const ids = (data || []).map(p => p.id);
+      
+      if (ids.length > 0) {
+        const { data: imagesData } = await supabase
+          .from('property_images')
+          .select('listing_id, image_url')
+          .in('listing_id', ids)
+          .order('order_index', { ascending: true });
+          
+        if (imagesData) {
+          imagesByProperty = imagesData.reduce((acc: Record<string, string[]>, img: { listing_id: string; image_url: string }) => {
+            if (!acc[img.listing_id]) acc[img.listing_id] = [];
+            acc[img.listing_id].push(img.image_url);
+            return acc;
+          }, {});
+        }
+      }
+
+      const formattedProperties = (data || []).map(property => ({
+        ...property,
+        price: parseFloat(property.price || 0),
+        price_per_person: property.price_per_person ? parseFloat(property.price_per_person) : undefined,
+        images: imagesByProperty[property.id] || [],
+      }));
+
+      setProperties(formattedProperties);
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+    } finally {
+      setLoadingProperties(false);
+    }
+  }, []);
+
+  const fetchRooms = useCallback(async () => {
+    try {
+      setLoadingRooms(true);
+      const { data, error } = await supabase
+        .from('property_listings')
+        .select('*')
+        .eq('show_on_landing', true)
+        .eq('is_available', true)
+        .eq('listing_type', 'room_rental')
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      if (error) throw error;
+
+      // Obtener imágenes
+      let imagesByRoom: Record<string, string[]> = {};
+      const ids = (data || []).map(r => r.id);
+      
+      if (ids.length > 0) {
+        const { data: imagesData } = await supabase
+          .from('property_images')
+          .select('listing_id, image_url')
+          .in('listing_id', ids)
+          .order('order_index', { ascending: true });
+          
+        if (imagesData) {
+          imagesByRoom = imagesData.reduce((acc: Record<string, string[]>, img: { listing_id: string; image_url: string }) => {
+            if (!acc[img.listing_id]) acc[img.listing_id] = [];
+            acc[img.listing_id].push(img.image_url);
+            return acc;
+          }, {});
+        }
+      }
+
+      const formattedRooms = (data || []).map(room => ({
+        ...room,
+        price: parseFloat(room.price || 0),
+        images: imagesByRoom[room.id] || [],
+      }));
+
+      setRooms(formattedRooms);
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+    } finally {
+      setLoadingRooms(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActivities();
+    fetchGroups();
+    fetchProperties();
+    fetchRooms();
+  }, [fetchActivities, fetchGroups, fetchProperties, fetchRooms]);
 
   const handleGetStarted = () => {
     navigate(user ? '/dashboard' : '/register');
@@ -704,6 +841,50 @@ const LandingPage: React.FC = () => {
                 <div className="col-span-4 text-center py-20 bg-gray-50 rounded-[2.5rem] border border-dashed border-gray-300">
                   <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4"/>
                   <p className="text-gray-500 text-lg">Pronto tendremos nuevas actividades para ti.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* --- PROPIEDADES Y HABITACIONES DESTACADAS --- */}
+      <section id="properties" className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4 pb-6 border-b border-gray-200">
+            <div>
+              <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-bold tracking-wider uppercase text-xs">Vivienda</span>
+              <h2 className="text-4xl font-bold text-gray-900 mt-3">Propiedades y Habitaciones Destacadas</h2>
+            </div>
+            <button onClick={() => navigate('/dashboard/properties/rental')} className="group text-blue-600 font-bold flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+              Ver todo <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform"/>
+            </button>
+          </div>
+
+          {(loadingProperties || loadingRooms) ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="bg-gray-200 rounded-xl h-80 animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Mostrar propiedades */}
+              {properties.slice(0, 4).map((property) => (
+                <div key={property.id} className="hover:-translate-y-2 transition-transform duration-300">
+                  <PropertyCard property={property} />
+                </div>
+              ))}
+              {/* Mostrar habitaciones si no hay suficientes propiedades */}
+              {properties.length < 4 && rooms.slice(0, 4 - properties.length).map((room) => (
+                <div key={room.id} className="hover:-translate-y-2 transition-transform duration-300">
+                  <RoomCard room={room} />
+                </div>
+              ))}
+              {properties.length === 0 && rooms.length === 0 && (
+                <div className="col-span-4 text-center py-20 bg-gray-50 rounded-[2.5rem] border border-dashed border-gray-300">
+                  <Home className="w-16 h-16 text-gray-300 mx-auto mb-4"/>
+                  <p className="text-gray-500 text-lg">Pronto tendremos nuevas propiedades para ti.</p>
                 </div>
               )}
             </div>

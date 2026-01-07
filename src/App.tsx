@@ -39,6 +39,8 @@ import RoommateSearch from './components/accommodations/RoommateSearch';
 // Componentes de administración
 import AdminRoomManagement from './components/admin/AdminRoomManagement';
 import AdminPropertyManagement from './components/admin/AdminPropertyManagement';
+import AdminActivityManagement from './components/admin/AdminActivityManagement';
+import AdminGroupManagement from './components/admin/AdminGroupManagement';
 
 // Componentes de actividades
 import ActivityForm from './components/activities/ActivityForm';
@@ -225,6 +227,8 @@ const DashboardLayout: React.FC = () => {
             {/* Administración */}
             <Route path="/admin/rooms" element={<AdminRoomManagement />} />
             <Route path="/admin/properties" element={<AdminPropertyManagement />} />
+            <Route path="/admin/activities" element={<AdminActivityManagement />} />
+            <Route path="/admin/groups" element={<AdminGroupManagement />} />
             
             {/* Perfil y Configuración */}
             <Route path="/profile" element={<ProfileForm />} />

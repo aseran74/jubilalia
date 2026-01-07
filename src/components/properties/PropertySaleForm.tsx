@@ -33,6 +33,9 @@ interface PropertySaleFormData {
   amenities: string[];
   images: string[];
   available_from: Date | null;
+  external_listing_url: string;
+  external_platform: string;
+  show_on_landing: boolean;
   // Campos específicos para Coliving
   coliving_total_spots?: string;
   coliving_community_description?: string;
@@ -130,6 +133,9 @@ const PropertySaleForm: React.FC = () => {
             amenities: [], // Las amenities se manejan por separado
             images: imagesData?.map(img => img.image_url) || [],
             available_from: propertyData.available_from ? new Date(propertyData.available_from) : null,
+            external_listing_url: propertyData.external_listing_url || '',
+            external_platform: propertyData.external_platform || '',
+            show_on_landing: propertyData.show_on_landing || false,
             // Datos de coliving
             coliving_total_spots: colivingData?.total_spots?.toString() || '',
             coliving_community_description: colivingData?.community_description || '',
@@ -182,6 +188,9 @@ const PropertySaleForm: React.FC = () => {
     amenities: [],
     images: [],
     available_from: null,
+    external_listing_url: '',
+    external_platform: '',
+    show_on_landing: false,
     // Campos específicos para Coliving
     coliving_total_spots: '',
     coliving_community_description: '',
@@ -391,7 +400,10 @@ const PropertySaleForm: React.FC = () => {
             property_condition: formData.property_condition,
             parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
             recommended_occupants: formData.recommended_occupants ? parseInt(formData.recommended_occupants) : null,
-            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null
+            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null,
+            external_listing_url: formData.external_listing_url || null,
+            external_platform: formData.external_platform || null,
+            show_on_landing: formData.show_on_landing || false
           })
           .eq('id', id);
 
@@ -423,7 +435,10 @@ const PropertySaleForm: React.FC = () => {
             property_condition: formData.property_condition,
             parking_spaces: formData.parking_spaces ? parseInt(formData.parking_spaces) : 0,
             recommended_occupants: formData.recommended_occupants ? parseInt(formData.recommended_occupants) : null,
-            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null
+            price_per_person: formData.price_per_person ? parseFloat(formData.price_per_person) : null,
+            external_listing_url: formData.external_listing_url || null,
+            external_platform: formData.external_platform || null,
+            show_on_landing: formData.show_on_landing || false
           })
           .select()
           .single();
@@ -1119,6 +1134,54 @@ const PropertySaleForm: React.FC = () => {
                     placeholder="Ej: 130"
                   />
                   {errors.price_per_person && <p className="text-red-500 text-sm mt-1">{errors.price_per_person}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Plataforma del anuncio
+                  </label>
+                  <select
+                    name="external_platform"
+                    value={formData.external_platform}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="">Selecciona una plataforma</option>
+                    <option value="Idealista">Idealista</option>
+                    <option value="Fotocasa">Fotocasa</option>
+                    <option value="Pisos.com">Pisos.com</option>
+                    <option value="Otros">Otros</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Link del anuncio
+                  </label>
+                  <input
+                    type="url"
+                    name="external_listing_url"
+                    value={formData.external_listing_url}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="https://..."
+                  />
+                  {errors.external_listing_url && <p className="text-red-500 text-sm mt-1">{errors.external_listing_url}</p>}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="show_on_landing"
+                      checked={formData.show_on_landing}
+                      onChange={(e) => setFormData(prev => ({ ...prev, show_on_landing: e.target.checked }))}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Incluir en la landing page
+                    </span>
+                  </label>
                 </div>
               </div>
             </div>

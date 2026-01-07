@@ -20,7 +20,8 @@ import {
   ShieldCheckIcon,
   MapIcon,
   HomeModernIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -144,6 +145,8 @@ const DashboardSidebar: React.FC = () => {
     items: [
       { name: 'Gestionar Compartir', href: '/dashboard/admin/rooms', icon: HomeModernIcon },
       { name: 'Gestionar Propiedades', href: '/dashboard/admin/properties', icon: BuildingOfficeIcon },
+      { name: 'Gestionar Actividades', href: '/dashboard/admin/activities', icon: CalendarIcon },
+      { name: 'Gestionar Grupos', href: '/dashboard/admin/groups', icon: UserGroupIcon },
     ]
   };
 

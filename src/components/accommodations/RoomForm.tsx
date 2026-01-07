@@ -33,6 +33,7 @@ interface RoomFormData {
   bed_type: string;
   other_requirements: string;
   images: string[];
+  show_on_landing: boolean;
 }
 
 const RoomForm: React.FC = () => {
@@ -63,7 +64,8 @@ const RoomForm: React.FC = () => {
     pet_types: [],
     bed_type: 'single',
     other_requirements: '',
-    images: []
+    images: [],
+    show_on_landing: false
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -157,7 +159,8 @@ const RoomForm: React.FC = () => {
             pet_types: requirementsData.pet_types || [],
             bed_type: requirementsData.bed_type || '',
             other_requirements: requirementsData.other_requirements || '',
-            images: imagesData?.map(img => img.image_url) || []
+            images: imagesData?.map(img => img.image_url) || [],
+            show_on_landing: roomData.show_on_landing || false
           });
 
         } catch (error) {
@@ -260,6 +263,7 @@ const RoomForm: React.FC = () => {
             postal_code: formData.postal_code,
             price: formData.price,
             available_from: formData.available_from ? formData.available_from.toISOString() : null,
+            show_on_landing: formData.show_on_landing || false
           })
           .eq('id', id);
 
@@ -330,7 +334,8 @@ const RoomForm: React.FC = () => {
             listing_type: 'room_rental',
             property_type: 'room',
             profile_id: profile.id,
-            is_available: true
+            is_available: true,
+            show_on_landing: formData.show_on_landing || false
           })
           .select()
           .single();
@@ -833,6 +838,22 @@ const RoomForm: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                {/* Checkbox para landing page */}
+                <div className="mt-6">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="show_on_landing"
+                      checked={formData.show_on_landing}
+                      onChange={(e) => setFormData(prev => ({ ...prev, show_on_landing: e.target.checked }))}
+                      className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      Incluir en la landing page
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
 

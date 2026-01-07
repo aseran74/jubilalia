@@ -40,6 +40,8 @@ interface Property {
   url?: string;
   recommended_occupants?: number;
   price_per_person?: number;
+  external_listing_url?: string;
+  external_platform?: string;
   coliving_data?: {
     total_spots: number;
     available_spots: number;
@@ -677,6 +679,36 @@ const PropertyDetail: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Anuncio externo */}
+            {(property.external_platform || property.external_listing_url) && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Anuncio externo
+                </h2>
+                <div className="space-y-3">
+                  {property.external_platform && (
+                    <div className="flex items-center space-x-3">
+                      <BuildingOfficeIcon className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-700">Plataforma: <strong>{property.external_platform}</strong></span>
+                    </div>
+                  )}
+                  {property.external_listing_url && (
+                    <div className="flex items-center space-x-3">
+                      <ArrowTopRightOnSquareIcon className="w-5 h-5 text-gray-400" />
+                      <a 
+                        href={property.external_listing_url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 hover:underline break-all"
+                      >
+                        {property.external_listing_url}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Amenidades */}
             {property.amenities && property.amenities.length > 0 && (
