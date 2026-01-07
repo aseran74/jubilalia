@@ -749,7 +749,7 @@ const PropertyDetail: React.FC = () => {
                   latitude={property.latitude || 40.4168}
                   longitude={property.longitude || -3.7038}
                   title={property.title}
-                  location={property.location}
+                  location={property.location || ''}
                 />
               </div>
             </div>

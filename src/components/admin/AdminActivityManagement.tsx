@@ -7,8 +7,7 @@ import {
   PlusIcon, 
   EyeIcon, 
   PencilIcon, 
-  TrashIcon,
-  MapPinIcon
+  TrashIcon
 } from '@heroicons/react/24/outline';
 
 interface Activity {
@@ -560,5 +559,6 @@ const AdminActivityManagement: React.FC = () => {
 };
 
 export default AdminActivityManagement;
+
 
 

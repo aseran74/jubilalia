@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useGoogleMaps } from '../hooks/useGoogleMaps';
 import { 
-  MagnifyingGlassIcon as SearchIcon, 
   MapPinIcon, 
   HomeIcon,
   CurrencyEuroIcon,
@@ -342,12 +341,7 @@ const PropertySearch: React.FC = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateURLParams();
-  };
-
-  const updateURLParams = () => {
+  useEffect(() => {
     const params = new URLSearchParams();
     if (searchType !== 'all') params.set('type', searchType);
     if (searchTerm) params.set('q', searchTerm);
@@ -357,7 +351,7 @@ const PropertySearch: React.FC = () => {
     if (bedrooms > 0) params.set('bedrooms', bedrooms.toString());
     if (bathrooms > 0) params.set('bathrooms', bathrooms.toString());
     setSearchParams(params);
-  };
+  }, [searchType, searchTerm, selectedCity, priceRange, bedrooms, bathrooms, setSearchParams]);
 
   const clearFilters = () => {
     setSearchTerm('');
@@ -478,7 +472,7 @@ const PropertySearch: React.FC = () => {
                 <div className="mt-4">
                   <AmenitiesFilter
                     selectedAmenities={selectedAmenities}
-                    onChange={setSelectedAmenities}
+                    onAmenitiesChange={setSelectedAmenities}
                   />
                 </div>
               )}
