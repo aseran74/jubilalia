@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import PublicNavbar from '../common/PublicNavbar';
+import PublicFooter from '../common/PublicFooter';
 import { 
   ArrowLeftIcon,
   MapPinIcon,
@@ -73,6 +75,8 @@ interface Author {
 const PropertyDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPublicRoute = location.pathname.startsWith('/properties/') || location.pathname.startsWith('/rooms/');
   const { profile } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [author, setAuthor] = useState<Author | null>(null);
@@ -340,10 +344,10 @@ const PropertyDetail: React.FC = () => {
             {error || 'Propiedad no encontrada'}
           </div>
           <button
-            onClick={() => navigate('/dashboard/properties/sale')}
+            onClick={() => navigate(isPublicRoute ? '/properties/search' : '/dashboard/properties/sale')}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            Volver a Propiedades
+            Volver {isPublicRoute ? 'a Búsqueda' : 'a Propiedades'}
           </button>
         </div>
       </div>
@@ -445,18 +449,21 @@ const PropertyDetail: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate('/dashboard/properties/sale')}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeftIcon className="w-5 h-5 mr-2" />
-            Volver a Propiedades
-          </button>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      {isPublicRoute && <PublicNavbar isTransparent={false} />}
+      
+      <div className={`${isPublicRoute ? 'pt-20' : 'py-8'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => navigate(isPublicRoute ? '/properties/search' : '/dashboard/properties/sale')}
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeftIcon className="w-5 h-5 mr-2" />
+              Volver {isPublicRoute ? 'a Búsqueda' : 'a Propiedades'}
+            </button>
+          </div>
 
         {/* Galería de imágenes - Nuevo componente */}
         {property.images && property.images.length > 0 && (
@@ -928,6 +935,9 @@ const PropertyDetail: React.FC = () => {
           </div>
         </div>
       </div>
+      </div>
+      
+      {isPublicRoute && <PublicFooter />}
     </div>
   );
 };

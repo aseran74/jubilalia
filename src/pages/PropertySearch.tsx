@@ -16,6 +16,8 @@ import {
 import { Link } from 'react-router-dom';
 import UnifiedPropertyFilter from '../components/common/UnifiedPropertyFilter';
 import AmenitiesFilter from '../components/common/AmenitiesFilter';
+import PublicNavbar from '../components/common/PublicNavbar';
+import PublicFooter from '../components/common/PublicFooter';
 
 type SearchType = 'all' | 'rental' | 'sale' | 'rooms';
 type ViewMode = 'list' | 'map';
@@ -379,19 +381,15 @@ const PropertySearch: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <PublicNavbar isTransparent={false} />
+      
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="bg-white border-b border-gray-200 pt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-gray-900">
               Buscar Propiedades
             </h1>
-            <button
-              onClick={() => navigate('/')}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              Volver al inicio
-            </button>
           </div>
 
           {/* Tipo de búsqueda */}
@@ -797,6 +795,8 @@ const PropertySearch: React.FC = () => {
           </>
         )}
       </div>
+      
+      <PublicFooter />
     </div>
   );
 };

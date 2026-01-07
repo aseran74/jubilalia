@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import PublicNavbar from '../common/PublicNavbar';
+import PublicFooter from '../common/PublicFooter';
 import { 
   HeartIcon,
   MapPinIcon,
@@ -64,6 +66,8 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
 }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isPublicRoute = location.pathname.startsWith('/rooms/');
   const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -315,10 +319,10 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
           <h3 className="text-lg font-medium text-gray-900 mb-2">Error al cargar</h3>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => navigate('/dashboard/rooms')}
+            onClick={() => navigate(isPublicRoute ? '/properties/search' : '/dashboard/rooms')}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
-            Volver a Compartir
+            Volver {isPublicRoute ? 'a Búsqueda' : 'a Compartir'}
           </button>
         </div>
       </div>
@@ -337,10 +341,10 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
           <h3 className="text-lg font-medium text-gray-900 mb-2">Habitación no encontrada</h3>
           <p className="text-gray-600 mb-4">La habitación que buscas no existe o ha sido eliminada.</p>
           <button
-            onClick={() => navigate('/dashboard/rooms')}
+            onClick={() => navigate(isPublicRoute ? '/properties/search' : '/dashboard/rooms')}
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
           >
-            Volver a Compartir
+            Volver {isPublicRoute ? 'a Búsqueda' : 'a Compartir'}
           </button>
         </div>
       </div>
@@ -349,11 +353,13 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {isPublicRoute && <PublicNavbar isTransparent={false} />}
+      
       {/* Header con botón de regreso */}
-      <div className="bg-white border-b border-gray-200 px-4 py-4">
+      <div className={`bg-white border-b border-gray-200 px-4 ${isPublicRoute ? 'pt-20' : 'py-4'}`}>
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(isPublicRoute ? '/properties/search' : -1)}
             className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
           >
                             <ArrowLeftIcon className="w-5 h-5 mr-2" />
@@ -663,6 +669,8 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
           </div>
         </div>
       )}
+      
+      {isPublicRoute && <PublicFooter />}
     </div>
   );
 };
