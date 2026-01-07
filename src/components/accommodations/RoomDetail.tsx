@@ -359,7 +359,13 @@ const RoomDetail: React.FC<RoomDetailProps> = ({
       <div className={`bg-white border-b border-gray-200 px-4 ${isPublicRoute ? 'pt-20' : 'py-4'}`}>
         <div className="max-w-7xl mx-auto">
           <button
-            onClick={() => navigate(isPublicRoute ? '/properties/search' : -1)}
+            onClick={() => {
+              if (isPublicRoute) {
+                navigate('/properties/search');
+              } else {
+                navigate(-1);
+              }
+            }}
             className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
           >
                             <ArrowLeftIcon className="w-5 h-5 mr-2" />
