@@ -12,6 +12,9 @@ import MobileLandingPage from './pages/MobileLandingPage';
 import ColivingExplanation from './pages/ColivingExplanation';
 import AppSplash from './pages/AppSplash';
 import PublicSearch from './pages/PublicSearch';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import CookiePolicy from './pages/CookiePolicy';
 import { lazy, Suspense } from 'react';
 
 // Lazy load de componentes pesados
@@ -423,6 +426,11 @@ const App: React.FC = () => {
           <Route path="/properties/rental/:id" element={<PropertyDetail />} />
           <Route path="/properties/sale/:id" element={<PropertyDetail />} />
           <Route path="/rooms/:id" element={<RoomDetail />} />
+          
+          {/* Páginas legales */}
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/cookies" element={<CookiePolicy />} />
           
           {/* Rutas accesibles desde landing page */}
           <Route path="/profile" element={<ProfileForm />} />

@@ -22,7 +22,9 @@ import {
   QuestionMarkCircleIcon as QuestionMark,
   CheckCircleIcon as CheckCircle,
   ShieldCheckIcon as ShieldCheck,
-  MagnifyingGlassIcon as SearchIcon
+  MagnifyingGlassIcon as SearchIcon,
+  InformationCircleIcon as Info,
+  DocumentTextIcon as Document
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
@@ -41,6 +43,7 @@ const LandingPage: React.FC = () => {
   const [isCohousingModalOpen, setIsCohousingModalOpen] = useState(false);
   const [isSuccessCaseModalOpen, setIsSuccessCaseModalOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [isLegalMenuOpen, setIsLegalMenuOpen] = useState(false);
   
   // Datos
   interface Activity {
@@ -378,6 +381,53 @@ const LandingPage: React.FC = () => {
 
             {/* Desktop CTA */}
             <div className="hidden lg:flex items-center space-x-4">
+              {/* Legal Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsLegalMenuOpen(!isLegalMenuOpen)}
+                  className={`p-2 rounded-full transition-all ${
+                    isScrolled 
+                      ? 'text-gray-600 hover:bg-gray-100' 
+                      : 'text-white hover:bg-white/20'
+                  }`}
+                  onBlur={() => setTimeout(() => setIsLegalMenuOpen(false), 200)}
+                >
+                  <Info className="w-5 h-5" />
+                </button>
+                {isLegalMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <button
+                      onClick={() => { scrollToSection('faq'); setIsLegalMenuOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <QuestionMark className="w-4 h-4" />
+                      FAQ
+                    </button>
+                    <button
+                      onClick={() => { navigate('/terms'); setIsLegalMenuOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <Document className="w-4 h-4" />
+                      Términos de Servicio
+                    </button>
+                    <button
+                      onClick={() => { navigate('/privacy'); setIsLegalMenuOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      Política de Privacidad
+                    </button>
+                    <button
+                      onClick={() => { navigate('/cookies'); setIsLegalMenuOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                    >
+                      <Document className="w-4 h-4" />
+                      Política de Cookies
+                    </button>
+                  </div>
+                )}
+              </div>
+              
               {user ? (
                 <ProfileCard isTransparent={!isScrolled} />
               ) : (
@@ -446,6 +496,18 @@ const LandingPage: React.FC = () => {
             <button onClick={() => scrollToSection('faq')} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
               <QuestionMark className="w-6 h-6" />
               <span>FAQ</span>
+            </button>
+            <button onClick={() => { setIsMenuOpen(false); navigate('/terms'); }} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
+              <Document className="w-6 h-6" />
+              <span>Términos de Servicio</span>
+            </button>
+            <button onClick={() => { setIsMenuOpen(false); navigate('/privacy'); }} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
+              <ShieldCheck className="w-6 h-6" />
+              <span>Política de Privacidad</span>
+            </button>
+            <button onClick={() => { setIsMenuOpen(false); navigate('/cookies'); }} className="flex items-center gap-3 text-left p-4 hover:bg-gray-100 rounded-xl transition-colors border-b-2 border-gray-300 text-gray-900 font-bold text-xl">
+              <Document className="w-6 h-6" />
+              <span>Política de Cookies</span>
             </button>
             
             <div className="pt-8 flex flex-col space-y-4 mt-4">
@@ -1087,10 +1149,19 @@ const LandingPage: React.FC = () => {
       <footer className="bg-white pt-20 pb-32 lg:pb-12 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <img src="/images/jubilogo.svg" alt="Jubilalia" loading="lazy" className="h-10 mx-auto mb-8 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500" />
-          <div className="flex flex-wrap justify-center gap-8 mb-8 text-sm font-bold text-gray-600">
-            <a href="#" className="hover:text-green-600 transition-colors">Privacidad</a>
-            <a href="#" className="hover:text-green-600 transition-colors">Términos</a>
-            <a href="#" className="hover:text-green-600 transition-colors">Cookies</a>
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mb-8 text-sm font-bold text-gray-600">
+            <button onClick={() => scrollToSection('faq')} className="hover:text-green-600 transition-colors">FAQ</button>
+            <Link to="/terms" className="hover:text-green-600 transition-colors">Términos de Servicio</Link>
+            <Link to="/privacy" className="hover:text-green-600 transition-colors">Política de Privacidad</Link>
+            <Link to="/cookies" className="hover:text-green-600 transition-colors">Política de Cookies</Link>
+            <a 
+              href="https://www.canva.com/design/DAG9W5ioZhY/fEJQvYVruMvv6O1-Ezg-8A/view?utm_content=DAG9W5ioZhY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-green-600 transition-colors"
+            >
+              Pitch Deck
+            </a>
           </div>
           <p className="text-sm text-gray-400 font-medium">&copy; {new Date().getFullYear()} Jubilalia. Hecho con <span className="text-red-500">❤️</span> para nuestros mayores.</p>
         </div>
