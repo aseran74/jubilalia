@@ -452,13 +452,13 @@ const PropertyDetail: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {isPublicRoute && <PublicNavbar isTransparent={false} />}
       
-      <div className={`${isPublicRoute ? 'pt-20' : 'py-8'}`}>
+      <div className={`${isPublicRoute ? 'pt-20 lg:pt-24' : 'py-8'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button */}
-          <div className="mb-6">
+          <div className={`mb-4 ${isPublicRoute ? 'pt-4 lg:pt-0' : ''}`}>
             <button
               onClick={() => navigate(isPublicRoute ? '/properties/search' : '/dashboard/properties/sale')}
-              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base"
             >
               <ArrowLeftIcon className="w-5 h-5 mr-2" />
               Volver {isPublicRoute ? 'a Búsqueda' : 'a Propiedades'}
@@ -471,17 +471,17 @@ const PropertyDetail: React.FC = () => {
         )}
 
         {/* Property Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {property.title}
               </h1>
-              <div className="flex items-center text-gray-600 mb-4">
-                <MapPinIcon className="w-5 h-5 mr-2" />
-                <span>{property.location}</span>
+              <div className="flex items-start text-gray-600 mb-4">
+                <MapPinIcon className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                <span className="text-sm sm:text-base break-words">{property.location}</span>
               </div>
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-600">
                 <span className="flex items-center">
                   <BuildingOfficeIcon className="w-4 h-4 mr-1" />
                   {getPropertyTypeLabel(property.property_type)}
@@ -500,27 +500,29 @@ const PropertyDetail: React.FC = () => {
                 </span>
               </div>
             </div>
-            <div className="mt-4 lg:mt-0 lg:ml-6">
-              <div className="text-3xl font-bold text-blue-600">
-                {property.price.toLocaleString('es-ES')}€
-              </div>
-              <div className="text-sm text-gray-600 text-center">
-                Precio
+            <div className="mt-4 lg:mt-0 lg:ml-6 w-full lg:w-auto flex justify-center lg:justify-end">
+              <div className="text-center">
+                <div className="text-3xl sm:text-4xl lg:text-3xl font-bold text-blue-600">
+                  {property.price.toLocaleString('es-ES')}€
+                </div>
+                <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Precio
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6 sm:space-y-8">
 
             {/* Description */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">
                 Descripción
               </h2>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                 {property.description}
               </p>
             </div>
