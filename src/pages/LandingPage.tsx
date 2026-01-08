@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   UserGroupIcon as Users, 
   ChatBubbleLeftRightIcon as MessageCircle, 
