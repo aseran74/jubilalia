@@ -136,6 +136,25 @@ const PropertySearch: React.FC = () => {
     }
   }, [filteredProperties, map, mapsLoaded, viewMode]);
 
+  useEffect(() => {
+    if (!selectedProperty) return;
+    const stillVisible = filteredProperties.some(property => property.id === selectedProperty.id);
+    if (!stillVisible) {
+      setSelectedProperty(null);
+    }
+  }, [filteredProperties, selectedProperty]);
+
+  useEffect(() => {
+    if (viewMode !== 'map' || !map || !mapsLoaded || !window.google?.maps) return;
+
+    const resizeTimeout = window.setTimeout(() => {
+      window.google.maps.event.trigger(map, 'resize');
+      fitMapToProperties(map, filteredProperties);
+    }, 0);
+
+    return () => window.clearTimeout(resizeTimeout);
+  }, [showFilters, viewMode, map, mapsLoaded, filteredProperties, mapCenter]);
+
   const fetchProperties = async () => {
     try {
       setLoading(true);
@@ -277,6 +296,27 @@ const PropertySearch: React.FC = () => {
     }
   };
 
+  const fitMapToProperties = (mapInstance: google.maps.Map, items: Property[]) => {
+    if (!window.google || !window.google.maps) return;
+
+    const bounds = new window.google.maps.LatLngBounds();
+    let hasValidCoords = false;
+
+    items.forEach(property => {
+      if (property.latitude && property.longitude) {
+        bounds.extend({ lat: property.latitude, lng: property.longitude });
+        hasValidCoords = true;
+      }
+    });
+
+    if (hasValidCoords) {
+      mapInstance.fitBounds(bounds);
+    } else {
+      mapInstance.setCenter(mapCenter);
+      mapInstance.setZoom(10);
+    }
+  };
+
   const updateMarkers = () => {
     if (!map || !window.google || !window.google.maps) {
       console.log('⚠️ No se pueden actualizar marcadores:', {
@@ -327,18 +367,7 @@ const PropertySearch: React.FC = () => {
       setMarkers(newMarkers);
 
       // Ajustar vista del mapa para mostrar todos los marcadores
-      if (newMarkers.length > 0) {
-        const bounds = new window.google.maps.LatLngBounds();
-        newMarkers.forEach(marker => {
-          const pos = marker.getPosition();
-          if (pos) bounds.extend(pos);
-        });
-        map.fitBounds(bounds);
-      } else {
-        // Si no hay marcadores, centrar en el centro por defecto
-        map.setCenter(mapCenter);
-        map.setZoom(10);
-      }
+      fitMapToProperties(map, filteredProperties);
     } catch (error) {
       console.error('❌ Error al actualizar marcadores:', error);
     }
