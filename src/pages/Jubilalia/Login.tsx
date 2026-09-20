@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { isMobileApp } from '../../utils/mobileDetection';
+import Modal from '../../components/common/Modal';
 
 const JubilaliaLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const JubilaliaLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTestUserModalOpen, setIsTestUserModalOpen] = useState(false);
 
   // Limpiar errores cuando cambie el formulario
   useEffect(() => {
@@ -77,6 +79,11 @@ const JubilaliaLogin: React.FC = () => {
     }
   };
 
+  const fillTestUser = (email: string, password: string) => {
+    setFormData({ email, password });
+    setIsTestUserModalOpen(false);
+  };
+
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true);
@@ -91,7 +98,7 @@ const JubilaliaLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-orange-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-orange-50 py-12 px-4 sm:px-6 lg:px-8 app-safe-header">
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -184,59 +191,6 @@ const JubilaliaLogin: React.FC = () => {
                </Link>
             </div>
 
-            {/* Usuarios de prueba */}
-            <div className="space-y-3">
-              {/* Admin de Prueba */}
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5">
-                    <svg fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-purple-800 mb-2">👑 Admin de Prueba</h4>
-                    <div className="space-y-1 text-sm text-purple-700">
-                      <p><strong>Email:</strong> admin@test.com</p>
-                      <p><strong>Contraseña:</strong> admin123</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ email: 'admin@test.com', password: 'admin123' })}
-                      className="mt-2 text-xs text-purple-600 hover:text-purple-800 font-medium underline"
-                    >
-                      Usar credenciales de admin
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Usuario Normal */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5">
-                    <svg fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-blue-800 mb-2">Usuario de prueba</h4>
-                    <div className="space-y-1 text-sm text-blue-700">
-                      <p><strong>Email:</strong> test@example.com</p>
-                      <p><strong>Contraseña:</strong> password</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ email: 'test@example.com', password: 'password' })}
-                      className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium underline"
-                    >
-                      Usar credenciales de prueba
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Error Display */}
             {formError && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
@@ -267,6 +221,16 @@ const JubilaliaLogin: React.FC = () => {
               )}
             </button>
           </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsTestUserModalOpen(true)}
+              className="min-h-12 text-base font-semibold text-emerald-700 underline-offset-2 hover:underline"
+            >
+              Usuario de prueba
+            </button>
+          </div>
 
           <div className="mt-8 text-center">
             <p className="text-gray-600">
@@ -333,6 +297,43 @@ const JubilaliaLogin: React.FC = () => {
           </p>
         </div>
       </div>
+
+      <Modal
+        isOpen={isTestUserModalOpen}
+        onClose={() => setIsTestUserModalOpen(false)}
+        title="Usuario de prueba"
+        size="sm"
+      >
+        <p className="mb-5 text-base leading-relaxed text-slate-600">
+          Usa estas cuentas para entrar sin registrarte. También valen en la app de Android.
+        </p>
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <h4 className="text-base font-bold text-slate-900">Usuario</h4>
+            <p className="mt-2 text-sm text-slate-600"><strong>Email:</strong> test@example.com</p>
+            <p className="text-sm text-slate-600"><strong>Contraseña:</strong> password</p>
+            <button
+              type="button"
+              onClick={() => fillTestUser('test@example.com', 'password')}
+              className="mt-4 w-full rounded-full bg-emerald-700 px-4 py-3 text-base font-bold text-white transition-colors hover:bg-emerald-800"
+            >
+              Usar este usuario
+            </button>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <h4 className="text-base font-bold text-slate-900">Administrador</h4>
+            <p className="mt-2 text-sm text-slate-600"><strong>Email:</strong> admin@test.com</p>
+            <p className="text-sm text-slate-600"><strong>Contraseña:</strong> admin123</p>
+            <button
+              type="button"
+              onClick={() => fillTestUser('admin@test.com', 'admin123')}
+              className="mt-4 w-full rounded-full bg-slate-800 px-4 py-3 text-base font-bold text-white transition-colors hover:bg-slate-900"
+            >
+              Usar administrador
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

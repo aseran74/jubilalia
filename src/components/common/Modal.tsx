@@ -26,7 +26,7 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-[80] overflow-y-auto">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -34,7 +34,7 @@ const Modal: React.FC<ModalProps> = ({
       />
       
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="flex min-h-full items-center justify-center p-4 pt-[calc(var(--safe-top)+1rem)] pb-[calc(var(--safe-bottom)+1rem)]">
         <div className={`relative w-full ${sizeClasses[size]} bg-white rounded-lg shadow-xl`}>
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">

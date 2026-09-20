@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -14,14 +14,14 @@ import {
   BuildingOfficeIcon,
   ChatBubbleLeftRightIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
   Bars3Icon,
   XMarkIcon,
   ShieldCheckIcon,
   MapIcon,
   HomeModernIcon,
   InformationCircleIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -37,23 +37,91 @@ interface NavigationGroup {
   description?: string;
 }
 
+const navigationGroups: NavigationGroup[] = [
+  {
+    name: 'Actividades',
+    icon: CalendarIcon,
+    items: [
+      { name: 'Buscar actividades', href: '/dashboard/activities', icon: MagnifyingGlassIcon },
+      { name: 'Ver en mapa', href: '/dashboard/activities/map', icon: MapIcon },
+      { name: 'Crear actividad', href: '/dashboard/activities/create', icon: PlusIcon },
+    ],
+  },
+  {
+    name: 'Posts',
+    icon: DocumentTextIcon,
+    items: [
+      { name: 'Buscar posts', href: '/dashboard/posts', icon: MagnifyingGlassIcon },
+      { name: 'Crear post', href: '/dashboard/posts/create', icon: PlusIcon },
+    ],
+  },
+  {
+    name: 'Socios',
+    icon: UserIcon,
+    items: [
+      { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
+      { name: 'Ver en mapa', href: '/dashboard/users/map', icon: MapIcon },
+    ],
+  },
+  {
+    name: 'Grupos',
+    icon: UsersIcon,
+    items: [
+      { name: 'Buscar grupos', href: '/dashboard/groups', icon: MagnifyingGlassIcon },
+      { name: 'Ver en mapa', href: '/dashboard/groups/map', icon: MapIcon },
+    ],
+  },
+  {
+    name: 'Coliving',
+    icon: HomeModernIcon,
+    description: 'Habitaciones, alquiler y venta para vivir en comunidad',
+    items: [
+      { name: '¿Qué es Coliving?', href: '/coliving', icon: InformationCircleIcon },
+      { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
+      { name: 'Habitaciones - Publicar', href: '/dashboard/rooms/create', icon: PlusIcon },
+      { name: 'Post habitaciones', href: '/dashboard/rooms/posts', icon: DocumentTextIcon },
+      { name: 'Alquiler - Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
+      { name: 'Alquiler - Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },
+      { name: 'Post alquiler', href: '/dashboard/properties/rental/posts', icon: DocumentTextIcon },
+      { name: 'Venta - Buscar', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
+      { name: 'Venta - Publicar', href: '/dashboard/properties/sale/create', icon: PlusIcon },
+      { name: 'Post venta', href: '/dashboard/properties/sale/posts', icon: DocumentTextIcon },
+    ],
+  },
+  {
+    name: 'Mensajería',
+    icon: ChatBubbleLeftRightIcon,
+    items: [
+      { name: 'Chat', href: '/dashboard/messages', icon: ChatBubbleLeftRightIcon },
+    ],
+  },
+];
+
+const adminGroup: NavigationGroup = {
+  name: 'Administración',
+  icon: ShieldCheckIcon,
+  items: [
+    { name: 'Gestionar Compartir', href: '/dashboard/admin/rooms', icon: HomeModernIcon },
+    { name: 'Gestionar Propiedades', href: '/dashboard/admin/properties', icon: BuildingOfficeIcon },
+    { name: 'Gestionar Actividades', href: '/dashboard/admin/activities', icon: CalendarIcon },
+    { name: 'Gestionar Grupos', href: '/dashboard/admin/groups', icon: UserGroupIcon },
+  ],
+};
+
 const DashboardSidebar: React.FC = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<string[]>(['actividades', 'posts', 'socios', 'grupos', 'coliving', 'mensajeria']);
-
-  // Detectar si es móvil
   const [isMobile, setIsMobile] = useState(false);
+  const [openGroups, setOpenGroups] = useState<string[]>([]);
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-      if (window.innerWidth >= 768) {
-        setIsMobileOpen(false);
-      }
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) setIsMobileOpen(false);
     };
 
     checkMobile();
@@ -61,13 +129,13 @@ const DashboardSidebar: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Debug logs
-  console.log('DashboardSidebar - Estado:', {
-    user: user ? { id: user.id, email: user.email } : null,
-    profile: profile ? { id: profile.id, full_name: profile.full_name } : null,
-    location: location.pathname,
-    openGroups
-  });
+  useEffect(() => {
+    const groups = isAdmin ? [...navigationGroups, adminGroup] : navigationGroups;
+    const activeGroup = groups.find((group) =>
+      group.items.some((item) => location.pathname === item.href)
+    );
+    setOpenGroups(activeGroup ? [activeGroup.name] : []);
+  }, [location.pathname, isAdmin]);
 
   const handleSignOut = async () => {
     try {
@@ -78,435 +146,248 @@ const DashboardSidebar: React.FC = () => {
     }
   };
 
-  const navigationGroups: NavigationGroup[] = [
-    {
-      name: 'Actividades',
-      icon: CalendarIcon,
-      items: [
-        { name: 'Buscar actividades', href: '/dashboard/activities', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/activities/map', icon: MapIcon },
-        { name: 'Crear actividad', href: '/dashboard/activities/create', icon: PlusIcon },
-      ]
-    },
-    {
-      name: 'Posts',
-      icon: DocumentTextIcon,
-      items: [
-        { name: 'Buscar posts', href: '/dashboard/posts', icon: MagnifyingGlassIcon },
-        { name: 'Crear post', href: '/dashboard/posts/create', icon: PlusIcon },
-      ]
-    },
-    {
-      name: 'Socios',
-      icon: UserIcon,
-      items: [
-        { name: 'Buscar gente', href: '/dashboard/users', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/users/map', icon: MapIcon },
-      ]
-    },
-    {
-      name: 'Grupos',
-      icon: UsersIcon,
-      items: [
-        { name: 'Buscar grupos', href: '/dashboard/groups', icon: MagnifyingGlassIcon },
-        { name: 'Ver en mapa', href: '/dashboard/groups/map', icon: MapIcon },
-      ]
-    },
-    {
-      name: 'Coliving',
-      icon: HomeModernIcon,
-      description: 'Busca y publica habitaciones, propiedades en alquiler y venta para vivir en comunidad',
-      items: [
-        { name: '¿Qué es Coliving?', href: '/coliving', icon: InformationCircleIcon },
-        { name: 'Habitaciones - Buscar', href: '/dashboard/rooms', icon: MagnifyingGlassIcon },
-        { name: 'Habitaciones - Publicar', href: '/dashboard/rooms/create', icon: PlusIcon },
-        { name: 'Post habitaciones', href: '/dashboard/rooms/posts', icon: DocumentTextIcon },
-        { name: 'Alquiler - Buscar', href: '/dashboard/properties/rental', icon: MagnifyingGlassIcon },
-        { name: 'Alquiler - Publicar', href: '/dashboard/properties/rental/create', icon: PlusIcon },
-        { name: 'Post alquiler', href: '/dashboard/properties/rental/posts', icon: DocumentTextIcon },
-        { name: 'Venta - Buscar', href: '/dashboard/properties/sale', icon: MagnifyingGlassIcon },
-        { name: 'Venta - Publicar', href: '/dashboard/properties/sale/create', icon: PlusIcon },
-        { name: 'Post venta', href: '/dashboard/properties/sale/posts', icon: DocumentTextIcon },
-      ]
-    },
-    {
-      name: 'Mensajería',
-      icon: ChatBubbleLeftRightIcon,
-      items: [
-        { name: 'Chat', href: '/dashboard/messages', icon: ChatBubbleLeftRightIcon },
-      ]
-    }
-  ];
-
-  // Sección de administración (solo para administradores)
-  const adminGroup: NavigationGroup = {
-    name: 'Administración',
-    icon: ShieldCheckIcon,
-    items: [
-      { name: 'Gestionar Compartir', href: '/dashboard/admin/rooms', icon: HomeModernIcon },
-      { name: 'Gestionar Propiedades', href: '/dashboard/admin/properties', icon: BuildingOfficeIcon },
-      { name: 'Gestionar Actividades', href: '/dashboard/admin/activities', icon: CalendarIcon },
-      { name: 'Gestionar Grupos', href: '/dashboard/admin/groups', icon: UserGroupIcon },
-    ]
+  const closeMobile = () => {
+    if (isMobile) setIsMobileOpen(false);
   };
 
-  const standaloneItems: NavigationItem[] = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'Mi Perfil', href: '/dashboard/profile', icon: UserIcon },
-    { name: 'Configuración', href: '/dashboard/settings', icon: Cog6ToothIcon },
-  ];
-
   const toggleGroup = (groupName: string) => {
-    setOpenGroups(prev => 
-      prev.includes(groupName) 
-        ? prev.filter(name => name !== groupName)
-        : [...prev, groupName]
+    setOpenGroups((prev) =>
+      prev.includes(groupName) ? prev.filter((name) => name !== groupName) : [groupName]
     );
   };
 
-  const isActive = (href: string) => {
-    if (href === '/dashboard') {
-      return location.pathname === '/dashboard';
-    }
-    return location.pathname.startsWith(href);
-  };
+  const isActive = (href: string) => location.pathname === href;
 
-  const isGroupActive = (group: NavigationGroup) => {
-    return group.items.some(item => isActive(item.href));
+  const isGroupActive = (group: NavigationGroup) =>
+    group.items.some((item) => location.pathname === item.href);
+
+  const expanded = !isCollapsed || isMobile;
+  const itemClass = (active: boolean) =>
+    `flex min-h-11 items-center rounded-xl text-[15px] font-medium transition-[background-color,color,transform] duration-150 ease-out ${
+      active
+        ? 'bg-emerald-700 text-white shadow-sm'
+        : 'text-slate-600 hover:bg-white hover:text-slate-900'
+    } ${expanded ? 'gap-3 px-3 py-2.5' : 'justify-center px-2 py-2.5'}`;
+
+  const renderGroup = (group: NavigationGroup, accent = 'emerald') => {
+    const open = openGroups.includes(group.name);
+    const groupActive = isGroupActive(group);
+    const activeGroupClass =
+      accent === 'admin'
+        ? groupActive
+          ? 'bg-red-50 text-red-800'
+          : 'text-slate-600 hover:bg-white hover:text-slate-900'
+        : groupActive
+          ? 'bg-emerald-50 text-emerald-900'
+          : 'text-slate-600 hover:bg-white hover:text-slate-900';
+
+    if (!expanded) {
+      return (
+        <Link
+          key={group.name}
+          to={group.items[0].href}
+          title={group.name}
+          className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+            groupActive ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-white hover:text-slate-900'
+          }`}
+        >
+          <group.icon className="h-5 w-5" />
+        </Link>
+      );
+    }
+
+    return (
+      <div key={group.name}>
+        <button
+          type="button"
+          onClick={() => toggleGroup(group.name)}
+          className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3 py-2.5 text-[15px] font-semibold ${activeGroupClass}`}
+          aria-expanded={open}
+        >
+          <span className="flex items-center gap-3">
+            <group.icon className="h-5 w-5 shrink-0" />
+            {group.name}
+          </span>
+          <ChevronDownIcon
+            className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {open && (
+          <div className="mt-1 space-y-1 border-l border-slate-200 ml-5 pl-3">
+            {group.description && (
+              <p className="px-2 pb-1 text-xs leading-relaxed text-slate-500">{group.description}</p>
+            )}
+            {group.items.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                onClick={closeMobile}
+                className={itemClass(isActive(item.href))}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <>
-      {/* Mobile Menu Button */}
       {isMobile && (
         <button
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200 md:hidden"
+          type="button"
+          onClick={() => setIsMobileOpen((open) => !open)}
+          className="fixed left-4 top-4 z-50 rounded-xl border border-slate-200 bg-white p-2 shadow-md md:hidden"
+          aria-label={isMobileOpen ? 'Cerrar menú' : 'Abrir menú'}
         >
           {isMobileOpen ? (
-            <XMarkIcon className="w-6 h-6 text-gray-600" />
+            <XMarkIcon className="h-6 w-6 text-slate-700" />
           ) : (
-            <Bars3Icon className="w-6 h-6 text-gray-600" />
+            <Bars3Icon className="h-6 w-6 text-slate-700" />
           )}
         </button>
       )}
 
-      {/* Mobile Overlay */}
       {isMobile && isMobileOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+        <div
+          className="fixed inset-0 z-40 bg-slate-900/40 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <div className={`
-        bg-white border-r border-gray-200 transition-all duration-300
-        ${isMobile 
-          ? `fixed top-0 left-0 h-full z-50 transform ${
-              isMobileOpen ? 'translate-x-0' : '-translate-x-full'
-            } w-80`
-          : `relative ${
-              isCollapsed ? 'w-20' : 'w-64'
-            }`
-        }
-      `}>
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className={`flex items-center justify-between border-b border-gray-200 ${
-            isCollapsed && !isMobile ? 'p-3' : 'p-4'
-          }`}>
-            <Link 
-              to="/" 
-              className="flex items-center flex-shrink-0"
-              onClick={() => isMobile && setIsMobileOpen(false)}
-            >
-              {(!isCollapsed || isMobile) ? (
-                <img 
-                  src="/images/jubilogo.svg" 
-                  alt="Jubilalia" 
-                  className="h-8 w-auto"
-                />
-              ) : (
-                <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xs">J</span>
-                </div>
-              )}
-            </Link>
-            {!isMobile && (
-              <button
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                className="p-2 rounded-md hover:bg-gray-100"
-              >
-                <svg
-                  className={`w-5 h-5 text-gray-600 transition-transform ${
-                    isCollapsed ? 'rotate-180' : ''
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
+      <aside
+        className={`flex h-screen shrink-0 flex-col border-r border-slate-200 bg-[#F4F1EA] transition-[width,transform] duration-200 ease-out ${
+          isMobile
+            ? `fixed inset-y-0 left-0 z-50 w-72 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : `sticky top-0 ${isCollapsed ? 'w-[4.75rem]' : 'w-72'}`
+        }`}
+      >
+        <div className={`flex items-center border-b border-slate-200/80 ${expanded ? 'px-4 py-4' : 'flex-col gap-3 px-2 py-4'}`}>
+          <Link to="/" onClick={closeMobile} className="flex min-w-0 items-center">
+            {expanded ? (
+              <img src="/images/jubilogo.svg" alt="Jubilalia" className="h-8 w-auto" />
+            ) : (
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-700 text-sm font-bold text-white">
+                J
+              </span>
             )}
-          </div>
+          </Link>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4">
-          <div className={`space-y-2 ${
-            isCollapsed && !isMobile ? 'px-2' : 'px-4'
-          }`}>
-            {/* Landing Page Link */}
-            <Link
-              to="/"
-              onClick={() => isMobile && setIsMobileOpen(false)}
-              className={`flex items-center rounded-lg text-sm font-medium text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200 ${
-                isCollapsed && !isMobile ? 'px-2 py-3 justify-center' : 'px-3 py-3'
-              }`}
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={() => setIsCollapsed((value) => !value)}
+              className={`rounded-lg p-2 text-slate-500 hover:bg-white hover:text-slate-800 ${expanded ? 'ml-auto' : ''}`}
+              aria-label={isCollapsed ? 'Expandir menú' : 'Contraer menú'}
             >
-              <svg className={`w-5 h-5 flex-shrink-0 ${
-                isCollapsed && !isMobile ? '' : 'mr-3'
-              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              <svg
+                className={`h-5 w-5 transition-transform duration-200 ${isCollapsed ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              {(!isCollapsed || isMobile) && 'Ir a Jubilalia'}
+            </button>
+          )}
+        </div>
+
+        {expanded && (
+          <Link
+            to="/"
+            onClick={closeMobile}
+            className="mx-3 mt-3 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:bg-white hover:text-emerald-800"
+          >
+            <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+            Ir a la web
+          </Link>
+        )}
+
+        <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Menú del dashboard">
+          <div className={`flex flex-col ${expanded ? 'gap-1' : 'items-center gap-2'}`}>
+            <Link
+              to="/dashboard"
+              onClick={closeMobile}
+              title="Inicio"
+              className={itemClass(isActive('/dashboard'))}
+            >
+              <HomeIcon className="h-5 w-5 shrink-0" />
+              {expanded && 'Inicio'}
             </Link>
 
+            <div className={`my-2 w-full border-t border-slate-200 ${expanded ? '' : 'mx-auto w-8'}`} />
 
+            {navigationGroups.map((group) => renderGroup(group))}
 
-            {/* Divider */}
-            <div className="border-t border-gray-200 my-4"></div>
-
-            {/* Standalone Items */}
-            {standaloneItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                onClick={() => isMobile && setIsMobileOpen(false)}
-                className={`flex items-center rounded-lg text-sm font-medium transition-colors ${
-                  isActive(item.href)
-                    ? 'bg-green-100 text-green-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                } ${
-                  isCollapsed && !isMobile ? 'px-2 py-3 justify-center' : 'px-3 py-3'
-                }`}
-              >
-                <item.icon className={`w-5 h-5 flex-shrink-0 ${
-                  isCollapsed && !isMobile ? '' : 'mr-3'
-                }`} />
-                {(!isCollapsed || isMobile) && item.name}
-              </Link>
-            ))}
-
-            {/* Divider */}
-            <div className="border-t border-gray-200 my-4"></div>
-
-            {/* Grouped Navigation */}
-            {(!isCollapsed || isMobile) && navigationGroups.map((group) => (
-              <div key={group.name} className="space-y-1">
-                <button
-                  onClick={() => toggleGroup(group.name)}
-                  className={`w-full flex items-center justify-between rounded-lg text-sm font-medium transition-colors ${
-                    isGroupActive(group)
-                      ? 'bg-green-50 text-green-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  } ${
-                    isCollapsed && !isMobile ? 'px-2 py-3' : 'px-3 py-3'
-                  }`}
-                >
-                  <div className="flex items-center">
-                    <group.icon className={`w-5 h-5 flex-shrink-0 ${
-                      isCollapsed && !isMobile ? '' : 'mr-3'
-                    }`} />
-                    {group.name}
-                  </div>
-                  {openGroups.includes(group.name) ? (
-                    <ChevronDownIcon className="w-4 h-4" />
-                  ) : (
-                    <ChevronRightIcon className="w-4 h-4" />
-                  )}
-                </button>
-                
-                {openGroups.includes(group.name) && (
-                  <div className="ml-6 space-y-1">
-                    {group.description && (
-                      <p className="px-3 py-2 text-xs text-gray-500 italic">
-                        {group.description}
-                      </p>
-                    )}
-                    {group.items.map((item) => (
-                      <Link
-                        key={item.href}
-                        to={item.href}
-                        onClick={() => isMobile && setIsMobileOpen(false)}
-                        className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                          isActive(item.href)
-                            ? 'bg-green-100 text-green-700'
-                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                        }`}
-                      >
-                        <item.icon className="w-4 h-4 mr-3 flex-shrink-0" />
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Admin Section (only for admins) */}
-            {isAdmin && (!isCollapsed || isMobile) && (
+            {isAdmin && (
               <>
-                {/* Divider */}
-                <div className="border-t border-gray-200 my-4"></div>
-                
-                <div className="space-y-1">
-                  <button
-                    onClick={() => toggleGroup(adminGroup.name)}
-                    className={`w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isGroupActive(adminGroup)
-                        ? 'bg-red-50 text-red-700'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <adminGroup.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                      {adminGroup.name}
-                    </div>
-                    {openGroups.includes(adminGroup.name) ? (
-                      <ChevronDownIcon className="w-4 h-4" />
-                    ) : (
-                      <ChevronRightIcon className="w-4 h-4" />
-                    )}
-                  </button>
-                  
-                  {openGroups.includes(adminGroup.name) && (
-                    <div className="ml-6 space-y-1">
-                      {adminGroup.items.map((item) => (
-                        <Link
-                          key={item.href}
-                          to={item.href}
-                          onClick={() => isMobile && setIsMobileOpen(false)}
-                          className={`flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
-                            isActive(item.href)
-                              ? 'bg-red-100 text-red-700'
-                              : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-                          }`}
-                        >
-                          <item.icon className="w-4 h-4 mr-3 flex-shrink-0" />
-                          {item.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <div className={`my-2 w-full border-t border-slate-200 ${expanded ? '' : 'mx-auto w-8'}`} />
+                {renderGroup(adminGroup, 'admin')}
               </>
-            )}
-
-            {/* Collapsed view for groups */}
-            {isCollapsed && !isMobile && (
-              <>
-                {/* Landing Page Link (Collapsed) */}
-                <Link
-                  to="/"
-                  className="w-full flex items-center justify-center p-3 rounded-lg text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border border-blue-200"
-                  title="Ir a Jubilalia"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                </Link>
-                
-                {/* Divider */}
-                <div className="border-t border-gray-200 my-4"></div>
-              </>
-            )}
-            
-            {isCollapsed && !isMobile && navigationGroups.map((group) => (
-              <div key={group.name} className="relative group">
-                <button
-                  className="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                  title={group.name}
-                >
-                  <group.icon className="w-5 h-5" />
-                </button>
-                
-                {/* Tooltip for collapsed groups */}
-                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                  {group.name}
-                </div>
-              </div>
-            ))}
-
-            {/* Admin Section (Collapsed view) */}
-            {isAdmin && isCollapsed && !isMobile && (
-              <div className="relative group">
-                <button
-                  className="w-full flex items-center justify-center p-2 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-                  title={adminGroup.name}
-                >
-                  <adminGroup.icon className="w-5 h-5" />
-                </button>
-                
-                {/* Tooltip for collapsed admin group */}
-                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                  {adminGroup.name}
-                </div>
-              </div>
             )}
           </div>
         </nav>
 
-        {/* User Section */}
-        <div className={`border-t border-gray-200 ${
-          isCollapsed && !isMobile ? 'p-3' : 'p-4'
-        }`}>
-          {(!isCollapsed || isMobile) ? (
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
+        <div className={`border-t border-slate-200/80 ${expanded ? 'p-3' : 'p-2'}`}>
+          {expanded ? (
+            <div className="mb-2 rounded-2xl bg-white/70 px-3 py-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {profile?.full_name || 'Usuario'}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email}
-                </p>
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-900">
+                    {profile?.full_name || 'Usuario'}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">{user?.email}</p>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="flex justify-center">
-              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                </span>
+            <div className="mb-2 flex justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
+                {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
               </div>
             </div>
           )}
-          
-          <button
-            onClick={handleSignOut}
-            className={`mt-3 w-full flex items-center rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors ${
-              isCollapsed && !isMobile ? 'px-2 py-3 justify-center' : 'px-3 py-3'
-            }`}
-          >
-            <ArrowRightOnRectangleIcon className={`w-5 h-5 flex-shrink-0 ${
-              isCollapsed && !isMobile ? '' : 'mr-3'
-            }`} />
-            {(!isCollapsed || isMobile) && 'Cerrar sesión'}
-          </button>
+
+          <div className={`flex flex-col ${expanded ? 'gap-1' : 'items-center gap-1'}`}>
+            <Link
+              to="/dashboard/profile"
+              onClick={closeMobile}
+              title="Mi perfil"
+              className={itemClass(isActive('/dashboard/profile'))}
+            >
+              <UserIcon className="h-5 w-5 shrink-0" />
+              {expanded && 'Mi perfil'}
+            </Link>
+            <Link
+              to="/dashboard/settings"
+              onClick={closeMobile}
+              title="Configuración"
+              className={itemClass(isActive('/dashboard/settings'))}
+            >
+              <Cog6ToothIcon className="h-5 w-5 shrink-0" />
+              {expanded && 'Configuración'}
+            </Link>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              title="Cerrar sesión"
+              className={`flex min-h-11 items-center rounded-xl text-[15px] font-medium text-slate-600 transition-colors hover:bg-white hover:text-red-700 ${
+                expanded ? 'w-full gap-3 px-3 py-2.5' : 'justify-center px-2 py-2.5'
+              }`}
+            >
+              <ArrowRightOnRectangleIcon className="h-5 w-5 shrink-0" />
+              {expanded && 'Cerrar sesión'}
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </aside>
     </>
   );
 };
