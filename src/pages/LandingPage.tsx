@@ -20,11 +20,15 @@ import {
   UserIcon as User,
   Squares2X2Icon as LayoutDashboard,
   QuestionMarkCircleIcon as QuestionMark,
-  CheckCircleIcon as CheckCircle,
   ShieldCheckIcon as ShieldCheck,
   MagnifyingGlassIcon as SearchIcon,
   InformationCircleIcon as Info,
-  DocumentTextIcon as Document
+  DocumentTextIcon as Document,
+  UserPlusIcon,
+  HomeModernIcon,
+  GlobeAmericasIcon,
+  SunIcon,
+  ChatBubbleOvalLeftEllipsisIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
@@ -772,75 +776,84 @@ const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* --- CÓMO FUNCIONA: Pasos visuales --- */}
-            <div className="relative">
-               {/* Conector visual en desktop */}
-               <div className="hidden md:block absolute top-12 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent z-0" style={{ top: '4rem' }}></div>
+          <p className="mb-8 text-center text-sm font-bold uppercase tracking-[0.22em] text-emerald-700">
+            Empieza en tres pasos
+          </p>
 
-              <div className="grid md:grid-cols-3 gap-10 relative z-10">
-                {/* Paso 1 */}
-                <div className="group text-center bg-white p-8 rounded-[2.5rem] hover:bg-green-50 hover:shadow-xl transition-all duration-300 border border-gray-100">
-                  <div className="relative mb-8 inline-block">
-                    <div className="w-24 h-24 bg-white rounded-full border-4 border-green-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
-                      <span className="text-4xl font-bold text-green-600">1</span>
-                    </div>
-                    <div className="absolute -top-0 -right-0 bg-white rounded-full p-1">
-                      <CheckCircle className="w-8 h-8 text-green-500 fill-white" />
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Crea tu Perfil
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed mb-6">
-                    Regístrate y completa tu perfil con tus intereses es completamente gratuito, crea tus preferencias y lo que buscas en nuestra plataforma
-                  </p>
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100/50 rounded-full text-sm text-green-700 font-bold">
-                    <ShieldCheck className="w-5 h-5" />
-                    <span>Verificación Segura</span>
-                  </div>
+          <ol className="grid gap-6 lg:grid-cols-3" aria-label="Cómo empezar en tres pasos">
+            {[
+              {
+                step: '01',
+                title: 'Crea tu Perfil',
+                description: 'Regístrate y completa tu perfil con tus intereses. Es completamente gratuito: crea tus preferencias y lo que buscas en nuestra plataforma.',
+                icon: UserPlusIcon,
+                numberClass: 'bg-emerald-700',
+                iconClass: 'bg-emerald-50 text-emerald-800',
+                badge: { icon: ShieldCheck, label: 'Verificación Segura', className: 'bg-emerald-50 text-emerald-800' },
+              },
+              {
+                step: '02',
+                title: 'Explora Opciones',
+                description: 'Encuentra compañeros y aficiones compartidas. Queda para jugar, salir al cine o al teatro, o unirte a viajes por Europa y España.',
+                icon: SearchIcon,
+                numberClass: 'bg-sky-700',
+                iconClass: 'bg-sky-50 text-sky-800',
+                badge: { icon: SearchIcon, label: 'Búsqueda Inteligente', className: 'bg-sky-50 text-sky-800' },
+                chips: ['Mus', 'Lectura', 'Taichi', 'Pádel', 'Museos', 'Cine', 'Teatro', 'Viajes'],
+              },
+              {
+                step: '03',
+                title: 'Conecta y Disfruta',
+                description: 'Chatea con otros usuarios, organiza encuentros y actividades y construye amistades duraderas.',
+                icon: MessageCircle,
+                numberClass: 'bg-amber-700',
+                iconClass: 'bg-amber-50 text-amber-800',
+                badge: { icon: Heart, label: 'Amistades reales', className: 'bg-amber-50 text-amber-900' },
+              },
+            ].map((item) => (
+              <li
+                key={item.step}
+                className="group flex h-full flex-col rounded-[2rem] border border-slate-200 bg-white p-8 text-left shadow-sm transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg"
+              >
+                <div className="mb-6 flex items-center justify-between">
+                  <span className={`flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-bold text-white ${item.numberClass}`}>
+                    {item.step}
+                  </span>
+                  <span className={`flex h-12 w-12 items-center justify-center rounded-full ${item.iconClass}`}>
+                    <item.icon className="h-6 w-6" aria-hidden="true" />
+                  </span>
                 </div>
+                <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-slate-400">Paso {item.step}</p>
+                <h3 className="text-2xl font-bold text-slate-900">{item.title}</h3>
+                <p className="mt-3 flex-grow text-lg leading-relaxed text-slate-600">{item.description}</p>
+                {'chips' in item && item.chips && (
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {item.chips.map((chip) => (
+                      <li key={chip} className="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">
+                        {chip}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className={`mt-6 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${item.badge.className}`}>
+                  <item.badge.icon className="h-5 w-5" aria-hidden="true" />
+                  {item.badge.label}
+                </div>
+              </li>
+            ))}
+          </ol>
 
-                {/* Paso 2 */}
-                <div className="group text-center bg-white p-8 rounded-[2.5rem] hover:bg-blue-50 hover:shadow-xl transition-all duration-300 border border-gray-100">
-                  <div className="relative mb-8 inline-block">
-                    <div className="w-24 h-24 bg-white rounded-full border-4 border-blue-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
-                      <span className="text-4xl font-bold text-blue-600">2</span>
-                    </div>
-                    <div className="absolute -top-0 -right-0 bg-white rounded-full p-1">
-                      <CheckCircle className="w-8 h-8 text-blue-500 fill-white" />
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Explora Opciones
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed mb-6 text-sm">
-                    Encuentra tus compañeros y descubre aficiones compartidas, desde emocionantes partidas de <strong>Mus</strong>, hasta <strong>clubes culturales o de lectura</strong>, o haz deportes como el <strong>Taichi o el Padel</strong>, realiza salidas culturales a <strong>Museos o conferencias</strong>, o simplemente queda para ir al <strong>cine o el teatro</strong> con otros usuarios, y por último te organizamos <strong>viajes por Europa y España</strong>.
-                  </p>                    
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100/50 rounded-full text-sm text-blue-700 font-bold">
-                    <SearchIcon className="w-5 h-5" />
-                    <span>Búsqueda Inteligente</span>
-                  </div>
-                </div>
-
-                {/* Paso 3 */}
-                <div className="group text-center bg-white p-8 rounded-[2.5rem] hover:bg-purple-50 hover:shadow-xl transition-all duration-300 border border-gray-100">
-                  <div className="relative mb-8 inline-block">
-                    <div className="w-24 h-24 bg-white rounded-full border-4 border-purple-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
-                      <span className="text-4xl font-bold text-purple-600">3</span>
-                    </div>
-                    <div className="absolute -top-0 -right-0 bg-white rounded-full p-1">
-                      <CheckCircle className="w-8 h-8 text-purple-500 fill-white" />
-                    </div>
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Conecta y Disfruta
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed mb-6">
-                    Chatea con otros usuarios, organiza encuentros y actividades y construye amistades duraderas
-                  </p>
-                </div>
-              </div>
-            </div>
+          <div className="mt-12 text-center">
+            <button
+              type="button"
+              onClick={handleGetStarted}
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-8 py-4 text-lg font-bold text-white shadow-lg shadow-emerald-700/20 transition-[transform,background-color] duration-150 ease-out hover:bg-emerald-800 active:scale-[0.98]"
+            >
+              Crear mi perfil gratis
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <p className="mt-3 text-base text-slate-500">Sin compromiso. Tú decides el ritmo.</p>
+          </div>
         </div>
       </section>
 
@@ -854,9 +867,9 @@ const LandingPage: React.FC = () => {
 
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-20">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-white text-purple-700 text-sm font-bold mb-6 border border-purple-100 shadow-sm">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></span>
-                  Tu eliges tu camino
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-white text-emerald-800 text-sm font-bold mb-6 border border-emerald-100 shadow-sm">
+                  <span className="w-2 h-2 bg-emerald-600 rounded-full mr-2"></span>
+                  Tú eliges tu camino
                 </div>
                 <h2 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
                   ¿Cómo funciona <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">Jubilalia?</span>
@@ -866,24 +879,101 @@ const LandingPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-4 gap-6">
-                 {/* Items loop */}
-                 {[
-                     { step: 1, title: "Define tu Proyecto", desc: "¿Vives solo, tienes una habitación libre y quieres compartir gastos o tener compañía? ¿O sueñas con un Cohousing en Cádiz donde retirarte, jugar al golf o pescar con gente afín? ¿Quizás prefieres alquilar o comprar una villa en un paraíso tropical como Filipinas o República Dominicana con tu pareja o más gente? Dinos qué buscas y nosotros lo encontramos.", color: "green" },
-                     { step: 2, title: "Buscamos por ti", desc: "Encontramos a la persona ideal para tu habitación o al grupo de compañeros con el mismo sueño de retiro que tú.", color: "blue" },
-                     { step: 3, title: "Conectad seguros", desc: "Chatea y conoceos. Podéis convivir unos días de prueba en casa u organizar reuniones para planificar vuestra mudanza .", color: "purple" },
-                     { step: 4, title: "Nueva Etapa", desc: "Si todo encaja, empieza una vida de compañía y ahorro. Ya sea en tu hogar de siempre o bajo una palmera en el paraíso.", color: "orange" }
-                 ].map((item, index) => (
-                    <div key={index} className={`group text-center relative p-8 rounded-[2rem] bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-${item.color}-100 h-full flex flex-col`}>
-                        <div className="relative mb-6">
-                            <div className={`w-20 h-20 bg-${item.color}-50 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-500`}>
-                            <span className={`text-3xl font-bold text-${item.color}-600`}>{item.step}</span>
-                            </div>
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">{item.title}</h3>
-                        <p className="text-gray-600 text-sm leading-relaxed flex-grow" dangerouslySetInnerHTML={{__html: item.desc.replace(/Cohousing en Cádiz|Filipinas o República Dominicana|grupo de compañeros|compañía y ahorro/g, '<strong>$&</strong>')}}></p>
+              <article className="rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-sm md:p-10">
+                <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">Elige tu camino</p>
+                    <h3 className="mt-2 text-3xl font-bold text-slate-900">Define tu Proyecto</h3>
+                  </div>
+                  <p className="max-w-xl text-lg leading-relaxed text-slate-600">
+                    Dinos qué buscas y nosotros lo encontramos.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  {[
+                    {
+                      icon: HomeModernIcon,
+                      title: 'Compartir casa',
+                      text: '¿Vives solo, tienes una habitación libre y quieres compartir gastos o tener compañía?',
+                    },
+                    {
+                      icon: Building,
+                      title: 'Cohousing',
+                      text: '¿Sueñas con un Cohousing en Cádiz donde retirarte, jugar al golf o pescar con gente afín?',
+                    },
+                    {
+                      icon: GlobeAmericasIcon,
+                      title: 'Villa',
+                      text: '¿Prefieres alquilar o comprar una villa en un paraíso tropical como Filipinas o República Dominicana, o una villa en Puglia o en Huelva, con tu pareja o más gente?',
+                    },
+                  ].map((path) => (
+                    <div
+                      key={path.title}
+                      className="rounded-3xl border border-slate-200 bg-slate-50 p-6 transition-[transform,background-color,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-white"
+                    >
+                      <path.icon className="mb-4 h-8 w-8 text-emerald-700" aria-hidden="true" />
+                      <h4 className="text-xl font-bold text-slate-900">{path.title}</h4>
+                      <p className="mt-3 text-base leading-relaxed text-slate-600">{path.text}</p>
                     </div>
-                 ))}
+                  ))}
+                </div>
+              </article>
+
+              <ol className="mt-8 grid gap-6 md:grid-cols-3" aria-label="Pasos siguientes de tu proyecto">
+                {[
+                  {
+                    step: '1',
+                    title: 'Buscamos por ti',
+                    desc: 'Encontramos a la persona ideal para tu habitación o al grupo de compañeros con el mismo sueño de retiro que tú.',
+                    icon: Search,
+                    numberClass: 'bg-sky-700',
+                    iconClass: 'text-sky-700 bg-sky-50',
+                  },
+                  {
+                    step: '2',
+                    title: 'Conectad seguros',
+                    desc: 'Chatea y conoceos. Podéis convivir unos días de prueba en casa u organizar reuniones para planificar vuestra mudanza.',
+                    icon: ChatBubbleOvalLeftEllipsisIcon,
+                    numberClass: 'bg-emerald-700',
+                    iconClass: 'text-emerald-800 bg-emerald-50',
+                  },
+                  {
+                    step: '3',
+                    title: 'Nueva Etapa',
+                    desc: 'Si todo encaja, empieza una vida de compañía y ahorro. Ya sea en tu hogar de siempre o bajo una palmera en el paraíso.',
+                    icon: SunIcon,
+                    numberClass: 'bg-amber-700',
+                    iconClass: 'text-amber-800 bg-amber-50',
+                  },
+                ].map((item) => (
+                  <li
+                    key={item.step}
+                    className="flex h-full flex-col rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
+                  >
+                    <div className="mb-5 flex items-center justify-between">
+                      <span className={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white ${item.numberClass}`}>
+                        {item.step}
+                      </span>
+                      <span className={`flex h-11 w-11 items-center justify-center rounded-full ${item.iconClass}`}>
+                        <item.icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900">{item.title}</h3>
+                    <p className="mt-3 flex-grow text-lg leading-relaxed text-slate-600">{item.desc}</p>
+                  </li>
+                ))}
+              </ol>
+
+              <div className="mt-12 text-center">
+                <button
+                  type="button"
+                  onClick={handleGetStarted}
+                  className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-8 py-4 text-lg font-bold text-white shadow-lg shadow-emerald-700/20 transition-[transform,background-color] duration-150 ease-out hover:bg-emerald-800 active:scale-[0.98]"
+                >
+                  Cuéntanos qué buscas
+                  <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                </button>
               </div>
             </div>
       </section>
