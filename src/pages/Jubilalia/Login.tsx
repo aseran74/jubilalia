@@ -14,7 +14,7 @@ import { isMobileApp } from '../../utils/mobileDetection';
 
 const JubilaliaLogin: React.FC = () => {
   const navigate = useNavigate();
-  const { signIn, signInWithGoogle, loading } = useAuth();
+  const { signIn, signInWithGoogle, loading, user } = useAuth();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -31,6 +31,12 @@ const JubilaliaLogin: React.FC = () => {
       setFormError('');
     }
   }, [formData]);
+
+  useEffect(() => {
+    if (user) {
+      navigate(isMobileApp() ? '/' : '/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,7 +65,7 @@ const JubilaliaLogin: React.FC = () => {
       
       // Redirigir según el tipo de app
       if (isMobileApp()) {
-        navigate('/landing');
+        navigate('/');
       } else {
         navigate('/dashboard');
       }
@@ -75,22 +81,11 @@ const JubilaliaLogin: React.FC = () => {
     try {
       setIsLoading(true);
       setFormError('');
-      
-      console.log('🔧 Iniciando login con Google...');
       await signInWithGoogle();
-      
-      console.log('✅ Login con Google exitoso');
-      
-      // Redirigir según el tipo de app
-      if (isMobileApp()) {
-        navigate('/landing');
-      } else {
-        navigate('/dashboard');
-      }
+      // En web, Google redirige solo. En la app nativa se abre el navegador y vuelve por deep link.
     } catch (error: any) {
       console.error('❌ Error en login con Google:', error);
       setFormError('Error al iniciar sesión con Google: ' + error.message);
-    } finally {
       setIsLoading(false);
     }
   };

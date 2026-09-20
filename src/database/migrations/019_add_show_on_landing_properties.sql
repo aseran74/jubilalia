@@ -13,3 +13,4 @@ COMMENT ON COLUMN property_listings.show_on_landing IS 'Indica si la propiedad d
 CREATE INDEX IF NOT EXISTS idx_property_listings_show_on_landing ON property_listings(show_on_landing) WHERE show_on_landing = true;
 
 
+

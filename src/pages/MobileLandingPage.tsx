@@ -1,151 +1,208 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon as SearchIcon, 
-  MapIcon, 
-  CalendarIcon, 
-  ChatBubbleLeftRightIcon as MessageIcon, 
-  HomeIcon, 
-  UserIcon, 
-  BellIcon 
-} from '@heroicons/react/24/solid'; // Cambiamos a SOLID para mejor visibilidad
+import {
+  BadgeCheck,
+  ChevronRight,
+  ShieldCheck,
+  UserRound,
+} from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-
-interface NavItemProps {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  active?: boolean;
-}
-
-// Componente pequeño para los items de navegación
-const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active = false }) => (
-  <button className={`flex flex-col items-center gap-1 ${active ? 'text-emerald-600' : 'text-slate-400'}`}>
-    <Icon className="w-6 h-6" />
-    <span className="text-[10px] font-bold tracking-wide">{label}</span>
-  </button>
-);
+import { supabase } from '../lib/supabase';
+import { getIdentityStatus } from '../lib/identityVerification';
+import MobileTabBar from '../components/mobile/MobileTabBar';
+import MobileActivityCard, { MobileActivity } from '../components/mobile/MobileActivityCard';
 
 const MobileLandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const [activities, setActivities] = useState<MobileActivity[]>([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
+  const identityStatus = useMemo(() => getIdentityStatus(user?.id), [user?.id]);
 
-  const mainCards = [
-    {
-      id: 'search-activities',
-      title: 'Explorar',
-      subtitle: 'Busca actividades',
-      icon: SearchIcon,
-      color: 'bg-emerald-500',
-      action: () => navigate('/dashboard/activities')
-    },
-    {
-      id: 'create-activity',
-      title: 'Crear',
-      subtitle: 'Publica algo nuevo',
-      icon: PlusIcon,
-      color: 'bg-indigo-500',
-      action: () => navigate('/dashboard/activities/create')
-    },
-    {
-      id: 'map-search',
-      title: 'Cerca de mí',
-      subtitle: 'Ver en el mapa',
-      icon: MapIcon,
-      color: 'bg-amber-500',
-      action: () => navigate('/dashboard/activities/map')
-    },
-    {
-      id: 'my-activities',
-      title: 'Mi Agenda',
-      subtitle: 'Mis eventos',
-      icon: CalendarIcon,
-      color: 'bg-rose-500',
-      action: () => navigate('/dashboard/activities')
-    }
-  ];
+  const firstName =
+    profile?.full_name?.split(' ')[0] ||
+    user?.user_metadata?.full_name?.split(' ')[0] ||
+    user?.user_metadata?.name?.split(' ')[0] ||
+    '';
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        setLoadingActivities(true);
+        const { data, error } = await supabase
+          .from('activities')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (error) throw error;
+
+        const ids = (data || []).map((activity) => activity.id);
+        let imagesByActivity: Record<string, string[]> = {};
+
+        if (ids.length > 0) {
+          const { data: imagesData } = await supabase
+            .from('activity_images')
+            .select('activity_id, image_url')
+            .in('activity_id', ids)
+            .order('is_primary', { ascending: false });
+
+          if (imagesData) {
+            imagesByActivity = imagesData.reduce((acc: Record<string, string[]>, img) => {
+              if (!acc[img.activity_id]) acc[img.activity_id] = [];
+              acc[img.activity_id].push(img.image_url);
+              return acc;
+            }, {});
+          }
+        }
+
+        setActivities(
+          (data || []).map((activity) => ({
+            id: activity.id,
+            title: activity.title,
+            description: activity.description,
+            city: activity.city,
+            location: activity.location,
+            date: activity.date,
+            time: activity.time,
+            price: parseFloat(activity.price || 0),
+            images: imagesByActivity[activity.id] || activity.images || [],
+            category: activity.activity_type || activity.category,
+          }))
+        );
+      } catch (error) {
+        console.error('Error cargando actividades:', error);
+      } finally {
+        setLoadingActivities(false);
+      }
+    };
+
+    fetchActivities();
+  }, []);
+
+  const goToIdentity = () => {
+    navigate(user ? '/verificar-identidad' : '/login');
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 font-sans antialiased text-slate-900">
-      
-      {/* Header con Bienvenida Personalizada */}
-      <header className="bg-white px-5 py-4 border-b border-slate-200 sticky top-0 z-40">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">J</span>
-            </div>
-            <h1 className="text-xl font-extrabold tracking-tight text-emerald-900">Jubilalia</h1>
+    <div className="app-shell min-h-screen">
+      <header className="app-header">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <img
+              src="/images/jubilogo.svg"
+              alt="Jubilalia"
+              className="h-9 w-auto"
+            />
           </div>
-          <button className="relative p-2 text-slate-600 bg-slate-100 rounded-full">
-            <BellIcon className="w-6 h-6" />
-            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+
+          <button
+            type="button"
+            onClick={() => navigate(user ? '/dashboard/profile' : '/login')}
+            className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-2 ring-white"
+            aria-label={user ? 'Abrir perfil' : 'Iniciar sesión'}
+          >
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <UserRound className="h-6 w-6 text-emerald-800" aria-hidden="true" />
+            )}
           </button>
         </div>
       </header>
 
-      <main className="px-5 py-6">
-        {/* Sección de Bienvenida: Genera conexión emocional */}
-        <section className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-800 italic">
-            Hola, {user?.name || profile?.full_name || 'amigo'} 👋
-          </h2>
-          <p className="text-slate-500 mt-1 text-lg">¿Qué te apetece disfrutar hoy?</p>
+      <main className="app-page">
+        <section className="mb-6">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-800">
+            Comunidad senior
+          </p>
+          <h1 className="mt-1 text-[1.85rem] font-bold leading-tight text-stone-900">
+            {firstName ? `Hola, ${firstName}` : 'Vive acompañado'}
+          </h1>
+          <p className="mt-2 text-base leading-relaxed text-stone-600">
+            Actividades, amistades y vivienda compartida, con calma y cerca de ti.
+          </p>
         </section>
 
-        {/* Grid de Actividades: Tarjetas más grandes y legibles */}
-        <section className="mb-10">
-          <div className="grid grid-cols-2 gap-4">
-            {mainCards.map((card) => {
-              const Icon = card.icon;
-              return (
-                <button
-                  key={card.id}
-                  onClick={card.action}
-                  className="group relative flex flex-col items-start p-5 bg-white rounded-3xl shadow-sm border border-slate-100 transition-all active:scale-95"
-                >
-                  <div className={`${card.color} p-3 rounded-2xl mb-4 text-white shadow-md`}>
-                    <Icon className="w-7 h-7" />
-                  </div>
-                  <h3 className="font-bold text-slate-800 text-lg leading-tight">{card.title}</h3>
-                  <p className="text-slate-500 text-xs mt-1">{card.subtitle}</p>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Nueva Sección: Comunidad (Social Proof) */}
-        <section className="mb-8">
-          <div className="bg-emerald-50 rounded-3xl p-6 border border-emerald-100">
-            <h3 className="text-emerald-900 font-bold mb-2">Comunidad Jubilalia</h3>
-            <p className="text-emerald-700 text-sm mb-4">Hay 12 actividades nuevas en tu zona esta semana.</p>
-            <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map((i) => (
-                <img key={i} className="w-8 h-8 rounded-full border-2 border-white" src={`https://i.pravatar.cc/100?u=${i}`} alt="user" />
-              ))}
-              <div className="w-8 h-8 rounded-full border-2 border-white bg-emerald-200 flex items-center justify-center text-[10px] font-bold text-emerald-700">+80</div>
+        <section className="mb-7">
+          {identityStatus === 'verified' ? (
+            <div className="flex items-center gap-3 rounded-[1.4rem] bg-emerald-50 px-4 py-4 ring-1 ring-emerald-100">
+              <BadgeCheck className="h-7 w-7 text-emerald-700" aria-hidden="true" />
+              <div>
+                <p className="font-bold text-emerald-950">Identidad verificada</p>
+                <p className="text-sm text-emerald-800">Tu perfil genera más confianza.</p>
+              </div>
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={goToIdentity}
+              className="w-full rounded-[1.6rem] bg-[#2f4a3a] px-5 py-5 text-left text-[#f4efe4] shadow-[0_12px_30px_rgba(47,74,58,0.25)] transition-transform active:scale-[0.99]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                  <ShieldCheck className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <ChevronRight className="mt-1 h-6 w-6 shrink-0 opacity-80" aria-hidden="true" />
+              </div>
+              <h2 className="mt-4 text-2xl font-bold tracking-tight">Valida tu identidad</h2>
+              <p className="mt-2 text-sm leading-relaxed text-[#f4efe4]/80">
+                {identityStatus === 'pending'
+                  ? 'Estamos revisando tu documentación. Puedes consultar el estado aquí.'
+                  : 'Un paso breve para publicar, unirte a planes y compartir vivienda con más seguridad.'}
+              </p>
+              <span className="mt-4 inline-flex min-h-11 items-center rounded-full bg-[#f4efe4] px-4 text-sm font-bold text-[#2f4a3a]">
+                {identityStatus === 'pending' ? 'Ver estado' : 'Empezar ahora'}
+              </span>
+            </button>
+          )}
+        </section>
+
+        <section>
+          <div className="mb-4 flex items-end justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-bold text-stone-900">Actividades</h2>
+              <p className="text-sm text-stone-500">Planes cerca de ti</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/search')}
+              className="min-h-11 text-sm font-bold text-emerald-800"
+            >
+              Ver más
+            </button>
           </div>
+
+          {loadingActivities ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="h-56 animate-pulse rounded-[1.4rem] bg-white/70" />
+              ))}
+            </div>
+          ) : activities.length > 0 ? (
+            <div className="space-y-4">
+              {activities.map((activity) => (
+                <MobileActivityCard key={activity.id} activity={activity} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[1.4rem] bg-white px-5 py-8 text-center shadow-sm ring-1 ring-stone-200">
+              <p className="font-bold text-stone-900">Aún no hay actividades</p>
+              <p className="mt-1 text-sm text-stone-500">Cuando se publiquen, aparecerán aquí.</p>
+              <button
+                type="button"
+                onClick={() => navigate(user ? '/activities/create' : '/login')}
+                className="mt-4 min-h-12 rounded-full bg-emerald-800 px-5 font-semibold text-white"
+              >
+                Publicar una actividad
+              </button>
+            </div>
+          )}
         </section>
       </main>
 
-      {/* Barra de Navegación Inferior Estilo "Dock" */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 px-6 pb-8 pt-3 z-50">
-        <div className="flex items-center justify-between max-w-md mx-auto">
-          <NavItem icon={HomeIcon} label="Inicio" active />
-          <NavItem icon={SearchIcon} label="Buscar" />
-          {/* Botón Central Destacado */}
-          <button 
-            onClick={() => navigate('/dashboard/activities/create')}
-            className="flex items-center justify-center -mt-12 w-14 h-14 bg-emerald-600 rounded-full shadow-lg shadow-emerald-200 text-white transition-transform active:scale-90 hover:bg-emerald-700"
-          >
-            <PlusIcon className="w-8 h-8" />
-          </button>
-          <NavItem icon={MessageIcon} label="Chat" />
-          <NavItem icon={UserIcon} label="Perfil" />
-        </div>
-      </nav>
+      <MobileTabBar />
     </div>
   );
 };

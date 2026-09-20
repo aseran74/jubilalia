@@ -223,7 +223,7 @@ const Register: React.FC = () => {
           
           // Redirigir según el tipo de app
           if (isMobileApp()) {
-            navigate('/landing');
+            navigate('/');
           } else {
             navigate('/dashboard');
           }

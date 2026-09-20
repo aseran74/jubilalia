@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { startGoogleOAuth } from '../lib/googleAuth';
 import { UserProfile } from '../types/supabase';
 
 interface AuthContextType {
@@ -140,30 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signInWithGoogle = async () => {
-    try {
-      // Si estamos en jubilalia.com, forzar ese dominio
-      // Si estamos en vercel.app, también usar el dominio actual
-      let redirectUrl = `${window.location.origin}/auth/callback`;
-      if (window.location.hostname.includes('jubilalia.com')) {
-        redirectUrl = 'https://jubilalia.com/auth/callback';
-      }
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        }
-      });
-      
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-      throw error;
-    }
+    await startGoogleOAuth();
   };
 
   const signOut = async () => {

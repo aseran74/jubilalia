@@ -1,7 +1,7 @@
 {
   "name": "jubilalia",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.61.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
+    "@capacitor/app": "^7.1.2",
     "@capacitor/assets": "^3.0.5",
+    "@capacitor/browser": "^7.0.5",
     "@capacitor/cli": "^7.4.3",
     "@capacitor/core": "^7.4.3",
     "@capacitor/status-bar": "^7.0.3",

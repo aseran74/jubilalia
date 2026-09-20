@@ -15,3 +15,4 @@ COMMENT ON COLUMN property_listings.external_listing_url IS 'URL del anuncio en 
 COMMENT ON COLUMN property_listings.external_platform IS 'Plataforma donde está publicado el anuncio (Idealista, Fotocasa, Pisos.com, Otros)';
 
 
+

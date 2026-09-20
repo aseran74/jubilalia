@@ -5,13 +5,14 @@ import { useMobileApp } from './hooks/useMobileApp';
 import { Heart } from 'lucide-react';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
+import { listenForNativeOAuthReturn } from './lib/googleAuth';
 
 // Landing Page - Lazy loading para mejorar PageSpeed
 import LandingPage from './pages/LandingPage';
 import MobileLandingPage from './pages/MobileLandingPage';
 import ColivingExplanation from './pages/ColivingExplanation';
-import AppSplash from './pages/AppSplash';
 import PublicSearch from './pages/PublicSearch';
+import VerifyIdentity from './pages/VerifyIdentity';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import CookiePolicy from './pages/CookiePolicy';
@@ -29,6 +30,7 @@ import AuthCallback from './pages/AuthCallback';
 // Componentes del dashboard
 import DashboardSidebar from './components/dashboard/DashboardSidebar';
 import Dashboard from './components/dashboard/Dashboard';
+import MobileTabBar from './components/mobile/MobileTabBar';
 
 // Componentes de propiedades
 import PropertySaleForm from './components/properties/PropertySaleForm';
@@ -130,6 +132,7 @@ const DashboardLayout: React.FC = () => {
   }
 
   return (
+    <>
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <DashboardSidebar />
@@ -137,7 +140,7 @@ const DashboardLayout: React.FC = () => {
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header móvil */}
-        <div className="lg:hidden bg-white border-b border-gray-200 p-4">
+        <div className="lg:hidden bg-white border-b border-gray-200 p-4 app-safe-header">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="text-gray-500 hover:text-gray-700"
@@ -149,7 +152,7 @@ const DashboardLayout: React.FC = () => {
         </div>
 
         {/* Contenido */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-24 lg:pb-0">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             
@@ -249,6 +252,8 @@ const DashboardLayout: React.FC = () => {
         </main>
       </div>
     </div>
+    <MobileTabBar />
+    </>
   );
 };
 
@@ -357,26 +362,35 @@ const DebugAuth: React.FC = () => {
 const App: React.FC = () => {
   const { isMobileApp, isLoading } = useMobileApp();
 
-  // Configurar StatusBar para Android - Configuración limpia
+  // Márgenes nativos: la web se pinta bajo la barra de estado y el CSS reserva el hueco
   useEffect(() => {
-    const setupStatusBar = async () => {
-      if (Capacitor.getPlatform() === 'android') {
-        try {
-          // Agregar clase 'android' al body
-          document.body.classList.add('android');
-          
-          // Configuración simple y limpia
-          await StatusBar.setOverlaysWebView({ overlay: true });
-          await StatusBar.setStyle({ style: Style.Light });
-          await StatusBar.setBackgroundColor({ color: '#ffffff' });
-          
-          console.log('✅ StatusBar configurado correctamente');
-        } catch (error) {
-          console.error('Error configurando StatusBar:', error);
-        }
+    const setupNativeChrome = async () => {
+      if (!Capacitor.isNativePlatform()) return;
+
+      const platform = Capacitor.getPlatform();
+      document.documentElement.classList.add('native-app', platform);
+      document.body.classList.add('native-app', platform);
+
+      try {
+        await StatusBar.setOverlaysWebView({ overlay: true });
+        await StatusBar.setStyle({ style: Style.Dark });
+        await StatusBar.setBackgroundColor({ color: '#00000000' });
+
+        const info = await StatusBar.getInfo();
+        const measuredHeight = Number((info as { height?: number }).height);
+        const safeTop = Number.isFinite(measuredHeight) && measuredHeight > 0 ? measuredHeight : 32;
+        document.documentElement.style.setProperty('--status-bar-height', `${safeTop}px`);
+        document.documentElement.style.setProperty('--safe-top', `${safeTop}px`);
+      } catch (error) {
+        document.documentElement.style.setProperty('--status-bar-height', '32px');
+        document.documentElement.style.setProperty('--safe-top', '32px');
+        console.error('Error configurando StatusBar:', error);
       }
     };
-    setupStatusBar();
+
+    setupNativeChrome();
+    const stopOAuthListener = listenForNativeOAuthReturn();
+    return () => stopOAuthListener();
   }, []);
 
   if (isLoading) {
@@ -396,10 +410,11 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/app" element={isMobileApp ? <AppSplash /> : <LandingPage />} />
+          <Route path="/" element={isMobileApp ? <MobileLandingPage /> : <LandingPage />} />
+          <Route path="/app" element={isMobileApp ? <MobileLandingPage /> : <LandingPage />} />
           <Route path="/landing" element={<LandingPage />} />
           <Route path="/mobile" element={<MobileLandingPage />} />
+          <Route path="/verificar-identidad" element={<VerifyIdentity />} />
           <Route path="/coliving" element={<ColivingExplanation />} />
           <Route path="/signin" element={<JubilaliaLogin />} />
           <Route path="/signup" element={<SignUpForm />} />

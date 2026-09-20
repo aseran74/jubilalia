@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Jubilalia</string>
     <string name="title_activity_main">Jubilalia</string>
-    <string name="package_name">com.jubilalia.app</string>
-    <string name="custom_url_scheme">com.jubilalia.app</string>
+    <string name="package_name">com.jubilalia</string>
+    <string name="custom_url_scheme">com.jubilalia</string>
 </resources>

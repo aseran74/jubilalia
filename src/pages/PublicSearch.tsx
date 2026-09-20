@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../hooks/useAuth';
 import { 
   Search, MapPin, Users, Calendar, Tag, Map, List, 
-  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, LayoutDashboard, ArrowLeft, Timer
+  UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, ArrowLeft, Timer
 } from 'lucide-react';
 import ActivityMap from '../components/activities/ActivityMap';
 import GroupsMap from '../components/groups/GroupsMap';
 import PeopleMap from '../components/people/PeopleMap';
+import MobileTabBar from '../components/mobile/MobileTabBar';
 
 // --- INTERFACES (Sin cambios) ---
 interface Activity {
@@ -139,7 +139,6 @@ const CardSkeleton = () => (
 
 const PublicSearch: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   
   // --- ESTADOS ---
   const [activeTab, setActiveTab] = useState<TabType>('activities');
@@ -434,7 +433,7 @@ const PublicSearch: React.FC = () => {
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       {/* --- HEADER (oculto en modo mapa móvil) --- */}
       {!isFullscreenMap && (
-        <div className="bg-white sticky top-0 z-30 shadow-sm border-b border-gray-200">
+        <div className="bg-white sticky top-0 z-30 shadow-sm border-b border-gray-200 app-safe-header">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
             <button 
@@ -1648,53 +1647,14 @@ const PublicSearch: React.FC = () => {
         </>
       )}
 
-      {/* Mobile/Tablet Bottom Navbar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
-        <div className="flex items-center justify-around h-16 px-2">
-          {/* Inicio */}
-          <button
-            onClick={() => navigate('/')}
-            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
-          >
-            <Home className="w-6 h-6" />
-            <span className="text-xs font-medium">Inicio</span>
-          </button>
-
-          {/* Buscar */}
-          <button
-            onClick={() => navigate('/search')}
-            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
-          >
-            <Search className="w-6 h-6" />
-            <span className="text-xs font-medium">Buscar</span>
-          </button>
-
-          {/* Mi Panel / Dashboard */}
-          <button
-            onClick={() => navigate(user ? '/dashboard' : '/login')}
-            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
-          >
-            <LayoutDashboard className="w-6 h-6" />
-            <span className="text-xs font-medium">Mi Panel</span>
-          </button>
-
-          {/* Perfil */}
-          <button
-            onClick={() => navigate(user ? '/dashboard/profile' : '/login')}
-            className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-600 hover:text-green-600 transition-colors"
-          >
-            <UserCircle className="w-6 h-6" />
-            <span className="text-xs font-medium">Perfil</span>
-          </button>
-        </div>
-      </nav>
+      <MobileTabBar />
 
       {/* Spacer para evitar que el contenido quede oculto detrás del navbar inferior en móvil */}
       {!isFullscreenMap && <div className="h-16 lg:hidden"></div>}
 
       {/* Botón flotante de cambio de vista (Lista/Mapa) */}
       {(activeTab === 'activities' || activeTab === 'groups' || activeTab === 'people') && !isFullscreenMap && (
-        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-40 lg:hidden">
+        <div className="fixed bottom-28 left-1/2 transform -translate-x-1/2 z-40 lg:hidden">
           <div className="flex items-center bg-white rounded-full shadow-2xl border-2 border-gray-200 overflow-hidden">
             <button
               onClick={() => setViewMode('list')}

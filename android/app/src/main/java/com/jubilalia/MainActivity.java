@@ -1,4 +1,4 @@
-package com.jubilalia.app;
+package com.jubilalia;
 
 import com.getcapacitor.BridgeActivity;
 

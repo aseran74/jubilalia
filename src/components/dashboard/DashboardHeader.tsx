@@ -21,7 +21,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onToggleSidebar }) =>
   };
 
   return (
-    <header className="bg-white/90 backdrop-blur-sm border-b border-white/20 px-4 lg:px-6 py-3 lg:py-4">
+    <header className="bg-white/90 backdrop-blur-sm border-b border-white/20 px-4 lg:px-6 py-3 lg:py-4 app-safe-header">
       <div className="flex items-center justify-between">
         {/* Lado izquierdo - Botón de toggle y breadcrumb */}
         <div className="flex items-center space-x-3 lg:space-x-4">

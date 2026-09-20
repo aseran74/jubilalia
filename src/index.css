@@ -1005,20 +1005,66 @@ span.flatpickr-weekday,
   animation: float-dots 5s ease-in-out infinite;
 }
 
-/* Configuración limpia para Android - StatusBar */
-.android body {
-  padding-top: env(safe-area-inset-top, 0px);
+:root {
+  --status-bar-height: 0px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Para páginas principales */
-.android .min-h-screen {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+html.native-app {
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--status-bar-height));
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
+  height: 100%;
 }
 
-/* Para elementos fijos */
-.android nav.fixed,
-.android .fixed {
-  top: calc(env(safe-area-inset-top, 0px) + 1rem);
+html.native-app body {
+  min-height: 100%;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+.app-shell {
+  background: #f3eee4;
+  color: #1c1917;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: calc(var(--safe-top) + 12px) 20px 12px;
+  background: rgba(243, 238, 228, 0.94);
+  backdrop-filter: blur(16px);
+}
+
+.app-page {
+  padding: 8px 20px calc(var(--safe-bottom) + 108px);
+}
+
+.app-tabbar {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--safe-bottom) + 12px);
+  z-index: 100;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.84);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 10px 30px rgba(28, 25, 23, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+}
+
+.app-safe-header {
+  padding-top: calc(var(--safe-top) + 10px) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-tabbar button,
+  .app-shell button,
+  .app-shell a {
+    transition: none !important;
+  }
 }
 
 /* Estilos para Google Maps - cursor normal por defecto */
