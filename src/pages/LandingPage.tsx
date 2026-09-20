@@ -35,7 +35,6 @@ import GroupCard from '../components/landing/GroupCard';
 import PropertyCard from '../components/landing/PropertyCard';
 import RoomCard from '../components/landing/RoomCard';
 import { supabase } from '../lib/supabase';
-import MobileTabBar from '../components/mobile/MobileTabBar';
 
 const LandingPage: React.FC = () => {
   // --- ESTADOS ---
@@ -326,7 +325,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-gray-900 selection:bg-green-200 selection:text-green-900">
       
       {/* --- NAVBAR MEJORADO --- */}
-      <nav className={`fixed top-0 w-full z-[100] app-safe-header transition-all duration-500 ${
+      <nav className={`fixed top-0 w-full z-[100] transition-all duration-500 ${
         isScrolled || isMenuOpen 
           ? 'bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100 py-3' 
           : 'bg-transparent py-6'
@@ -1168,7 +1167,27 @@ const LandingPage: React.FC = () => {
         </div>
       </footer>
 
-      <MobileTabBar />
+      {/* Mobile/Tablet Bottom Navbar (Refinado) */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 lg:hidden pb-safe">
+        <div className="flex items-center justify-around h-16 px-2">
+          {[
+            { label: 'Inicio', icon: Home, action: () => { scrollToSection('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); } },
+            { label: 'Coliving', icon: Building, action: () => navigate('/properties/search') },
+            { label: 'Buscar', icon: Search, action: () => navigate('/search') },
+            { label: 'Mi Panel', icon: LayoutDashboard, action: () => navigate(user ? '/dashboard' : '/login') },
+            { label: 'Perfil', icon: User, action: () => navigate(user ? '/dashboard/profile' : '/login') }
+          ].map((item, idx) => (
+            <button
+                key={idx}
+                onClick={item.action}
+                className="flex flex-col items-center justify-center gap-1 flex-1 py-2 text-gray-400 hover:text-green-600 active:text-green-700 transition-colors group"
+            >
+                <item.icon className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
+                <span className="text-[10px] font-bold">{item.label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
 
       {/* Spacer para Mobile */}
       <div className="h-safe-bottom lg:hidden"></div>
