@@ -163,6 +163,7 @@ const LandingPage: React.FC = () => {
         category: mapActivityTypeToCategory(activity.activity_type),
         price: parseFloat(activity.price || 0),
         images: imagesByActivity[activity.id] || [],
+        is_featured: false,
       }));
 
       setActivities(formattedActivities);
