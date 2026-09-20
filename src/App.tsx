@@ -1,119 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
-import { useMobileApp } from './hooks/useMobileApp';
-import { Heart } from 'lucide-react';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
-import { listenForNativeOAuthReturn } from './lib/googleAuth';
-
-// Landing Page - Lazy loading para mejorar PageSpeed
 import LandingPage from './pages/LandingPage';
-import MobileLandingPage from './pages/MobileLandingPage';
-import ColivingExplanation from './pages/ColivingExplanation';
-import PublicSearch from './pages/PublicSearch';
-import VerifyIdentity from './pages/VerifyIdentity';
-import TermsOfService from './pages/TermsOfService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import CookiePolicy from './pages/CookiePolicy';
-import { lazy, Suspense } from 'react';
-
-// Lazy load de componentes pesados
-const PropertySearch = lazy(() => import('./pages/PropertySearch'));
-
-// Componentes de autenticación
-import SignUpForm from './components/auth/SignUpForm';
-import JubilaliaLogin from './pages/Jubilalia/Login';
-import Register from './pages/Jubilalia/Register';
 import AuthCallback from './pages/AuthCallback';
 
-// Componentes del dashboard
-import DashboardSidebar from './components/dashboard/DashboardSidebar';
-import Dashboard from './components/dashboard/Dashboard';
-import MobileTabBar from './components/mobile/MobileTabBar';
+const PageFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-emerald-700 border-t-transparent" />
+  </div>
+);
 
-// Componentes de propiedades
-import PropertySaleForm from './components/properties/PropertySaleForm';
-import PropertyRentalForm from './components/properties/PropertyRentalForm';
-import PropertyDetail from './components/properties/PropertyDetail';
-import PropertySaleList from './components/properties/PropertySaleList';
-import PropertyRentalList from './components/properties/PropertyRentalList';
-
-// Componentes de alquiler de habitaciones
-import RoomList from './components/accommodations/RoomList';
-import RoomDetail from './components/accommodations/RoomDetail';
-import RoomForm from './components/accommodations/RoomForm';
-import RoommateSearch from './components/accommodations/RoommateSearch';
-
-// Componentes de administración
-import AdminRoomManagement from './components/admin/AdminRoomManagement';
-import AdminPropertyManagement from './components/admin/AdminPropertyManagement';
-import AdminActivityManagement from './components/admin/AdminActivityManagement';
-import AdminGroupManagement from './components/admin/AdminGroupManagement';
-
-// Componentes de actividades
-import ActivityForm from './components/activities/ActivityForm';
-import ActivityList from './components/activities/ActivityList';
-import ActivityDetail from './components/activities/ActivityDetail';
-
-// Componentes de posts
-import PostForm from './components/posts/PostForm';
-import PostList from './components/posts/PostList';
-import PostDetail from './components/posts/PostDetail';
-import PostEdit from './components/posts/PostEdit';
-
-// Componentes de publicaciones Coliving
-import ColivingPostsList from './components/coliving/ColivingPostsList';
-import ColivingPostForm from './components/coliving/ColivingPostForm';
-
-// Componentes de perfil y usuarios
-import ProfileForm from './components/profile/ProfileForm';
-import PeopleSearch from './components/people/PeopleSearch';
-import PersonDetail from './components/people/PersonDetail';
-import Settings from './components/dashboard/Settings';
-import FriendsList from './components/friends/FriendsList';
-import NotificationsPage from './components/dashboard/NotificationsPage';
-
-// Componentes de grupos
-import Groups from './components/people/Groups';
-import GroupForm from './components/groups/GroupForm';
-import GroupDetail from './components/groups/GroupDetail';
-
-// Componentes de mensajería
-import ChatApp from './components/messaging/ChatApp';
-
-// Componentes de debug
-import ConnectionTest from './components/debug/ConnectionTest';
-import GooglePlacesTest from './components/debug/GooglePlacesTest';
-import DatabaseTest from './components/debug/DatabaseTest';
-import RoomFormTest from './components/debug/RoomFormTest';
-import AuthDiagnostic from './components/debug/AuthDiagnostic';
-import DatabaseDiagnostic from './components/debug/DatabaseDiagnostic';
-import VercelAuthFix from './components/debug/VercelAuthFix';
-import GoogleAuthDiagnostic from './components/debug/GoogleAuthDiagnostic';
-import RedirectFix from './components/debug/RedirectFix';
-import GoogleMapsDiagnostic from './components/debug/GoogleMapsDiagnostic';
-import MapDebug from './components/debug/MapDebug';
-
-// Componentes de mapas
-import RoomsMapView from './components/maps/RoomsMapView';
-import PropertiesSaleMapView from './components/maps/PropertiesSaleMapView';
-import PropertiesRentalMapView from './components/maps/PropertiesRentalMapView';
-
-// Componentes de demo
-import CalendarDemo from './components/demo/CalendarDemo';
+const ColivingExplanation = lazy(() => import('./pages/ColivingExplanation'));
+const PublicSearch = lazy(() => import('./pages/PublicSearch'));
+const VerifyIdentity = lazy(() => import('./pages/VerifyIdentity'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
+const PropertySearch = lazy(() => import('./pages/PropertySearch'));
+const SignUpForm = lazy(() => import('./components/auth/SignUpForm'));
+const JubilaliaLogin = lazy(() => import('./pages/Jubilalia/Login'));
+const Register = lazy(() => import('./pages/Jubilalia/Register'));
+const DashboardSidebar = lazy(() => import('./components/dashboard/DashboardSidebar'));
+const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
+const MobileTabBar = lazy(() => import('./components/mobile/MobileTabBar'));
+const PropertySaleForm = lazy(() => import('./components/properties/PropertySaleForm'));
+const PropertyRentalForm = lazy(() => import('./components/properties/PropertyRentalForm'));
+const PropertyDetail = lazy(() => import('./components/properties/PropertyDetail'));
+const PropertySaleList = lazy(() => import('./components/properties/PropertySaleList'));
+const PropertyRentalList = lazy(() => import('./components/properties/PropertyRentalList'));
+const RoomList = lazy(() => import('./components/accommodations/RoomList'));
+const RoomDetail = lazy(() => import('./components/accommodations/RoomDetail'));
+const RoomForm = lazy(() => import('./components/accommodations/RoomForm'));
+const RoommateSearch = lazy(() => import('./components/accommodations/RoommateSearch'));
+const AdminRoomManagement = lazy(() => import('./components/admin/AdminRoomManagement'));
+const AdminPropertyManagement = lazy(() => import('./components/admin/AdminPropertyManagement'));
+const AdminActivityManagement = lazy(() => import('./components/admin/AdminActivityManagement'));
+const AdminGroupManagement = lazy(() => import('./components/admin/AdminGroupManagement'));
+const ActivityForm = lazy(() => import('./components/activities/ActivityForm'));
+const ActivityList = lazy(() => import('./components/activities/ActivityList'));
+const ActivityDetail = lazy(() => import('./components/activities/ActivityDetail'));
+const PostForm = lazy(() => import('./components/posts/PostForm'));
+const PostList = lazy(() => import('./components/posts/PostList'));
+const PostDetail = lazy(() => import('./components/posts/PostDetail'));
+const PostEdit = lazy(() => import('./components/posts/PostEdit'));
+const ColivingPostsList = lazy(() => import('./components/coliving/ColivingPostsList'));
+const ColivingPostForm = lazy(() => import('./components/coliving/ColivingPostForm'));
+const ProfileForm = lazy(() => import('./components/profile/ProfileForm'));
+const PeopleSearch = lazy(() => import('./components/people/PeopleSearch'));
+const PersonDetail = lazy(() => import('./components/people/PersonDetail'));
+const Settings = lazy(() => import('./components/dashboard/Settings'));
+const FriendsList = lazy(() => import('./components/friends/FriendsList'));
+const NotificationsPage = lazy(() => import('./components/dashboard/NotificationsPage'));
+const Groups = lazy(() => import('./components/people/Groups'));
+const GroupForm = lazy(() => import('./components/groups/GroupForm'));
+const GroupDetail = lazy(() => import('./components/groups/GroupDetail'));
+const ChatApp = lazy(() => import('./components/messaging/ChatApp'));
+const ConnectionTest = lazy(() => import('./components/debug/ConnectionTest'));
+const GooglePlacesTest = lazy(() => import('./components/debug/GooglePlacesTest'));
+const DatabaseTest = lazy(() => import('./components/debug/DatabaseTest'));
+const RoomFormTest = lazy(() => import('./components/debug/RoomFormTest'));
+const AuthDiagnostic = lazy(() => import('./components/debug/AuthDiagnostic'));
+const DatabaseDiagnostic = lazy(() => import('./components/debug/DatabaseDiagnostic'));
+const VercelAuthFix = lazy(() => import('./components/debug/VercelAuthFix'));
+const GoogleAuthDiagnostic = lazy(() => import('./components/debug/GoogleAuthDiagnostic'));
+const RedirectFix = lazy(() => import('./components/debug/RedirectFix'));
+const GoogleMapsDiagnostic = lazy(() => import('./components/debug/GoogleMapsDiagnostic'));
+const MapDebug = lazy(() => import('./components/debug/MapDebug'));
+const RoomsMapView = lazy(() => import('./components/maps/RoomsMapView'));
+const PropertiesSaleMapView = lazy(() => import('./components/maps/PropertiesSaleMapView'));
+const PropertiesRentalMapView = lazy(() => import('./components/maps/PropertiesRentalMapView'));
+const CalendarDemo = lazy(() => import('./components/demo/CalendarDemo'));
+const MobileLandingPage = lazy(() => import('./pages/MobileLandingPage'));
 
 // Componente principal del dashboard
 const DashboardLayout: React.FC = () => {
-  const { user, loading, profile } = useAuth();
+  const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  // Debug info
-  console.log('DashboardLayout - Estado de autenticación:', {
-    user: user ? { id: user.id, email: user.email } : null,
-    profile: profile ? { id: profile.id, full_name: profile.full_name } : null,
-    loading
-  });
 
   if (loading) {
     return (
@@ -127,11 +90,11 @@ const DashboardLayout: React.FC = () => {
   }
 
   if (!user) {
-    console.log('DashboardLayout - No hay usuario, redirigiendo a /login');
     return <Navigate to="/login" replace />;
   }
 
   return (
+    <Suspense fallback={<PageFallback />}>
     <>
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
@@ -254,6 +217,7 @@ const DashboardLayout: React.FC = () => {
     </div>
     <MobileTabBar />
     </>
+    </Suspense>
   );
 };
 
@@ -360,18 +324,20 @@ const DebugAuth: React.FC = () => {
 
 // Componente principal de la aplicación
 const App: React.FC = () => {
-  const { isMobileApp, isLoading } = useMobileApp();
+  const isMobileApp = Capacitor.isNativePlatform();
 
-  // Márgenes nativos: la web se pinta bajo la barra de estado y el CSS reserva el hueco
   useEffect(() => {
-    const setupNativeChrome = async () => {
-      if (!Capacitor.isNativePlatform()) return;
+    if (!Capacitor.isNativePlatform()) return;
 
+    let stopOAuthListener = () => {};
+
+    const setupNativeChrome = async () => {
       const platform = Capacitor.getPlatform();
       document.documentElement.classList.add('native-app', platform);
       document.body.classList.add('native-app', platform);
 
       try {
+        const { StatusBar, Style } = await import('@capacitor/status-bar');
         await StatusBar.setOverlaysWebView({ overlay: true });
         await StatusBar.setStyle({ style: Style.Dark });
         await StatusBar.setBackgroundColor({ color: '#00000000' });
@@ -386,29 +352,19 @@ const App: React.FC = () => {
         document.documentElement.style.setProperty('--safe-top', '32px');
         console.error('Error configurando StatusBar:', error);
       }
+
+      const { listenForNativeOAuthReturn } = await import('./lib/googleAuth');
+      stopOAuthListener = listenForNativeOAuthReturn();
     };
 
     setupNativeChrome();
-    const stopOAuthListener = listenForNativeOAuthReturn();
     return () => stopOAuthListener();
   }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-orange-50">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="w-8 h-8 text-white" />
-          </div>
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <Router>
       <AuthProvider>
+        <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path="/" element={isMobileApp ? <MobileLandingPage /> : <LandingPage />} />
           <Route path="/app" element={isMobileApp ? <MobileLandingPage /> : <LandingPage />} />
@@ -424,18 +380,7 @@ const App: React.FC = () => {
           
           {/* Página pública de búsqueda */}
           <Route path="/search" element={<PublicSearch />} />
-          <Route path="/properties/search" element={
-            <Suspense fallback={
-              <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Cargando búsqueda...</p>
-                </div>
-              </div>
-            }>
-              <PropertySearch />
-            </Suspense>
-          } />
+          <Route path="/properties/search" element={<PropertySearch />} />
           
           {/* Rutas públicas de propiedades y habitaciones */}
           <Route path="/properties/rental/:id" element={<PropertyDetail />} />
@@ -471,6 +416,7 @@ const App: React.FC = () => {
           <Route path="/dashboard/*" element={<DashboardLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </AuthProvider>
     </Router>
   );

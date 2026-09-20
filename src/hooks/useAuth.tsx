@@ -42,19 +42,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshProfile = async (userToRefresh = user) => {
     if (!userToRefresh) {
-      console.log('refreshProfile - No hay usuario, saliendo...');
       return;
     }
 
     // Evitar múltiples llamadas simultáneas
     if (loading) {
-      console.log('refreshProfile - Ya hay una consulta en progreso, saliendo...');
       return;
     }
 
     try {
-      console.log('refreshProfile - Usuario:', userToRefresh.id);
-      console.log('refreshProfile - Iniciando consulta a la base de datos...');
       
       // Buscar perfil por auth_user_id con timeout
       // Usar maybeSingle() para evitar errores cuando hay múltiples perfiles
@@ -73,17 +69,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       const { data: profileData, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
-      console.log('refreshProfile - Consulta completada');
-      console.log('refreshProfile - Perfil encontrado:', profileData, 'Error:', error);
-
       if (profileData && !error) {
-        console.log('refreshProfile - Estableciendo perfil existente:', profileData);
         setProfile(profileData);
       } else {
-        console.log('refreshProfile - Creando nuevo perfil...');
-        // Si no existe el perfil, crearlo automáticamente
         const newProfile = createLocalProfile(userToRefresh);
-        console.log('refreshProfile - Nuevo perfil a crear:', newProfile);
         
         const { data: createdProfile, error: createError } = await supabase
           .from('profiles')
@@ -91,16 +80,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           .select()
           .single();
 
-        console.log('refreshProfile - Perfil creado:', createdProfile, 'Error:', createError);
-        
         if (createdProfile && !createError) {
-          console.log('refreshProfile - Estableciendo perfil creado:', createdProfile);
           setProfile(createdProfile);
         } else {
           console.error('refreshProfile - Error al crear perfil:', createError);
         }
       }
-      console.log('refreshProfile - Función completada exitosamente');
     } catch (error) {
       console.error('Error refreshing profile:', error);
     }
@@ -212,10 +197,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Obtener sesión inicial
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('getInitialSession - Sesión:', session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        console.log('getInitialSession - Usuario encontrado, llamando a refreshProfile...');
         await refreshProfile(session.user);
       }
       setLoading(false);
@@ -225,11 +208,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Escuchar cambios en la autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('onAuthStateChange - Evento:', event, 'Sesión:', session);
+      async (_event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          console.log('onAuthStateChange - Usuario encontrado, llamando a refreshProfile...');
           await refreshProfile(session.user);
         } else {
           setProfile(null);
@@ -244,7 +225,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Efecto adicional para refrescar el perfil cuando cambie el usuario
   useEffect(() => {
     if (user && !profile && !loading) {
-      console.log('useEffect [user] - Usuario cambiado, refrescando perfil...');
       refreshProfile(user);
     }
   }, [user, profile, loading]); // Agregado loading para evitar llamadas simultáneas

@@ -31,7 +31,7 @@ const MobileLandingPage: React.FC = () => {
         setLoadingActivities(true);
         const { data, error } = await supabase
           .from('activities')
-          .select('*')
+          .select('id, title, description, activity_type, location, city, date, time, price')
           .eq('is_active', true)
           .order('created_at', { ascending: false })
           .limit(6);
@@ -67,8 +67,8 @@ const MobileLandingPage: React.FC = () => {
             date: activity.date,
             time: activity.time,
             price: parseFloat(activity.price || 0),
-            images: imagesByActivity[activity.id] || activity.images || [],
-            category: activity.activity_type || activity.category,
+            images: imagesByActivity[activity.id] || [],
+            category: activity.activity_type,
           }))
         );
       } catch (error) {

@@ -34,6 +34,9 @@ export default defineConfig({
             if (id.includes('@supabase')) {
               return 'vendor-supabase';
             }
+            if (id.includes('@capacitor')) {
+              return 'vendor-capacitor';
+            }
             if (id.includes('google') || id.includes('maps')) {
               return 'vendor-maps';
             }

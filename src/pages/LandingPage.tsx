@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   UserGroupIcon as Users, 
@@ -28,13 +28,14 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import ProfileCard from '../components/landing/ProfileCard';
-import CohousingModal from '../components/landing/CohousingModal';
-import SuccessCaseModal from '../components/landing/SuccessCaseModal';
 import ActivityCard from '../components/landing/ActivityCard';
 import GroupCard from '../components/landing/GroupCard';
 import PropertyCard from '../components/landing/PropertyCard';
 import RoomCard from '../components/landing/RoomCard';
 import { supabase } from '../lib/supabase';
+
+const CohousingModal = lazy(() => import('../components/landing/CohousingModal'));
+const SuccessCaseModal = lazy(() => import('../components/landing/SuccessCaseModal'));
 
 const LandingPage: React.FC = () => {
   // --- ESTADOS ---
@@ -129,7 +130,7 @@ const LandingPage: React.FC = () => {
       setLoadingActivities(true);
       const { data, error } = await supabase
         .from('activities')
-        .select('*')
+        .select('id, title, description, activity_type, location, city, date, time, max_participants, current_participants, price, created_at')
         .eq('is_active', true)
         .eq('show_on_landing', true)
         .order('created_at', { ascending: false })
@@ -177,7 +178,7 @@ const LandingPage: React.FC = () => {
       setLoadingGroups(true);
       const { data, error } = await supabase
         .from('groups')
-        .select('*')
+        .select('id, name, description, category, city, image_url, current_members, max_members, is_public, created_at')
         .eq('show_on_landing', true)
         .order('created_at', { ascending: false })
         .limit(4);
@@ -193,14 +194,9 @@ const LandingPage: React.FC = () => {
   // --- EFECTOS ---
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    fetchActivities();
-    fetchGroups();
-  }, [fetchActivities, fetchGroups]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -218,7 +214,7 @@ const LandingPage: React.FC = () => {
       setLoadingProperties(true);
       const { data, error } = await supabase
         .from('property_listings')
-        .select('*')
+        .select('id, title, description, property_type, address, city, price, bedrooms, bathrooms, listing_type, price_per_person')
         .eq('show_on_landing', true)
         .eq('is_available', true)
         .in('listing_type', ['property_rental', 'property_purchase'])
@@ -267,7 +263,7 @@ const LandingPage: React.FC = () => {
       setLoadingRooms(true);
       const { data, error } = await supabase
         .from('property_listings')
-        .select('*')
+        .select('id, title, description, address, city, price')
         .eq('show_on_landing', true)
         .eq('is_available', true)
         .eq('listing_type', 'room_rental')
@@ -311,10 +307,12 @@ const LandingPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchActivities();
-    fetchGroups();
-    fetchProperties();
-    fetchRooms();
+    void Promise.all([
+      fetchActivities(),
+      fetchGroups(),
+      fetchProperties(),
+      fetchRooms(),
+    ]);
   }, [fetchActivities, fetchGroups, fetchProperties, fetchRooms]);
 
   const handleGetStarted = () => {
@@ -1193,8 +1191,10 @@ const LandingPage: React.FC = () => {
       <div className="h-safe-bottom lg:hidden"></div>
 
       {/* Modales */}
-      <CohousingModal isOpen={isCohousingModalOpen} onClose={() => setIsCohousingModalOpen(false)} />
-      <SuccessCaseModal isOpen={isSuccessCaseModalOpen} onClose={() => setIsSuccessCaseModalOpen(false)} />
+      <Suspense fallback={null}>
+        <CohousingModal isOpen={isCohousingModalOpen} onClose={() => setIsCohousingModalOpen(false)} />
+        <SuccessCaseModal isOpen={isSuccessCaseModalOpen} onClose={() => setIsSuccessCaseModalOpen(false)} />
+      </Suspense>
     </div>
   );
 };
