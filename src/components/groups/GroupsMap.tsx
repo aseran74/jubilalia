@@ -52,12 +52,14 @@ interface GroupsMapProps {
   groups: Group[];
   onGroupSelect: (group: Group) => void;
   className?: string;
+  compact?: boolean;
 }
 
 const GroupsMap: React.FC<GroupsMapProps> = ({
   groups,
   onGroupSelect,
-  className = ""
+  className = "",
+  compact = false
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -211,7 +213,7 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
 
   if (mapsLoading) {
     return (
-      <div className={`flex items-center justify-center h-64 bg-gray-100 rounded-lg ${className}`}>
+      <div className={`flex items-center justify-center bg-gray-100 ${compact ? 'h-full' : 'h-64 rounded-lg'} ${className}`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-2"></div>
           <p className="text-sm text-gray-600">Cargando mapa...</p>
@@ -222,7 +224,7 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
 
   if (mapsError) {
     return (
-      <div className={`flex items-center justify-center h-64 bg-red-50 rounded-lg ${className}`}>
+      <div className={`flex items-center justify-center bg-red-50 ${compact ? 'h-full' : 'h-64 rounded-lg'} ${className}`}>
         <div className="text-center">
           <p className="text-red-600">Error cargando el mapa</p>
         </div>
@@ -231,7 +233,11 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
   }
 
   return (
-    <div ref={mapRef} className={`w-full h-96 rounded-lg ${className}`} style={{ cursor: 'default' }} />
+    <div
+      ref={mapRef}
+      className={`w-full ${compact ? 'h-full rounded-none' : 'h-96 rounded-lg'} ${className}`}
+      style={{ cursor: 'default' }}
+    />
   );
 };
 

@@ -6,6 +6,8 @@ import GroupPosts from '../groups/GroupPosts';
 import GroupMembers from '../groups/GroupMembers';
 import GroupsMap from '../groups/GroupsMap';
 import AdminButtons from '../common/AdminButtons';
+import Modal from '../common/Modal';
+import MapFilterButton from '../common/MapFilterButton';
 import { 
   PlusIcon,
   UsersIcon,
@@ -15,8 +17,6 @@ import {
   TagIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
-  XMarkIcon,
-  MapIcon
 } from '@heroicons/react/24/outline';
 
 interface Group {
@@ -51,22 +51,21 @@ const Groups: React.FC = () => {
   const [showGroupPosts, setShowGroupPosts] = useState(false);
   const [showGroupMembers, setShowGroupMembers] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   
   // Estados para filtros
   const [filters, setFilters] = useState({
     search: '',
-    category: '',
+    categories: [] as string[],
     city: '',
     isPublic: null as boolean | null  // null = mostrar todos, true = solo públicos, false = solo privados
   });
 
   // Detectar el modo de visualización
   useEffect(() => {
-    if (location.pathname === '/dashboard/groups/map') {
+    const path = location.pathname.replace(/\/$/, '');
+    if (path.endsWith('/groups') || path.endsWith('/groups/map')) {
       setViewMode('map');
-    } else {
-      setViewMode('list');
     }
   }, [location.pathname]);
 
@@ -83,9 +82,9 @@ const Groups: React.FC = () => {
       );
     }
 
-    // Filtro por categoría
-    if (filters.category) {
-      filtered = filtered.filter(group => group.category === filters.category);
+    // Filtro por categoría (varias a la vez)
+    if (filters.categories.length > 0) {
+      filtered = filtered.filter(group => filters.categories.includes(group.category));
     }
 
     // Filtro por ciudad
@@ -120,11 +119,20 @@ const Groups: React.FC = () => {
     }));
   };
 
+  const toggleCategory = (category: string) => {
+    setFilters(prev => ({
+      ...prev,
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter(item => item !== category)
+        : [...prev.categories, category]
+    }));
+  };
+
   // Limpiar filtros
   const clearFilters = () => {
     setFilters({
       search: '',
-      category: '',
+      categories: [],
       city: '',
       isPublic: true
     });
@@ -425,295 +433,277 @@ const Groups: React.FC = () => {
     );
   }
 
+  const activeFilterCount =
+    (filters.search ? 1 : 0) + filters.categories.length + (filters.city ? 1 : 0);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Grupos</h1>
-            <p className="text-gray-600 mt-2">Conecta con personas que comparten tus intereses</p>
-          </div>
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-stone-900">Grupos</h1>
+          {groups.length > 0 && (
+            <p className="mt-0.5 text-sm text-stone-500">
+              {filteredGroups.length} de {groups.length} grupos
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard/groups/create')}
+          className="inline-flex min-h-10 items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+        >
+          <PlusIcon className="h-4 w-4" />
+          Crear
+        </button>
+
+        <div className="flex rounded-full bg-stone-100 p-1">
           <button
-            onClick={() => navigate('/dashboard/groups/create')}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+              viewMode === 'list' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
+            }`}
           >
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Crear Grupo
+            Lista
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('map')}
+            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+              viewMode === 'map' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            Mapa
           </button>
         </div>
 
-        {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-              <FunnelIcon className="w-5 h-5 mr-2" />
-              Filtros
-            </h2>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="text-sm text-gray-600 hover:text-gray-800 flex items-center"
-              >
-                <FunnelIcon className="w-4 h-4 mr-1" />
-                {showFilters ? 'Ocultar' : 'Mostrar'} filtros
-              </button>
-              <button
-                onClick={clearFilters}
-                className="text-sm text-red-600 hover:text-red-800 flex items-center"
-              >
-                <XMarkIcon className="w-4 h-4 mr-1" />
-                Limpiar
-              </button>
-            </div>
-          </div>
-
-          {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Búsqueda */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Buscar
-                </label>
-                <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={filters.search}
-                    onChange={(e) => handleFilterChange('search', e.target.value)}
-                    placeholder="Nombre o descripción..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Categoría */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categoría
-                </label>
-                <select
-                  value={filters.category}
-                  onChange={(e) => handleFilterChange('category', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="">Todas las categorías</option>
-                  <option value="Retiros">Retiros</option>
-                  <option value="Deportes">Deportes</option>
-                  <option value="Hobbies">Hobbies</option>
-                  <option value="Comida">Comida</option>
-                  <option value="Cartas">Cartas</option>
-                </select>
-              </div>
-
-              {/* Ciudad */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ciudad
-                </label>
-                <input
-                  type="text"
-                  value={filters.city}
-                  onChange={(e) => handleFilterChange('city', e.target.value)}
-                  placeholder="Madrid, Barcelona..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Visibilidad */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Visibilidad
-                </label>
-                <select
-                  value={filters.isPublic ? 'public' : 'private'}
-                  onChange={(e) => handleFilterChange('isPublic', e.target.value === 'public')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="public">Públicos</option>
-                  <option value="private">Privados</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Contador de resultados */}
-          <div className="mt-4 text-sm text-gray-600">
-            Mostrando {filteredGroups.length} de {groups.length} grupos
-          </div>
-        </div>
-
-        {/* Controles de vista */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                viewMode === 'list'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <UsersIcon className="w-4 h-4" />
-              Lista
-            </button>
-            <button
-              onClick={() => setViewMode('map')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                viewMode === 'map'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              <MapIcon className="w-4 h-4" />
-              Mapa
-            </button>
-          </div>
-        </div>
-
-        {/* Vista según el modo seleccionado */}
-        {viewMode === 'list' ? (
-          /* Lista de grupos */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {filteredGroups.map((group) => (
-            <div key={group.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center space-x-3 mb-4">
-                  {group.image_url ? (
-                    <img
-                      src={group.image_url}
-                      alt={group.name}
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <UsersIcon className="w-6 h-6 text-green-600" />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{group.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      {group.is_public ? 'Público' : 'Privado'}
-                    </p>
-                  </div>
-                </div>
-
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{group.description}</p>
-
-                {/* Categoría y Localización */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {group.category && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      <TagIcon className="w-3 h-3 mr-1" />
-                      {group.category}
-                    </span>
-                  )}
-                  {group.city && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      <MapPinIcon className="w-3 h-3 mr-1" />
-                      {group.city}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <UsersIcon className="w-4 h-4 mr-1" />
-                    {group.current_members}/{group.max_members} miembros
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(group.created_at).toLocaleDateString('es-ES')}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  {group.is_member ? (
-                    <>
-                      <button
-                        onClick={() => viewGroupPosts(group)}
-                        className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-center"
-                      >
-                        Ver Posts
-                      </button>
-                      <button
-                        onClick={() => viewGroupMembers(group)}
-                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center flex items-center justify-center space-x-1"
-                      >
-                        <UserGroupIcon className="h-4 w-4" />
-                        <span>Miembros</span>
-                      </button>
-                      <button
-                        onClick={() => leaveGroup(group.id)}
-                        className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                      >
-                        Salir
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                    <button
-                      onClick={() => joinGroup(group.id)}
-                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Unirse
-                    </button>
-                      <button
-                        onClick={() => viewGroupMembers(group)}
-                        className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-1"
-                        title="Ver miembros"
-                      >
-                        <UserGroupIcon className="h-4 w-4" />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                {/* Botones de administrador */}
-                {isAdmin && (
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <AdminButtons 
-                      itemId={group.id}
-                      itemType="group"
-                      onDelete={handleDeleteGroup}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-        ) : (
-          /* Vista del mapa */
-          <GroupsMap 
-            groups={filteredGroups}
-            onGroupSelect={handleGroupSelect}
-            className="w-full h-96 mb-8"
-          />
-        )}
-
-        {filteredGroups.length === 0 && (
-          <div className="text-center py-12">
-            <UsersIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {groups.length === 0 ? 'No hay grupos disponibles' : 'No se encontraron grupos'}
-            </h3>
-            <p className="text-gray-500 mb-6">
-              {groups.length === 0 
-                ? 'Sé el primero en crear un grupo y conectar con otros usuarios.'
-                : 'Intenta ajustar los filtros para encontrar grupos que coincidan con tus criterios.'
-              }
-            </p>
-            <button
-              onClick={() => navigate('/dashboard/groups/create')}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Crear Primer Grupo
-            </button>
-          </div>
+        {viewMode === 'list' && (
+          <button
+            type="button"
+            onClick={() => setShowFilters(true)}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+          >
+            <FunnelIcon className="h-4 w-4" />
+            Filtros
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
         )}
       </div>
 
-      {/* Vista de miembros del grupo */}
+      {viewMode === 'map' && (
+        <div className="relative h-[calc(100vh-9rem)] min-h-[28rem] w-full">
+          <GroupsMap
+            groups={filteredGroups}
+            onGroupSelect={handleGroupSelect}
+            compact
+            className="h-full w-full"
+          />
+          <MapFilterButton count={activeFilterCount} onClick={() => setShowFilters(true)} />
+        </div>
+      )}
+
+      {viewMode === 'list' && (
+        <div className="p-4">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {filteredGroups.map((group) => (
+              <div key={group.id} className="overflow-hidden rounded-2xl bg-white shadow-lg">
+                <div className="p-6">
+                  <div className="mb-4 flex items-center space-x-3">
+                    {group.image_url ? (
+                      <img
+                        src={group.image_url}
+                        alt={group.name}
+                        className="h-12 w-12 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+                        <UsersIcon className="h-6 w-6 text-green-600" />
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{group.name}</h3>
+                      <p className="text-sm text-gray-500">
+                        {group.is_public ? 'Público' : 'Privado'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="mb-4 line-clamp-2 text-sm text-gray-600">{group.description}</p>
+
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    {group.category && (
+                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                        <TagIcon className="mr-1 h-3 w-3" />
+                        {group.category}
+                      </span>
+                    )}
+                    {group.city && (
+                      <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                        <MapPinIcon className="mr-1 h-3 w-3" />
+                        {group.city}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mb-4 flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <UsersIcon className="mr-1 h-4 w-4" />
+                      {group.current_members}/{group.max_members} miembros
+                    </div>
+                    <div>{new Date(group.created_at).toLocaleDateString('es-ES')}</div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {group.is_member ? (
+                      <>
+                        <button
+                          onClick={() => viewGroupPosts(group)}
+                          className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-center text-white hover:bg-green-700"
+                        >
+                          Ver Posts
+                        </button>
+                        <button
+                          onClick={() => viewGroupMembers(group)}
+                          className="flex flex-1 items-center justify-center space-x-1 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                        >
+                          <UserGroupIcon className="h-4 w-4" />
+                          <span>Miembros</span>
+                        </button>
+                        <button
+                          onClick={() => leaveGroup(group.id)}
+                          className="rounded-lg border border-red-300 px-4 py-2 text-red-600 hover:bg-red-50"
+                        >
+                          Salir
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => joinGroup(group.id)}
+                          className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                        >
+                          Unirse
+                        </button>
+                        <button
+                          onClick={() => viewGroupMembers(group)}
+                          className="flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-50"
+                          title="Ver miembros"
+                        >
+                          <UserGroupIcon className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {isAdmin && (
+                    <div className="mt-3 border-t border-gray-200 pt-3">
+                      <AdminButtons
+                        itemId={group.id}
+                        itemType="group"
+                        onDelete={handleDeleteGroup}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredGroups.length === 0 && (
+            <div className="py-12 text-center">
+              <UsersIcon className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+              <h3 className="mb-2 text-lg font-medium text-gray-900">
+                {groups.length === 0 ? 'No hay grupos disponibles' : 'No se encontraron grupos'}
+              </h3>
+              <p className="mb-6 text-gray-500">
+                {groups.length === 0
+                  ? 'Sé el primero en crear un grupo y conectar con otros usuarios.'
+                  : 'Intenta ajustar los filtros para encontrar grupos que coincidan con tus criterios.'}
+              </p>
+              <button
+                onClick={() => navigate('/dashboard/groups/create')}
+                className="rounded-lg bg-emerald-700 px-6 py-3 text-white hover:bg-emerald-800"
+              >
+                Crear grupo
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Buscar</label>
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                placeholder="Nombre o descripción..."
+                className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-emerald-600"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Categoría ({filters.categories.length} seleccionadas)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {['Retiros', 'Deportes', 'Hobbies', 'Comida', 'Cartas'].map((category) => {
+                const selected = filters.categories.includes(category);
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => toggleCategory(category)}
+                    className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                      selected
+                        ? 'bg-emerald-700 text-white'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Ciudad</label>
+            <input
+              type="text"
+              value={filters.city}
+              onChange={(e) => handleFilterChange('city', e.target.value)}
+              placeholder="Madrid, Barcelona..."
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-emerald-600"
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex-1 rounded-xl border border-stone-200 px-4 py-3 font-semibold text-stone-600 hover:bg-stone-50"
+            >
+              Limpiar
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFilters(false)}
+              className="flex-1 rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800"
+            >
+              Ver resultados
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {showGroupMembers && selectedGroup && (
         <GroupMembers
           groupId={selectedGroup.id}

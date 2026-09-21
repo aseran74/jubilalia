@@ -13,13 +13,15 @@ interface SearchFilters {
 interface PeopleSearchFiltersProps {
   filters: SearchFilters;
   onFiltersChange: (filters: Partial<SearchFilters>) => void;
+  embedded?: boolean;
 }
 
 const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
   filters,
-  onFiltersChange
+  onFiltersChange,
+  embedded = false
 }) => {
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(embedded);
 
   // Lista de intereses predefinidos
   const predefinedInterests = [
@@ -35,6 +37,13 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
     'Comercial', 'Administrativo', 'Técnico', 'Arquitecto',
     'Diseñador', 'Escritor', 'Artista', 'Consultor', 'Otros'
   ];
+
+  const UNLIMITED_KM = 999999;
+  const SLIDER_MAX_KM = 100;
+  const isUnlimitedDistance = filters.maxDistance > SLIDER_MAX_KM;
+  const sliderDistance = isUnlimitedDistance
+    ? SLIDER_MAX_KM
+    : Math.min(SLIDER_MAX_KM, Math.max(5, filters.maxDistance));
 
   const handleInterestToggle = (interest: string) => {
     const newInterests = filters.interests.includes(interest)
@@ -73,7 +82,8 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className={embedded ? '' : 'bg-white rounded-lg shadow-sm p-6'}>
+      {!embedded && (
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
           Filtros
@@ -85,50 +95,55 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
           {showAdvanced ? 'Ocultar' : 'Avanzados'}
         </button>
       </div>
+      )}
 
       {/* Distancia */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Distancia máxima: {filters.maxDistance === 999999 ? 'Sin límite' : `${filters.maxDistance} km`}
+          Distancia máxima: {isUnlimitedDistance ? 'Sin límite' : `${sliderDistance} km`}
         </label>
         <input
           type="range"
           min="5"
-          max="999999"
+          max={SLIDER_MAX_KM}
           step="5"
-          value={filters.maxDistance}
-          onChange={(e) => handleDistanceChange(parseInt(e.target.value))}
+          value={sliderDistance}
+          onChange={(e) => handleDistanceChange(parseInt(e.target.value, 10))}
           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
         />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
           <span>5 km</span>
+          <span>50 km</span>
           <span>100 km</span>
-          <span>Sin límite</span>
         </div>
         
         {/* Botones rápidos */}
-        <div className="flex gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-3">
           <button
+            type="button"
             onClick={() => handleDistanceChange(25)}
-            className={`flex-1 px-3 py-1.5 text-xs rounded ${filters.maxDistance === 25 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${!isUnlimitedDistance && filters.maxDistance === 25 ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
           >
             25 km
           </button>
           <button
+            type="button"
             onClick={() => handleDistanceChange(50)}
-            className={`flex-1 px-3 py-1.5 text-xs rounded ${filters.maxDistance === 50 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${!isUnlimitedDistance && filters.maxDistance === 50 ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
           >
             50 km
           </button>
           <button
+            type="button"
             onClick={() => handleDistanceChange(100)}
-            className={`flex-1 px-3 py-1.5 text-xs rounded ${filters.maxDistance === 100 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${!isUnlimitedDistance && filters.maxDistance === 100 ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
           >
             100 km
           </button>
           <button
-            onClick={() => handleDistanceChange(999999)}
-            className={`flex-1 px-3 py-1.5 text-xs rounded ${filters.maxDistance === 999999 ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+            type="button"
+            onClick={() => handleDistanceChange(UNLIMITED_KM)}
+            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${isUnlimitedDistance ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
           >
             Sin límite
           </button>
@@ -140,18 +155,24 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Intereses ({filters.interests.length} seleccionados)
         </label>
-        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
-          {predefinedInterests.map((interest) => (
-            <label key={interest} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.interests.includes(interest)}
-                onChange={() => handleInterestToggle(interest)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">{interest}</span>
-            </label>
-          ))}
+        <div className="flex flex-wrap gap-2">
+          {predefinedInterests.map((interest) => {
+            const selected = filters.interests.includes(interest);
+            return (
+              <button
+                key={interest}
+                type="button"
+                onClick={() => handleInterestToggle(interest)}
+                className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                  selected
+                    ? 'bg-emerald-700 text-white'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                {interest}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -194,22 +215,25 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Género
             </label>
-            <div className="flex space-x-4">
-              {['male', 'female', 'other', null].map((gender) => (
-                <label key={gender || 'any'} className="flex items-center">
-                  <input
-                    type="radio"
-                    name="gender"
-                    checked={filters.gender === gender}
-                    onChange={() => handleGenderChange(gender)}
-                    className="border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700">
-                    {gender === 'male' ? 'Hombre' : 
-                     gender === 'female' ? 'Mujer' : 
-                     gender === 'other' ? 'Otro' : 'Cualquiera'}
-                  </span>
-                </label>
+            <div className="flex flex-wrap gap-2">
+              {([
+                { value: null, label: 'Cualquiera' },
+                { value: 'male', label: 'Hombre' },
+                { value: 'female', label: 'Mujer' },
+                { value: 'other', label: 'Otro' },
+              ] as const).map((option) => (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => handleGenderChange(option.value)}
+                  className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                    filters.gender === option.value
+                      ? 'bg-emerald-700 text-white'
+                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                  }`}
+                >
+                  {option.label}
+                </button>
               ))}
             </div>
           </div>
@@ -219,18 +243,25 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Ocupación
             </label>
-            <select
-              value={filters.occupation || ''}
-              onChange={(e) => handleOccupationChange(e.target.value || null)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="">Cualquiera</option>
-              {predefinedOccupations.map((occupation) => (
-                <option key={occupation} value={occupation}>
-                  {occupation}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-wrap gap-2">
+              {predefinedOccupations.map((occupation) => {
+                const selected = filters.occupation === occupation;
+                return (
+                  <button
+                    key={occupation}
+                    type="button"
+                    onClick={() => handleOccupationChange(selected ? null : occupation)}
+                    className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                      selected
+                        ? 'bg-emerald-700 text-white'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                    }`}
+                  >
+                    {occupation}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Preferencias de vivienda */}
@@ -238,29 +269,37 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Preferencias de vivienda
             </label>
-            <div className="space-y-3">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={filters.has_room_to_share === true}
-                  onChange={(e) => onFiltersChange({ has_room_to_share: e.target.checked ? true : null })}
-                  className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                />
-                <span className="ml-2 text-sm text-gray-700">
-                  🏠 Tiene habitación disponible
-                </span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={filters.wants_to_find_roommate === true}
-                  onChange={(e) => onFiltersChange({ wants_to_find_roommate: e.target.checked ? true : null })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm text-gray-700">
-                  👥 Busca compañero/a
-                </span>
-              </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  onFiltersChange({
+                    has_room_to_share: filters.has_room_to_share === true ? null : true,
+                  })
+                }
+                className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                  filters.has_room_to_share === true
+                    ? 'bg-emerald-700 text-white'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Tiene habitación
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onFiltersChange({
+                    wants_to_find_roommate: filters.wants_to_find_roommate === true ? null : true,
+                  })
+                }
+                className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                  filters.wants_to_find_roommate === true
+                    ? 'bg-emerald-700 text-white'
+                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                }`}
+              >
+                Busca compañero/a
+              </button>
             </div>
           </div>
         </>

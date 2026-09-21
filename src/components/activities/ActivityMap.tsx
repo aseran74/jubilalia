@@ -36,6 +36,7 @@ interface ActivityMapProps {
   activities: ActivityMapActivity[];
   onActivitySelect: (activity: ActivityMapActivity | Activity) => void;
   className?: string;
+  compact?: boolean;
 }
 
 // Estilo minimalista
@@ -49,7 +50,8 @@ const MAP_STYLES = [
 const ActivityMap: React.FC<ActivityMapProps> = ({
   activities,
   onActivitySelect,
-  className = ""
+  className = "",
+  compact = false
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -314,19 +316,21 @@ const ActivityMap: React.FC<ActivityMapProps> = ({
     // ... (Resto de lógica de zoom igual)
   }, [activities, map, infoWindow, onActivitySelect]);
 
-  if (mapsLoading) return <div className={`h-[600px] bg-gray-100 rounded-2xl ${className} animate-pulse`} />;
+  if (mapsLoading) return <div className={`${compact ? 'h-full' : 'h-[600px] rounded-2xl'} bg-gray-100 ${className} animate-pulse`} />;
   if (mapsError) return null;
 
   return (
-    <div className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden ${className}`}>
-      <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-blue-600" />
-          Mapa de Actividades
-        </h3>
-      </div>
+    <div className={`overflow-hidden bg-white ${compact ? 'h-full' : 'rounded-2xl shadow-lg border border-gray-100'} ${className}`}>
+      {!compact && (
+        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-blue-600" />
+            Mapa de Actividades
+          </h3>
+        </div>
+      )}
       
-      <div className="relative w-full h-[600px] bg-gray-100">
+      <div className={`relative w-full bg-gray-100 ${compact ? 'h-full' : 'h-[600px]'}`}>
         <div ref={mapRef} className="w-full h-full focus:outline-none"/>
       </div>
     </div>

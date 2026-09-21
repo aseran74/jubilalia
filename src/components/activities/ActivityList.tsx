@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
-import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus, Map, ArrowLeft } from 'lucide-react';
+import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus } from 'lucide-react';
 import ActivityMap from './ActivityMap';
+import Modal from '../common/Modal';
+import MapFilterButton from '../common/MapFilterButton';
 
 interface Activity {
   id: string;
@@ -22,6 +24,7 @@ interface Activity {
   difficulty_level: string;
   tags: string[];
   images: string[];
+  profile_id?: string;
   owner: {
     full_name: string;
     avatar_url?: string;
@@ -30,14 +33,16 @@ interface Activity {
 
 const ActivityList: React.FC = () => {
   const { profile } = useAuth();
+  const location = useLocation();
+  const mineOnly = location.search.includes('mine');
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const [showSearchInMap, setShowSearchInMap] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
+  const [showFilters, setShowFilters] = useState(false);
   const [userLocation, setUserLocation] = useState<string>('');
-  const [selectedType, setSelectedType] = useState<string>('');
-  const [selectedCity, setSelectedCity] = useState<string>('');
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(5000);
@@ -149,6 +154,7 @@ const ActivityList: React.FC = () => {
           description: activity.description || '',
           city: activity.city || 'Sin ciudad',
           images: imagesByActivity[activity.id] || [],
+          profile_id: activity.profile_id,
           owner: { full_name: 'Usuario', avatar_url: undefined },
           is_free: activity.is_free ?? false,
           price: activity.price ?? 0,
@@ -188,16 +194,18 @@ const ActivityList: React.FC = () => {
       (activity.description && activity.description.toLowerCase().includes(searchLower)) ||
       (activity.city && activity.city.toLowerCase().includes(searchLower));
     
-    // Filtro por tipo de actividad
-    const matchesType = !selectedType || activity.activity_type === selectedType;
+    // Filtro por tipo de actividad (varias a la vez)
+    const matchesType = selectedTypes.length === 0 || selectedTypes.includes(activity.activity_type);
     
-    // Filtro por ciudad
-    const matchesCity = !selectedCity || activity.city === selectedCity;
+    // Filtro por ciudad (varias a la vez)
+    const matchesCity = selectedCities.length === 0 || selectedCities.includes(activity.city);
     
     // Filtro por precio - diferente según si es viajes o no
     let matchesPrice = true;
-    const selectedTypeLower = selectedType?.toLowerCase() || '';
-    const isTravelSelected = selectedTypeLower.includes('viaje') || selectedTypeLower === 'viajes';
+    const isTravelSelected = selectedTypes.some((type) => {
+      const typeLower = type.toLowerCase();
+      return typeLower.includes('viaje') || typeLower === 'viajes';
+    });
     const activityTypeLower = activity.activity_type?.toLowerCase() || '';
     const isTravelActivity = activityTypeLower.includes('viaje') || activityTypeLower === 'viajes';
     
@@ -233,7 +241,9 @@ const ActivityList: React.FC = () => {
       }
     }
     
-    return matchesSearch && matchesType && matchesCity && matchesPrice && matchesDuration;
+    const matchesMine = !mineOnly || activity.profile_id === profile?.id;
+
+    return matchesSearch && matchesType && matchesCity && matchesPrice && matchesDuration && matchesMine;
   });
 
   // Obtener listas únicas para los filtros
@@ -242,8 +252,37 @@ const ActivityList: React.FC = () => {
 
   const handleActivitySelect = (activity: Activity | { id: string; title: string; [key: string]: any }) => {
     console.log('🔗 Navegando a detalles de actividad:', activity.title, 'ID:', activity.id);
-    navigate(`/activities/${activity.id}`);
+    navigate(`/dashboard/activities/${activity.id}`);
   };
+
+  const toggleType = (type: string) => {
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((item) => item !== type) : [...prev, type]
+    );
+  };
+
+  const toggleCity = (city: string) => {
+    setSelectedCities((prev) =>
+      prev.includes(city) ? prev.filter((item) => item !== city) : [...prev, city]
+    );
+  };
+
+  const clearActivityFilters = () => {
+    setSearchTerm('');
+    setSelectedTypes([]);
+    setSelectedCities([]);
+    setPriceFilter('all');
+    setMinPrice(0);
+    setMaxPrice(5000);
+    setMinDuration(0);
+    setMaxDuration(30);
+  };
+
+  const activeFilterCount =
+    (searchTerm ? 1 : 0) +
+    selectedTypes.length +
+    selectedCities.length +
+    (priceFilter !== 'all' ? 1 : 0);
 
   if (loading) {
     return (
@@ -254,289 +293,69 @@ const ActivityList: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 mx-4 md:mx-8 lg:mx-16 xl:mx-24">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-4">
-            {/* Botón volver */}
-            <button
-              onClick={() => navigate('/')}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-600 font-medium">Volver</span>
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Actividades</h1>
-              {userLocation && (
-                <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  Cerca de: {userLocation} (50 km)
-                </p>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={() => navigate('/dashboard/activities/create')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Crear Actividad
-          </button>
-        </div>
-        
-        {/* Búsqueda - oculto en móvil cuando está en modo mapa */}
-        <div className={`relative ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <input
-            type="text"
-            placeholder="Buscar actividades..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Filtros */}
-        <div className={`mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 ${viewMode === 'map' ? 'hidden lg:grid' : 'grid'}`}>
-          {/* Filtro por tipo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tipo de Actividad
-            </label>
-            <select
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value);
-                // Resetear filtros cuando cambia el tipo
-                setPriceFilter('all');
-                setMinPrice(0);
-                setMaxPrice(5000);
-                setMinDuration(0);
-                setMaxDuration(30);
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todos los tipos</option>
-              {activityTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filtro por ciudad */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ciudad
-            </label>
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Todas las ciudades</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filtro por precio - solo para no-viajes */}
-          {selectedType && !selectedType.toLowerCase().includes('viaje') && selectedType.toLowerCase() !== 'viajes' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Precio
-              </label>
-              <select
-                value={priceFilter}
-                onChange={(e) => setPriceFilter(e.target.value as 'all' | 'free' | 'paid')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Todos</option>
-                <option value="free">Gratis</option>
-                <option value="paid">De pago</option>
-              </select>
-            </div>
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-stone-900">
+            {mineOnly ? 'Mis actividades' : 'Actividades'}
+          </h1>
+          {userLocation && (
+            <p className="mt-0.5 flex items-center gap-1 truncate text-sm text-stone-500">
+              <MapPin className="h-4 w-4 shrink-0" />
+              Cerca de {userLocation}
+            </p>
           )}
         </div>
-
-        {/* Filtros específicos para VIAJES */}
-        {selectedType && (selectedType.toLowerCase().includes('viaje') || selectedType.toLowerCase() === 'viajes') && (
-          <div className={`mt-4 space-y-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
-            {/* Rango de precio para viajes */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Rango de Precio: €{minPrice} - €{maxPrice}
-              </label>
-              <div className="grid grid-cols-2 gap-4 mb-2">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Precio mínimo</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10000"
-                    step="50"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Precio máximo</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="10000"
-                    step="50"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Duración del viaje */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duración del Viaje: {minDuration} - {maxDuration} días
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Duración mínima (días)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="365"
-                    step="1"
-                    value={minDuration}
-                    onChange={(e) => setMinDuration(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Duración máxima (días)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="365"
-                    step="1"
-                    value={maxDuration}
-                    onChange={(e) => setMaxDuration(Number(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Filtros específicos para NO-VIAJES */}
-        {selectedType && !selectedType.toLowerCase().includes('viaje') && selectedType.toLowerCase() !== 'viajes' && priceFilter === 'paid' && (
-          <div className={`mt-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rango de Precio: €{minPrice} - €{maxPrice}
-            </label>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Precio mínimo</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="10000"
-                  step="5"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">Precio máximo</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="10000"
-                  step="5"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Botón para limpiar filtros */}
-        {(selectedType || selectedCity || priceFilter !== 'all' || minPrice > 0 || maxPrice < 5000 || minDuration > 0 || maxDuration < 30) && (
-          <div className={`mt-4 ${viewMode === 'map' ? 'hidden lg:block' : 'block'}`}>
-            <button
-              onClick={() => {
-                setSelectedType('');
-                setSelectedCity('');
-                setPriceFilter('all');
-                setMinPrice(0);
-                setMaxPrice(5000);
-                setMinDuration(0);
-                setMaxDuration(30);
-              }}
-              className="px-4 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Limpiar filtros
-            </button>
-          </div>
-        )}
-
-        {/* Botón de recargar */}
-        <div className="mt-4">
+        <span className="text-sm font-medium text-stone-600">
+          {filteredActivities.length} actividades
+        </span>
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard/activities/create')}
+          className="inline-flex min-h-10 items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+        >
+          <Plus className="h-4 w-4" />
+          Crear
+        </button>
+        <div className="flex rounded-full bg-stone-100 p-1">
           <button
-            onClick={fetchActivities}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Recargar Actividades
-          </button>
-        </div>
-      </div>
-
-      {/* Controles de vista */}
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-2">
-          <button
+            type="button"
             onClick={() => setViewMode('list')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              viewMode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+              viewMode === 'list' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
-            <Search className="w-4 h-4" />
             Lista
           </button>
           <button
+            type="button"
             onClick={() => setViewMode('map')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-              viewMode === 'map'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+              viewMode === 'map' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
-            <Map className="w-4 h-4" />
             Mapa
           </button>
         </div>
-      </div>
-
-      {/* Resultados */}
-      <div className="mb-4">
-        <p className="text-gray-600">
-          Se encontraron <span className="font-semibold text-blue-600">{filteredActivities.length}</span> actividades
-        </p>
+        {viewMode === 'list' && (
+          <button
+            type="button"
+            onClick={() => setShowFilters(true)}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+          >
+            Filtros
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Vista según el modo seleccionado */}
       {viewMode === 'list' ? (
-        /* Lista de actividades */
+        <div className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredActivities.map((activity) => (
           <div key={activity.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -649,34 +468,20 @@ const ActivityList: React.FC = () => {
           </div>
         ))}
         </div>
+        </div>
       ) : (
-        /* Vista del mapa */
-        <div className="relative">
-          <ActivityMap 
+        <div className="relative h-[calc(100vh-9rem)] min-h-[28rem] w-full">
+          <ActivityMap
             activities={filteredActivities}
             onActivitySelect={handleActivitySelect}
-            className="w-full"
+            compact
+            className="h-full w-full"
           />
-          
-          {/* Botón flotante para búsqueda en modo mapa - solo móvil */}
-          <div className="lg:hidden absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
-            <button
-              onClick={() => setShowSearchInMap(!showSearchInMap)}
-              className="bg-white rounded-full shadow-xl border border-gray-200 px-6 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors"
-            >
-              <Search className="w-5 h-5 text-gray-700" />
-              <span className="text-sm font-medium text-gray-700">Buscar</span>
-              {searchTerm && (
-                <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                  1
-                </span>
-              )}
-            </button>
-          </div>
+          <MapFilterButton count={activeFilterCount} onClick={() => setShowFilters(true)} />
         </div>
       )}
 
-      {filteredActivities.length === 0 && !loading && (
+      {viewMode === 'list' && filteredActivities.length === 0 && !loading && (
         <div className="text-center py-12">
           <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron actividades</h3>
@@ -684,53 +489,84 @@ const ActivityList: React.FC = () => {
         </div>
       )}
 
-      {/* Modal de búsqueda para móvil en modo mapa */}
-      {viewMode === 'map' && showSearchInMap && (
-        <div 
-          className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
-          onClick={() => setShowSearchInMap(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-md"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-900">Buscar Actividades</h3>
-                <button
-                  onClick={() => setShowSearchInMap(false)}
-                  className="p-2 rounded-md hover:bg-gray-100 transition-colors"
-                >
-                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Buscar actividades..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="p-6 border-t border-gray-200">
-              <button
-                onClick={() => setShowSearchInMap(false)}
-                className="w-full px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Buscar
-              </button>
+      <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
+        <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar actividades..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:ring-2 focus:ring-emerald-600"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Tipo de actividad ({selectedTypes.length} seleccionados)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {activityTypes.map((type) => {
+                const selected = selectedTypes.includes(type);
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => toggleType(type)}
+                    className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                      selected
+                        ? 'bg-emerald-700 text-white'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                );
+              })}
             </div>
           </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Ciudad ({selectedCities.length} seleccionadas)
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {cities.map((city) => {
+                const selected = selectedCities.includes(city);
+                return (
+                  <button
+                    key={city}
+                    type="button"
+                    onClick={() => toggleCity(city)}
+                    className={`rounded-full px-3.5 py-2 text-sm font-semibold ${
+                      selected
+                        ? 'bg-emerald-700 text-white'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                    }`}
+                  >
+                    {city}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={clearActivityFilters}
+              className="flex-1 rounded-xl border border-stone-200 px-4 py-3 font-semibold text-stone-600 hover:bg-stone-50"
+            >
+              Limpiar
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFilters(false)}
+              className="flex-1 rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800"
+            >
+              Ver resultados
+            </button>
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

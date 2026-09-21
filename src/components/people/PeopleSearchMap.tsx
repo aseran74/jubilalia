@@ -7,12 +7,14 @@ interface PeopleSearchMapProps {
   searchResults: LocationSearchResult[];
   onPersonSelect: (person: LocationSearchResult) => void;
   className?: string;
+  compact?: boolean;
 }
 
 const PeopleSearchMap: React.FC<PeopleSearchMapProps> = ({
   searchResults,
   onPersonSelect,
-  className = ""
+  className = "",
+  compact = false
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
@@ -179,38 +181,42 @@ const PeopleSearchMap: React.FC<PeopleSearchMapProps> = ({
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm overflow-hidden ${className}`}>
-      <div className="p-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-          <MapPin className="w-5 h-5 mr-2 text-blue-500" />
-          Mapa de Resultados
-        </h3>
-        <p className="text-sm text-gray-600 mt-1">
-          {searchResults.length} persona{searchResults.length !== 1 ? 's' : ''} encontrada{searchResults.length !== 1 ? 's' : ''}
-        </p>
-      </div>
+    <div className={`relative overflow-hidden bg-white ${compact ? 'h-full rounded-none' : 'rounded-lg shadow-sm'} ${className}`}>
+      {!compact && (
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+            <MapPin className="w-5 h-5 mr-2 text-blue-500" />
+            Mapa de Resultados
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">
+            {searchResults.length} persona{searchResults.length !== 1 ? 's' : ''} encontrada{searchResults.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+      )}
       
       <div 
         ref={mapRef} 
         className="w-full"
-        style={{ minHeight: '600px', height: '600px' }}
+        style={compact ? { height: '100%', minHeight: '100%' } : { minHeight: '600px', height: '600px' }}
       />
       
-      <div className="p-4 bg-gray-50 border-t border-gray-200">
-        <div className="flex items-center justify-center space-x-6 mb-2">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
-            <span className="text-xs text-gray-600">Con foto</span>
+      {!compact && (
+        <div className="p-4 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center justify-center space-x-6 mb-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
+              <span className="text-xs text-gray-600">Con foto</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
+              <span className="text-xs text-gray-600">Sin foto</span>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
-            <span className="text-xs text-gray-600">Sin foto</span>
-          </div>
+          <p className="text-xs text-gray-500 text-center">
+            💡 Haz clic en un marcador para ver detalles de la persona
+          </p>
         </div>
-        <p className="text-xs text-gray-500 text-center">
-          💡 Haz clic en un marcador para ver detalles de la persona
-        </p>
-      </div>
+      )}
     </div>
   );
 };

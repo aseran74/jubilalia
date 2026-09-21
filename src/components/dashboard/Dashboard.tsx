@@ -8,7 +8,7 @@ import {
   SparklesIcon, UserGroupIcon, MagnifyingGlassIcon,
   HomeModernIcon, KeyIcon, BuildingLibraryIcon, BuildingOffice2Icon,
   PlusIcon, DocumentTextIcon, MapPinIcon, CalendarIcon, HeartIcon,
-  ArrowRightIcon, ClockIcon
+  ArrowRightIcon, ClockIcon, Squares2X2Icon
 } from '@heroicons/react/24/solid';
 import { formatDistanceToNow, format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -46,6 +46,124 @@ interface Friend {
   avatar_url: string | null;
   city?: string | null;
 }
+
+interface ActivityCardItem {
+  id: string;
+  title: string;
+  date: string;
+  time?: string;
+  city?: string;
+  location?: string;
+  category?: string;
+  price?: number;
+  image?: string;
+  isExample?: boolean;
+}
+
+const EXAMPLE_ACTIVITIES: ActivityCardItem[] = [
+  {
+    id: 'example-mus',
+    title: 'Partida de Mus',
+    date: new Date(Date.now() + 2 * 86400000).toISOString(),
+    time: '17:30',
+    city: 'Madrid',
+    location: 'Centro de Mayores',
+    category: 'Social',
+    price: 0,
+    image: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+  {
+    id: 'example-taichi',
+    title: 'Taichi en el parque',
+    date: new Date(Date.now() + 3 * 86400000).toISOString(),
+    time: '09:00',
+    city: 'Barcelona',
+    location: 'Parque de la Ciutadella',
+    category: 'Deporte',
+    price: 0,
+    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+  {
+    id: 'example-museo',
+    title: 'Visita al museo',
+    date: new Date(Date.now() + 5 * 86400000).toISOString(),
+    time: '11:00',
+    city: 'Valencia',
+    location: 'Museo de Bellas Artes',
+    category: 'Cultura',
+    price: 8,
+    image: 'https://images.unsplash.com/photo-1554907984-15263bfd63bd?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+  {
+    id: 'example-padel',
+    title: 'Pádel entre amigos',
+    date: new Date(Date.now() + 6 * 86400000).toISOString(),
+    time: '18:00',
+    city: 'Sevilla',
+    location: 'Club deportivo',
+    category: 'Deporte',
+    price: 6,
+    image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+];
+
+interface GroupCardItem {
+  id: string;
+  name: string;
+  description?: string;
+  city?: string;
+  category?: string;
+  members?: number;
+  image_url?: string;
+  isExample?: boolean;
+}
+
+const EXAMPLE_GROUPS: GroupCardItem[] = [
+  {
+    id: 'example-lectura',
+    name: 'Club de lectura',
+    description: 'Quedamos cada mes para comentar un libro y tomar un café.',
+    city: 'Madrid',
+    category: 'Cultura',
+    members: 18,
+    image_url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+  {
+    id: 'example-senderismo',
+    name: 'Senderismo y naturaleza',
+    description: 'Rutas suaves por el campo y la costa, sin prisas.',
+    city: 'Cádiz',
+    category: 'Naturaleza',
+    members: 24,
+    image_url: 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+  {
+    id: 'example-viajes',
+    name: 'Viajes por España',
+    description: 'Organizamos escapadas de fin de semana por ciudades y pueblos.',
+    city: 'Valencia',
+    category: 'Viajes',
+    members: 31,
+    image_url: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+  {
+    id: 'example-mus-group',
+    name: 'Mus y tertulia',
+    description: 'Partidas de mus, conversación y merienda entre amigos.',
+    city: 'Sevilla',
+    category: 'Social',
+    members: 14,
+    image_url: 'https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=800&q=80',
+    isExample: true,
+  },
+];
 
 interface GroupMemberResponse {
   group_id: string;
@@ -261,6 +379,37 @@ const Dashboard: React.FC = () => {
     </Link>
   );
 
+  const formatEuro = (price?: number) => {
+    if (!price) return 'Gratis';
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(price);
+  };
+
+  const activityCards: ActivityCardItem[] = [
+    ...nearbyActivities.slice(0, 4).map((act) => ({
+      id: act.id,
+      title: act.title,
+      date: act.date,
+      time: typeof act.time === 'string' ? act.time : undefined,
+      city: act.city,
+      location: typeof act.location === 'string' ? act.location : undefined,
+      category: typeof act.activity_type === 'string' ? act.activity_type : undefined,
+      price: typeof act.price === 'number' ? act.price : Number(act.price) || 0,
+      image: Array.isArray(act.images) ? String(act.images[0] || '') : undefined,
+      isExample: false,
+    })),
+    ...EXAMPLE_ACTIVITIES,
+  ].slice(0, 4);
+
+  const groupCards: GroupCardItem[] = [
+    ...userGroups.slice(0, 4).map((group) => ({
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      image_url: group.image_url,
+      isExample: false,
+    })),
+    ...EXAMPLE_GROUPS,
+  ].slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-sans pb-24">
@@ -320,6 +469,110 @@ const Dashboard: React.FC = () => {
                      </Link>
                 </MainCard>
             </div>
+        </section>
+
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-bold text-stone-800">
+              <SparklesIcon className="h-5 w-5 text-orange-500" />
+              Actividades
+            </h2>
+            <Link to="/dashboard/activities" className="text-sm font-bold text-orange-600 hover:underline">
+              Ver todas
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {activityCards.map((activity) => (
+              <Link
+                key={activity.id}
+                to={activity.isExample ? '/dashboard/activities' : `/dashboard/activities/${activity.id}`}
+                className="group overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="relative h-40 bg-stone-200">
+                  {activity.image ? (
+                    <img src={activity.image} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-100 to-pink-100">
+                      <CalendarIcon className="h-10 w-10 text-orange-400" />
+                    </div>
+                  )}
+                  {activity.isExample && (
+                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-stone-700">
+                      Ejemplo
+                    </span>
+                  )}
+                  <span className="absolute right-3 top-3 rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold text-white">
+                    {formatEuro(activity.price)}
+                  </span>
+                </div>
+                <div className="space-y-2 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wide text-orange-600">{activity.category}</p>
+                  <h3 className="line-clamp-2 text-lg font-bold text-stone-900">{activity.title}</h3>
+                  <p className="flex items-center gap-1.5 text-sm text-stone-500">
+                    <MapPinIcon className="h-4 w-4 shrink-0" />
+                    {[activity.location, activity.city].filter(Boolean).join(', ')}
+                  </p>
+                  <p className="flex items-center gap-1.5 text-sm text-stone-500">
+                    <ClockIcon className="h-4 w-4 shrink-0" />
+                    {format(new Date(activity.date), "d MMM", { locale: es })}
+                    {activity.time ? ` · ${activity.time}` : ''}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-bold text-stone-800">
+              <UserGroupIcon className="h-5 w-5 text-indigo-600" />
+              Grupos
+            </h2>
+            <Link to="/dashboard/groups" className="text-sm font-bold text-indigo-600 hover:underline">
+              Ver todos
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {groupCards.map((group) => (
+              <Link
+                key={group.id}
+                to={group.isExample ? '/dashboard/groups' : `/dashboard/groups/${group.id}`}
+                className="group overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white shadow-sm transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="relative h-40 bg-stone-200">
+                  {group.image_url ? (
+                    <img src={group.image_url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-100 to-violet-100">
+                      <UserGroupIcon className="h-10 w-10 text-indigo-400" />
+                    </div>
+                  )}
+                  {group.isExample && (
+                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-stone-700">
+                      Ejemplo
+                    </span>
+                  )}
+                  {group.category && (
+                    <span className="absolute right-3 top-3 rounded-full bg-indigo-700 px-3 py-1 text-xs font-bold text-white">
+                      {group.category}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2 p-4">
+                  <h3 className="line-clamp-1 text-lg font-bold text-stone-900">{group.name}</h3>
+                  {group.description && (
+                    <p className="line-clamp-2 text-sm text-stone-500">{group.description}</p>
+                  )}
+                  <p className="flex items-center gap-1.5 text-sm text-stone-500">
+                    <MapPinIcon className="h-4 w-4 shrink-0" />
+                    {group.city || 'España'}
+                    {typeof group.members === 'number' ? ` · ${group.members} miembros` : ''}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
 
 
@@ -395,8 +648,13 @@ const Dashboard: React.FC = () => {
         </section>
 
 
-        {/* --- BLOQUE 3: GRUPOS, AMIGOS Y ALERTAS (Nuevo formato) --- */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {/* --- BLOQUE 3: MIS COSAS --- */}
+        <section>
+            <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
+                <Squares2X2Icon className="w-5 h-5 text-stone-500" />
+                Mis cosas
+            </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
             {/* Mis Grupos */}
             <Link to="/dashboard/groups" className="group bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
                 <div className="flex items-center gap-4 mb-3">
@@ -507,6 +765,36 @@ const Dashboard: React.FC = () => {
                 </div>
             </Link>
 
+            {/* Mis actividades */}
+            <Link to="/dashboard/activities" className="group bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                <div className="flex items-center gap-4 mb-3">
+                    <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
+                        <SparklesIcon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-bold">Mis actividades</h3>
+                        {nearbyActivities.length > 0 && (
+                            <span className="text-xs text-white/80">{nearbyActivities.length} {nearbyActivities.length === 1 ? 'cerca' : 'cerca de ti'}</span>
+                        )}
+                    </div>
+                </div>
+                {nearbyActivities.length > 0 ? (
+                    <div className="space-y-2 mb-4">
+                        {nearbyActivities.slice(0, 2).map((act) => (
+                            <div key={act.id} className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                                <p className="text-sm font-semibold truncate">{act.title}</p>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-white/90 text-sm mb-4">Tus planes y actividades</p>
+                )}
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                    <span>Ver mis actividades</span>
+                    <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+            </Link>
+
             {/* Mis Notificaciones */}
             <Link to="/dashboard/notifications" className="group bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
                 <div className="flex items-center gap-4 mb-3">
@@ -522,6 +810,7 @@ const Dashboard: React.FC = () => {
                 </div>
             </Link>
         </div>
+        </section>
 
 
         {/* --- BLOQUE 4: MENSAJES Y ACTIVIDADES CERCANAS (Lado a lado en escritorio) --- */}

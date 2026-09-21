@@ -7,6 +7,8 @@ import LocationSelector from './LocationSelector';
 import PeopleSearchFilters from './PeopleSearchFilters';
 import PeopleSearchResults from './PeopleSearchResults';
 import PeopleSearchMap from './PeopleSearchMap';
+import Modal from '../common/Modal';
+import MapFilterButton from '../common/MapFilterButton';
 import type { LocationSearchResult, SearchFilters } from '../../types/supabase';
 
 const PeopleSearch: React.FC = () => {
@@ -25,15 +27,13 @@ const PeopleSearch: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Detectar si estamos en la ruta del mapa
   useEffect(() => {
-    if (location.pathname === '/dashboard/users/map') {
+    const path = location.pathname.replace(/\/$/, '');
+    if (path.endsWith('/users') || path.endsWith('/users/map')) {
       setViewMode('map');
-    } else {
-      setViewMode('list');
     }
   }, [location.pathname]);
 
@@ -200,7 +200,7 @@ const PeopleSearch: React.FC = () => {
         console.log('🔍 Datos de búsqueda con avatares:', data?.map(p => ({ name: p.full_name, avatar: p.avatar_url })));
         
         // Si es "Sin límite", no geocodificar, solo formatear los datos
-        if (filters.maxDistance === 999999) {
+        if (filters.maxDistance > 100) {
           console.log('🌍 Modo SIN LÍMITE: Mostrando todos los perfiles sin filtrar por distancia');
           
           const formattedResults = data.map(profile => {
@@ -455,194 +455,148 @@ const PeopleSearch: React.FC = () => {
     navigate(`/dashboard/users/${person.id}`);
   };
 
+  const activeFilterCount =
+    filters.interests.length +
+    (filters.gender ? 1 : 0) +
+    (filters.occupation ? 1 : 0) +
+    (filters.has_room_to_share ? 1 : 0) +
+    (filters.wants_to_find_roommate ? 1 : 0);
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Buscar Personas
-        </h1>
-        <p className="text-gray-600">
-          Encuentra personas cerca de ti con intereses similares
-        </p>
-      </div>
-
-      {/* Selector de ubicación */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              ¿Dónde quieres buscar?
-            </h2>
-            {searchLocation && (
-              <p className="text-sm text-gray-600 mt-1 flex items-center gap-1">
-                <MapPin className="w-4 h-4" />
-                Buscando en: {searchLocation.formatted_address} ({filters.maxDistance === 999999 ? 'Sin límite' : `${filters.maxDistance} km`})
-              </p>
-            )}
-          </div>
-        </div>
-        <LocationSelector
-          onLocationSelect={handleLocationSelect}
-          placeholder={searchLocation ? "Cambiar ubicación..." : "Buscar ciudad, dirección o lugar..."}
-          className="max-w-md"
-        />
-        {searchLocation && (
-          <p className="text-xs text-gray-500 mt-2">
-            💡 Puedes cambiar la ubicación si estás de viaje
-          </p>
-        )}
-      </div>
-
-      {/* Filtros - ocultos en modo mapa móvil, siempre visibles en desktop o modo lista */}
-      <div className={viewMode === 'map' ? 'hidden lg:block' : 'block'}>
-        <PeopleSearchFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-        />
-      </div>
-      
-      {/* Filtros Modal para móvil en modo mapa */}
-      {viewMode === 'map' && showFilters && (
-        <div 
-          className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
-          onClick={() => setShowFilters(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl border border-gray-200 w-full max-w-md max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-900">Filtros de Búsqueda</h3>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="p-2 rounded-md hover:bg-gray-100 transition-colors"
-                >
-                  <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <PeopleSearchFilters
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-              />
-            </div>
-            <div className="p-6 border-t border-gray-200">
-              <button
-                onClick={() => setShowFilters(false)}
-                className="w-full px-6 py-3 text-base font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Aplicar Filtros
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Controles de vista */}
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-600">
-          {searchResults.length > 0 && (
-            <span>
-              {filteredResults.length} de {searchResults.length} personas encontradas
-            </span>
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-stone-900">Buscar personas</h1>
+          {searchLocation && (
+            <p className="mt-0.5 flex items-center gap-1 truncate text-sm text-stone-500">
+              <MapPin className="h-4 w-4 shrink-0" />
+              {searchLocation.formatted_address}
+              {' · '}
+              {filters.maxDistance > 100 ? 'Sin límite' : `${filters.maxDistance} km`}
+            </p>
           )}
         </div>
-        
-        <div className="flex space-x-2">
+
+        {searchResults.length > 0 && (
+          <span className="text-sm font-medium text-stone-600">
+            {filteredResults.length} de {searchResults.length}
+          </span>
+        )}
+
+        <div className="flex rounded-full bg-stone-100 p-1">
           <button
+            type="button"
             onClick={() => setViewMode('list')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              viewMode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+              viewMode === 'list' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             Lista
           </button>
           <button
+            type="button"
             onClick={() => setViewMode('map')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              viewMode === 'map'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
+              viewMode === 'map' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             Mapa
           </button>
         </div>
+
+        {viewMode === 'list' && (
+          <button
+            type="button"
+            onClick={() => setShowFilters(true)}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+          >
+            Filtros
+            {activeFilterCount > 0 && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        )}
       </div>
 
-      {/* Estado de carga y errores */}
-      {loading && (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-          <p className="text-gray-600">Buscando personas...</p>
-        </div>
-      )}
+      <div className="relative min-h-0 flex-1">
+        {loading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+            <div className="text-center">
+              <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-emerald-700" />
+              <p className="text-stone-600">Buscando personas...</p>
+            </div>
+          </div>
+        )}
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700">{error}</p>
-        </div>
-      )}
+        {error && (
+          <div className="m-4 rounded-lg border border-red-200 bg-red-50 p-4">
+            <p className="text-red-700">{error}</p>
+          </div>
+        )}
 
-      {/* Resultados */}
-      {!loading && !error && searchResults.length > 0 && (
-        <>
-          {viewMode === 'list' ? (
+        {!error && viewMode === 'map' && (
+          <div className="relative h-[calc(100vh-9rem)] min-h-[28rem] w-full">
+            <PeopleSearchMap
+              searchResults={filteredResults}
+              onPersonSelect={handlePersonSelect}
+              compact
+              className="h-full"
+            />
+            <MapFilterButton count={activeFilterCount} onClick={() => setShowFilters(true)} />
+          </div>
+        )}
+
+        {!loading && !error && viewMode === 'list' && searchResults.length > 0 && (
+          <div className="p-4">
             <PeopleSearchResults
               results={filteredResults}
               loading={loading}
               onPersonClick={handlePersonClick}
               onPersonSelect={handlePersonSelect}
             />
-          ) : (
-            <div className="relative">
-              <PeopleSearchMap
-                searchResults={filteredResults}
-                onPersonSelect={handlePersonSelect}
-                className=""
-              />
-              
-              {/* Botón flotante para filtros en modo mapa - solo móvil */}
-              <div className="lg:hidden absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="bg-white rounded-full shadow-xl border border-gray-200 px-6 py-3 flex items-center gap-2 hover:bg-gray-50 transition-colors"
-                >
-                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                  </svg>
-                  <span className="text-sm font-medium text-gray-700">Filtros</span>
-                  {(filters.interests.length > 0 || filters.gender || filters.occupation) && (
-                    <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
-                      {(filters.interests.length || 0) + (filters.gender ? 1 : 0) + (filters.occupation ? 1 : 0)}
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+          </div>
+        )}
 
-      {/* Estado vacío */}
-      {!loading && !error && searchResults.length === 0 && searchLocation && (
-        <div className="text-center py-8">
-          <p className="text-gray-600">No se encontraron personas en esta ubicación</p>
-        </div>
-      )}
+        {!loading && !error && viewMode === 'list' && searchResults.length === 0 && searchLocation && (
+          <div className="p-8 text-center text-stone-600">No se encontraron personas en esta ubicación</div>
+        )}
 
-      {/* Instrucciones iniciales */}
-      {!loading && !error && !searchLocation && (
-        <div className="text-center py-8">
-          <p className="text-gray-600">Selecciona una ubicación para comenzar a buscar</p>
+        {!loading && !error && !searchLocation && viewMode === 'list' && (
+          <div className="p-8 text-center text-stone-600">Elige una ubicación en Filtros para comenzar</div>
+        )}
+      </div>
+
+      <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
+        <div className="max-h-[70vh] space-y-6 overflow-y-auto pr-1">
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-stone-800">¿Dónde quieres buscar?</h3>
+            <LocationSelector
+              onLocationSelect={handleLocationSelect}
+              placeholder={searchLocation ? 'Cambiar ubicación...' : 'Buscar ciudad, dirección o lugar...'}
+            />
+            {searchLocation && (
+              <p className="mt-2 flex items-center gap-1 text-sm text-stone-500">
+                <MapPin className="h-4 w-4 shrink-0" />
+                {searchLocation.formatted_address}
+              </p>
+            )}
+          </div>
+          <PeopleSearchFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            embedded
+          />
+          <button
+            type="button"
+            onClick={() => setShowFilters(false)}
+            className="w-full rounded-xl bg-emerald-700 px-6 py-3 text-base font-semibold text-white hover:bg-emerald-800"
+          >
+            Ver resultados
+          </button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

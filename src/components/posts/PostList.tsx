@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
+import Modal from '../common/Modal';
 import { 
   Search, 
   Filter, 
@@ -278,6 +279,11 @@ const PostList: React.FC = () => {
     return matchesSearch;
   });
 
+  const activeFilterCount =
+    (searchTerm ? 1 : 0) +
+    (selectedCategory ? 1 : 0) +
+    (dateFilter !== 'all' ? 1 : 0);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -312,133 +318,38 @@ const PostList: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Posts</h1>
-            <p className="text-gray-600 mt-2">Descubre contenido interesante de la comunidad</p>
-          </div>
-          
-          <button
-            onClick={() => navigate('/dashboard/posts/create')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Crear Post
-          </button>
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-stone-900">Posts</h1>
+          <p className="mt-0.5 text-sm text-stone-500">
+            {filteredPosts.length} publicaciones
+          </p>
         </div>
-
-        {/* Búsqueda principal */}
-        <form onSubmit={handleSearch} className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar posts, autores, categorías..."
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </form>
-
-        {/* Botón de filtros */}
-        <div className="mt-4 flex items-center justify-between">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            <Filter className="w-4 h-4" />
-            {showFilters ? 'Ocultar' : 'Mostrar'} Filtros
-          </button>
-
-          <button
-            onClick={clearFilters}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-          >
-            Limpiar filtros
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/dashboard/posts/create')}
+          className="inline-flex min-h-10 items-center gap-2 rounded-full bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+        >
+          <Plus className="h-4 w-4" />
+          Crear
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowFilters(true)}
+          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+        >
+          <Filter className="h-4 w-4" />
+          Filtros
+          {activeFilterCount > 0 && (
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
       </div>
 
-      {/* Filtros avanzados */}
-      {showFilters && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Filtros Avanzados</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Categoría */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Todas las categorías</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Fecha */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Cualquier fecha</option>
-                <option value="today">Hoy</option>
-                <option value="week">Esta semana</option>
-                <option value="month">Este mes</option>
-                <option value="year">Este año</option>
-              </select>
-            </div>
-
-            {/* Ordenar por */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Ordenar por</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="published_at">Fecha de publicación</option>
-                <option value="title">Título</option>
-                <option value="view_count">Vistas</option>
-                <option value="like_count">Likes</option>
-                <option value="comment_count">Comentarios</option>
-              </select>
-            </div>
-
-            {/* Orden */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Orden</label>
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="desc">Descendente</option>
-                <option value="asc">Ascendente</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Resultados */}
-      <div className="mb-4">
-        <p className="text-gray-600">
-          Se encontraron <span className="font-semibold text-blue-600">{filteredPosts.length}</span> posts
-        </p>
-      </div>
-
+      <div className="p-4">
       {/* Lista de posts */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPosts.map((post) => (
@@ -589,6 +500,81 @@ const PostList: React.FC = () => {
           <p className="text-gray-500">Intenta ajustar los filtros de búsqueda o crear un nuevo post</p>
         </div>
       )}
+      </div>
+
+      <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
+        <div className="space-y-4">
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar posts, autores, categorías..."
+              className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:ring-2 focus:ring-emerald-600"
+            />
+          </form>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Categoría</label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-emerald-600"
+            >
+              <option value="">Todas las categorías</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Fecha</label>
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-emerald-600"
+            >
+              <option value="all">Cualquier fecha</option>
+              <option value="today">Hoy</option>
+              <option value="week">Esta semana</option>
+              <option value="month">Este mes</option>
+              <option value="year">Este año</option>
+            </select>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">Ordenar por</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-emerald-600"
+            >
+              <option value="published_at">Fecha de publicación</option>
+              <option value="title">Título</option>
+              <option value="view_count">Vistas</option>
+              <option value="like_count">Likes</option>
+              <option value="comment_count">Comentarios</option>
+            </select>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex-1 rounded-xl border border-stone-200 px-4 py-3 font-semibold text-stone-600 hover:bg-stone-50"
+            >
+              Limpiar
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowFilters(false)}
+              className="flex-1 rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800"
+            >
+              Ver resultados
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
