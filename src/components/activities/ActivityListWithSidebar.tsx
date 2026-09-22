@@ -33,7 +33,7 @@ const ActivityListWithSidebar: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
@@ -217,17 +217,6 @@ const ActivityListWithSidebar: React.FC = () => {
             <div className="flex justify-between items-center">
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                    viewMode === 'list'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  <Search className="w-4 h-4" />
-                  Lista
-                </button>
-                <button
                   onClick={() => setViewMode('map')}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
                     viewMode === 'map'
@@ -237,6 +226,17 @@ const ActivityListWithSidebar: React.FC = () => {
                 >
                   <Map className="w-4 h-4" />
                   Mapa
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                    viewMode === 'list'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  <Search className="w-4 h-4" />
+                  Lista
                 </button>
               </div>
             </div>

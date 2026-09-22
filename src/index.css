@@ -1009,7 +1009,7 @@ span.flatpickr-weekday,
 }
 
 html.native-app {
-  --safe-top: max(env(safe-area-inset-top, 0px), var(--status-bar-height));
+  --safe-top: max(env(safe-area-inset-top, 0px), var(--status-bar-height), 28px);
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
   height: 100%;
 }

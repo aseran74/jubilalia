@@ -23,6 +23,7 @@ import {
   KeyIcon,
   SparklesIcon,
   Squares2X2Icon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavigationItem {
@@ -52,6 +53,12 @@ const planLinks: NavigationItem[] = [
     href: '/dashboard/users',
     icon: UsersIcon,
     match: (pathname) => pathname.startsWith('/dashboard/users'),
+  },
+  {
+    name: 'Posts',
+    href: '/dashboard/posts',
+    icon: DocumentTextIcon,
+    match: (pathname) => pathname.startsWith('/dashboard/posts'),
   },
 ];
 
@@ -105,6 +112,7 @@ type OpenSection = 'plans' | 'coliving' | 'mine' | 'admin' | null;
 
 const isPlansPath = (pathname: string, search: string) =>
   pathname.startsWith('/dashboard/users') ||
+  pathname.startsWith('/dashboard/posts') ||
   (pathname.startsWith('/dashboard/activities') && !search.includes('mine')) ||
   (pathname.startsWith('/dashboard/groups') && search.includes('explore'));
 
@@ -255,7 +263,8 @@ const DashboardSidebar: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsMobileOpen((open) => !open)}
-          className="fixed left-4 top-4 z-50 rounded-xl border border-slate-200 bg-white p-2 shadow-md md:hidden"
+          className="fixed left-4 z-50 rounded-xl border border-slate-200 bg-white p-2 shadow-md md:hidden"
+          style={{ top: 'calc(var(--safe-top) + 12px)' }}
           aria-label={isMobileOpen ? 'Cerrar menú' : 'Abrir menú'}
         >
           {isMobileOpen ? (
@@ -267,7 +276,7 @@ const DashboardSidebar: React.FC = () => {
       )}
 
       {isMobile && isMobileOpen && (
-        <div
+        <div 
           className="fixed inset-0 z-40 bg-slate-900/40 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
@@ -288,27 +297,27 @@ const DashboardSidebar: React.FC = () => {
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-700 text-sm font-bold text-white">
                 J
               </span>
-            )}
-          </Link>
+              )}
+            </Link>
 
-          {!isMobile && (
-            <button
+            {!isMobile && (
+              <button
               type="button"
               onClick={() => setIsCollapsed((value) => !value)}
               className={`rounded-lg p-2 text-slate-500 hover:bg-white hover:text-slate-800 ${expanded ? 'ml-auto' : ''}`}
               aria-label={isCollapsed ? 'Expandir menú' : 'Contraer menú'}
-            >
-              <svg
-                className={`h-5 w-5 transition-transform duration-200 ${isCollapsed ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
               >
+                <svg
+                className={`h-5 w-5 transition-transform duration-200 ${isCollapsed ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-          )}
-        </div>
+                </svg>
+              </button>
+            )}
+          </div>
 
         {expanded && (
           <Link
@@ -379,11 +388,11 @@ const DashboardSidebar: React.FC = () => {
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
                   {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
-                </div>
+              </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-900">
-                    {profile?.full_name || 'Usuario'}
-                  </p>
+                  {profile?.full_name || 'Usuario'}
+                </p>
                   <p className="truncate text-xs text-slate-500">{user?.email}</p>
                 </div>
               </div>
@@ -391,11 +400,11 @@ const DashboardSidebar: React.FC = () => {
           ) : (
             <div className="mb-2 flex justify-center">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
-                {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
               </div>
             </div>
           )}
-
+          
           <div className={`flex flex-col ${expanded ? 'gap-0.5' : 'items-center gap-1'}`}>
             <Link
               to="/dashboard/profile"
@@ -415,9 +424,9 @@ const DashboardSidebar: React.FC = () => {
               <Cog6ToothIcon className="h-5 w-5 shrink-0" />
               {expanded && 'Configuración'}
             </Link>
-            <button
+          <button
               type="button"
-              onClick={handleSignOut}
+            onClick={handleSignOut}
               title="Cerrar sesión"
               className={`flex min-h-10 items-center rounded-xl text-sm font-medium text-slate-600 transition-colors hover:bg-white hover:text-red-700 ${
                 expanded ? 'w-full gap-3 px-3 py-2' : 'justify-center px-2 py-2'
@@ -425,9 +434,9 @@ const DashboardSidebar: React.FC = () => {
             >
               <ArrowRightOnRectangleIcon className="h-5 w-5 shrink-0" />
               {expanded && 'Cerrar sesión'}
-            </button>
-          </div>
+          </button>
         </div>
+      </div>
       </aside>
     </>
   );

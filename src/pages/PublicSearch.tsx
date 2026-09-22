@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
-  Search, MapPin, Users, Calendar, Tag, Map, List, 
+  Search, MapPin, Users, Calendar, Tag, 
   UserCircle, Building2, Filter, ChevronDown, Euro, Heart, X, Home, ArrowLeft, Timer
 } from 'lucide-react';
 import ActivityMap from '../components/activities/ActivityMap';
 import GroupsMap from '../components/groups/GroupsMap';
 import PeopleMap from '../components/people/PeopleMap';
 import MobileTabBar from '../components/mobile/MobileTabBar';
+import MapViewControls from '../components/common/MapViewControls';
 
 // --- INTERFACES (Sin cambios) ---
 interface Activity {
@@ -143,7 +144,7 @@ const PublicSearch: React.FC = () => {
   // --- ESTADOS ---
   const [activeTab, setActiveTab] = useState<TabType>('activities');
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   
   // Estados Actividades
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -882,7 +883,7 @@ const PublicSearch: React.FC = () => {
       {isFullscreenMap ? (
         <div className="fixed inset-0 z-40 bg-white" style={{ marginTop: 0, paddingTop: 0 }}>
           {/* Botón para volver a lista */}
-          <div className="absolute top-4 left-4 z-50 flex items-center gap-2">
+          <div className="absolute left-4 z-50 flex items-center gap-2" style={{ top: 'calc(var(--safe-top) + 12px)' }}>
             <button
               onClick={() => setViewMode('list')}
               className="bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors"
@@ -898,20 +899,9 @@ const PublicSearch: React.FC = () => {
             </button>
           </div>
 
-          {/* Botón flotante de filtros */}
-          <div className="absolute top-4 right-4 z-50">
-            <button
-              onClick={() => setShowMapFilters(!showMapFilters)}
-              className="bg-green-600 text-white shadow-lg rounded-full p-3 hover:bg-green-700 transition-colors flex items-center gap-2"
-            >
-              <Filter className="w-5 h-5" />
-              <span className="hidden sm:inline">Filtros</span>
-            </button>
-          </div>
-
           {/* Panel de filtros flotante */}
           {showMapFilters && (
-            <div className="absolute top-20 right-4 z-50 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 max-w-xs w-[calc(100vw-2rem)] max-h-[calc(100vh-120px)] overflow-y-auto">
+            <div className="absolute right-4 z-50 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 max-w-xs w-[calc(100vw-2rem)] max-h-[calc(100vh-120px)] overflow-y-auto" style={{ top: 'calc(var(--safe-top) + 4.5rem)' }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-900">Filtros</h3>
                 <button
@@ -1649,69 +1639,19 @@ const PublicSearch: React.FC = () => {
 
       <MobileTabBar />
 
-      {/* Spacer para evitar que el contenido quede oculto detrás del navbar inferior en móvil */}
       {!isFullscreenMap && <div className="h-16 lg:hidden"></div>}
 
-      {/* Botón flotante de cambio de vista (Lista/Mapa) */}
-      {(activeTab === 'activities' || activeTab === 'groups' || activeTab === 'people') && !isFullscreenMap && (
-        <div className="fixed bottom-28 left-1/2 transform -translate-x-1/2 z-40 lg:hidden">
-          <div className="flex items-center bg-white rounded-full shadow-2xl border-2 border-gray-200 overflow-hidden">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-6 py-3 flex items-center gap-2 transition-all ${
-                viewMode === 'list' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <List className="w-6 h-6" />
-              <span className="font-semibold text-sm">Lista</span>
-            </button>
-            <div className="w-px h-8 bg-gray-200"></div>
-            <button
-              onClick={() => setViewMode('map')}
-              className={`px-6 py-3 flex items-center gap-2 transition-all ${
-                viewMode === 'map' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Map className="w-6 h-6" />
-              <span className="font-semibold text-sm">Mapa</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Botón flotante de cambio de vista para desktop (en la barra de filtros) */}
-      {(activeTab === 'activities' || activeTab === 'groups' || activeTab === 'people') && !isFullscreenMap && (
-        <div className="hidden lg:block fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40">
-          <div className="flex items-center bg-white rounded-full shadow-2xl border-2 border-gray-200 overflow-hidden">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-6 py-3 flex items-center gap-2 transition-all ${
-                viewMode === 'list' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <List className="w-5 h-5" />
-              <span className="font-semibold">Lista</span>
-            </button>
-            <div className="w-px h-8 bg-gray-200"></div>
-            <button
-              onClick={() => setViewMode('map')}
-              className={`px-6 py-3 flex items-center gap-2 transition-all ${
-                viewMode === 'map' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Map className="w-5 h-5" />
-              <span className="font-semibold">Mapa</span>
-            </button>
-          </div>
-        </div>
+      {(activeTab === 'activities' || activeTab === 'groups' || activeTab === 'people') && (
+        <MapViewControls
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onFiltersClick={() => setShowMapFilters(true)}
+          filterCount={
+            (activeTab === 'activities' ? Number(!!selectedType) + Number(!!selectedCity) + Number(priceFilter !== 'all') : 0) +
+            (activeTab === 'groups' ? Number(!!selectedGroupCategory) + Number(!!selectedGroupCity) : 0) +
+            (activeTab === 'people' ? Number(!!selectedPersonCity) + Number(!!selectedGender) + selectedInterests.length : 0)
+          }
+        />
       )}
     </div>
   );

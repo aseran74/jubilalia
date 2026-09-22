@@ -8,7 +8,7 @@ import PeopleSearchFilters from './PeopleSearchFilters';
 import PeopleSearchResults from './PeopleSearchResults';
 import PeopleSearchMap from './PeopleSearchMap';
 import Modal from '../common/Modal';
-import MapFilterButton from '../common/MapFilterButton';
+import MapViewControls, { MapOverlayHeader } from '../common/MapViewControls';
 import type { LocationSearchResult, SearchFilters } from '../../types/supabase';
 
 const PeopleSearch: React.FC = () => {
@@ -463,8 +463,9 @@ const PeopleSearch: React.FC = () => {
     (filters.wants_to_find_roommate ? 1 : 0);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
-      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+    <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
+      {viewMode === 'list' && (
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
         <div className="min-w-0 flex-1">
           <h1 className="text-lg font-bold text-stone-900">Buscar personas</h1>
           {searchLocation && (
@@ -482,43 +483,8 @@ const PeopleSearch: React.FC = () => {
             {filteredResults.length} de {searchResults.length}
           </span>
         )}
-
-        <div className="flex rounded-full bg-stone-100 p-1">
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-              viewMode === 'list' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            Lista
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('map')}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-              viewMode === 'map' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            Mapa
-          </button>
-        </div>
-
-        {viewMode === 'list' && (
-          <button
-            type="button"
-            onClick={() => setShowFilters(true)}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
-          >
-            Filtros
-            {activeFilterCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-        )}
       </div>
+      )}
 
       <div className="relative min-h-0 flex-1">
         {loading && (
@@ -537,19 +503,28 @@ const PeopleSearch: React.FC = () => {
         )}
 
         {!error && viewMode === 'map' && (
-          <div className="relative h-[calc(100vh-9rem)] min-h-[28rem] w-full">
+          <div className="relative h-[100dvh] min-h-[22rem] w-full">
             <PeopleSearchMap
               searchResults={filteredResults}
               onPersonSelect={handlePersonSelect}
               compact
               className="h-full"
             />
-            <MapFilterButton count={activeFilterCount} onClick={() => setShowFilters(true)} />
+            <MapOverlayHeader
+              title="Miembros"
+              subtitle={
+                searchLocation
+                  ? `${searchLocation.formatted_address} · ${filters.maxDistance > 100 ? 'Sin límite' : `${filters.maxDistance} km`}`
+                  : filteredResults.length
+                    ? `${filteredResults.length} personas`
+                    : undefined
+              }
+            />
           </div>
         )}
 
         {!loading && !error && viewMode === 'list' && searchResults.length > 0 && (
-          <div className="p-4">
+          <div className="p-4 pb-32">
             <PeopleSearchResults
               results={filteredResults}
               loading={loading}
@@ -567,6 +542,13 @@ const PeopleSearch: React.FC = () => {
           <div className="p-8 text-center text-stone-600">Elige una ubicación en Filtros para comenzar</div>
         )}
       </div>
+
+      <MapViewControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFiltersClick={() => setShowFilters(true)}
+        filterCount={activeFilterCount}
+      />
 
       <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
         <div className="max-h-[70vh] space-y-6 overflow-y-auto pr-1">

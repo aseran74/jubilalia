@@ -146,12 +146,23 @@ const DashboardLayout: React.FC = () => {
             <Route path="/activities/create" element={<ActivityForm />} />
             <Route path="/activities/:id" element={<ActivityDetail />} />
             <Route path="/activities/:id/edit" element={<ActivityForm />} />
+            <Route path="/dashboard/activities" element={<ActivityList />} />
+            <Route path="/dashboard/activities/map" element={<ActivityList />} />
+            <Route path="/dashboard/activities/create" element={<ActivityForm />} />
+            <Route path="/dashboard/activities/:id" element={<ActivityDetail />} />
+            <Route path="/dashboard/activities/:id/edit" element={<ActivityForm />} />
             
             {/* Posts */}
             <Route path="/posts" element={<PostList />} />
+            <Route path="/posts/map" element={<PostList />} />
             <Route path="/posts/create" element={<PostForm />} />
             <Route path="/posts/:id" element={<PostDetail />} />
             <Route path="/posts/:id/edit" element={<PostEdit />} />
+            <Route path="/dashboard/posts" element={<PostList />} />
+            <Route path="/dashboard/posts/map" element={<PostList />} />
+            <Route path="/dashboard/posts/create" element={<PostForm />} />
+            <Route path="/dashboard/posts/:id" element={<PostDetail />} />
+            <Route path="/dashboard/posts/:id/edit" element={<PostEdit />} />
             
             {/* Búsqueda de Usuarios */}
             <Route path="/users" element={<PeopleSearch />} />
@@ -180,6 +191,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Mensajería */}
             <Route path="/messages" element={<ChatApp />} />
+            <Route path="/dashboard/messages" element={<ChatApp />} />
             
             {/* Administración */}
             <Route path="/admin/rooms" element={<AdminRoomManagement />} />

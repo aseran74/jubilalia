@@ -5,7 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus } from 'lucide-react';
 import ActivityMap from './ActivityMap';
 import Modal from '../common/Modal';
-import MapFilterButton from '../common/MapFilterButton';
+import MapViewControls, { MapOverlayHeader } from '../common/MapViewControls';
 
 interface Activity {
   id: string;
@@ -58,6 +58,13 @@ const ActivityList: React.FC = () => {
       console.log('ActivityList - Dirección del perfil cargada:', location);
     }
   }, [profile]);
+
+  useEffect(() => {
+    const path = location.pathname.replace(/\/$/, '');
+    if (path.endsWith('/activities') || path.endsWith('/activities/map')) {
+      setViewMode('map');
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     fetchActivities();
@@ -284,17 +291,10 @@ const ActivityList: React.FC = () => {
     selectedCities.length +
     (priceFilter !== 'all' ? 1 : 0);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
-      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+    <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
+      {viewMode === 'list' && (
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
         <div className="min-w-0 flex-1">
           <h1 className="text-lg font-bold text-stone-900">
             {mineOnly ? 'Mis actividades' : 'Actividades'}
@@ -317,45 +317,18 @@ const ActivityList: React.FC = () => {
           <Plus className="h-4 w-4" />
           Crear
         </button>
-        <div className="flex rounded-full bg-stone-100 p-1">
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-              viewMode === 'list' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            Lista
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('map')}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-              viewMode === 'map' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            Mapa
-          </button>
-        </div>
-        {viewMode === 'list' && (
-          <button
-            type="button"
-            onClick={() => setShowFilters(true)}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
-          >
-            Filtros
-            {activeFilterCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-        )}
       </div>
+      )}
+
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-emerald-700" />
+        </div>
+      )}
 
       {/* Vista según el modo seleccionado */}
       {viewMode === 'list' ? (
-        <div className="p-4">
+        <div className="p-4 pb-32">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredActivities.map((activity) => (
           <div key={activity.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -470,16 +443,36 @@ const ActivityList: React.FC = () => {
         </div>
         </div>
       ) : (
-        <div className="relative h-[calc(100vh-9rem)] min-h-[28rem] w-full">
+        <div className="relative h-[100dvh] min-h-[22rem] w-full">
           <ActivityMap
             activities={filteredActivities}
             onActivitySelect={handleActivitySelect}
             compact
             className="h-full w-full"
           />
-          <MapFilterButton count={activeFilterCount} onClick={() => setShowFilters(true)} />
+          <MapOverlayHeader
+            title={mineOnly ? 'Mis actividades' : 'Actividades'}
+            subtitle={userLocation ? `Cerca de ${userLocation} · ${filteredActivities.length}` : `${filteredActivities.length} actividades`}
+            action={
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/activities/create')}
+                className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-800"
+              >
+                <Plus className="h-4 w-4" />
+                Crear
+              </button>
+            }
+          />
         </div>
       )}
+
+      <MapViewControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFiltersClick={() => setShowFilters(true)}
+        filterCount={activeFilterCount}
+      />
 
       {viewMode === 'list' && filteredActivities.length === 0 && !loading && (
         <div className="text-center py-12">

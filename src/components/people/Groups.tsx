@@ -7,7 +7,7 @@ import GroupMembers from '../groups/GroupMembers';
 import GroupsMap from '../groups/GroupsMap';
 import AdminButtons from '../common/AdminButtons';
 import Modal from '../common/Modal';
-import MapFilterButton from '../common/MapFilterButton';
+import MapViewControls, { MapOverlayHeader } from '../common/MapViewControls';
 import { 
   PlusIcon,
   UsersIcon,
@@ -15,7 +15,6 @@ import {
   ArrowLeftIcon,
   MapPinIcon,
   TagIcon,
-  FunnelIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
@@ -369,17 +368,6 @@ const Groups: React.FC = () => {
     fetchGroups();
   }, [profile]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando grupos...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Si estamos viendo posts de un grupo
   if (showGroupPosts && selectedGroup) {
     return (
@@ -437,8 +425,9 @@ const Groups: React.FC = () => {
     (filters.search ? 1 : 0) + filters.categories.length + (filters.city ? 1 : 0);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
-      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+    <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
+      {viewMode === 'list' && (
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
         <div className="min-w-0 flex-1">
           <h1 className="text-lg font-bold text-stone-900">Grupos</h1>
           {groups.length > 0 && (
@@ -456,59 +445,42 @@ const Groups: React.FC = () => {
           <PlusIcon className="h-4 w-4" />
           Crear
         </button>
-
-        <div className="flex rounded-full bg-stone-100 p-1">
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-              viewMode === 'list' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            Lista
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('map')}
-            className={`rounded-full px-3 py-1.5 text-sm font-semibold ${
-              viewMode === 'map' ? 'bg-emerald-700 text-white' : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            Mapa
-          </button>
-        </div>
-
-        {viewMode === 'list' && (
-          <button
-            type="button"
-            onClick={() => setShowFilters(true)}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
-          >
-            <FunnelIcon className="h-4 w-4" />
-            Filtros
-            {activeFilterCount > 0 && (
-              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-        )}
       </div>
+      )}
+
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-emerald-700" />
+        </div>
+      )}
 
       {viewMode === 'map' && (
-        <div className="relative h-[calc(100vh-9rem)] min-h-[28rem] w-full">
+        <div className="relative h-[100dvh] min-h-[22rem] w-full">
           <GroupsMap
             groups={filteredGroups}
             onGroupSelect={handleGroupSelect}
             compact
             className="h-full w-full"
           />
-          <MapFilterButton count={activeFilterCount} onClick={() => setShowFilters(true)} />
+          <MapOverlayHeader
+            title="Grupos"
+            subtitle={groups.length > 0 ? `${filteredGroups.length} de ${groups.length} grupos` : undefined}
+            action={
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/groups/create')}
+                className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-800"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Crear
+              </button>
+            }
+          />
         </div>
       )}
 
       {viewMode === 'list' && (
-        <div className="p-4">
+        <div className="p-4 pb-32">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredGroups.map((group) => (
               <div key={group.id} className="overflow-hidden rounded-2xl bg-white shadow-lg">
@@ -635,6 +607,13 @@ const Groups: React.FC = () => {
           )}
         </div>
       )}
+
+      <MapViewControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFiltersClick={() => setShowFilters(true)}
+        filterCount={activeFilterCount}
+      />
 
       <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
         <div className="space-y-4">

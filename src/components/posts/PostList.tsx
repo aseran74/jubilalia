@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
 import AdminButtons from '../common/AdminButtons';
 import Modal from '../common/Modal';
+import MapViewControls, { MapOverlayHeader } from '../common/MapViewControls';
+import PostsMap from './PostsMap';
 import { 
   Search, 
-  Filter, 
   Calendar, 
   User, 
   Eye, 
@@ -44,8 +45,14 @@ interface Post {
     id: string;
     full_name: string;
     avatar_url?: string;
+    city?: string;
+    latitude?: number;
+    longitude?: number;
   };
   is_liked?: boolean;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 const PostList: React.FC = () => {
@@ -59,9 +66,18 @@ const PostList: React.FC = () => {
   const [sortBy, setSortBy] = useState('published_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    const path = location.pathname.replace(/\/$/, '');
+    if (path.endsWith('/posts') || path.endsWith('/posts/map')) {
+      setViewMode('map');
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     fetchCategories();
@@ -106,7 +122,8 @@ const PostList: React.FC = () => {
           author:profiles!posts_profile_id_fkey(
             id,
             full_name,
-            avatar_url
+            avatar_url,
+            city
           )
         `)
         .eq('is_published', true);
@@ -173,7 +190,9 @@ const PostList: React.FC = () => {
 
           return {
             ...post,
-            is_liked: isLiked
+            is_liked: isLiked,
+            city: post.author?.city,
+            author: post.author || { id: '', full_name: 'Usuario' },
           };
         })
       );
@@ -305,21 +324,13 @@ const PostList: React.FC = () => {
 
   // Función para determinar la ruta - siempre ir al detalle del post
   const getPostRoute = (post: Post): string => {
-    // Siempre ir al detalle del post para ver el contenido completo
     return `/dashboard/posts/${post.id}`;
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col bg-slate-50">
-      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3">
+    <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
+      {viewMode === 'list' && (
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
         <div className="min-w-0 flex-1">
           <h1 className="text-lg font-bold text-stone-900">Posts</h1>
           <p className="mt-0.5 text-sm text-stone-500">
@@ -334,23 +345,42 @@ const PostList: React.FC = () => {
           <Plus className="h-4 w-4" />
           Crear
         </button>
-        <button
-          type="button"
-          onClick={() => setShowFilters(true)}
-          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
-        >
-          <Filter className="h-4 w-4" />
-          Filtros
-          {activeFilterCount > 0 && (
-            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1.5 text-xs font-bold text-white">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
       </div>
+      )}
 
-      <div className="p-4">
-      {/* Lista de posts */}
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-700" />
+        </div>
+      )}
+
+      {viewMode === 'map' && (
+        <div className="relative h-[100dvh] min-h-[22rem] w-full">
+          <PostsMap
+            posts={filteredPosts}
+            onPostSelect={(post) => navigate(`/dashboard/posts/${post.id}`)}
+            compact
+            className="h-full w-full"
+          />
+          <MapOverlayHeader
+            title="Posts"
+            subtitle={`${filteredPosts.length} publicaciones`}
+            action={
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard/posts/create')}
+                className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-800"
+              >
+                <Plus className="h-4 w-4" />
+                Crear
+              </button>
+            }
+          />
+        </div>
+      )}
+
+      {viewMode === 'list' && (
+      <div className="p-4 pb-32">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPosts.map((post) => (
           <div key={post.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -501,6 +531,14 @@ const PostList: React.FC = () => {
         </div>
       )}
       </div>
+      )}
+
+      <MapViewControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFiltersClick={() => setShowFilters(true)}
+        filterCount={activeFilterCount}
+      />
 
       <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
         <div className="space-y-4">
