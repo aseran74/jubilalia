@@ -5,7 +5,9 @@ import { useAuth } from '../../hooks/useAuth';
 import { Search, MapPin, Users, Calendar, Clock, Eye, Activity, Plus } from 'lucide-react';
 import ActivityMap from './ActivityMap';
 import Modal from '../common/Modal';
-import MapViewControls, { MapOverlayHeader } from '../common/MapViewControls';
+import MapViewControls, { MapOverlayHeader, NearbyButton, detectNearbyLocation } from '../common/MapViewControls';
+import DistanceFilter from '../common/DistanceFilter';
+import { formatDistanceLabel, isWithinDistance, resolveCoordinates, resolveProfileOrigin } from '../../utils/geo';
 
 interface Activity {
   id: string;
@@ -25,6 +27,8 @@ interface Activity {
   tags: string[];
   images: string[];
   profile_id?: string;
+  latitude?: number;
+  longitude?: number;
   owner: {
     full_name: string;
     avatar_url?: string;
@@ -35,6 +39,10 @@ const ActivityList: React.FC = () => {
   const { profile } = useAuth();
   const location = useLocation();
   const mineOnly = location.search.includes('mine');
+  const [nearbyOnly, setNearbyOnly] = useState(location.search.includes('nearby'));
+  const [detectingNearby, setDetectingNearby] = useState(false);
+  const [maxDistance, setMaxDistance] = useState(50);
+  const [origin, setOrigin] = useState<{ lat: number; lng: number; label?: string } | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,10 +60,15 @@ const ActivityList: React.FC = () => {
 
   // Cargar dirección del perfil al inicio
   useEffect(() => {
-    if (profile && profile.city) {
-      const location = `${profile.city}${profile.state ? ', ' + profile.state : ''}`;
-      setUserLocation(location);
-      console.log('ActivityList - Dirección del perfil cargada:', location);
+    if (profile) {
+      const profileOrigin = resolveProfileOrigin(profile);
+      if (profileOrigin) {
+        setOrigin((prev) => prev ?? { ...profileOrigin, label: profile.city || undefined });
+      }
+      if (profile.city) {
+        const location = `${profile.city}${profile.state ? ', ' + profile.state : ''}`;
+        setUserLocation(location);
+      }
     }
   }, [profile]);
 
@@ -249,8 +262,13 @@ const ActivityList: React.FC = () => {
     }
     
     const matchesMine = !mineOnly || activity.profile_id === profile?.id;
+    const matchesDistance = isWithinDistance(
+      origin,
+      resolveCoordinates(activity.latitude, activity.longitude, activity.city),
+      maxDistance
+    );
 
-    return matchesSearch && matchesType && matchesCity && matchesPrice && matchesDuration && matchesMine;
+    return matchesSearch && matchesType && matchesCity && matchesPrice && matchesDuration && matchesMine && matchesDistance;
   });
 
   // Obtener listas únicas para los filtros
@@ -283,13 +301,44 @@ const ActivityList: React.FC = () => {
     setMaxPrice(5000);
     setMinDuration(0);
     setMaxDuration(30);
+    setNearbyOnly(false);
+    setMaxDistance(50);
+  };
+
+  const handleDetectNearby = async () => {
+    if (nearbyOnly) {
+      setNearbyOnly(false);
+      const profileOrigin = resolveProfileOrigin(profile);
+      setOrigin(profileOrigin ? { ...profileOrigin, label: profile?.city || undefined } : null);
+      return;
+    }
+
+    setDetectingNearby(true);
+    const locationResult = await detectNearbyLocation();
+    if (locationResult) {
+      setOrigin({
+        lat: locationResult.lat,
+        lng: locationResult.lng,
+        label: locationResult.formattedAddress || locationResult.city,
+      });
+      if (locationResult.city) {
+        setUserLocation(locationResult.formattedAddress || locationResult.city);
+      }
+    } else {
+      const profileOrigin = resolveProfileOrigin(profile);
+      setOrigin(profileOrigin ? { ...profileOrigin, label: profile?.city || undefined } : null);
+    }
+    setNearbyOnly(true);
+    setDetectingNearby(false);
   };
 
   const activeFilterCount =
     (searchTerm ? 1 : 0) +
     selectedTypes.length +
     selectedCities.length +
-    (priceFilter !== 'all' ? 1 : 0);
+    (nearbyOnly ? 1 : 0) +
+    (priceFilter !== 'all' ? 1 : 0) +
+    (maxDistance !== 50 ? 1 : 0);
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
@@ -297,18 +346,19 @@ const ActivityList: React.FC = () => {
       <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
         <div className="min-w-0 flex-1">
           <h1 className="text-lg font-bold text-stone-900">
-            {mineOnly ? 'Mis actividades' : 'Actividades'}
+            {mineOnly ? 'Mis actividades' : nearbyOnly ? 'Actividades cercanas' : 'Actividades'}
           </h1>
-          {userLocation && (
+          {origin && (
             <p className="mt-0.5 flex items-center gap-1 truncate text-sm text-stone-500">
               <MapPin className="h-4 w-4 shrink-0" />
-              Cerca de {userLocation}
+              {origin.label || userLocation || 'Tu ubicación'} · {formatDistanceLabel(maxDistance)}
             </p>
           )}
         </div>
         <span className="text-sm font-medium text-stone-600">
           {filteredActivities.length} actividades
         </span>
+        <NearbyButton active={nearbyOnly} loading={detectingNearby} onClick={handleDetectNearby} />
         <button
           type="button"
           onClick={() => navigate('/dashboard/activities/create')}
@@ -451,10 +501,16 @@ const ActivityList: React.FC = () => {
             className="h-full w-full"
           />
           <MapOverlayHeader
-            title={mineOnly ? 'Mis actividades' : 'Actividades'}
-            subtitle={userLocation ? `Cerca de ${userLocation} · ${filteredActivities.length}` : `${filteredActivities.length} actividades`}
+            title={mineOnly ? 'Mis actividades' : nearbyOnly ? 'Actividades cercanas' : 'Actividades'}
+            subtitle={
+              origin
+                ? `${origin.label || userLocation || 'Tu ubicación'} · ${formatDistanceLabel(maxDistance)} · ${filteredActivities.length}`
+                : `${filteredActivities.length} actividades`
+            }
             action={
-              <button
+              <div className="flex shrink-0 items-center gap-2">
+                <NearbyButton active={nearbyOnly} loading={detectingNearby} onClick={handleDetectNearby} />
+                <button
                 type="button"
                 onClick={() => navigate('/dashboard/activities/create')}
                 className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-800"
@@ -462,6 +518,7 @@ const ActivityList: React.FC = () => {
                 <Plus className="h-4 w-4" />
                 Crear
               </button>
+              </div>
             }
           />
         </div>
@@ -484,6 +541,17 @@ const ActivityList: React.FC = () => {
 
       <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
         <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
+          <button
+            type="button"
+            onClick={handleDetectNearby}
+            className={`flex w-full min-h-12 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
+              nearbyOnly ? 'bg-emerald-700 text-white' : 'border border-stone-200 text-stone-700 hover:bg-stone-50'
+            }`}
+          >
+            <MapPin className="h-5 w-5" />
+            {nearbyOnly ? 'Mostrando los más cercanos' : 'Detectar más cercanos'}
+          </button>
+          <DistanceFilter value={maxDistance} onChange={setMaxDistance} />
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input

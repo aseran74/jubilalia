@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, X, Info } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import RoomCard from './RoomCard';
 import { supabase } from '../../lib/supabase';
 import PriceRangeSlider from '../common/PriceRangeSlider';
-import CompartirInfoModal from './CompartirInfoModal';
+import MapViewControls, { MapOverlayHeader, CreateListingButton } from '../common/MapViewControls';
+import ListingsMap from '../maps/ListingsMap';
 
 interface Room {
   id: string;
@@ -30,6 +31,8 @@ interface Room {
   created_at: string;
   rating?: number;
   review_count?: number;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface RoomListProps {
@@ -51,7 +54,7 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
     gender: 'male' as string
   });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   // Función para cargar datos reales de Supabase
   const fetchRooms = async () => {
@@ -70,6 +73,8 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
           city,
           postal_code,
           price,
+          latitude,
+          longitude,
           created_at,
           profile_id,
           is_available
@@ -143,7 +148,9 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             },
             created_at: listing.created_at,
             rating: 4.5, // Mock rating por ahora
-            review_count: 0
+            review_count: 0,
+            latitude: listing.latitude,
+            longitude: listing.longitude
           };
         })
       );
@@ -195,173 +202,100 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
 
   const cities = [...new Set(rooms.map(room => room.city))];
 
+  const activeFilterCount =
+    (searchTerm ? 1 : 0) +
+    (selectedCity ? 1 : 0) +
+    (priceRange.min !== 0 || priceRange.max !== 2000 ? 1 : 0) +
+    (filters.privateBathroom ? 1 : 0) +
+    (filters.hasBalcony ? 1 : 0) +
+    (filters.smokingAllowed ? 1 : 0) +
+    (filters.petsAllowed ? 1 : 0);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando habitaciones...</p>
-        </div>
-      </div>
-    );
-  }
+  const createRoom = () => navigate('/dashboard/rooms/create');
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Compartir - Habitaciones Disponibles</h1>
-              <p className="text-gray-600 mt-2">Encuentra tu hogar ideal para la jubilación</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  console.log('Abriendo modal Compartir Info');
-                  setShowInfoModal(true);
-                }}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-              >
-                <Info className="w-5 h-5" />
-                ¿Cómo funciona?
-              </button>
-              <button
-                onClick={() => navigate('/dashboard/rooms/create')}
-                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Publicar Habitación
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filtros */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Búsqueda */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Buscar habitaciones..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Ciudad */}
-            <select
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="">Todas las ciudades</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-
-            {/* Botón de filtros avanzados */}
-            <button 
-              onClick={() => setShowAdvancedFilters(true)}
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Search className="w-5 h-5 mr-2" />
-              Más filtros
-            </button>
-          </div>
-
-          {/* Filtros adicionales */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.privateBathroom}
-                onChange={(e) => setFilters(prev => ({ ...prev, privateBathroom: e.target.checked }))}
-                className="mr-2"
-              />
-              Baño privado
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.hasBalcony}
-                onChange={(e) => setFilters(prev => ({ ...prev, hasBalcony: e.target.checked }))}
-                className="mr-2"
-              />
-              Balcón
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.smokingAllowed}
-                onChange={(e) => setFilters(prev => ({ ...prev, smokingAllowed: e.target.checked }))}
-                className="mr-2"
-              />
-              Fumar permitido
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.petsAllowed}
-                onChange={(e) => setFilters(prev => ({ ...prev, petsAllowed: e.target.checked }))}
-                className="mr-2"
-              />
-              Mascotas permitidas
-            </label>
-            <select
-              value={filters.gender}
-              onChange={(e) => setFilters(prev => ({ ...prev, gender: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="male">Soy un hombre</option>
-              <option value="female">Soy una mujer</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Resultados */}
-        <div className="mb-4">
-          <p className="text-gray-600">
-            Mostrando {filteredRooms.length} de {rooms.length} habitaciones
+    <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
+      {viewMode === 'list' && (
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-stone-900">Habitaciones</h1>
+          <p className="mt-0.5 text-sm text-stone-500">
+            {filteredRooms.length} anuncios
           </p>
         </div>
-
-        {/* Lista de habitaciones */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRooms.map((room) => (
-            <RoomCard
-              key={room.id}
-              room={room}
-              onFavorite={handleFavorite}
-            />
-          ))}
-        </div>
-
-        {filteredRooms.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron habitaciones</h3>
-            <p className="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
-          </div>
-        )}
+        <CreateListingButton onClick={createRoom} label="Crear anuncio de habitación" />
       </div>
+      )}
+
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-emerald-700" />
+        </div>
+      )}
+
+      {viewMode === 'map' ? (
+        <div className="relative h-[100dvh] min-h-[22rem] w-full">
+          <ListingsMap
+            items={filteredRooms.map((room) => ({
+              id: room.id,
+              title: room.title,
+              city: room.city,
+              address: room.address,
+              latitude: room.latitude,
+              longitude: room.longitude,
+              price: room.price_per_month,
+              imageUrl: room.images?.[0],
+            }))}
+            onSelect={(item) => navigate(`/dashboard/rooms/${item.id}`)}
+            actionLabel="Ver habitación"
+            markerLetter="H"
+            compact
+            className="h-full w-full"
+          />
+          <MapOverlayHeader
+            title="Habitaciones"
+            subtitle={`${filteredRooms.length} anuncios`}
+            action={<CreateListingButton onClick={createRoom} label="Crear anuncio de habitación" />}
+          />
+        </div>
+      ) : (
+        <div className="p-4 pb-32">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredRooms.map((room) => (
+              <RoomCard
+                key={room.id}
+                room={room}
+                onFavorite={handleFavorite}
+              />
+            ))}
+          </div>
+
+          {filteredRooms.length === 0 && !loading && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 21v-4a2 2 0 012-2h4a2 2 0 012 2v4" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron habitaciones</h3>
+              <p className="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <MapViewControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFiltersClick={() => setShowAdvancedFilters(true)}
+        filterCount={activeFilterCount}
+      />
+
 
       {/* Modal de Filtros Avanzados */}
       {showAdvancedFilters && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             {/* Header del Modal */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
@@ -376,6 +310,34 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             
             {/* Contenido del Modal */}
             <div className="p-6 overflow-y-auto flex-1 space-y-8">
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Buscar</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Buscar habitaciones..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Ciudad</label>
+                <select
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-3 focus:border-transparent focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">Todas las ciudades</option>
+                  {cities.map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-4">
                   Rango de Precio (€/mes)
@@ -452,6 +414,8 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
             <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCity('');
                   setPriceRange({ min: 0, max: 2000 });
                   setFilters({
                     privateBathroom: false,
@@ -476,8 +440,6 @@ const RoomList: React.FC<RoomListProps> = ({ rooms: propRooms }) => {
         </div>
       )}
 
-      {/* Modal de información */}
-      <CompartirInfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
     </div>
   );
 };

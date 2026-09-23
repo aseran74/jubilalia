@@ -4,7 +4,9 @@ import { supabase } from '../../lib/supabase';
 import UnifiedPropertyFilter from '../common/UnifiedPropertyFilter';
 import AmenitiesFilter from '../common/AmenitiesFilter';
 import Modal from '../common/Modal';
-import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Home, Plus } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Home } from 'lucide-react';
+import MapViewControls, { MapOverlayHeader, CreateListingButton } from '../common/MapViewControls';
+import ListingsMap from '../maps/ListingsMap';
 
 interface PropertyRental {
   id: string;
@@ -28,6 +30,8 @@ interface PropertyRental {
     avatar_url?: string;
   };
   images: string[];
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const PropertyRentalList: React.FC = () => {
@@ -41,6 +45,7 @@ const PropertyRentalList: React.FC = () => {
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const navigate = useNavigate();
 
@@ -74,7 +79,9 @@ const PropertyRentalList: React.FC = () => {
           total_area,
           max_occupants,
           recommended_occupants,
-          price_per_person
+          price_per_person,
+          latitude,
+          longitude
         `)
         .eq('listing_type', 'property_rental')
         .eq('is_available', true);
@@ -190,7 +197,9 @@ const PropertyRentalList: React.FC = () => {
             property_type: property.property_type || requirements.property_type || ''
           },
           owner: profilesMap.get(property.profile_id) || { full_name: 'Propietario' },
-          images: imagesMap.get(property.id) || []
+          images: imagesMap.get(property.id) || [],
+          latitude: property.latitude,
+          longitude: property.longitude
         };
       }) || [];
 
@@ -255,86 +264,64 @@ const PropertyRentalList: React.FC = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-      </div>
-    );
-  }
+  const activeFilterCount =
+    (searchTerm ? 1 : 0) +
+    (selectedCity ? 1 : 0) +
+    (propertyType ? 1 : 0) +
+    (priceRange.min !== 0 || priceRange.max !== 10000 ? 1 : 0) +
+    (bedrooms > 0 ? 1 : 0) +
+    (bathrooms > 0 ? 1 : 0) +
+    selectedAmenities.length;
+
+  const createRental = () => navigate('/dashboard/properties/rental/create');
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Propiedades en Alquiler</h1>
-            <p className="text-gray-600 mt-1">
-              {filteredProperties.length} propiedades encontradas
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate('/dashboard/properties/rental/map')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <MapPin className="w-4 h-4" />
-              Ver en Mapa
-            </button>
-            <button
-              onClick={() => navigate('/dashboard/properties/rental/create')}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Publicar Propiedad
-            </button>
-          </div>
+    <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
+      {viewMode === 'list' && (
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-stone-900">Alquiler</h1>
+          <p className="mt-0.5 text-sm text-stone-500">
+            {filteredProperties.length} propiedades
+          </p>
         </div>
+        <CreateListingButton onClick={createRental} label="Crear anuncio de alquiler" />
       </div>
+      )}
 
-      {/* Filtros y búsqueda */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Filtros de búsqueda</h2>
-          <button
-            onClick={fetchProperties}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Recargar
-          </button>
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-emerald-700" />
         </div>
-        
-        <UnifiedPropertyFilter
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedCity={selectedCity}
-          setSelectedCity={setSelectedCity}
-          selectedPropertyType={propertyType}
-          setSelectedPropertyType={setPropertyType}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-          bedrooms={bedrooms}
-          setBedrooms={setBedrooms}
-          bathrooms={bathrooms}
-          setBathrooms={setBathrooms}
-          selectedAmenities={selectedAmenities}
-          cities={cities}
-          propertyTypes={propertyTypes}
-          onOpenAdvancedFilters={() => setIsFiltersModalOpen(true)}
-          maxPrice={5000}
-        />
-      </div>
+      )}
 
-      {/* Resultados */}
-      <div className="mb-4">
-        <p className="text-gray-600">
-          Se encontraron <span className="font-semibold text-green-600">{filteredProperties.length}</span> propiedades
-        </p>
-      </div>
-
-      {/* Lista de propiedades */}
+      {viewMode === 'map' ? (
+        <div className="relative h-[100dvh] min-h-[22rem] w-full">
+          <ListingsMap
+            items={filteredProperties.map((property) => ({
+              id: property.id,
+              title: property.title,
+              city: property.city,
+              address: property.address,
+              latitude: property.latitude,
+              longitude: property.longitude,
+              price: property.price,
+              imageUrl: property.images?.[0],
+            }))}
+            onSelect={(item) => navigate(`/dashboard/properties/rental/${item.id}`)}
+            actionLabel="Ver alquiler"
+            markerLetter="A"
+            compact
+            className="h-full w-full"
+          />
+          <MapOverlayHeader
+            title="Alquiler"
+            subtitle={`${filteredProperties.length} propiedades`}
+            action={<CreateListingButton onClick={createRental} label="Crear anuncio de alquiler" />}
+          />
+        </div>
+      ) : (
+        <div className="p-4 pb-32">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProperties.map((property) => (
           <div key={property.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -442,15 +429,42 @@ const PropertyRentalList: React.FC = () => {
           <p className="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
         </div>
       )}
+        </div>
+      )}
+
+      <MapViewControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFiltersClick={() => setIsFiltersModalOpen(true)}
+        filterCount={activeFilterCount}
+      />
 
       {/* Modal de Filtros */}
       <Modal
         isOpen={isFiltersModalOpen}
         onClose={() => setIsFiltersModalOpen(false)}
-        title="Filtros Avanzados"
+        title="Filtros"
         size="lg"
       >
-        <div className="space-y-6">
+        <div className="max-h-[70vh] space-y-6 overflow-y-auto pr-1">
+          <UnifiedPropertyFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+            selectedPropertyType={propertyType}
+            setSelectedPropertyType={setPropertyType}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            bedrooms={bedrooms}
+            setBedrooms={setBedrooms}
+            bathrooms={bathrooms}
+            setBathrooms={setBathrooms}
+            selectedAmenities={selectedAmenities}
+            cities={cities}
+            propertyTypes={propertyTypes}
+            maxPrice={5000}
+          />
           <div>
             <h4 className="text-sm font-medium text-gray-900 mb-3">Amenidades</h4>
             <AmenitiesFilter
@@ -462,6 +476,9 @@ const PropertyRentalList: React.FC = () => {
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <button
               onClick={() => {
+                setSearchTerm('');
+                setSelectedCity('');
+                setPropertyType('');
                 setSelectedAmenities([]);
                 setBedrooms(0);
                 setBathrooms(0);

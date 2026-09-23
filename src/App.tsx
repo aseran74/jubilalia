@@ -67,9 +67,6 @@ const GoogleAuthDiagnostic = lazy(() => import('./components/debug/GoogleAuthDia
 const RedirectFix = lazy(() => import('./components/debug/RedirectFix'));
 const GoogleMapsDiagnostic = lazy(() => import('./components/debug/GoogleMapsDiagnostic'));
 const MapDebug = lazy(() => import('./components/debug/MapDebug'));
-const RoomsMapView = lazy(() => import('./components/maps/RoomsMapView'));
-const PropertiesSaleMapView = lazy(() => import('./components/maps/PropertiesSaleMapView'));
-const PropertiesRentalMapView = lazy(() => import('./components/maps/PropertiesRentalMapView'));
 const CalendarDemo = lazy(() => import('./components/demo/CalendarDemo'));
 const MobileLandingPage = lazy(() => import('./pages/MobileLandingPage'));
 
@@ -105,7 +102,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Propiedades - Venta */}
             <Route path="/properties/sale" element={<PropertySaleList />} />
-            <Route path="/properties/sale/map" element={<PropertiesSaleMapView />} />
+            <Route path="/properties/sale/map" element={<PropertySaleList />} />
             <Route path="/properties/sale/create" element={<PropertySaleForm />} />
             <Route path="/properties/sale/:id" element={<PropertyDetail />} />
             <Route path="/properties/sale/:id/edit" element={<PropertySaleForm />} />
@@ -117,7 +114,7 @@ const DashboardLayout: React.FC = () => {
             
             {/* Propiedades - Alquiler */}
             <Route path="/properties/rental" element={<PropertyRentalList />} />
-            <Route path="/properties/rental/map" element={<PropertiesRentalMapView />} />
+            <Route path="/properties/rental/map" element={<PropertyRentalList />} />
             <Route path="/properties/rental/create" element={<PropertyRentalForm />} />
             <Route path="/properties/rental/:id" element={<PropertyDetail />} />
             <Route path="/properties/rental/:id/edit" element={<PropertyRentalForm />} />
@@ -130,7 +127,7 @@ const DashboardLayout: React.FC = () => {
             {/* Alquiler de Habitaciones */}
             <Route path="/rooms" element={<RoomList />} />
             <Route path="/rooms/roommates" element={<RoommateSearch />} />
-            <Route path="/rooms/map" element={<RoomsMapView />} />
+            <Route path="/rooms/map" element={<RoomList />} />
             <Route path="/rooms/create" element={<RoomForm />} />
             <Route path="/rooms/:id" element={<RoomDetail />} />
             <Route path="/rooms/:id/edit" element={<RoomForm />} />

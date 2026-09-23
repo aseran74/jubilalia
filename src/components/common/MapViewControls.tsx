@@ -1,5 +1,5 @@
 import React from 'react';
-import { FunnelIcon, ListBulletIcon, MapIcon } from '@heroicons/react/24/solid';
+import { FunnelIcon, ListBulletIcon, MapIcon, MapPinIcon, PlusIcon } from '@heroicons/react/24/solid';
 
 interface MapViewControlsProps {
   viewMode: 'list' | 'map';
@@ -76,5 +76,88 @@ export const MapOverlayHeader: React.FC<MapOverlayHeaderProps> = ({ title, subti
     </div>
   </div>
 );
+
+interface CreateListingButtonProps {
+  onClick: () => void;
+  label: string;
+}
+
+export const CreateListingButton: React.FC<CreateListingButtonProps> = ({ onClick, label }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-label={label}
+    title={label}
+    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-white shadow-md ring-1 ring-black/5 hover:bg-emerald-800"
+  >
+    <PlusIcon className="h-6 w-6" />
+  </button>
+);
+
+interface NearbyButtonProps {
+  active: boolean;
+  onClick: () => void;
+  loading?: boolean;
+}
+
+export const NearbyButton: React.FC<NearbyButtonProps> = ({ active, onClick, loading = false }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-label="Detectar más cercanos"
+    aria-pressed={active}
+    title="Detectar más cercanos"
+    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-md ring-1 ring-black/5 ${
+      active ? 'bg-emerald-700 text-white' : 'bg-white/95 text-emerald-700'
+    }`}
+  >
+    <MapPinIcon className={`h-5 w-5 ${loading ? 'animate-pulse' : ''}`} />
+  </button>
+);
+
+export const detectNearbyLocation = (): Promise<{
+  city: string;
+  lat: number;
+  lng: number;
+  formattedAddress: string;
+} | null> =>
+  new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        if (!window.google?.maps?.Geocoder) {
+          resolve({ city: '', lat, lng, formattedAddress: '' });
+          return;
+        }
+
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results: Array<{
+          formatted_address?: string;
+          address_components?: Array<{ long_name: string; types: string[] }>;
+        }> | null, status: string) => {
+          const first = status === 'OK' ? results?.[0] : undefined;
+          const cityComponent = first?.address_components?.find((component) =>
+            component.types.includes('locality')
+          );
+
+          resolve({
+            city: cityComponent?.long_name || '',
+            lat,
+            lng,
+            formattedAddress: first?.formatted_address || cityComponent?.long_name || '',
+          });
+        });
+      },
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  });
 
 export default MapViewControls;

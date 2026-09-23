@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DistanceFilter from '../common/DistanceFilter';
 
 interface SearchFilters {
   maxDistance: number;
@@ -38,13 +39,6 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
     'Diseñador', 'Escritor', 'Artista', 'Consultor', 'Otros'
   ];
 
-  const UNLIMITED_KM = 999999;
-  const SLIDER_MAX_KM = 100;
-  const isUnlimitedDistance = filters.maxDistance > SLIDER_MAX_KM;
-  const sliderDistance = isUnlimitedDistance
-    ? SLIDER_MAX_KM
-    : Math.min(SLIDER_MAX_KM, Math.max(5, filters.maxDistance));
-
   const handleInterestToggle = (interest: string) => {
     const newInterests = filters.interests.includes(interest)
       ? filters.interests.filter(i => i !== interest)
@@ -71,7 +65,7 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
 
   const clearFilters = () => {
     onFiltersChange({
-      maxDistance: 50, // 50 km por defecto
+      maxDistance: 50,
       interests: [],
       ageRange: [55, 100],
       gender: null,
@@ -99,55 +93,7 @@ const PeopleSearchFilters: React.FC<PeopleSearchFiltersProps> = ({
 
       {/* Distancia */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Distancia máxima: {isUnlimitedDistance ? 'Sin límite' : `${sliderDistance} km`}
-        </label>
-        <input
-          type="range"
-          min="5"
-          max={SLIDER_MAX_KM}
-          step="5"
-          value={sliderDistance}
-          onChange={(e) => handleDistanceChange(parseInt(e.target.value, 10))}
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-        />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>5 km</span>
-          <span>50 km</span>
-          <span>100 km</span>
-        </div>
-        
-        {/* Botones rápidos */}
-        <div className="flex flex-wrap gap-2 mt-3">
-          <button
-            type="button"
-            onClick={() => handleDistanceChange(25)}
-            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${!isUnlimitedDistance && filters.maxDistance === 25 ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
-          >
-            25 km
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDistanceChange(50)}
-            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${!isUnlimitedDistance && filters.maxDistance === 50 ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
-          >
-            50 km
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDistanceChange(100)}
-            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${!isUnlimitedDistance && filters.maxDistance === 100 ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
-          >
-            100 km
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDistanceChange(UNLIMITED_KM)}
-            className={`rounded-full px-3.5 py-2 text-xs font-semibold ${isUnlimitedDistance ? 'bg-emerald-700 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}`}
-          >
-            Sin límite
-          </button>
-        </div>
+        <DistanceFilter value={filters.maxDistance} onChange={handleDistanceChange} />
       </div>
 
       {/* Intereses */}

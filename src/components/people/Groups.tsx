@@ -7,14 +7,15 @@ import GroupMembers from '../groups/GroupMembers';
 import GroupsMap from '../groups/GroupsMap';
 import AdminButtons from '../common/AdminButtons';
 import Modal from '../common/Modal';
-import MapViewControls, { MapOverlayHeader } from '../common/MapViewControls';
+import MapViewControls, { MapOverlayHeader, NearbyButton, detectNearbyLocation } from '../common/MapViewControls';
+import DistanceFilter from '../common/DistanceFilter';
+import { formatDistanceLabel, isWithinDistance, resolveCoordinates, resolveProfileOrigin } from '../../utils/geo';
 import { 
   PlusIcon,
   UsersIcon,
   UserGroupIcon,
   ArrowLeftIcon,
   MapPinIcon,
-  TagIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
@@ -51,6 +52,10 @@ const Groups: React.FC = () => {
   const [showGroupMembers, setShowGroupMembers] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
+  const [nearbyOnly, setNearbyOnly] = useState(location.search.includes('nearby'));
+  const [detectingNearby, setDetectingNearby] = useState(false);
+  const [maxDistance, setMaxDistance] = useState(50);
+  const [origin, setOrigin] = useState<{ lat: number; lng: number; label?: string } | null>(null);
   
   // Estados para filtros
   const [filters, setFilters] = useState({
@@ -67,6 +72,9 @@ const Groups: React.FC = () => {
       setViewMode('map');
     }
   }, [location.pathname]);
+
+  const isExplore = location.search.includes('explore');
+  const groupsTitle = nearbyOnly ? 'Grupos cercanos' : isExplore ? 'Grupos' : 'Mis grupos';
 
   // Aplicar filtros
   const applyFilters = () => {
@@ -93,6 +101,14 @@ const Groups: React.FC = () => {
       );
     }
 
+    filtered = filtered.filter((group) =>
+      isWithinDistance(
+        origin,
+        resolveCoordinates(group.latitude, group.longitude, group.city),
+        maxDistance
+      )
+    );
+
     // Filtro por visibilidad - solo aplicar si se ha cambiado explícitamente
     // Por defecto, mostrar todos los grupos (no filtrar por isPublic)
     // Este filtro solo se aplica si el usuario lo cambia manualmente
@@ -108,7 +124,7 @@ const Groups: React.FC = () => {
   // Aplicar filtros cuando cambien
   useEffect(() => {
     applyFilters();
-  }, [groups, filters]);
+  }, [groups, filters, nearbyOnly, origin, maxDistance, profile?.city]);
 
   // Manejar cambios en filtros
   const handleFilterChange = (key: string, value: any) => {
@@ -135,6 +151,44 @@ const Groups: React.FC = () => {
       city: '',
       isPublic: true
     });
+    setNearbyOnly(false);
+    setMaxDistance(50);
+    const profileOrigin = resolveProfileOrigin(profile);
+    setOrigin(profileOrigin ? { ...profileOrigin, label: profile?.city || undefined } : null);
+  };
+
+  useEffect(() => {
+    const profileOrigin = resolveProfileOrigin(profile);
+    if (profileOrigin) {
+      setOrigin((prev) => prev ?? { ...profileOrigin, label: profile?.city || undefined });
+    }
+  }, [profile]);
+
+  const handleDetectNearby = async () => {
+    if (nearbyOnly) {
+      setNearbyOnly(false);
+      const profileOrigin = resolveProfileOrigin(profile);
+      setOrigin(profileOrigin ? { ...profileOrigin, label: profile?.city || undefined } : null);
+      return;
+    }
+
+    setDetectingNearby(true);
+    const locationResult = await detectNearbyLocation();
+    if (locationResult) {
+      setOrigin({
+        lat: locationResult.lat,
+        lng: locationResult.lng,
+        label: locationResult.formattedAddress || locationResult.city,
+      });
+      if (locationResult.city) {
+        setFilters((prev) => ({ ...prev, city: locationResult.city }));
+      }
+    } else {
+      const profileOrigin = resolveProfileOrigin(profile);
+      setOrigin(profileOrigin ? { ...profileOrigin, label: profile?.city || undefined } : null);
+    }
+    setNearbyOnly(true);
+    setDetectingNearby(false);
   };
 
   // Cargar grupos - Diferencia entre "Mis Grupos" y "Explorar"
@@ -422,21 +476,23 @@ const Groups: React.FC = () => {
   }
 
   const activeFilterCount =
-    (filters.search ? 1 : 0) + filters.categories.length + (filters.city ? 1 : 0);
+    (filters.search ? 1 : 0) + filters.categories.length + (filters.city ? 1 : 0) + (nearbyOnly ? 1 : 0) + (maxDistance !== 50 ? 1 : 0);
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
       {viewMode === 'list' && (
       <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg font-bold text-stone-900">Grupos</h1>
+          <h1 className="text-lg font-bold text-stone-900">{groupsTitle}</h1>
           {groups.length > 0 && (
             <p className="mt-0.5 text-sm text-stone-500">
               {filteredGroups.length} de {groups.length} grupos
+              {origin ? ` · ${formatDistanceLabel(maxDistance)}` : ''}
             </p>
           )}
         </div>
 
+        <NearbyButton active={nearbyOnly} loading={detectingNearby} onClick={handleDetectNearby} />
         <button
           type="button"
           onClick={() => navigate('/dashboard/groups/create')}
@@ -463,10 +519,12 @@ const Groups: React.FC = () => {
             className="h-full w-full"
           />
           <MapOverlayHeader
-            title="Grupos"
-            subtitle={groups.length > 0 ? `${filteredGroups.length} de ${groups.length} grupos` : undefined}
+            title={groupsTitle}
+            subtitle={groups.length > 0 ? `${filteredGroups.length} de ${groups.length} grupos${origin ? ` · ${formatDistanceLabel(maxDistance)}` : ''}` : undefined}
             action={
-              <button
+              <div className="flex shrink-0 items-center gap-2">
+                <NearbyButton active={nearbyOnly} loading={detectingNearby} onClick={handleDetectNearby} />
+                <button
                 type="button"
                 onClick={() => navigate('/dashboard/groups/create')}
                 className="inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-emerald-700 px-3 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-800"
@@ -474,6 +532,7 @@ const Groups: React.FC = () => {
                 <PlusIcon className="h-4 w-4" />
                 Crear
               </button>
+              </div>
             }
           />
         </div>
@@ -483,51 +542,47 @@ const Groups: React.FC = () => {
         <div className="p-4 pb-32">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredGroups.map((group) => (
-              <div key={group.id} className="overflow-hidden rounded-2xl bg-white shadow-lg">
-                <div className="p-6">
-                  <div className="mb-4 flex items-center space-x-3">
-                    {group.image_url ? (
-                      <img
-                        src={group.image_url}
-                        alt={group.name}
-                        className="h-12 w-12 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-                        <UsersIcon className="h-6 w-6 text-green-600" />
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{group.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {group.is_public ? 'Público' : 'Privado'}
-                      </p>
+              <div key={group.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+                <div className="relative h-48 overflow-hidden bg-gray-200">
+                  {group.image_url ? (
+                    <img
+                      src={group.image_url}
+                      alt={group.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                      <UsersIcon className="h-12 w-12 text-white opacity-50" />
                     </div>
-                  </div>
-
-                  <p className="mb-4 line-clamp-2 text-sm text-gray-600">{group.description}</p>
-
-                  <div className="mb-4 flex flex-wrap gap-2">
+                  )}
+                  <div className="absolute left-3 top-3 space-y-2">
                     {group.category && (
-                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                        <TagIcon className="mr-1 h-3 w-3" />
+                      <span className="rounded-full bg-blue-100/90 px-2 py-1 text-xs font-medium text-blue-800 backdrop-blur-sm">
                         {group.category}
                       </span>
                     )}
-                    {group.city && (
-                      <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                        <MapPinIcon className="mr-1 h-3 w-3" />
-                        {group.city}
-                      </span>
-                    )}
                   </div>
+                  <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-1 text-xs font-medium text-gray-800">
+                    {group.is_public ? 'Público' : 'Privado'}
+                  </span>
+                </div>
 
-                  <div className="mb-4 flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <UsersIcon className="mr-1 h-4 w-4" />
-                      {group.current_members}/{group.max_members} miembros
+                <div className="p-4">
+                  <h3 className="mb-2 text-lg font-semibold text-gray-900">{group.name}</h3>
+                  <p className="mb-3 line-clamp-2 text-sm text-gray-600">{group.description}</p>
+
+                  {group.city && (
+                    <div className="mb-3 flex items-center text-sm text-gray-500">
+                      <MapPinIcon className="mr-1 h-4 w-4" />
+                      <span>{group.city}</span>
                     </div>
-                    <div>{new Date(group.created_at).toLocaleDateString('es-ES')}</div>
+                  )}
+
+                  <div className="mb-4 flex items-center text-sm text-gray-600">
+                    <UsersIcon className="mr-1 h-4 w-4" />
+                    <span>
+                      {group.current_members}/{group.max_members} miembros
+                    </span>
                   </div>
 
                   <div className="flex gap-2">
@@ -617,6 +672,17 @@ const Groups: React.FC = () => {
 
       <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
         <div className="space-y-4">
+          <button
+            type="button"
+            onClick={handleDetectNearby}
+            className={`flex w-full min-h-12 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
+              nearbyOnly ? 'bg-emerald-700 text-white' : 'border border-stone-200 text-stone-700 hover:bg-stone-50'
+            }`}
+          >
+            <MapPinIcon className="h-5 w-5" />
+            {nearbyOnly ? 'Mostrando los más cercanos' : 'Detectar más cercanos'}
+          </button>
+          <DistanceFilter value={maxDistance} onChange={setMaxDistance} />
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">Buscar</label>
             <div className="relative">

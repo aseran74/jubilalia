@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import UnifiedPropertyFilter from '../common/UnifiedPropertyFilter';
 import AmenitiesFilter from '../common/AmenitiesFilter';
-import PriceRangeSlider from '../common/PriceRangeSlider';
-import { Search, MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car, Plus, X } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, Eye, MessageCircle, Building, Calendar, Car, X } from 'lucide-react';
+import MapViewControls, { MapOverlayHeader, CreateListingButton } from '../common/MapViewControls';
+import ListingsMap from '../maps/ListingsMap';
 
 interface PropertySale {
   id: string;
@@ -31,6 +32,8 @@ interface PropertySale {
     avatar_url?: string;
   };
   images: string[];
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 const PropertySaleList: React.FC = () => {
@@ -44,6 +47,7 @@ const PropertySaleList: React.FC = () => {
   const [bathrooms, setBathrooms] = useState(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [showFiltersModal, setShowFiltersModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   const navigate = useNavigate();
 
@@ -76,7 +80,9 @@ const PropertySaleList: React.FC = () => {
           property_condition,
           parking_spaces,
           recommended_occupants,
-          price_per_person
+          price_per_person,
+          latitude,
+          longitude
         `)
         .eq('listing_type', 'property_purchase')
         .eq('is_available', true);
@@ -155,7 +161,9 @@ const PropertySaleList: React.FC = () => {
             property_type: property.property_type || requirements.property_type || ''
           },
           owner: profilesMap.get(property.profile_id) || { full_name: 'Propietario' },
-          images: imagesMap.get(property.id) || []
+          images: imagesMap.get(property.id) || [],
+          latitude: property.latitude,
+          longitude: property.longitude
         };
       }) || [];
 
@@ -206,6 +214,7 @@ const PropertySaleList: React.FC = () => {
   };
 
   const activeFiltersCount = [
+    searchTerm,
     selectedCity,
     propertyType,
     bedrooms > 0,
@@ -214,150 +223,55 @@ const PropertySaleList: React.FC = () => {
     selectedAmenities.length > 0
   ].filter(Boolean).length;
 
-  const areFiltersActive = activeFiltersCount > 0 || searchTerm !== '';
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-      </div>
-    );
-  }
+  const createSale = () => navigate('/dashboard/properties/sale/create');
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Propiedades en Venta</h1>
-            <p className="text-gray-600">
-              {filteredProperties.length} {filteredProperties.length === 1 ? 'propiedad disponible' : 'propiedades disponibles'}
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate('/dashboard/properties/sale/map')}
-              className="px-4 py-2.5 bg-white text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-all flex items-center gap-2 font-medium shadow-sm"
-            >
-              <MapPin className="w-4 h-4" />
-              Ver en Mapa
-            </button>
-            <button
-              onClick={() => navigate('/dashboard/properties/sale/create')}
-              className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 font-medium shadow-sm"
-            >
-              <Plus className="w-4 h-4" />
-              Publicar Propiedad
-            </button>
-          </div>
+    <div className="relative flex min-h-[100dvh] flex-col bg-slate-50">
+      {viewMode === 'list' && (
+      <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-stone-200 bg-white px-4 py-3 pl-[4.5rem] md:pl-4 pt-[calc(var(--safe-top)+12px)]">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-lg font-bold text-stone-900">Venta</h1>
+          <p className="mt-0.5 text-sm text-stone-500">
+            {filteredProperties.length} propiedades
+          </p>
         </div>
+        <CreateListingButton onClick={createSale} label="Crear anuncio de venta" />
       </div>
+      )}
 
-      {/* Filters Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4">
-          <UnifiedPropertyFilter
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            selectedCity={selectedCity}
-            setSelectedCity={setSelectedCity}
-            selectedPropertyType={propertyType}
-            setSelectedPropertyType={setPropertyType}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            bedrooms={bedrooms}
-            setBedrooms={setBedrooms}
-            bathrooms={bathrooms}
-            setBathrooms={setBathrooms}
-          selectedAmenities={selectedAmenities}
-            cities={cities}
-            propertyTypes={propertyTypes}
-            onOpenAdvancedFilters={() => setShowFiltersModal(true)}
-            maxPrice={1000000}
+      {loading && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/70">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-emerald-700" />
+        </div>
+      )}
+
+      {viewMode === 'map' ? (
+        <div className="relative h-[100dvh] min-h-[22rem] w-full">
+          <ListingsMap
+            items={filteredProperties.map((property) => ({
+              id: property.id,
+              title: property.title,
+              city: property.city,
+              address: property.address,
+              latitude: property.latitude,
+              longitude: property.longitude,
+              price: property.price,
+              imageUrl: property.images?.[0],
+            }))}
+            onSelect={(item) => navigate(`/dashboard/properties/sale/${item.id}`)}
+            actionLabel="Ver venta"
+            markerLetter="V"
+            compact
+            className="h-full w-full"
+          />
+          <MapOverlayHeader
+            title="Venta"
+            subtitle={`${filteredProperties.length} propiedades`}
+            action={<CreateListingButton onClick={createSale} label="Crear anuncio de venta" />}
           />
         </div>
-        
-
-        {/* Active Filters Tags */}
-        {areFiltersActive && (
-          <div className="px-4 py-3 bg-green-50 border-t border-green-100">
-            <div className="flex items-center flex-wrap gap-2">
-              <span className="text-sm font-semibold text-gray-700">Filtros activos:</span>
-              
-              {searchTerm && (
-                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
-                  <Search className="w-3 h-3" />
-                  "{searchTerm}"
-                  <button onClick={() => setSearchTerm('')} className="ml-0.5 text-gray-500 hover:text-gray-900">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              )}
-
-              {selectedCity && (
-                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
-                  <MapPin className="w-3 h-3" />
-                  {selectedCity}
-                  <button onClick={() => setSelectedCity('')} className="ml-0.5 text-gray-500 hover:text-gray-900">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              )}
-
-              {propertyType && (
-                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
-                  <Building className="w-3 h-3" />
-                  {propertyType}
-                  <button onClick={() => setPropertyType('')} className="ml-0.5 text-gray-500 hover:text-gray-900">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              )}
-
-              {bedrooms > 0 && (
-                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
-                  <Bed className="w-3 h-3" />
-                  {bedrooms}+ hab.
-                  <button onClick={() => setBedrooms(0)} className="ml-0.5 text-gray-500 hover:text-gray-900">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              )}
-
-              {bathrooms > 0 && (
-                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
-                  <Bath className="w-3 h-3" />
-                  {bathrooms}+ baños
-                  <button onClick={() => setBathrooms(0)} className="ml-0.5 text-gray-500 hover:text-gray-900">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              )}
-
-              {(priceRange.min !== 0 || priceRange.max !== 1000000) && (
-                <span className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
-                  {formatPrice(priceRange.min)} - {formatPrice(priceRange.max)}
-                  <button onClick={() => setPriceRange({ min: 0, max: 1000000 })} className="ml-0.5 text-gray-500 hover:text-gray-900">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              )}
-
-              {selectedAmenities.map(amenity => (
-                <span key={amenity} className="inline-flex items-center gap-1.5 bg-white text-gray-800 text-sm px-3 py-1.5 rounded-full border border-gray-300 shadow-sm">
-                  {amenity}
-                  <button onClick={() => setSelectedAmenities(prev => prev.filter(a => a !== amenity))} className="ml-0.5 text-gray-500 hover:text-gray-900">
-                    <X className="w-3.5 h-3.5" />
-            </button>
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Property Grid */}
+      ) : (
+        <div className="p-4 pb-32">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProperties.map((property) => (
           <div key={property.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-green-200 transition-all duration-300 group">
@@ -446,14 +360,22 @@ const PropertySaleList: React.FC = () => {
           </button>
         </div>
       )}
+        </div>
+      )}
+
+      <MapViewControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onFiltersClick={() => setShowFiltersModal(true)}
+        filterCount={activeFiltersCount}
+      />
 
       {/* Modal de Filtros Avanzados */}
       {showFiltersModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            {/* Header del Modal */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
-              <h2 className="text-2xl font-bold text-gray-900">Filtros Avanzados</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Filtros</h2>
               <button
                 onClick={() => setShowFiltersModal(false)}
                 className="p-2 hover:bg-white rounded-full transition-colors"
@@ -462,49 +384,50 @@ const PropertySaleList: React.FC = () => {
               </button>
             </div>
             
-            {/* Contenido del Modal */}
             <div className="p-6 overflow-y-auto flex-1 space-y-8">
-              <PriceRangeSlider
-                min={0}
-                max={1000000}
-                value={priceRange}
-                onChange={setPriceRange}
-                step={10000}
+              <UnifiedPropertyFilter
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                selectedCity={selectedCity}
+                setSelectedCity={setSelectedCity}
+                selectedPropertyType={propertyType}
+                setSelectedPropertyType={setPropertyType}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                bedrooms={bedrooms}
+                setBedrooms={setBedrooms}
+                bathrooms={bathrooms}
+                setBathrooms={setBathrooms}
+                selectedAmenities={selectedAmenities}
+                cities={cities}
+                propertyTypes={propertyTypes}
+                maxPrice={1000000}
               />
 
-          <div>
+              <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-4">
                   Amenidades Disponibles
                 </label>
-            <AmenitiesFilter
-              selectedAmenities={selectedAmenities}
-              onAmenitiesChange={setSelectedAmenities}
-            />
-                {selectedAmenities.length > 0 && (
-                  <p className="mt-3 text-sm text-green-600 font-medium">
-                    ✓ {selectedAmenities.length} amenidad{selectedAmenities.length !== 1 ? 'es' : ''} seleccionada{selectedAmenities.length !== 1 ? 's' : ''}
-                  </p>
-                )}
+                <AmenitiesFilter
+                  selectedAmenities={selectedAmenities}
+                  onAmenitiesChange={setSelectedAmenities}
+                />
               </div>
-          </div>
+            </div>
           
-            {/* Footer del Modal */}
             <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
-            <button
-              onClick={() => {
-                  setPriceRange({ min: 0, max: 1000000 });
-                setSelectedAmenities([]);
-              }}
+              <button
+                onClick={handleClearFilters}
                 className="flex-1 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-            >
+              >
                 Limpiar Filtros
-            </button>
-            <button
+              </button>
+              <button
                 onClick={() => setShowFiltersModal(false)}
                 className="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm"
-            >
+              >
                 Aplicar Filtros
-            </button>
+              </button>
             </div>
           </div>
         </div>

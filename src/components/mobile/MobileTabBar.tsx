@@ -1,13 +1,13 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Search, LayoutDashboard, Plus } from 'lucide-react';
+import { Home, Search, MessageCircle, UserRound } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 const tabs = [
-  { id: 'home', label: 'Inicio', icon: Home, path: '/' },
-  { id: 'search', label: 'Buscar', icon: Search, path: '/search' },
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-  { id: 'publish', label: 'Publicar', icon: Plus, path: '/activities/create' },
+  { id: 'home', label: 'Inicio', icon: Home, path: '/', needsAuth: false },
+  { id: 'search', label: 'Buscar', icon: Search, path: '/search', needsAuth: false },
+  { id: 'messages', label: 'Mensajes', icon: MessageCircle, path: '/dashboard/messages', needsAuth: true },
+  { id: 'profile', label: 'Perfil', icon: UserRound, path: '/dashboard/profile', needsAuth: true },
 ] as const;
 
 const MobileTabBar: React.FC = () => {
@@ -31,14 +31,13 @@ const MobileTabBar: React.FC = () => {
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = isActive(tab.path);
-          const needsAuth = tab.id === 'dashboard' || tab.id === 'publish';
 
           return (
             <button
               key={tab.id}
               type="button"
               onClick={() => {
-                if (needsAuth && !user) {
+                if (tab.needsAuth && !user) {
                   navigate('/login');
                   return;
                 }

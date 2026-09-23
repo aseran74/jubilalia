@@ -8,8 +8,9 @@ import PeopleSearchFilters from './PeopleSearchFilters';
 import PeopleSearchResults from './PeopleSearchResults';
 import PeopleSearchMap from './PeopleSearchMap';
 import Modal from '../common/Modal';
-import MapViewControls, { MapOverlayHeader } from '../common/MapViewControls';
+import MapViewControls, { MapOverlayHeader, NearbyButton, detectNearbyLocation } from '../common/MapViewControls';
 import type { LocationSearchResult, SearchFilters } from '../../types/supabase';
+import { formatDistanceLabel, isUnlimitedDistance } from '../../utils/geo';
 
 const PeopleSearch: React.FC = () => {
   const location = useLocation();
@@ -29,6 +30,8 @@ const PeopleSearch: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('map');
   const [showFilters, setShowFilters] = useState(false);
+  const [nearbyActive, setNearbyActive] = useState(false);
+  const [detectingNearby, setDetectingNearby] = useState(false);
 
   useEffect(() => {
     const path = location.pathname.replace(/\/$/, '');
@@ -200,7 +203,7 @@ const PeopleSearch: React.FC = () => {
         console.log('🔍 Datos de búsqueda con avatares:', data?.map(p => ({ name: p.full_name, avatar: p.avatar_url })));
         
         // Si es "Sin límite", no geocodificar, solo formatear los datos
-        if (filters.maxDistance > 100) {
+        if (isUnlimitedDistance(filters.maxDistance)) {
           console.log('🌍 Modo SIN LÍMITE: Mostrando todos los perfiles sin filtrar por distancia');
           
           const formattedResults = data.map(profile => {
@@ -439,6 +442,32 @@ const PeopleSearch: React.FC = () => {
     setSearchLocation(location);
   };
 
+  const handleDetectNearby = async () => {
+    if (nearbyActive) {
+      setNearbyActive(false);
+      loadInitialUsers();
+      return;
+    }
+
+    setDetectingNearby(true);
+    const locationResult = await detectNearbyLocation();
+    if (locationResult) {
+      setSearchLocation({
+        formatted_address: locationResult.formattedAddress || locationResult.city || 'Tu ubicación',
+        geometry: {
+          location: {
+            lat: locationResult.lat,
+            lng: locationResult.lng,
+          },
+        },
+      });
+      setNearbyActive(true);
+    } else if (searchLocation) {
+      setNearbyActive(true);
+    }
+    setDetectingNearby(false);
+  };
+
   const handleFiltersChange = (newFilters: Partial<SearchFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
@@ -473,7 +502,7 @@ const PeopleSearch: React.FC = () => {
               <MapPin className="h-4 w-4 shrink-0" />
               {searchLocation.formatted_address}
               {' · '}
-              {filters.maxDistance > 100 ? 'Sin límite' : `${filters.maxDistance} km`}
+              {formatDistanceLabel(filters.maxDistance)}
             </p>
           )}
         </div>
@@ -483,6 +512,7 @@ const PeopleSearch: React.FC = () => {
             {filteredResults.length} de {searchResults.length}
           </span>
         )}
+        <NearbyButton active={nearbyActive} loading={detectingNearby} onClick={handleDetectNearby} />
       </div>
       )}
 
@@ -514,11 +544,12 @@ const PeopleSearch: React.FC = () => {
               title="Miembros"
               subtitle={
                 searchLocation
-                  ? `${searchLocation.formatted_address} · ${filters.maxDistance > 100 ? 'Sin límite' : `${filters.maxDistance} km`}`
+                  ? `${searchLocation.formatted_address} · ${formatDistanceLabel(filters.maxDistance)}`
                   : filteredResults.length
                     ? `${filteredResults.length} personas`
                     : undefined
               }
+              action={<NearbyButton active={nearbyActive} loading={detectingNearby} onClick={handleDetectNearby} />}
             />
           </div>
         )}
@@ -547,11 +578,21 @@ const PeopleSearch: React.FC = () => {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         onFiltersClick={() => setShowFilters(true)}
-        filterCount={activeFilterCount}
+        filterCount={activeFilterCount + (nearbyActive ? 1 : 0)}
       />
 
       <Modal isOpen={showFilters} onClose={() => setShowFilters(false)} title="Filtros" size="lg">
         <div className="max-h-[70vh] space-y-6 overflow-y-auto pr-1">
+          <button
+            type="button"
+            onClick={handleDetectNearby}
+            className={`flex w-full min-h-12 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold ${
+              nearbyActive ? 'bg-emerald-700 text-white' : 'border border-stone-200 text-stone-700 hover:bg-stone-50'
+            }`}
+          >
+            <MapPin className="h-5 w-5" />
+            {nearbyActive ? 'Mostrando los más cercanos' : 'Detectar más cercanos'}
+          </button>
           <div>
             <h3 className="mb-2 text-sm font-semibold text-stone-800">¿Dónde quieres buscar?</h3>
             <LocationSelector

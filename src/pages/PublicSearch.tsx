@@ -1562,7 +1562,7 @@ const PublicSearch: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {filteredGroups.map(group => (
                   <div key={group.id} onClick={() => navigate(`/groups/${group.id}`)} className="group bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all cursor-pointer border border-gray-100 overflow-hidden">
-                    <div className="relative h-44">
+                    <div className="relative h-52 overflow-hidden">
                       {group.image_url ? <img src={group.image_url} alt={group.name} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-purple-50 flex items-center justify-center"><Building2 className="w-12 h-12 text-purple-200" /></div>}
                     </div>
                     <div className="p-5">
