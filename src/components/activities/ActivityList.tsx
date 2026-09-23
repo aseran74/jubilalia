@@ -7,6 +7,7 @@ import ActivityMap from './ActivityMap';
 import Modal from '../common/Modal';
 import MapViewControls, { MapOverlayHeader, NearbyButton, detectNearbyLocation } from '../common/MapViewControls';
 import DistanceFilter from '../common/DistanceFilter';
+import PriceFilter, { ALL_PRICES, matchesPriceFilter } from '../common/PriceFilter';
 import { formatDistanceLabel, isWithinDistance, resolveCoordinates, resolveProfileOrigin } from '../../utils/geo';
 
 interface Activity {
@@ -51,9 +52,7 @@ const ActivityList: React.FC = () => {
   const [userLocation, setUserLocation] = useState<string>('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
-  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(5000);
+  const [priceFilter, setPriceFilter] = useState<number>(ALL_PRICES);
   const [minDuration, setMinDuration] = useState<number>(0);
   const [maxDuration, setMaxDuration] = useState<number>(30);
   const navigate = useNavigate();
@@ -220,38 +219,14 @@ const ActivityList: React.FC = () => {
     // Filtro por ciudad (varias a la vez)
     const matchesCity = selectedCities.length === 0 || selectedCities.includes(activity.city);
     
-    // Filtro por precio - diferente según si es viajes o no
-    let matchesPrice = true;
     const isTravelSelected = selectedTypes.some((type) => {
       const typeLower = type.toLowerCase();
       return typeLower.includes('viaje') || typeLower === 'viajes';
     });
     const activityTypeLower = activity.activity_type?.toLowerCase() || '';
     const isTravelActivity = activityTypeLower.includes('viaje') || activityTypeLower === 'viajes';
-    
-    // Solo aplicar filtros de precio si el tipo seleccionado coincide con el tipo de actividad
-    if (isTravelSelected && isTravelActivity) {
-      // Para viajes: solo filtro por rango de precio (solo si se ha modificado el rango)
-      const activityPrice = activity.price || 0;
-      // Si los valores están en el rango por defecto (0-5000), no filtrar por precio
-      if (minPrice > 0 || maxPrice < 5000) {
-        matchesPrice = activityPrice >= minPrice && activityPrice <= maxPrice;
-      }
-    } else if (!isTravelSelected && !isTravelActivity) {
-      // Para no-viajes: filtro por gratis/pago y rango de precio
-      if (priceFilter === 'free') {
-        matchesPrice = activity.is_free === true;
-      } else if (priceFilter === 'paid') {
-        const activityPrice = activity.price || 0;
-        // Solo filtrar por rango si se ha modificado
-        if (minPrice > 0 || maxPrice < 5000) {
-          matchesPrice = activity.is_free === false && activityPrice >= minPrice && activityPrice <= maxPrice;
-        } else {
-          matchesPrice = activity.is_free === false;
-        }
-      }
-    }
-    
+    const matchesPrice = matchesPriceFilter(priceFilter, activity.is_free, activity.price);
+
     // Filtro por duración (solo para viajes y solo si se ha modificado el rango)
     let matchesDuration = true;
     if (isTravelSelected && isTravelActivity && activity.duration) {
@@ -296,9 +271,7 @@ const ActivityList: React.FC = () => {
     setSearchTerm('');
     setSelectedTypes([]);
     setSelectedCities([]);
-    setPriceFilter('all');
-    setMinPrice(0);
-    setMaxPrice(5000);
+    setPriceFilter(ALL_PRICES);
     setMinDuration(0);
     setMaxDuration(30);
     setNearbyOnly(false);
@@ -337,7 +310,7 @@ const ActivityList: React.FC = () => {
     selectedTypes.length +
     selectedCities.length +
     (nearbyOnly ? 1 : 0) +
-    (priceFilter !== 'all' ? 1 : 0) +
+    (priceFilter !== ALL_PRICES ? 1 : 0) +
     (maxDistance !== 50 ? 1 : 0);
 
   return (
@@ -552,6 +525,7 @@ const ActivityList: React.FC = () => {
             {nearbyOnly ? 'Mostrando los más cercanos' : 'Detectar más cercanos'}
           </button>
           <DistanceFilter value={maxDistance} onChange={setMaxDistance} />
+          <PriceFilter value={priceFilter} onChange={setPriceFilter} />
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <input
