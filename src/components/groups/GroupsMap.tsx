@@ -91,7 +91,10 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
         ]
       });
 
-      const newInfoWindow = new window.google.maps.InfoWindow();
+      const newInfoWindow = new window.google.maps.InfoWindow({
+        maxWidth: 280,
+        minWidth: 280,
+      });
       
       setMap(newMap);
       setInfoWindow(newInfoWindow);
@@ -143,45 +146,144 @@ const GroupsMap: React.FC<GroupsMapProps> = ({
 
       // Agregar evento de clic al marcador
       marker.addListener('click', () => {
+        const imageHtml = group.image_url
+          ? `<div class="iw-image-container" style="background-image: url('${group.image_url}');">
+               <div class="iw-type-badge">${group.category || (group.is_public ? 'Público' : 'Privado')}</div>
+               <div class="iw-price-badge"><span style="background:rgba(255,255,255,0.95);color:#166534;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;">${group.current_members}/${group.max_members}</span></div>
+             </div>`
+          : `<div class="iw-image-container" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center;">
+               <span style="font-size: 30px;">👥</span>
+               <div class="iw-type-badge">${group.category || 'Grupo'}</div>
+             </div>`;
+
         const content = `
-          <div style="padding: 8px; max-width: 200px; font-family: system-ui, -apple-system, sans-serif;">
-            ${group.image_url ? `
-              <div style="margin-bottom: 8px;">
-                <img src="${group.image_url}" alt="${group.name}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 6px;" onerror="console.log('Error cargando imagen:', this.src)">
+          <div class="iw-card-wrapper">
+            ${imageHtml}
+            <div class="iw-content">
+              <h3 class="iw-title">${group.name}</h3>
+              <div class="iw-meta">
+                <span>📍 ${group.city || 'España'}</span>
+                <span class="iw-dot">·</span>
+                <span>${group.is_public ? 'Público' : 'Privado'}</span>
               </div>
-            ` : '<div style="margin-bottom: 8px; height: 80px; background-color: #f3f4f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 12px;">Sin imagen</div>'}
-            <h3 style="font-weight: 600; font-size: 14px; margin-bottom: 6px; color: #111827;">${group.name}</h3>
-            <p style="color: #6b7280; font-size: 12px; margin-bottom: 6px;">${group.description.substring(0, 60)}${group.description.length > 60 ? '...' : ''}</p>
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 11px; margin-bottom: 6px;">
-              <span style="color: #10B981; font-weight: 600;">${group.current_members}/${group.max_members}</span>
-              <span style="display: flex; align-items: center; gap: 2px;">🏷️ ${group.category}</span>
+              <button id="details-btn-${group.id}" class="iw-button">
+                Ver grupo
+              </button>
             </div>
-            <div style="display: flex; align-items: center; gap: 2px; font-size: 10px; color: #6b7280; margin-bottom: 6px;">
-              <span>📍</span>
-              <span>${group.city}</span>
-            </div>
-            <button id="details-btn-${group.id}" style="margin-top: 4px; padding: 4px 8px; background-color: #10B981; color: white; font-size: 10px; border-radius: 4px; border: none; cursor: pointer; hover: background-color: #059669; width: 100%;">
-              Ver detalles
-            </button>
+            <style>
+              .gm-style-iw-c {
+                padding: 0 !important;
+                border-radius: 12px !important;
+                overflow: hidden !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+              }
+              .gm-style-iw-d {
+                overflow: hidden !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-height: none !important;
+              }
+              button.gm-ui-hover-effect {
+                position: absolute !important;
+                top: 8px !important;
+                right: 8px !important;
+                background: rgba(0, 0, 0, 0.5) !important;
+                border-radius: 50% !important;
+                width: 28px !important;
+                height: 28px !important;
+                z-index: 100 !important;
+                opacity: 1 !important;
+              }
+              button.gm-ui-hover-effect img {
+                filter: invert(1) !important;
+                margin: 6px !important;
+                width: 16px !important;
+                height: 16px !important;
+              }
+              .iw-card-wrapper {
+                width: 280px;
+                font-family: system-ui, sans-serif;
+                padding-bottom: 2px;
+              }
+              .iw-image-container {
+                width: 100%;
+                height: 130px;
+                background-size: cover;
+                background-position: center;
+                position: relative;
+              }
+              .iw-price-badge {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+              }
+              .iw-type-badge {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0,0,0,0.6);
+                color: white;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+              .iw-content {
+                padding: 12px 14px;
+              }
+              .iw-title {
+                font-weight: 700;
+                font-size: 15px;
+                color: #111827;
+                margin: 0 0 6px 0;
+                line-height: 1.25;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              .iw-meta {
+                display: flex;
+                align-items: center;
+                font-size: 12px;
+                color: #6b7280;
+                margin-bottom: 12px;
+              }
+              .iw-dot {
+                margin: 0 6px;
+                font-weight: bold;
+                color: #d1d5db;
+              }
+              .iw-button {
+                width: 100%;
+                padding: 9px 0;
+                background-color: #047857;
+                color: white;
+                font-size: 13px;
+                font-weight: 600;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+              }
+            </style>
           </div>
         `;
-        
+
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
-        
-        // Manejar clic en el botón "Ver detalles"
+
         setTimeout(() => {
           const button = document.getElementById(`details-btn-${group.id}`);
           if (button) {
             button.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log('🔗 Navegando a detalles de grupo:', group.name);
               onGroupSelect(group);
               infoWindow.close();
             });
           }
-        }, 100);
+        }, 50);
       });
 
       newMarkers.push(marker);

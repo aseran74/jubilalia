@@ -439,31 +439,31 @@ const Groups: React.FC = () => {
           </div>
 
           {/* Información del grupo */}
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <div className="flex items-center space-x-4">
+          <div className="mb-6 overflow-hidden rounded-lg bg-white shadow">
+            <div className="relative h-48 w-full bg-gray-200">
               {selectedGroup.image_url ? (
                 <img
                   src={selectedGroup.image_url}
                   alt={selectedGroup.name}
-                  className="w-16 h-16 rounded-lg object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
-                  <UsersIcon className="w-8 h-8 text-green-600" />
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                  <UsersIcon className="h-12 w-12 text-white opacity-50" />
                 </div>
               )}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{selectedGroup.name}</h1>
-                <p className="text-gray-600">{selectedGroup.description}</p>
-                <div className="flex items-center space-x-4 mt-2">
-                  <span className="text-sm text-gray-500">
-                    <UsersIcon className="w-4 h-4 inline mr-1" />
-                    {selectedGroup.current_members || 0} miembros
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {selectedGroup.is_public ? 'Público' : 'Privado'}
-                  </span>
-                </div>
+            </div>
+            <div className="p-6">
+              <h1 className="text-2xl font-bold text-gray-900">{selectedGroup.name}</h1>
+              <p className="text-gray-600">{selectedGroup.description}</p>
+              <div className="mt-2 flex items-center space-x-4">
+                <span className="text-sm text-gray-500">
+                  <UsersIcon className="mr-1 inline h-4 w-4" />
+                  {selectedGroup.current_members || 0} miembros
+                </span>
+                <span className="text-sm text-gray-500">
+                  {selectedGroup.is_public ? 'Público' : 'Privado'}
+                </span>
               </div>
             </div>
           </div>
@@ -543,15 +543,15 @@ const Groups: React.FC = () => {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredGroups.map((group) => (
               <div key={group.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                <div className="relative h-48 overflow-hidden bg-gray-200">
+                <div className="relative h-48 w-full overflow-hidden bg-gray-200">
                   {group.image_url ? (
                     <img
                       src={group.image_url}
                       alt={group.name}
-                      className="h-full w-full object-cover"
+                      className="absolute inset-0 h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
                       <UsersIcon className="h-12 w-12 text-white opacity-50" />
                     </div>
                   )}
